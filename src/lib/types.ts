@@ -87,3 +87,11 @@ export const isPlan = (a: Activity): boolean => Boolean(a.date_time);
 export const isBucketItem = (a: Activity): boolean => !a.date_time;
 export const isMultiDay = (a: Activity): boolean =>
   a.date_time !== null && a.ends_at !== null && a.ends_at.slice(0, 10) !== a.date_time.slice(0, 10);
+
+/** Plans whose last day is before today — lived, not upcoming. */
+export function isMemory(a: Activity, today?: string): boolean {
+  if (!a.date_time) return false;
+  const day = today ?? new Date().toISOString().slice(0, 10);
+  const lastDay = (a.ends_at ?? a.date_time).slice(0, 10);
+  return lastDay < day;
+}

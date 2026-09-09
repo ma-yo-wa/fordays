@@ -35,6 +35,21 @@ function BucketIcon({ on }: { on: boolean }) {
   );
 }
 
+function MemoriesIcon({ on }: { on: boolean }) {
+  return on ? (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 2.4c.4 0 .8.2 1 .6l1.6 3.4 3.7.5c.9.1 1.3 1.2.6 1.8l-2.7 2.6.6 3.7c.2.9-.8 1.6-1.6 1.2L12 14.8l-3.2 1.7c-.8.4-1.8-.3-1.6-1.2l.6-3.7-2.7-2.6c-.7-.6-.3-1.7.6-1.8l3.7-.5L11 3c.2-.4.6-.6 1-.6Z" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+      <path
+        d="m12 3.2 1.5 3.2.4.8.9.1 3.5.5-2.5 2.5-.6.6.1.9.6 3.5-3.1-1.6-.8-.4-.8.4-3.1 1.6.6-3.5.1-.9-.6-.6-2.5-2.5 3.5-.5.9-.1.4-.8L12 3.2Z"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function TabBar() {
   const screen = useApp((st) => st.screen);
   const setScreen = useApp((st) => st.setScreen);
@@ -51,9 +66,6 @@ export default function TabBar() {
         aria-current={on ? 'page' : undefined}
         aria-label={label}
       >
-        {/* The pill travels between tabs instead of appearing and
-            disappearing, which is what makes two icons read as one
-            control rather than two buttons. */}
         {on && (
           <motion.span
             layoutId="tab-pill"
@@ -69,11 +81,11 @@ export default function TabBar() {
   return (
     <nav className={s.dock}>
       <div className={s.inner}>
-        {tab('calendar', 'Plans', (on) => <CalendarIcon on={on} />)}
         {tab('bucket', 'Bucket List', (on) => <BucketIcon on={on} />)}
+        {tab('calendar', 'Plans', (on) => <CalendarIcon on={on} />)}
+        {tab('memories', 'Memories', (on) => <MemoriesIcon on={on} />)}
       </div>
 
-      {/* Hidden until the space has two people — create is a shared act. */}
       {matched && (
         <motion.button
           type="button"

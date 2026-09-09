@@ -14,6 +14,7 @@ import Toasts from './components/Toasts';
 import UpdateBanner from './components/UpdateBanner';
 import BucketList from './screens/BucketList';
 import Calendar from './screens/Calendar';
+import Memories from './screens/Memories';
 import { peekInvite, watchPasswordRecovery } from './lib/auth';
 import { useApp } from './lib/store';
 import s from './App.module.css';
@@ -109,7 +110,7 @@ export default function App() {
 
       <main
         ref={main}
-        className={`${s.main} ${screen === 'bucket' ? s.largeTitleRoom : ''}`}
+        className={`${s.main} ${screen !== 'calendar' ? s.largeTitleRoom : ''}`}
         onScroll={(e) => setNavScroll(e.currentTarget.scrollTop)}
       >
         <AnimatePresence mode="wait" initial={false}>
@@ -121,7 +122,14 @@ export default function App() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            {ready && (screen === 'bucket' ? <BucketList /> : <Calendar />)}
+            {ready &&
+              (screen === 'bucket' ? (
+                <BucketList />
+              ) : screen === 'memories' ? (
+                <Memories />
+              ) : (
+                <Calendar />
+              ))}
           </motion.div>
         </AnimatePresence>
       </main>

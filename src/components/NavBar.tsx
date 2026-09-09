@@ -52,7 +52,11 @@ export default function NavBar() {
       ? ''
       : ` ${cursorDate.getFullYear()}`
   }`;
-  const title = isCalendar ? monthLabel : 'Bucket List';
+  const title = isCalendar
+    ? monthLabel
+    : screen === 'memories'
+      ? 'Memories'
+      : 'Bucket List';
 
   /* The large title hands off to the compact one over ~22px of travel,
      which is roughly where iOS makes the swap. A compact bar has no

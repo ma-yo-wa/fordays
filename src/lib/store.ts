@@ -13,7 +13,7 @@ import {
 } from './auth';
 import { iso, todayISO } from './date';
 
-export type Screen = 'bucket' | 'calendar';
+export type Screen = 'bucket' | 'calendar' | 'memories';
 
 /** The two things this app makes. A plan has a date; a bucket-list item
  *  is the same thing before anyone has committed to one. */
@@ -212,7 +212,7 @@ export const useApp = create<AppState>()((set, get) => {
         authPhase: 'local',
         space: {
           id: 'local',
-          name: 'Someday',
+          name: 'Fordays',
           inviteCode: '',
           partner1Id: '0',
           partner2Id: '1',
