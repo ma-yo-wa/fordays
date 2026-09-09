@@ -1,15 +1,38 @@
 import { motion } from 'motion/react';
 import CoverArt from '../components/CoverArt';
 import { useApp, isMatched } from '../lib/store';
+import type { Activity } from '../lib/types';
 import { isMemory } from '../lib/types';
 import { dtDate, MON3, parseISO, todayISO } from '../lib/date';
 import { tintsFor } from '../lib/tint';
-import s from './BucketList.module.css';
+import s from './Memories.module.css';
 
-function memoryWhen(dateTime: string): string {
+function memoryDay(dateTime: string): string {
   const d = parseISO(dateTime);
-  const mon = MON3[d.getMonth()] ?? '';
-  return `${mon} ${d.getDate()}, ${d.getFullYear()}`;
+  return String(d.getDate());
+}
+
+function monthKey(a: Activity): string {
+  return (a.ends_at ?? a.date_time)!.slice(0, 7);
+}
+
+function monthLabel(key: string): string {
+  const [y, m] = key.split('-').map(Number);
+  const mon = MON3[(m ?? 1) - 1] ?? '';
+  return `${mon} ${y}`;
+}
+
+function groupByMonth(items: Activity[]): { key: string; label: string; items: Activity[] }[] {
+  const map = new Map<string, Activity[]>();
+  for (const a of items) {
+    const key = monthKey(a);
+    const list = map.get(key);
+    if (list) list.push(a);
+    else map.set(key, [a]);
+  }
+  return [...map.entries()]
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([key, group]) => ({ key, label: monthLabel(key), items: group }));
 }
 
 export default function Memories() {
@@ -27,11 +50,13 @@ export default function Memories() {
       return be.localeCompare(ae);
     });
 
+  const sections = groupByMonth(items);
   const tints = tintsFor(items.map((a) => a.id));
+  const tintById = new Map(items.map((a, i) => [a.id, tints[i]!]));
 
   if (!items.length) {
     return (
-      <div className={s.board}>
+      <div className={s.wrap}>
         <div className={s.blank}>
           <p>
             {matched
@@ -43,35 +68,46 @@ export default function Memories() {
     );
   }
 
-  return (
-    <div className={s.board}>
-      {items.map((a, i) => {
-        const when = dtDate(a.date_time);
-        return (
-          <motion.button
-            key={a.id}
-            type="button"
-            className={s.card}
-            style={{ background: tints[i] }}
-            onClick={() => openDetail(a.id)}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: Math.min(i, 7) * 0.055,
-              duration: 0.5,
-              ease: [0.2, 0.8, 0.2, 1],
-            }}
-          >
-            {a.image_url && <CoverArt url={a.image_url} size="card" className={s.art} />}
-            <div className={s.veil} />
+  let cardIndex = 0;
 
-            <div className={s.body}>
-              <h3 className={s.title}>{a.title}</h3>
-              <div className={s.foot}>{when ? memoryWhen(when) : ''}</div>
-            </div>
-          </motion.button>
-        );
-      })}
+  return (
+    <div className={s.wrap}>
+      {sections.map((section) => (
+        <section key={section.key}>
+          <h2 className={s.month}>{section.label}</h2>
+          <div className={s.board}>
+            {section.items.map((a) => {
+              const i = cardIndex++;
+              const when = dtDate(a.date_time);
+              return (
+                <motion.button
+                  key={a.id}
+                  type="button"
+                  className={s.card}
+                  style={{ background: tintById.get(a.id) }}
+                  onClick={() => openDetail(a.id)}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: Math.min(i, 7) * 0.055,
+                    duration: 0.5,
+                    ease: [0.2, 0.8, 0.2, 1],
+                  }}
+                >
+                  {a.image_url && (
+                    <CoverArt url={a.image_url} size="card" className={s.art} />
+                  )}
+                  <div className={s.veil} />
+                  <div className={s.body}>
+                    <h3 className={s.title}>{a.title}</h3>
+                    <div className={s.foot}>{when ? memoryDay(when) : ''}</div>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }

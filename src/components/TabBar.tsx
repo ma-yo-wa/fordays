@@ -36,16 +36,26 @@ function BucketIcon({ on }: { on: boolean }) {
 }
 
 function MemoriesIcon({ on }: { on: boolean }) {
+  /* Soft photo / moment — not a star or heart. */
   return on ? (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M12 2.4c.4 0 .8.2 1 .6l1.6 3.4 3.7.5c.9.1 1.3 1.2.6 1.8l-2.7 2.6.6 3.7c.2.9-.8 1.6-1.6 1.2L12 14.8l-3.2 1.7c-.8.4-1.8-.3-1.6-1.2l.6-3.7-2.7-2.6c-.7-.6-.3-1.7.6-1.8l3.7-.5L11 3c.2-.4.6-.6 1-.6Z" />
+      <path d="M6 4.5h12A2.5 2.5 0 0 1 20.5 7v10a2.5 2.5 0 0 1-2.5 2.5H6A2.5 2.5 0 0 1 3.5 17V7A2.5 2.5 0 0 1 6 4.5Z" />
+      <circle cx="9" cy="9.2" r="1.55" fill="#fffdfb" fillOpacity="0.92" />
+      <path
+        d="M4.2 16.2 8.4 12l2.2 2.1 3.1-3.6 5.9 5.7"
+        fill="none"
+        stroke="#fffdfb"
+        strokeOpacity="0.9"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   ) : (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
-      <path
-        d="m12 3.2 1.5 3.2.4.8.9.1 3.5.5-2.5 2.5-.6.6.1.9.6 3.5-3.1-1.6-.8-.4-.8.4-3.1 1.6.6-3.5.1-.9-.6-.6-2.5-2.5 3.5-.5.9-.1.4-.8L12 3.2Z"
-        strokeLinejoin="round"
-      />
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" />
+      <circle cx="9" cy="9.2" r="1.45" />
+      <path d="m4.4 16.1 4-3.9 2.2 2.1 3.1-3.6 5.7 5.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
