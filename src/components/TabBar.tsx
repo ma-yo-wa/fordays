@@ -66,12 +66,17 @@ export default function TabBar() {
   const setAddOpen = useApp((st) => st.setAddOpen);
   const matched = useApp((st) => isMatched(st.space));
 
-  const tab = (id: Screen, label: string, icon: (on: boolean) => React.ReactNode) => {
+  const tab = (
+    id: Screen,
+    label: string,
+    icon: (on: boolean) => React.ReactNode,
+    hub = false,
+  ) => {
     const on = screen === id;
     return (
       <button
         type="button"
-        className={`${s.tab} ${on ? s.on : ''}`}
+        className={`${s.tab} ${on ? s.on : ''} ${hub ? s.hub : ''}`}
         onClick={() => setScreen(id)}
         aria-current={on ? 'page' : undefined}
         aria-label={label}
@@ -92,7 +97,7 @@ export default function TabBar() {
     <nav className={s.dock}>
       <div className={s.inner}>
         {tab('bucket', 'Bucket List', (on) => <BucketIcon on={on} />)}
-        {tab('calendar', 'Plans', (on) => <CalendarIcon on={on} />)}
+        {tab('calendar', 'Plans', (on) => <CalendarIcon on={on} />, true)}
         {tab('memories', 'Memories', (on) => <MemoriesIcon on={on} />)}
       </div>
 

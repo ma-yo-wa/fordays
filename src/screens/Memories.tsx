@@ -3,14 +3,9 @@ import CoverArt from '../components/CoverArt';
 import { useApp, isMatched } from '../lib/store';
 import type { Activity } from '../lib/types';
 import { isMemory } from '../lib/types';
-import { dtDate, MON3, parseISO, todayISO } from '../lib/date';
+import { MON3, todayISO } from '../lib/date';
 import { tintsFor } from '../lib/tint';
 import s from './Memories.module.css';
-
-function memoryDay(dateTime: string): string {
-  const d = parseISO(dateTime);
-  return String(d.getDate());
-}
 
 function monthKey(a: Activity): string {
   return (a.ends_at ?? a.date_time)!.slice(0, 7);
@@ -78,7 +73,6 @@ export default function Memories() {
           <div className={s.board}>
             {section.items.map((a) => {
               const i = cardIndex++;
-              const when = dtDate(a.date_time);
               return (
                 <motion.button
                   key={a.id}
@@ -100,7 +94,6 @@ export default function Memories() {
                   <div className={s.veil} />
                   <div className={s.body}>
                     <h3 className={s.title}>{a.title}</h3>
-                    <div className={s.foot}>{when ? memoryDay(when) : ''}</div>
                   </div>
                 </motion.button>
               );
