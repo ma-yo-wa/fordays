@@ -70,16 +70,6 @@
   display: block;
 }
 
-/* Plans is the hub — a touch larger than the side tabs. */
-.hub .icon {
-  height: 28px;
-}
-
-.hub svg {
-  width: 28px;
-  height: 28px;
-}
-
 .on {
   color: var(--ink);
 }
