@@ -31,9 +31,9 @@ function pushCopy(state: PushState, partnerName: string | null | undefined): str
     case 'unsupported':
       return "This browser can't do web push";
     case 'ios-install':
-      return 'Open Someday from the Home Screen icon to turn notifications on';
+      return 'Open Fordays from the Home Screen icon to turn notifications on';
     case 'denied':
-      return 'Blocked — iPhone Settings → Someday → Notifications';
+      return 'Blocked — iPhone Settings → Fordays → Notifications';
     case 'granted-idle':
       return 'Allowed — turn the switch on to finish subscribing';
     case 'on':

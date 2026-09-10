@@ -58,7 +58,7 @@ self.addEventListener('push', (event) => {
     }
   }
 
-  const title = data.title || 'Someday';
+  const title = data.title || 'Fordays';
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body || 'Something changed in your space.',
@@ -142,7 +142,7 @@ self.addEventListener('pushsubscriptionchange', (event) => {
 self.addEventListener('message', (event) => {
   const msg = (event.data ?? {}) as { type?: string; title?: string; body?: string };
   if (msg.type === 'preview-notification') {
-    void self.registration.showNotification(msg.title || 'Someday', {
+    void self.registration.showNotification(msg.title || 'Fordays', {
       body: msg.body || 'This is how a banner will look.',
       icon: '/icon-192.png',
       badge: '/badge-96.png',

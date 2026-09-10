@@ -44,7 +44,7 @@ export function authConfigured(c: Config = loadConfig()): boolean {
 
 /** Shown when the client build has no project URL/key. */
 export const MISSING_BACKEND =
-  'This copy of Someday can’t reach the server. Close the tab and open the link again — if it keeps happening, ask whoever shared it to redeploy.';
+  'This copy of Fordays can’t reach the server. Close the tab and open the link again — if it keeps happening, ask whoever shared it to redeploy.';
 
 /** Turn Auth/API noise into something a person can act on. */
 export function friendlyAuthError(err: unknown): string {
@@ -188,7 +188,7 @@ export async function ensureSpace(): Promise<SpaceInfo | null> {
 
   const { error } = await sb.from('spaces').insert({
     partner_1_id: uid,
-    name: 'Someday',
+    name: 'Fordays',
   });
   if (error) throw error;
   return loadSpace();

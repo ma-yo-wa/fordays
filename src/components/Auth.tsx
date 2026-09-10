@@ -101,7 +101,7 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
   if (mode === 'sent') {
     return (
       <div className={s.wrap}>
-        <h1 className={s.brand}>Someday</h1>
+        <h1 className={s.brand}>Fordays</h1>
         <p className={s.lead}>Check your email for a reset link — open it on this phone</p>
         <div className={f.row}>
           <button
@@ -122,7 +122,7 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
   if (mode === 'recover') {
     return (
       <div className={s.wrap}>
-        <h1 className={s.brand}>Someday</h1>
+        <h1 className={s.brand}>Fordays</h1>
         <p className={s.lead}>Choose a new password</p>
 
         <span className={f.label}>New password</span>
@@ -159,7 +159,7 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
   if (mode === 'forgot') {
     return (
       <div className={s.wrap}>
-        <h1 className={s.brand}>Someday</h1>
+        <h1 className={s.brand}>Fordays</h1>
         <p className={s.lead}>We’ll email a link to reset your password</p>
 
         <span className={f.label}>Email</span>
@@ -209,7 +209,7 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
 
   return (
     <div className={s.wrap}>
-      <h1 className={s.brand}>Someday</h1>
+      <h1 className={s.brand}>Fordays</h1>
       <p className={s.lead}>
         {inviterHint
           ? `${inviterHint} wants to share a space with you — sign in to join`

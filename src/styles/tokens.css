@@ -1,8 +1,8 @@
 /* =====================================================================
-   Someday — design tokens
+   Fordays — design tokens
 
-   The palette is sampled from the avatar: a soft orb running hot rose at
-   the core, out through coral and peach, to a pale green rim. The whole
+   The palette is sampled from the avatar: a soft orb running hot rose/magenta at
+   the core, out through coral and peach, to a mint rim. The whole
    sweep sits at roughly one lightness (L≈.77), which is what makes it
    read as a glow rather than as a gradient. Two consequences shape
    everything downstream:
@@ -26,13 +26,14 @@
   --rule: #e4dcd0;
 
   /* the orb itself, sampled by radius — only ever used in real gradients */
+  --orb-core: #fd7a9a;
   --orb-rose: #fd8696;
   --orb-coral: #fda492;
   --orb-peach: #f0c296;
   --orb-sand: #e1d4a0;
   --orb-olive: #d6deaa;
   --orb-green: #cde7b3;
-  --orb-mint: #d2eec8;
+  --orb-mint: #ddf2d8;
 
   /* Rose = a Plan. Fills take ink, never white. */
   --rose: #f2648b;

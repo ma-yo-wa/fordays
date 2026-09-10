@@ -32,10 +32,10 @@ export default function InviteShare({ open, code, onClose }: Props) {
 
       const text = idea
         ? `I added “${idea}” to a space for us — join here: ${link}`
-        : `Join me on Someday: ${link}`;
+        : `Join me on Fordays: ${link}`;
 
       if (navigator.share) {
-        await navigator.share({ title: 'Someday', text, url: link });
+        await navigator.share({ title: 'Fordays', text, url: link });
       } else {
         await navigator.clipboard.writeText(text);
         toast('Invite link copied');

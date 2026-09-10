@@ -92,7 +92,7 @@ async function forget(endpoint: string): Promise<void> {
 
 export async function enablePush(): Promise<string> {
   if (iosNeedsInstall()) {
-    return 'Add Someday to your Home Screen, open it from there, then try again.';
+    return 'Add Fordays to your Home Screen, open it from there, then try again.';
   }
   if (!pushSupported()) return "This browser can't do web push";
 
@@ -101,7 +101,7 @@ export async function enablePush(): Promise<string> {
     perm = await Notification.requestPermission();
   }
   if (perm === 'denied') {
-    return 'Blocked — iPhone Settings → Someday → Notifications → Allow';
+    return 'Blocked — iPhone Settings → Fordays → Notifications → Allow';
   }
   if (perm !== 'granted') {
     return 'Tap Allow on the notifications prompt, then try the switch again.';

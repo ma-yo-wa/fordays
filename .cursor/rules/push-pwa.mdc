@@ -1,0 +1,16 @@
+---
+description: Always commit and push PWA (web) changes to main so deploy updates immediately
+alwaysApply: true
+---
+
+# Always push the PWA
+
+After any change under the web PWA (`src/`, Worker config, `wrangler`, deploy workflow, public assets, etc.):
+
+1. **Commit** the relevant web files (do not wait to be asked).
+2. **Push to `origin/main`** so GitHub Actions deploys and the user can check live immediately.
+3. Mention the live URL briefly when done (Workers / fordays.app as configured).
+
+Do **not** block on iOS/Swift work before shipping web. Push PWA changes as soon as they are ready, even mid-session.
+
+Native `ios/` changes do not need this auto-push unless the user asks.

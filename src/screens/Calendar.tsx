@@ -216,7 +216,7 @@ export default function Calendar() {
               </p>
             ) : (
               <>
-                <p>Invite your person — Someday is for the two of you</p>
+                <p>Invite your person — Fordays is for the two of you</p>
                 <button type="button" onClick={() => setInviteShareOpen(true)}>
                   Invite
                 </button>

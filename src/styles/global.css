@@ -64,7 +64,7 @@ body {
   background:
     radial-gradient(
       88% 46% at 50% -10%,
-      rgba(253, 134, 150, 0.4) 0%,
+      rgba(253, 122, 154, 0.4) 0%,
       rgba(253, 164, 146, 0.2) 44%,
       transparent 74%
     ),
@@ -94,7 +94,7 @@ body::after {
     background:
       radial-gradient(
         88% 46% at 50% -10%,
-        rgba(253, 134, 150, 0.17) 0%,
+        rgba(253, 122, 154, 0.17) 0%,
         rgba(253, 164, 146, 0.08) 44%,
         transparent 74%
       ),

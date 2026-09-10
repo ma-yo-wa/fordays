@@ -36,26 +36,24 @@ function BucketIcon({ on }: { on: boolean }) {
 }
 
 function MemoriesIcon({ on }: { on: boolean }) {
-  /* Soft photo / moment — not a star or heart. */
+  /* Compact rangefinder — nostalgia in the glyph, same line weight as the dock. */
   return on ? (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M6 4.5h12A2.5 2.5 0 0 1 20.5 7v10a2.5 2.5 0 0 1-2.5 2.5H6A2.5 2.5 0 0 1 3.5 17V7A2.5 2.5 0 0 1 6 4.5Z" />
-      <circle cx="9" cy="9.2" r="1.55" fill="#fffdfb" fillOpacity="0.92" />
-      <path
-        d="M4.2 16.2 8.4 12l2.2 2.1 3.1-3.6 5.9 5.7"
-        fill="none"
-        stroke="#fffdfb"
-        strokeOpacity="0.9"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M7.2 5.2h3.1c.4 0 .7.2.9.5l.6 1H8.1l-.9-1.5Z" />
+      <path d="M4.2 7.2h15.6A2.2 2.2 0 0 1 22 9.4v8A2.2 2.2 0 0 1 19.8 19.6H4.2A2.2 2.2 0 0 1 2 17.4v-8A2.2 2.2 0 0 1 4.2 7.2Z" />
+      <circle cx="12" cy="13.3" r="3.55" fill="#fffdfb" fillOpacity="0.95" />
+      <circle cx="12" cy="13.3" r="1.55" />
+      <rect x="17.2" y="9.1" width="2.4" height="1.7" rx="0.45" fill="#fffdfb" fillOpacity="0.9" />
     </svg>
   ) : (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
-      <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" />
-      <circle cx="9" cy="9.2" r="1.45" />
-      <path d="m4.4 16.1 4-3.9 2.2 2.1 3.1-3.6 5.7 5.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M8.1 6.8h2.4l.8 1.2H4.4A2 2 0 0 0 2.4 10v7.2A2 2 0 0 0 4.4 19.2h15.2a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-6.1"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="13.4" r="3.2" />
+      <circle cx="12" cy="13.4" r="1.25" />
+      <path d="M17.4 9.4h2.1" strokeLinecap="round" />
     </svg>
   );
 }

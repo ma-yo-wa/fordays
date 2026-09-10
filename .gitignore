@@ -8,3 +8,6 @@ dist
 .wrangler
 .dev.vars
 supabase/.temp
+mobile/.expo
+mobile/dist
+mobile/node_modules
