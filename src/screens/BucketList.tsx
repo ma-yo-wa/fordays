@@ -18,7 +18,10 @@ export default function BucketList() {
     .slice()
     .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
 
-  const tints = tintsFor(items.map((a) => a.id));
+  const tints = tintsFor(
+    items.map((a) => a.id),
+    items.map((a) => a.title),
+  );
 
   if (!items.length) {
     return (

@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { fetchGifs, type GifItem } from '../lib/giphy';
+import { fetchStills, trackStillDownload, type StillItem } from '../lib/unsplash';
 import { fileToCoverDataUrl, isEmojiCover } from '../lib/cover';
 import CoverArt from './CoverArt';
 import f from './Form.module.css';
 import s from './CoverPicker.module.css';
 
-type Tab = 'gifs' | 'photos';
+type Tab = 'gifs' | 'stills' | 'photos';
+type SearchTab = 'gifs' | 'stills';
 
 interface Props {
   value: string | null;
@@ -18,49 +20,66 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
   const [tab, setTab] = useState<Tab>('gifs');
   const [q, setQ] = useState('');
   const [gifs, setGifs] = useState<GifItem[]>([]);
+  const [stills, setStills] = useState<StillItem[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const timer = useRef<number | null>(null);
   const ctrl = useRef<AbortController | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  async function loadGifs(action: 'trending' | 'search', query: string) {
+  async function load(source: SearchTab, query: string) {
     ctrl.current?.abort();
     const mine = new AbortController();
     ctrl.current = mine;
     setLoading(true);
     setMsg(null);
     try {
-      const next = await fetchGifs(action, query, mine.signal);
-      if (mine.signal.aborted) return;
-      setGifs(next);
-      if (!next.length) {
-        setMsg(query ? `Nothing for “${query}”. Try another word.` : 'No GIFs came back.');
+      if (source === 'gifs') {
+        const next = await fetchGifs(query ? 'search' : 'trending', query, mine.signal);
+        if (mine.signal.aborted) return;
+        setGifs(next);
+        if (!next.length) {
+          setMsg(query ? `Nothing for “${query}”. Try another word.` : 'No GIFs came back.');
+        }
+      } else {
+        const next = await fetchStills(query, mine.signal);
+        if (mine.signal.aborted) return;
+        setStills(next);
+        if (!next.length) {
+          setMsg(query ? `Nothing for “${query}”. Try another word.` : 'No stills came back.');
+        }
       }
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
       const kind = (err as { kind?: string }).kind;
-      setGifs([]);
+      if (source === 'gifs') setGifs([]);
+      else setStills([]);
       setMsg(
-        {
-          rate: "Giphy's rate limit is hit. Give it a minute.",
-          cfg: 'Add VITE_GIPHY_API_KEY in Cloudflare (free key from developers.giphy.com), then redeploy.',
-          http: 'Giphy returned an error.',
-        }[kind ?? ''] ?? "Couldn't reach Giphy.",
+        source === 'gifs'
+          ? {
+              rate: "Giphy's rate limit is hit. Give it a minute.",
+              cfg: 'Add VITE_GIPHY_API_KEY in Cloudflare (free key from developers.giphy.com), then redeploy.',
+              http: 'Giphy returned an error.',
+            }[kind ?? ''] ?? "Couldn't reach Giphy."
+          : {
+              rate: "Unsplash's rate limit is hit. Give it a minute.",
+              cfg: 'Add VITE_UNSPLASH_ACCESS_KEY (free key from unsplash.com/developers), then redeploy.',
+              http: 'Unsplash returned an error.',
+            }[kind ?? ''] ?? "Couldn't reach Unsplash.",
       );
     } finally {
       if (!mine.signal.aborted) setLoading(false);
     }
   }
 
-  function openGifsTab() {
-    setTab('gifs');
-    const t = titleHint().trim();
-    if (t) {
-      setQ(t);
-      void loadGifs('search', t);
-    } else if (!gifs.length) {
-      void loadGifs('trending', '');
+  function openSearchTab(id: SearchTab) {
+    setTab(id);
+    const query = q.trim() || titleHint().trim();
+    if (query) {
+      setQ(query);
+      void load(id, query);
+    } else {
+      void load(id, '');
     }
   }
 
@@ -68,12 +87,14 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
     const t = titleHint().trim();
     if (t) {
       setQ(t);
-      void loadGifs('search', t);
+      void load('gifs', t);
     } else {
-      void loadGifs('trending', '');
+      void load('gifs', '');
     }
     return () => ctrl.current?.abort();
   }, []);
+
+  const hits = tab === 'gifs' ? gifs : tab === 'stills' ? stills : [];
 
   return (
     <div className={s.wrap}>
@@ -87,6 +108,7 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
               onClick={() => {
                 onChange(null);
                 setGifs([]);
+                setStills([]);
                 setMsg(null);
               }}
             >
@@ -100,6 +122,7 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
         {(
           [
             ['gifs', 'GIFs'],
+            ['stills', 'Stills'],
             ['photos', 'Photos'],
           ] as const
         ).map(([id, label]) => (
@@ -110,10 +133,11 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
             aria-selected={tab === id}
             className={`${f.segment} ${tab === id ? f.segmentOn : ''}`}
             onClick={() => {
-              if (id === 'gifs') openGifsTab();
-              else {
+              if (id === 'photos') {
                 setTab(id);
                 setMsg(null);
+              } else {
+                openSearchTab(id);
               }
             }}
           >
@@ -129,7 +153,7 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
         ))}
       </div>
 
-      {tab === 'gifs' && (
+      {(tab === 'gifs' || tab === 'stills') && (
         <div className={`${s.search} ${loading ? s.loading : ''}`}>
           <span className={s.mag} aria-hidden>
             ⌕
@@ -137,24 +161,24 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
           <input
             className={s.searchInput}
             value={q}
-            placeholder="Search Giphy…"
+            placeholder={tab === 'gifs' ? 'Search Giphy…' : 'Search Unsplash…'}
             onChange={(e) => {
               const next = e.target.value;
               setQ(next);
               if (timer.current) window.clearTimeout(timer.current);
               timer.current = window.setTimeout(() => {
-                void loadGifs(next.trim() ? 'search' : 'trending', next.trim());
+                void load(tab, next.trim());
               }, 300);
             }}
             onFocus={() => {
-              if (tab === 'gifs' && !q.trim() && !gifs.length) {
-                const t = titleHint().trim();
-                if (t) {
-                  setQ(t);
-                  void loadGifs('search', t);
-                } else {
-                  void loadGifs('trending', '');
-                }
+              if (tab !== 'gifs' && tab !== 'stills') return;
+              if (q.trim() || hits.length) return;
+              const t = titleHint().trim();
+              if (t) {
+                setQ(t);
+                void load(tab, t);
+              } else {
+                void load(tab, '');
               }
             }}
           />
@@ -165,7 +189,7 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
               aria-label="Clear search"
               onClick={() => {
                 setQ('');
-                if (tab === 'gifs') void loadGifs('trending', '');
+                if (tab === 'gifs' || tab === 'stills') void load(tab, '');
               }}
             >
               ×
@@ -191,6 +215,37 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
             </button>
           ))}
         </div>
+      )}
+
+      {tab === 'stills' && stills.length > 0 && (
+        <>
+          <div className={s.gifGrid}>
+            {stills.map((p, i) => (
+              <button
+                key={p.id}
+                type="button"
+                className={`${s.gifCell} ${value === p.full ? s.iconOn : ''}`}
+                style={{ ['--i' as string]: i }}
+                onClick={() => {
+                  trackStillDownload(p.download);
+                  onChange(p.full);
+                  setMsg(null);
+                }}
+              >
+                <img src={p.preview} alt={p.title.slice(0, 60)} loading="lazy" />
+              </button>
+            ))}
+          </div>
+          <p className={s.photoNote}>
+            <a
+              href="https://unsplash.com/?utm_source=fordays&utm_medium=referral"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Photos via Unsplash
+            </a>
+          </p>
+        </>
       )}
 
       {tab === 'photos' && (
@@ -234,11 +289,8 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
       {msg && (
         <div className={s.msg}>
           <span>{msg}</span>
-          {tab === 'gifs' ? (
-            <button
-              type="button"
-              onClick={() => void loadGifs(q.trim() ? 'search' : 'trending', q.trim())}
-            >
+          {tab === 'gifs' || tab === 'stills' ? (
+            <button type="button" onClick={() => void load(tab, q.trim())}>
               Retry
             </button>
           ) : null}

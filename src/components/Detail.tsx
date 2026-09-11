@@ -269,7 +269,12 @@ export default function Detail() {
     <Sheet open={!!detailId} onClose={close}>
       <div className={`${s.head} ${item.image_url ? s.headCovered : ''}`}>
         {!item.image_url && (
-          <CoverArt washId={item.id} size="thumb" className={s.headWash} />
+          <CoverArt
+            washId={item.id}
+            washTitle={item.title}
+            size="thumb"
+            className={s.headWash}
+          />
         )}
         <div>
           <h3 className={s.title}>{item.title}</h3>

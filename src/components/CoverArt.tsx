@@ -6,6 +6,7 @@ interface Props {
   url?: string | null;
   /** Orb wash when there is no picture — same language as the bucket board. */
   washId?: string;
+  washTitle?: string | null;
   className?: string;
   /** Larger emoji for detail / picker preview. */
   size?: 'card' | 'hero' | 'thumb';
@@ -14,6 +15,7 @@ interface Props {
 export default function CoverArt({
   url,
   washId,
+  washTitle,
   className,
   size = 'card',
 }: Props) {
@@ -22,7 +24,7 @@ export default function CoverArt({
     return (
       <div
         className={`${s.wash} ${s[size]} ${className ?? ''}`}
-        style={{ background: tintFor(washId) }}
+        style={{ background: tintFor(washId, washTitle) }}
         aria-hidden
       />
     );

@@ -224,6 +224,7 @@ export default function Calendar() {
                   <CoverArt
                     url={a.image_url}
                     washId={a.id}
+                    washTitle={a.title}
                     size="thumb"
                     className={s.thumb}
                   />

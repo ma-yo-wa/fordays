@@ -185,6 +185,14 @@
   color: var(--ink-faint);
 }
 
+.gifGrid + .photoNote {
+  margin-top: 10px;
+}
+
+.photoNote a {
+  color: inherit;
+}
+
 .photoThumb {
   width: 100%;
   height: 120px;

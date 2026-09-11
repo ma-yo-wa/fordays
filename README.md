@@ -123,7 +123,8 @@ Do these when the basic app is live and you both have accounts — not before.
 
 | Feature | What’s needed |
 |---|---|
-| Giphy covers | Free key from [developers.giphy.com](https://developers.giphy.com/) → Cloudflare env `VITE_GIPHY_API_KEY` → redeploy. (Edge Function path is optional later.) |
+| Giphy covers | Free key from [developers.giphy.com](https://developers.giphy.com/) → GitHub secret `VITE_GIPHY_API_KEY` → redeploy. (Edge Function path is optional later.) |
+| Unsplash stills | Free Access Key from [unsplash.com/developers](https://unsplash.com/developers) → GitHub secret `VITE_UNSPLASH_ACCESS_KEY` → redeploy. |
 | Web Push | `node vapid-keygen.mjs`, secrets + deploy `push-fan-out`, fill `private.app_config` (see `push.sql`), set `VITE_VAPID_PUBLIC_KEY` (or paste in Settings). Home Screen app → Settings → Push on. You’ll get a ping when she joins, locks a date, or updates notes. |
 | Google Calendar | See **Google Calendar setup** below |
 

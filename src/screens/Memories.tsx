@@ -46,7 +46,10 @@ export default function Memories() {
     });
 
   const sections = groupByMonth(items);
-  const tints = tintsFor(items.map((a) => a.id));
+  const tints = tintsFor(
+    items.map((a) => a.id),
+    items.map((a) => a.title),
+  );
   const tintById = new Map(items.map((a, i) => [a.id, tints[i]!]));
 
   if (!items.length) {

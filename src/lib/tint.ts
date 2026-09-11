@@ -1,3 +1,5 @@
+import { hueForTitle } from './art';
+
 /* The orb's hues, deepened until they can carry white text but kept
    saturated — a flat dark fill of the same hue goes muddy, and six muddy
    rectangles is what a board of these looked like. Each card is a short
@@ -5,8 +7,8 @@
    at the bottom where the title does, so the type has contrast without
    a heavy scrim over the whole card.
 
-   Tint comes from the id, so the board looks composed rather than random
-   and a given card keeps its colour forever. */
+   Title families (dinner, hike, soccer…) pick a hue from art.ts. No
+   match falls back to the id, so a given card still keeps a colour. */
 const PALETTE: Array<[string, string]> = [
   ['#E0416F', '#7A1F3D'],
   ['#DE5A3E', '#7E2A28'],
@@ -31,20 +33,27 @@ const gradient = (i: number): string => {
   return `linear-gradient(155deg, ${from} 0%, ${to} 82%)`;
 };
 
-export function tintFor(id: string): string {
-  return gradient(bucket(id));
+function hueFor(id: string, title?: string | null): number {
+  return hueForTitle(title) ?? bucket(id);
+}
+
+export function tintFor(id: string, title?: string | null): string {
+  return gradient(hueFor(id, title));
 }
 
 /* The hash is uniform, but uniform isn't the same as good-looking: on a
    board of four, random assignment lands three cards on the same hue
    often enough to look broken. So the colour is still derived from the
-   id — a card keeps its own — and then nudged along the palette only
-   when it would collide with the card to its left or the one above it in
-   the two-column grid. */
-export function tintsFor(ids: string[]): string[] {
+   title family or the id — a card keeps its own — and then nudged along
+   the palette only when it would collide with the card to its left or
+   the one above it in the two-column grid. */
+export function tintsFor(
+  ids: string[],
+  titles: Array<string | null | undefined> = [],
+): string[] {
   const chosen: number[] = [];
   for (let i = 0; i < ids.length; i++) {
-    let idx = bucket(ids[i] as string);
+    let idx = hueFor(ids[i] as string, titles[i]);
     for (
       let step = 0;
       step < PALETTE.length && (idx === chosen[i - 1] || idx === chosen[i - 2]);
