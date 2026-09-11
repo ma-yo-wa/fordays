@@ -1,5 +1,9 @@
 /* The wrapper keeps whatever box the caller styled; the image fills it.
    Clipping lives here because callers round their corners. */
+.wash {
+  overflow: hidden;
+}
+
 .photo {
   overflow: hidden;
 }

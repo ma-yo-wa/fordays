@@ -1,15 +1,32 @@
 import { emojiFromCover, isEmojiCover } from '../lib/cover';
+import { tintFor } from '../lib/tint';
 import s from './CoverArt.module.css';
 
 interface Props {
-  url: string | null | undefined;
+  url?: string | null;
+  /** Orb wash when there is no picture — same language as the bucket board. */
+  washId?: string;
   className?: string;
   /** Larger emoji for detail / picker preview. */
   size?: 'card' | 'hero' | 'thumb';
 }
 
-export default function CoverArt({ url, className, size = 'card' }: Props) {
-  if (!url) return null;
+export default function CoverArt({
+  url,
+  washId,
+  className,
+  size = 'card',
+}: Props) {
+  if (!url) {
+    if (!washId) return null;
+    return (
+      <div
+        className={`${s.wash} ${s[size]} ${className ?? ''}`}
+        style={{ background: tintFor(washId) }}
+        aria-hidden
+      />
+    );
+  }
 
   if (isEmojiCover(url)) {
     return (

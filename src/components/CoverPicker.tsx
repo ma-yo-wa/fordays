@@ -1,17 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { fetchGifs, type GifItem } from '../lib/giphy';
-import {
-  emojiCover,
-  fileToCoverDataUrl,
-  iconsForPicker,
-  isEmojiCover,
-} from '../lib/cover';
+import { fileToCoverDataUrl, isEmojiCover } from '../lib/cover';
 import CoverArt from './CoverArt';
 import f from './Form.module.css';
 import s from './CoverPicker.module.css';
 
-type Tab = 'icons' | 'gifs' | 'photos';
+type Tab = 'gifs' | 'photos';
 
 interface Props {
   value: string | null;
@@ -20,7 +15,7 @@ interface Props {
 }
 
 export default function CoverPicker({ value, onChange, titleHint }: Props) {
-  const [tab, setTab] = useState<Tab>('icons');
+  const [tab, setTab] = useState<Tab>('gifs');
   const [q, setQ] = useState('');
   const [gifs, setGifs] = useState<GifItem[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
@@ -69,9 +64,16 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
     }
   }
 
-  useEffect(() => () => ctrl.current?.abort(), []);
-
-  const icons = iconsForPicker(titleHint(), tab === 'icons' ? q : '');
+  useEffect(() => {
+    const t = titleHint().trim();
+    if (t) {
+      setQ(t);
+      void loadGifs('search', t);
+    } else {
+      void loadGifs('trending', '');
+    }
+    return () => ctrl.current?.abort();
+  }, []);
 
   return (
     <div className={s.wrap}>
@@ -97,7 +99,6 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
       <div className={f.segmented} role="tablist" aria-label="Cover type">
         {(
           [
-            ['icons', 'Icons'],
             ['gifs', 'GIFs'],
             ['photos', 'Photos'],
           ] as const
@@ -113,7 +114,6 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
               else {
                 setTab(id);
                 setMsg(null);
-                if (id === 'icons') setQ('');
               }
             }}
           >
@@ -129,7 +129,7 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
         ))}
       </div>
 
-      {(tab === 'icons' || tab === 'gifs') && (
+      {tab === 'gifs' && (
         <div className={`${s.search} ${loading ? s.loading : ''}`}>
           <span className={s.mag} aria-hidden>
             ⌕
@@ -137,11 +137,10 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
           <input
             className={s.searchInput}
             value={q}
-            placeholder={tab === 'gifs' ? 'Search Giphy…' : 'Search icons…'}
+            placeholder="Search Giphy…"
             onChange={(e) => {
               const next = e.target.value;
               setQ(next);
-              if (tab !== 'gifs') return;
               if (timer.current) window.clearTimeout(timer.current);
               timer.current = window.setTimeout(() => {
                 void loadGifs(next.trim() ? 'search' : 'trending', next.trim());
@@ -172,26 +171,6 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
               ×
             </button>
           ) : null}
-        </div>
-      )}
-
-      {tab === 'icons' && (
-        <div className={s.grid}>
-          {icons.map((emoji) => {
-            const cover = emojiCover(emoji);
-            const on = value === cover;
-            return (
-              <button
-                key={emoji}
-                type="button"
-                className={`${s.iconCell} ${on ? s.iconOn : ''}`}
-                onClick={() => onChange(cover)}
-                aria-label={`Use ${emoji}`}
-              >
-                <span>{emoji}</span>
-              </button>
-            );
-          })}
         </div>
       )}
 

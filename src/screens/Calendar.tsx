@@ -129,15 +129,6 @@ export default function Calendar() {
           else if (startsHere) bandClasses.push(s.bandStart);
           else if (endsHere) bandClasses.push(s.bandEnd);
 
-          // Only on the day a thing begins. Repeating the hotel glyph
-          // across all five nights just makes the month look busy; the
-          // band is already saying "this is still going".
-          const glyphs = [
-            ...new Set(
-              theirs.filter((e) => dtDate(e.startsAt) === date).map((e) => artFor(e.title)),
-            ),
-          ].slice(0, 2);
-
           return (
             <button
               key={i}
@@ -146,15 +137,6 @@ export default function Calendar() {
               onClick={() => setPicked(date)}
             >
               {spanning.length > 0 && <span className={bandClasses.join(' ')} />}
-              {glyphs.length > 0 && (
-                <span className={s.glyphs} aria-hidden>
-                  {glyphs.map((g, gi) => (
-                    <span key={`${g}-${gi}`} className={s.glyphMark}>
-                      {g}
-                    </span>
-                  ))}
-                </span>
-              )}
               <span className={s.num}>{cell.label}</span>
               <span className={s.marks}>
                 {mine.slice(0, 3).map((p) => (
@@ -239,13 +221,12 @@ export default function Calendar() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05, duration: 0.4 }}
                 >
-                  {a.image_url ? (
-                    <CoverArt url={a.image_url} size="thumb" className={s.thumb} />
-                  ) : (
-                    <span className={s.glyph} aria-hidden>
-                      {artFor(a.title)}
-                    </span>
-                  )}
+                  <CoverArt
+                    url={a.image_url}
+                    washId={a.id}
+                    size="thumb"
+                    className={s.thumb}
+                  />
                   <span>
                     <span className={s.title}>{a.title}</span>
                     <div className={s.range}>{timing}</div>

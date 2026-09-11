@@ -6,7 +6,6 @@ import CoverArt from './CoverArt';
 import WhenFields from './WhenFields';
 import { useApp, partnerName, isMatched } from '../lib/store';
 import { isPlan } from '../lib/types';
-import { artFor } from '../lib/art';
 import { faceColor, faceIndexFor } from '../lib/tint';
 import {
   composeWhen,
@@ -268,10 +267,10 @@ export default function Detail() {
 
   return (
     <Sheet open={!!detailId} onClose={close}>
-      <div className={s.head}>
-        <span className={s.glyph} aria-hidden>
-          {artFor(item.title)}
-        </span>
+      <div className={`${s.head} ${item.image_url ? s.headCovered : ''}`}>
+        {!item.image_url && (
+          <CoverArt washId={item.id} size="thumb" className={s.headWash} />
+        )}
         <div>
           <h3 className={s.title}>{item.title}</h3>
           <div className={s.when}>
