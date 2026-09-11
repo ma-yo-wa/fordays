@@ -344,7 +344,7 @@ export async function joinInvite(code: string, bringItems = false): Promise<void
 }
 
 /** Canonical production origin — invite links should never ship as localhost. */
-const PROD_ORIGIN = 'https://someday-app.someday.workers.dev';
+const PROD_ORIGIN = 'https://fordays.app';
 
 export function appOrigin(): string {
   const { protocol, hostname, origin } = window.location;
