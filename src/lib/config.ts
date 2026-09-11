@@ -1,4 +1,5 @@
-const KEY = 'someday.config.v1';
+const KEY = 'fordays.config.v1';
+const LEGACY_KEY = 'someday.config.v1';
 
 export interface Config {
   /** Display names for the two partners. */
@@ -28,9 +29,19 @@ const DEFAULTS: Config = {
   ...FROM_ENV,
 };
 
+function readStored(): string | null {
+  const fresh = localStorage.getItem(KEY);
+  if (fresh) return fresh;
+  const legacy = localStorage.getItem(LEGACY_KEY);
+  if (!legacy) return null;
+  localStorage.setItem(KEY, legacy);
+  localStorage.removeItem(LEGACY_KEY);
+  return legacy;
+}
+
 export function loadConfig(): Config {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = readStored();
     if (!raw) return { ...DEFAULTS };
     const parsed = JSON.parse(raw) as Partial<Config>;
     return {

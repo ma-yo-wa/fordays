@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* =====================================================================
-   Generate a VAPID key pair for Someday.
+   Generate a VAPID key pair for Fordays.
 
      node vapid-keygen.mjs
 

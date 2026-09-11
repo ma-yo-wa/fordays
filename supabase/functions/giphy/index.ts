@@ -1,5 +1,5 @@
 /* =====================================================================
-   Someday — giphy
+   Fordays — giphy
    Supabase Edge Function (Deno).
 
    A thin proxy in front of the Giphy API, for one reason: an API key

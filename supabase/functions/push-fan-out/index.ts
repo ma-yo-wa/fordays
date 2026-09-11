@@ -1,5 +1,5 @@
 /* =====================================================================
-   Someday — push-fan-out
+   Fordays — push-fan-out
    Supabase Edge Function (Deno).
 
    Zero dependencies. VAPID signing (RFC 8292) and payload encryption

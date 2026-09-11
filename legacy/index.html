@@ -2112,7 +2112,7 @@ function renderMkDates(){
   const rel = (n)=>{ const d = new Date(); d.setDate(d.getDate()+n); return iso(d); };
   const satOffset = (6 - new Date().getDay() + 7) % 7 || 7;
   const opts = [
-    ["Someday",      null],
+    ["No day yet",   null],
     ["Tonight",      rel(0)],
     ["Tomorrow",     rel(1)],
     ["This weekend", rel(satOffset)],

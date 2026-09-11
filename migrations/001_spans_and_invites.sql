@@ -286,7 +286,7 @@ begin
   on conflict (id) do nothing;
 
   insert into public.spaces (partner_1_id, name)
-  values (new.id, 'Someday');
+  values (new.id, 'Fordays');
 
   return new;
 end;

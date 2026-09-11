@@ -4,7 +4,7 @@ import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 declare const self: ServiceWorkerGlobalScope & typeof globalThis;
 
 /* =====================================================================
-   Someday — service worker
+   Fordays — service worker
 
    Three jobs, and deliberately nothing else:
      1. stay current without ceremony
@@ -66,7 +66,7 @@ self.addEventListener('push', (event) => {
       badge: data.badge || '/badge-96.png',
       // Same tag: a second update about the same activity replaces the
       // first banner instead of stacking a pile of them.
-      tag: data.tag || 'someday',
+      tag: data.tag || 'fordays',
       data: {
         url: data.url || '/',
         activityId: data.activityId ?? null,
@@ -146,7 +146,7 @@ self.addEventListener('message', (event) => {
       body: msg.body || 'This is how a banner will look.',
       icon: '/icon-192.png',
       badge: '/badge-96.png',
-      tag: 'someday-preview',
+      tag: 'fordays-preview',
       data: { url: '/' },
     });
   }

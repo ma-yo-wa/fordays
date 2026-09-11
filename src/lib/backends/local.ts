@@ -18,7 +18,8 @@ function clearSuggestion(a: Activity): void {
   a.suggested_note = null;
 }
 
-const KEY = 'someday.data.v1';
+const KEY = 'fordays.data.v1';
+const LEGACY_KEY = 'someday.data.v1';
 
 interface Snapshot {
   activities: Activity[];
@@ -44,7 +45,7 @@ export class LocalBackend implements Backend {
     if (!this.data.activities.length) this.seed();
 
     try {
-      this.channel = new BroadcastChannel('someday');
+      this.channel = new BroadcastChannel('fordays');
       this.channel.onmessage = () => {
         this.read();
         this.emit();
@@ -240,7 +241,14 @@ export class LocalBackend implements Backend {
 
   private read(): void {
     try {
-      const raw = localStorage.getItem(KEY);
+      let raw = localStorage.getItem(KEY);
+      if (!raw) {
+        raw = localStorage.getItem(LEGACY_KEY);
+        if (raw) {
+          localStorage.setItem(KEY, raw);
+          localStorage.removeItem(LEGACY_KEY);
+        }
+      }
       this.data = raw
         ? (JSON.parse(raw) as Snapshot)
         : { activities: [], logs: [], external: [] };

@@ -67,6 +67,7 @@ demo mode still works for you both to poke at the UI.
    - `migrations/002_partner_joined_push.sql` (if `push.sql` was already
      applied earlier — adds the “she joined” ping)
    - `migrations/003_external_events.sql` (shared Google calendar overlays)
+   - later numbered files through `009_fordays_rename.sql`
 3. **Authentication → Providers → Email**
    - Enable Email
    - Turn **Confirm email** **off** so sign-up works inside the app (no
@@ -79,7 +80,7 @@ joins with an invite link or code from the empty seat in the nav bar.
 
 ### 2. Frontend (Cloudflare Pages)
 
-1. Put this repo on GitHub as **`someday`** (private is fine).
+1. Put this repo on GitHub as **`fordays`** (private is fine).
 2. [Cloudflare Dashboard](https://dash.cloudflare.com) → **Workers & Pages** →
    **Create** → **Pages** → **Connect to Git** → pick the repo.
 3. Build settings:
@@ -101,17 +102,16 @@ joins with an invite link or code from the empty seat in the nav bar.
    | `VITE_SUPABASE_URL` | your project URL |
    | `VITE_SUPABASE_ANON_KEY` | your anon public key |
 
-5. Deploy. You’ll get a workers URL (e.g.
-   `https://someday-app.writemayowa.workers.dev`).
+5. Deploy. The live app is **`https://fordays.app`**.
 
 6. Back in Supabase → **Authentication → URL configuration**:
-   - Site URL = your live workers URL
-   - Redirect URLs = that URL (`https://…workers.dev/**`) and
+   - Site URL = `https://fordays.app`
+   - Redirect URLs = `https://fordays.app/**` and
      `http://localhost:5173/**` for local
 
 ### 3. Install on iPhone
 
-Safari → open the Pages URL → Share → **Add to Home Screen**.  
+Safari → open **https://fordays.app** → Share → **Add to Home Screen**.  
 Push notifications only work from the installed icon (iOS 16.4+).
 
 ---
@@ -130,11 +130,11 @@ Do these when the basic app is live and you both have accounts — not before.
 
 1. [Google Cloud Console](https://console.cloud.google.com/) → create/select a project.
 2. **APIs & Services → Library** → enable **Google Calendar API**.
-3. **OAuth consent screen** → External → app name `Someday` → add your Google
+3. **OAuth consent screen** → External → app name `Fordays` → add your Google
    account as a **Test user** (while the app is in Testing).
 4. **Credentials → Create credentials → OAuth client ID → Web application**:
    - Authorized JavaScript origins (no trailing slash):
-     - `https://someday-app.writemayowa.workers.dev`
+     - `https://fordays.app`
      - `http://localhost:5173`
    - Authorized redirect URIs (same two URLs are fine if asked).
 5. Copy the **Client ID** (`….apps.googleusercontent.com`).

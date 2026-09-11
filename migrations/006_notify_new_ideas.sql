@@ -47,7 +47,7 @@ begin
     title := '💡 ' || actor_name || ' added “' || new.title || '” to the bucket';
     body  := case
                when coalesce(btrim(new.description), '') <> '' then left(new.description, 120)
-               else 'Open Someday when you’re free'
+               else 'Open Fordays when you’re free'
              end;
   elsif kind = 'scheduled' then
     title := '📅 ' || actor_name || ' locked in a date for ' || new.title || '!';

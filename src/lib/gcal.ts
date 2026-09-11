@@ -23,8 +23,10 @@ declare global {
   }
 }
 
-const TOKEN_KEY = 'someday.gcalToken';
-const CAL_KEY = 'someday.gcalCalendar';
+const TOKEN_KEY = 'fordays.gcalToken';
+const LEGACY_TOKEN_KEY = 'someday.gcalToken';
+const CAL_KEY = 'fordays.gcalCalendar';
+const LEGACY_CAL_KEY = 'someday.gcalCalendar';
 const SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
 
 export interface GoogleCalendar {
@@ -103,9 +105,19 @@ export async function connectGoogle(): Promise<string> {
   });
 }
 
+function takeItem(store: Storage, next: string, prev: string): string | null {
+  const fresh = store.getItem(next);
+  if (fresh) return fresh;
+  const legacy = store.getItem(prev);
+  if (!legacy) return null;
+  store.setItem(next, legacy);
+  store.removeItem(prev);
+  return legacy;
+}
+
 export function googleToken(): string | null {
   try {
-    return sessionStorage.getItem(TOKEN_KEY);
+    return takeItem(sessionStorage, TOKEN_KEY, LEGACY_TOKEN_KEY);
   } catch {
     return null;
   }
@@ -121,7 +133,7 @@ export function clearGoogleToken(): void {
 
 export function savedGoogleCalendar(): GoogleCalendar | null {
   try {
-    const raw = localStorage.getItem(CAL_KEY);
+    const raw = takeItem(localStorage, CAL_KEY, LEGACY_CAL_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as GoogleCalendar;
     if (!parsed?.id || !parsed?.summary) return null;

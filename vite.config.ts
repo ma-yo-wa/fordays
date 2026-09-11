@@ -20,8 +20,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
       },
       manifest: {
-        name: 'Someday',
-        short_name: 'Someday',
+        name: 'Fordays',
+        short_name: 'Fordays',
         description: 'Plans and a bucket list for two.',
         start_url: '/',
         scope: '/',

@@ -1,6 +1,6 @@
 {
-  "name": "Someday",
-  "short_name": "Someday",
+  "name": "Fordays",
+  "short_name": "Fordays",
   "description": "A private shared bucket list and calendar for two.",
   "start_url": "./index.html",
   "scope": "./",

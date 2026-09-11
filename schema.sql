@@ -44,7 +44,7 @@ create trigger on_auth_user_created
 -- ---------------------------------------------------------------------
 create table if not exists public.spaces (
   id            uuid primary key default gen_random_uuid(),
-  name          text not null default 'Someday',
+  name          text not null default 'Fordays',
   partner_1_id  uuid not null references public.profiles(id) on delete cascade,
   partner_2_id  uuid references public.profiles(id) on delete set null,
   invite_code   text unique not null default encode(gen_random_bytes(4), 'hex'),
