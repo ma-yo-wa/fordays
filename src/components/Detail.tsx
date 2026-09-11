@@ -3,6 +3,7 @@ import { DayPicker } from 'react-day-picker';
 import Sheet from './Sheet';
 import CoverPicker from './CoverPicker';
 import CoverArt from './CoverArt';
+import WhenFields from './WhenFields';
 import { useApp, partnerName, isMatched } from '../lib/store';
 import { isPlan } from '../lib/types';
 import { artFor } from '../lib/art';
@@ -109,6 +110,7 @@ export default function Detail() {
   const [from, setFrom] = useState('');
   const [until, setUntil] = useState('');
   const [end, setEnd] = useState<string | null>(null);
+  const [multiDay, setMultiDay] = useState(false);
   const [suggestNote, setSuggestNote] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -122,11 +124,10 @@ export default function Detail() {
     setDate(dtDate(item.date_time) ?? todayISO());
     setFrom(dtTime(item.date_time) ?? '');
     setUntil(dtTime(item.ends_at) ?? '');
-    setEnd(
-      item.ends_at && dtDate(item.ends_at) !== dtDate(item.date_time)
-        ? dtDate(item.ends_at)
-        : null,
-    );
+    const multi =
+      Boolean(item.ends_at) && dtDate(item.ends_at) !== dtDate(item.date_time);
+    setEnd(multi ? dtDate(item.ends_at) : null);
+    setMultiDay(multi);
     setSuggestNote('');
     setBusy(false);
   }, [detailId, item]);
@@ -151,9 +152,9 @@ export default function Detail() {
     setDate(dtDate(start) ?? todayISO());
     setFrom(dtTime(start) ?? '');
     setUntil(dtTime(finish) ?? '');
-    setEnd(
-      finish && dtDate(finish) !== dtDate(start) ? dtDate(finish) : null,
-    );
+    const multi = Boolean(finish) && dtDate(finish) !== dtDate(start);
+    setEnd(multi ? dtDate(finish) : null);
+    setMultiDay(multi);
     setSuggestNote('');
     setMode('suggest');
   }
@@ -173,7 +174,12 @@ export default function Detail() {
   }
 
   async function saveWhen() {
-    const { date_time, ends_at } = composeWhen({ date, from, until, endDate: end });
+    const { date_time, ends_at } = composeWhen({
+      date,
+      from,
+      until,
+      endDate: multiDay ? end : null,
+    });
     await patch(item!.id, { date_time, ends_at });
     setPicked(date);
     const d = parseISO(date);
@@ -184,7 +190,12 @@ export default function Detail() {
 
   async function saveSuggest() {
     const row = item!;
-    const { date_time, ends_at } = composeWhen({ date, from, until, endDate: end });
+    const { date_time, ends_at } = composeWhen({
+      date,
+      from,
+      until,
+      endDate: multiDay ? end : null,
+    });
     if (sameWhen(date_time, row.date_time, ends_at, row.ends_at)) {
       toast('That’s already the date — change it, or leave a reason in a note');
       return;
@@ -416,42 +427,17 @@ export default function Detail() {
             }}
           />
 
-          <span className={f.label}>
-            From <span className={f.hint}>— optional</span>
-          </span>
-          <div className={f.group}>
-            <input
-              className={f.input}
-              type="time"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-            />
-          </div>
-
-          <span className={f.label}>
-            Until <span className={f.hint}>— optional</span>
-          </span>
-          <div className={f.group}>
-            <input
-              className={f.input}
-              type="time"
-              value={until}
-              onChange={(e) => setUntil(e.target.value)}
-            />
-          </div>
-
-          <span className={f.label}>
-            Ends on <span className={f.hint}>— for something that runs over days</span>
-          </span>
-          <div className={f.group}>
-            <input
-              className={f.input}
-              type="date"
-              value={end ?? ''}
-              min={date}
-              onChange={(e) => setEnd(e.target.value || null)}
-            />
-          </div>
+          <WhenFields
+            date={date}
+            from={from}
+            until={until}
+            end={end}
+            multiDay={multiDay}
+            onFrom={setFrom}
+            onUntil={setUntil}
+            onEnd={setEnd}
+            onMultiDay={setMultiDay}
+          />
 
           {mode === 'suggest' && (
             <>

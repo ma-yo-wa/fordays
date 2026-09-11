@@ -72,6 +72,24 @@ textarea.input {
   padding: 0 4px;
 }
 
+.textLink {
+  display: block;
+  margin: 14px 4px 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 600;
+  color: var(--rose-ink);
+  text-align: left;
+}
+
+.textLink:active {
+  opacity: 0.7;
+}
+
 /* Read-only — the other person’s name, not a field you edit. */
 .withName {
   margin: 0;

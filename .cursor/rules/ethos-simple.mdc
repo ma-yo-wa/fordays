@@ -1,0 +1,14 @@
+---
+description: UI must stay ridiculously simple — see ETHOS.md
+alwaysApply: true
+---
+
+# Simpler than a calendar
+
+Read and follow [`ETHOS.md`](../../ETHOS.md).
+
+- Prefer fewer fields; hide power options behind progressive disclosure.
+- Plan when-flow default: **day + From + Until**. Multi-day only after **Runs more than one day?**
+- Soft blanks are valid. Never force Until or Ends on.
+- Copy: plan / day / bucket — not calendar / schedule / event chrome.
+- Ship PWA and iOS together.

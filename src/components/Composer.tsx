@@ -3,6 +3,7 @@ import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/style.css';
 import Sheet from './Sheet';
 import CoverPicker from './CoverPicker';
+import WhenFields from './WhenFields';
 import { useApp } from '../lib/store';
 import { addDays, composeWhen, describePlan, iso, nextSaturday, parseISO } from '../lib/date';
 import f from './Form.module.css';
@@ -30,6 +31,7 @@ export default function Composer() {
   const [from, setFrom] = useState('');
   const [until, setUntil] = useState('');
   const [end, setEnd] = useState<string | null>(null);
+  const [multiDay, setMultiDay] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -43,6 +45,7 @@ export default function Composer() {
     setFrom('');
     setUntil('');
     setEnd(null);
+    setMultiDay(false);
     setPickerOpen(false);
     setSaving(false);
   }, [mode, picked]);
@@ -60,7 +63,9 @@ export default function Composer() {
       return;
     }
     setSaving(true);
-    const when = isPlan ? composeWhen({ date, from, until, endDate: end }) : null;
+    const when = isPlan
+      ? composeWhen({ date, from, until, endDate: multiDay ? end : null })
+      : null;
     try {
       await create({
         title: clean,
@@ -164,48 +169,32 @@ export default function Composer() {
             />
           )}
 
-          <span className={f.label}>
-            From <span className={f.hint}>— optional</span>
-          </span>
-          <div className={f.group}>
-            <input
-              className={f.input}
-              type="time"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-            />
-          </div>
-
-          <span className={f.label}>
-            Until <span className={f.hint}>— optional</span>
-          </span>
-          <div className={f.group}>
-            <input
-              className={f.input}
-              type="time"
-              value={until}
-              onChange={(e) => setUntil(e.target.value)}
-            />
-          </div>
-
-          {/* Tucked below the times — most plans are one day. */}
-          <span className={f.label}>
-            Ends on <span className={f.hint}>— only if it runs over days</span>
-          </span>
-          <div className={f.group}>
-            <input
-              className={f.input}
-              type="date"
-              value={end ?? ''}
-              min={date}
-              onChange={(e) => setEnd(e.target.value || null)}
-            />
-          </div>
+          <WhenFields
+            date={date}
+            from={from}
+            until={until}
+            end={end}
+            multiDay={multiDay}
+            onFrom={setFrom}
+            onUntil={setUntil}
+            onEnd={setEnd}
+            onMultiDay={setMultiDay}
+          />
 
           <p className={f.rowNote} style={{ marginTop: 12 }}>
             {describePlan(
-              composeWhen({ date, from, until, endDate: end }).date_time,
-              composeWhen({ date, from, until, endDate: end }).ends_at,
+              composeWhen({
+                date,
+                from,
+                until,
+                endDate: multiDay ? end : null,
+              }).date_time,
+              composeWhen({
+                date,
+                from,
+                until,
+                endDate: multiDay ? end : null,
+              }).ends_at,
             )}
           </p>
         </>

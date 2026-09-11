@@ -2,9 +2,11 @@
 
 **Fordays** — *Plans for days.*
 
+Product ethos (simplicity, when-fields, language): [`ETHOS.md`](./ETHOS.md).
+
 Palette is the **orb** (rose → coral → peach → green): rose = Plan, sage = Idea. Pastels never take white text — ink on fills. See `src/styles/tokens.css` / `ios/Fordays/Theme/Theme.swift`.
 
-Private shared planning for two people: dated **plans** on the calendar, undated ideas in the **bucket**.
+Private shared planning for two people: dated **plans**, undated ideas in the **bucket**.
 
 ---
 
