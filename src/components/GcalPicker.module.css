@@ -12,8 +12,7 @@
 .sectionLabel {
   display: block;
   font: var(--t-footnote);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: var(--tr-footnote);
   font-weight: 600;
   color: var(--ink-faint);
   margin: 0 0 8px 4px;
