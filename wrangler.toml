@@ -3,6 +3,8 @@
 name = "someday-app"
 account_id = "51cff98c19b84bdb2544f38ecb284fae"
 compatibility_date = "2026-07-30"
+# Keep the old workers.dev host so existing Home Screen icons still open.
+workers_dev = true
 
 [assets]
 directory = "./dist"
