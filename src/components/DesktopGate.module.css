@@ -1,0 +1,67 @@
+.page {
+  min-height: 100%;
+  min-height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 80% at 10% -10%, #ffeaee 0%, transparent 55%),
+    radial-gradient(90% 70% at 100% 0%, #edf6e3 0%, transparent 50%),
+    var(--paper);
+  color: var(--ink);
+}
+
+.orb {
+  position: absolute;
+  width: min(420px, 70vw);
+  height: min(420px, 70vw);
+  right: -8%;
+  top: -12%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 40% 40%,
+    #ff7396 0%,
+    #fd8696 22%,
+    #fda492 42%,
+    #f0c296 62%,
+    #cde7b3 82%,
+    transparent 100%
+  );
+  opacity: 0.55;
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.main {
+  position: relative;
+  max-width: 28rem;
+  padding: 22vh 28px 48px;
+}
+
+.brand {
+  font: var(--t-large-title);
+  letter-spacing: var(--tr-large-title);
+  margin: 0 0 10px;
+}
+
+.tag {
+  font: var(--t-title1);
+  letter-spacing: var(--tr-title1);
+  font-weight: 600;
+  margin: 0 0 16px;
+  max-width: 16ch;
+}
+
+.lead {
+  font: var(--t-body);
+  letter-spacing: var(--tr-body);
+  color: var(--ink-soft);
+  margin: 0 0 20px;
+  max-width: 34ch;
+}
+
+.hint {
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-faint);
+  margin: 0;
+}

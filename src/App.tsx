@@ -16,10 +16,20 @@ import BucketList from './screens/BucketList';
 import Calendar from './screens/Calendar';
 import Memories from './screens/Memories';
 import { peekInvite, watchPasswordRecovery } from './lib/auth';
+import { isDesktopBrowser } from './lib/device';
 import { useApp } from './lib/store';
+import DesktopGate from './components/DesktopGate';
 import s from './App.module.css';
 
 export default function App() {
+  if (isDesktopBrowser()) {
+    return <DesktopGate />;
+  }
+
+  return <AppShell />;
+}
+
+function AppShell() {
   const ready = useApp((st) => st.ready);
   const authPhase = useApp((st) => st.authPhase);
   const screen = useApp((st) => st.screen);

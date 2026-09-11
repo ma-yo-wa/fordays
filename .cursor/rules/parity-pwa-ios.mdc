@@ -21,4 +21,5 @@ Fordays has two clients that must stay in sync:
 
 - **PWA** = the product in the browser / Home Screen. Keep it.
 - **Marketing / loose web** may be dropped later; do not invest in a separate “website app” experience unless asked.
+- **Desktop browsers** must not run the planner — `DesktopGate` only (phone / installed PWA). Native iOS is unaffected.
 - Long-term native iOS is the TestFlight path; PWA remains the shared/quick surface until the user says otherwise.
