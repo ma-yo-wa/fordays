@@ -2,16 +2,15 @@
 
 **Fordays** — *Plans for days.*
 
-A private shared planning app for exactly two people. Install it as a PWA on
-your phones. One space, two equal partners, and one question: *does this have
-a date yet?*
+A private shared planning app for exactly two people. One space, two equal
+partners, and one question: *does this have a day yet?*
 
 | | |
 |---|---|
-| **Plan** | Has a date (and optional end date). Lives on the calendar. |
-| **Bucket List** | No date yet. Lives on the board until you put it on the calendar. |
+| **Plan** | Has a day (optional From / Until). |
+| **Bucket List** | No day yet — make it a plan when you’re ready. |
 
-Product backlog: [`BACKLOG.md`](./BACKLOG.md).
+Ethos: [`ETHOS.md`](./ETHOS.md). Backlog: [`BACKLOG.md`](./BACKLOG.md).
 
 Imported Google Calendar events stay read-only overlays — they never become
 plans. Create always asks which of the two you’re making; nothing is inferred.
