@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { addDays, parseISO } from '../lib/date';
 import f from './Form.module.css';
 
@@ -12,6 +13,41 @@ type Props = {
   onEnd: (v: string | null) => void;
   onMultiDay: (open: boolean) => void;
 };
+
+function TimeInput({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const [tick, setTick] = useState(0);
+
+  function set(next: string) {
+    onChange(next);
+    if (!next) setTick((n) => n + 1);
+  }
+
+  return (
+    <div className={f.group}>
+      <div className={f.inputRow}>
+        <input
+          key={tick}
+          className={f.input}
+          type="time"
+          value={value}
+          onChange={(e) => set(e.target.value)}
+          onInput={(e) => set((e.target as HTMLInputElement).value)}
+        />
+        {value ? (
+          <button type="button" className={f.fieldClear} onClick={() => set('')}>
+            Clear
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 
 /** Day is chosen elsewhere. Default: From + Until. Multi-day stays hidden. */
 export default function WhenFields({
@@ -42,14 +78,7 @@ export default function WhenFields({
       <span className={f.label}>
         From <span className={f.hint}>— optional</span>
       </span>
-      <div className={f.group}>
-        <input
-          className={f.input}
-          type="time"
-          value={from}
-          onChange={(e) => onFrom(e.target.value)}
-        />
-      </div>
+      <TimeInput value={from} onChange={onFrom} />
 
       <span className={f.label}>
         Until{' '}
@@ -57,14 +86,7 @@ export default function WhenFields({
           {multiDay ? '— on the last day, optional' : '— optional'}
         </span>
       </span>
-      <div className={f.group}>
-        <input
-          className={f.input}
-          type="time"
-          value={until}
-          onChange={(e) => onUntil(e.target.value)}
-        />
-      </div>
+      <TimeInput value={until} onChange={onUntil} />
 
       {!multiDay ? (
         <button type="button" className={f.textLink} onClick={openMultiDay}>

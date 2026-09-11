@@ -26,6 +26,31 @@
   border-top: var(--hairline-w) solid var(--separator);
 }
 
+.inputRow {
+  display: flex;
+  align-items: center;
+}
+
+.inputRow .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.fieldClear {
+  flex: none;
+  border: none;
+  background: none;
+  padding: 12px 14px;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 600;
+  color: var(--ink-faint);
+}
+
+.fieldClear:active {
+  opacity: 0.7;
+}
+
 .input {
   width: 100%;
   border: none;
