@@ -78,7 +78,7 @@ export default function Composer() {
       } else {
         setScreen('bucket');
       }
-      toast(isPlan ? 'It’s on the calendar' : 'Added to your bucket list');
+      toast(isPlan ? 'Made it a plan' : 'Added to your bucket list');
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Could not save');
     } finally {

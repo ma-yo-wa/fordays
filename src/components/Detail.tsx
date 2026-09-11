@@ -179,7 +179,7 @@ export default function Detail() {
     const d = parseISO(date);
     setCursor(iso(new Date(d.getFullYear(), d.getMonth(), 1)));
     setMode('view');
-    toast('Moved');
+    toast(planned ? 'Updated' : 'Made it a plan');
   }
 
   async function saveSuggest() {
@@ -484,7 +484,7 @@ export default function Detail() {
               disabled={busy}
               onClick={() => void (mode === 'suggest' ? saveSuggest() : saveWhen())}
             >
-              {mode === 'suggest' ? 'Suggest' : 'Save'}
+              {mode === 'suggest' ? 'Suggest' : planned ? 'Save' : 'Make it a plan'}
             </button>
           </div>
         </>
@@ -522,7 +522,7 @@ export default function Detail() {
         <div className={s.actions}>
           <button type="button" className={s.action} onClick={() => setMode('when')}>
             <CalendarPlusIcon />
-            {planned ? 'Change the date' : 'Put it on the calendar'}
+            {planned ? 'Change the day' : 'Make it a plan'}
           </button>
 
           {matched && (
