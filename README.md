@@ -102,16 +102,17 @@ joins with an invite link or code from the empty seat in the nav bar.
    | `VITE_SUPABASE_URL` | your project URL |
    | `VITE_SUPABASE_ANON_KEY` | your anon public key |
 
-5. Deploy. The live app is **`https://fordays.app`**.
+5. Deploy. The live app is
+   `https://someday-app.someday.workers.dev`.
 
 6. Back in Supabase → **Authentication → URL configuration**:
-   - Site URL = `https://fordays.app`
-   - Redirect URLs = `https://fordays.app/**` and
+   - Site URL = your live workers URL
+   - Redirect URLs = that URL (`https://…workers.dev/**`) and
      `http://localhost:5173/**` for local
 
 ### 3. Install on iPhone
 
-Safari → open **https://fordays.app** → Share → **Add to Home Screen**.  
+Safari → open the Workers URL → Share → **Add to Home Screen**.  
 Push notifications only work from the installed icon (iOS 16.4+).
 
 ---
@@ -134,7 +135,7 @@ Do these when the basic app is live and you both have accounts — not before.
    account as a **Test user** (while the app is in Testing).
 4. **Credentials → Create credentials → OAuth client ID → Web application**:
    - Authorized JavaScript origins (no trailing slash):
-     - `https://fordays.app`
+     - `https://someday-app.someday.workers.dev`
      - `http://localhost:5173`
    - Authorized redirect URIs (same two URLs are fine if asked).
 5. Copy the **Client ID** (`….apps.googleusercontent.com`).
