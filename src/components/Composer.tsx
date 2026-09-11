@@ -4,7 +4,7 @@ import 'react-day-picker/style.css';
 import Sheet from './Sheet';
 import CoverPicker from './CoverPicker';
 import { useApp } from '../lib/store';
-import { addDays, iso, nextSaturday, parseISO, pretty } from '../lib/date';
+import { addDays, composeWhen, describePlan, iso, nextSaturday, parseISO } from '../lib/date';
 import f from './Form.module.css';
 
 /* Still one form and still one nullable column underneath, but which of
@@ -27,7 +27,8 @@ export default function Composer() {
   const [notes, setNotes] = useState('');
   const [cover, setCover] = useState<string | null>(null);
   const [date, setDate] = useState<string>(picked);
-  const [time, setTime] = useState('');
+  const [from, setFrom] = useState('');
+  const [until, setUntil] = useState('');
   const [end, setEnd] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -39,7 +40,8 @@ export default function Composer() {
     setCover(null);
     // A plan opens on the day you were already looking at.
     setDate(picked);
-    setTime('');
+    setFrom('');
+    setUntil('');
     setEnd(null);
     setPickerOpen(false);
     setSaving(false);
@@ -58,16 +60,14 @@ export default function Composer() {
       return;
     }
     setSaving(true);
-    const dateTime = isPlan ? (time ? `${date}T${time}` : date) : null;
-    // An end that isn't after the start isn't a span, it's a typo.
-    const span = isPlan && end && end > date ? (time ? `${end}T${time}` : end) : null;
+    const when = isPlan ? composeWhen({ date, from, until, endDate: end }) : null;
     try {
       await create({
         title: clean,
         description: notes.trim() || null,
         image_url: cover,
-        date_time: dateTime,
-        ends_at: span,
+        date_time: when?.date_time ?? null,
+        ends_at: when?.ends_at ?? null,
       });
       close();
       if (isPlan) {
@@ -165,21 +165,32 @@ export default function Composer() {
           )}
 
           <span className={f.label}>
-            Time <span className={f.hint}>— leave blank for all day</span>
+            From <span className={f.hint}>— optional</span>
           </span>
           <div className={f.group}>
             <input
               className={f.input}
               type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
             />
           </div>
 
-          {/* Tucked below the time, because most plans are one day and
-              this shouldn't be the second thing you have to think about. */}
           <span className={f.label}>
-            Ends <span className={f.hint}>— only if it runs over days</span>
+            Until <span className={f.hint}>— optional</span>
+          </span>
+          <div className={f.group}>
+            <input
+              className={f.input}
+              type="time"
+              value={until}
+              onChange={(e) => setUntil(e.target.value)}
+            />
+          </div>
+
+          {/* Tucked below the times — most plans are one day. */}
+          <span className={f.label}>
+            Ends on <span className={f.hint}>— only if it runs over days</span>
           </span>
           <div className={f.group}>
             <input
@@ -192,9 +203,10 @@ export default function Composer() {
           </div>
 
           <p className={f.rowNote} style={{ marginTop: 12 }}>
-            {end && end > date
-              ? `${longDate(date)} – ${longDate(end)}`
-              : `${longDate(date)}${time ? ` at ${pretty(time)}` : ', all day'}`}
+            {describePlan(
+              composeWhen({ date, from, until, endDate: end }).date_time,
+              composeWhen({ date, from, until, endDate: end }).ends_at,
+            )}
           </p>
         </>
       )}
@@ -219,12 +231,4 @@ export default function Composer() {
       </div>
     </Sheet>
   );
-}
-
-function longDate(dateISO: string): string {
-  return parseISO(dateISO).toLocaleDateString(undefined, {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  });
 }

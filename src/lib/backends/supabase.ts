@@ -20,12 +20,15 @@ function toTimestamptz(v: string): string {
   return new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1, hh ?? 0, mm ?? 0).toISOString();
 }
 
-/** timestamptz -> app form, rendered in the reader's own timezone. */
+/** timestamptz -> app form, rendered in the reader's own timezone.
+ *  Clock times on ends_at survive even when the start is all-day. */
 function fromTimestamptz(v: string | null, allDay: boolean): string | null {
   if (!v) return null;
   const d = new Date(v);
   const date = iso(d);
-  return allDay ? date : `${date}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const hasClock = d.getHours() !== 0 || d.getMinutes() !== 0;
+  if (allDay && !hasClock) return date;
+  return `${date}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 interface ActivityRow {

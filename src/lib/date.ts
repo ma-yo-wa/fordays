@@ -106,23 +106,67 @@ export function formatRange(
   return `${left} – ${right}`;
 }
 
+/** Compose a plan’s when: day + optional From / Until + optional multi-day end.
+ *  Nothing is required past the day. Until may be set without From. */
+export function composeWhen(input: {
+  date: string;
+  from?: string;
+  until?: string;
+  endDate?: string | null;
+}): { date_time: string; ends_at: string | null } {
+  let from = (input.from ?? '').trim();
+  let until = (input.until ?? '').trim();
+  const endDate =
+    input.endDate && input.endDate > input.date ? input.endDate : null;
+
+  // Same-day window typed backwards — swap quietly.
+  if (!endDate && from && until && until < from) {
+    const tmp = from;
+    from = until;
+    until = tmp;
+  }
+
+  const date_time = from ? `${input.date}T${from}` : input.date;
+
+  if (endDate) {
+    return { date_time, ends_at: until ? `${endDate}T${until}` : endDate };
+  }
+  if (until) {
+    return { date_time, ends_at: `${input.date}T${until}` };
+  }
+  return { date_time, ends_at: null };
+}
+
 /** How a plan reads on its own detail screen: the full day spelled out,
- *  a span when it has one, and the time only when there is one. */
+ *  a span when it has one, and times only when they were set. */
 export function describePlan(
   dateTime: string,
   endsAt: string | null,
 ): string {
   const start = parseISO(dateTime);
-  const time = dtTime(dateTime);
+  const sTime = dtTime(dateTime);
   const long = (d: Date) =>
     d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
 
-  if (endsAt && dtDate(endsAt) !== dtDate(dateTime)) {
+  if (endsAt) {
+    const sDate = dtDate(dateTime) as string;
+    const eDate = dtDate(endsAt) as string;
+    const eTime = dtTime(endsAt);
     const end = parseISO(endsAt);
-    const nights = Math.round((+end - +start) / 86400000);
-    return `${long(start)} – ${long(end)} · ${nights} night${nights === 1 ? '' : 's'}`;
+
+    if (eDate !== sDate) {
+      const nights = Math.round((+end - +start) / 86400000);
+      const left = sTime ? `${long(start)} at ${pretty(sTime)}` : long(start);
+      const right = eTime ? `${long(end)} at ${pretty(eTime)}` : long(end);
+      return `${left} – ${right} · ${nights} night${nights === 1 ? '' : 's'}`;
+    }
+
+    if (sTime && eTime) return `${long(start)}, ${pretty(sTime)} – ${pretty(eTime)}`;
+    if (eTime && !sTime) return `${long(start)} until ${pretty(eTime)}`;
+    if (sTime) return `${long(start)} at ${pretty(sTime)}`;
   }
-  return time ? `${long(start)} at ${pretty(time)}` : `${long(start)}, all day`;
+
+  return sTime ? `${long(start)} at ${pretty(sTime)}` : `${long(start)}, all day`;
 }
 
 /** Anticipation copy for a plan’s date: Today, Tomorrow, In 2 days… */

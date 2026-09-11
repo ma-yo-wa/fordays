@@ -8,6 +8,7 @@ import { isPlan } from '../lib/types';
 import { artFor } from '../lib/art';
 import { faceColor, faceIndexFor } from '../lib/tint';
 import {
+  composeWhen,
   describePlan,
   dtDate,
   dtTime,
@@ -105,7 +106,8 @@ export default function Detail() {
   const [notes, setNotes] = useState('');
   const [cover, setCover] = useState<string | null>(null);
   const [date, setDate] = useState(todayISO());
-  const [time, setTime] = useState('');
+  const [from, setFrom] = useState('');
+  const [until, setUntil] = useState('');
   const [end, setEnd] = useState<string | null>(null);
   const [suggestNote, setSuggestNote] = useState('');
   const [busy, setBusy] = useState(false);
@@ -118,8 +120,13 @@ export default function Detail() {
     setNotes(item.description ?? '');
     setCover(item.image_url);
     setDate(dtDate(item.date_time) ?? todayISO());
-    setTime(dtTime(item.date_time) ?? '');
-    setEnd(dtDate(item.ends_at));
+    setFrom(dtTime(item.date_time) ?? '');
+    setUntil(dtTime(item.ends_at) ?? '');
+    setEnd(
+      item.ends_at && dtDate(item.ends_at) !== dtDate(item.date_time)
+        ? dtDate(item.ends_at)
+        : null,
+    );
     setSuggestNote('');
     setBusy(false);
   }, [detailId, item]);
@@ -139,10 +146,14 @@ export default function Detail() {
 
   function openSuggest() {
     const row = item!;
-    const from = row.suggested_date_time ?? row.date_time;
-    setDate(dtDate(from) ?? todayISO());
-    setTime(dtTime(from) ?? '');
-    setEnd(dtDate(row.suggested_ends_at ?? row.ends_at));
+    const start = row.suggested_date_time ?? row.date_time;
+    const finish = row.suggested_ends_at ?? row.ends_at;
+    setDate(dtDate(start) ?? todayISO());
+    setFrom(dtTime(start) ?? '');
+    setUntil(dtTime(finish) ?? '');
+    setEnd(
+      finish && dtDate(finish) !== dtDate(start) ? dtDate(finish) : null,
+    );
     setSuggestNote('');
     setMode('suggest');
   }
@@ -162,10 +173,8 @@ export default function Detail() {
   }
 
   async function saveWhen() {
-    const dateTime = time ? `${date}T${time}` : date;
-    // An end that isn't after the start isn't a span, it's a typo.
-    const span = end && end > date ? (time ? `${end}T${time}` : end) : null;
-    await patch(item!.id, { date_time: dateTime, ends_at: span });
+    const { date_time, ends_at } = composeWhen({ date, from, until, endDate: end });
+    await patch(item!.id, { date_time, ends_at });
     setPicked(date);
     const d = parseISO(date);
     setCursor(iso(new Date(d.getFullYear(), d.getMonth(), 1)));
@@ -175,15 +184,14 @@ export default function Detail() {
 
   async function saveSuggest() {
     const row = item!;
-    const dateTime = time ? `${date}T${time}` : date;
-    const span = end && end > date ? (time ? `${end}T${time}` : end) : null;
-    if (sameWhen(dateTime, row.date_time, span, row.ends_at)) {
+    const { date_time, ends_at } = composeWhen({ date, from, until, endDate: end });
+    if (sameWhen(date_time, row.date_time, ends_at, row.ends_at)) {
       toast('That’s already the date — change it, or leave a reason in a note');
       return;
     }
     if (
       row.suggested_date_time &&
-      sameWhen(dateTime, row.suggested_date_time, span, row.suggested_ends_at)
+      sameWhen(date_time, row.suggested_date_time, ends_at, row.suggested_ends_at)
     ) {
       toast('That’s already the suggestion');
       return;
@@ -191,8 +199,8 @@ export default function Detail() {
     setBusy(true);
     try {
       await suggestWhen(row.id, {
-        date_time: dateTime,
-        ends_at: span,
+        date_time,
+        ends_at,
         note: suggestNote.trim() || null,
       });
       setMode('view');
@@ -409,19 +417,31 @@ export default function Detail() {
           />
 
           <span className={f.label}>
-            Time <span className={f.hint}>— leave blank for all day</span>
+            From <span className={f.hint}>— optional</span>
           </span>
           <div className={f.group}>
             <input
               className={f.input}
               type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
             />
           </div>
 
           <span className={f.label}>
-            Ends <span className={f.hint}>— for something that runs over days</span>
+            Until <span className={f.hint}>— optional</span>
+          </span>
+          <div className={f.group}>
+            <input
+              className={f.input}
+              type="time"
+              value={until}
+              onChange={(e) => setUntil(e.target.value)}
+            />
+          </div>
+
+          <span className={f.label}>
+            Ends on <span className={f.hint}>— for something that runs over days</span>
           </span>
           <div className={f.group}>
             <input
