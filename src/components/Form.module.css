@@ -249,13 +249,15 @@ textarea.input {
 }
 
 /* react-day-picker, restyled to match. The library gives us keyboard
-   handling, locale and range logic; the look stays ours. */
+   handling, locale and range logic; the look stays ours. Stretch the
+   month to the sheet width — a fixed 40px×7 grid leaves a dead gap. */
 .picker {
   margin-top: 14px;
+  width: 100%;
   --rdp-accent-color: var(--rose);
   --rdp-accent-background-color: var(--rose-wash);
-  --rdp-day-height: 40px;
-  --rdp-day-width: 40px;
+  --rdp-day-height: 44px;
+  --rdp-day-width: auto;
   --rdp-day_button-height: 36px;
   --rdp-day_button-width: 36px;
   --rdp-day_button-border-radius: 50%;
@@ -263,6 +265,25 @@ textarea.input {
   --rdp-today-color: var(--rose-ink);
   --rdp-font-family: var(--ui);
   font-size: 14px;
+}
+
+.picker :global(.rdp-months),
+.picker :global(.rdp-month),
+.picker :global(.rdp-month_grid) {
+  width: 100%;
+  max-width: none;
+}
+
+.picker :global(.rdp-month_grid) {
+  table-layout: fixed;
+}
+
+.picker :global(.rdp-day) {
+  width: auto;
+}
+
+.picker :global(.rdp-day_button) {
+  margin-inline: auto;
 }
 
 .picker :global(.rdp-caption_label) {
