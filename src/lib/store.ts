@@ -396,7 +396,7 @@ export const useApp = create<AppState>()((set, get) => {
     async suggestWhen(id, input) {
       if (!backend) throw new Error('Not connected — try signing out and back in');
       if (!isMatched(get().space) || !canCompose(get().space)) {
-        throw new Error('Suggest a date when someone else is in this orb');
+        throw new Error('Suggest a date when someone else is in this Orb');
       }
       try {
         await backend.suggestWhen(id, input);
@@ -474,7 +474,7 @@ export const useApp = create<AppState>()((set, get) => {
       if (!backend) throw new Error('Not connected');
       if (backend.name !== 'supabase') {
         throw new Error(
-          'Calendar sharing needs a signed-in cloud orb — sign out and sign back in, then import again',
+          'Calendar sharing needs a signed-in cloud Orb — sign out and sign back in, then import again',
         );
       }
       await backend.replaceExternal(events);

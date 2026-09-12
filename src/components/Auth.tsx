@@ -212,7 +212,7 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
       <h1 className={s.brand}>Fordays</h1>
       <p className={s.lead}>
         {inviterHint
-          ? `${inviterHint} wants to share an orb with you — sign in to join`
+          ? `${inviterHint} wants to share an Orb with you — sign in to join`
           : 'A shared calendar and bucket list for two'}
       </p>
 
@@ -335,7 +335,7 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
       <p className={s.note}>
         {mode === 'signup'
           ? 'Your name shows on the shared calendar.'
-          : 'Private orb for two — sign in on each phone.'}
+          : 'Private Orb for two — sign in on each phone.'}
       </p>
 
       {error && <p className={s.error}>{error}</p>}

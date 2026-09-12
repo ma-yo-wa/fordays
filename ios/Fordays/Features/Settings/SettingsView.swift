@@ -70,7 +70,7 @@ struct SettingsView: View {
 
   private var orbsSection: some View {
     VStack(alignment: .leading, spacing: 8) {
-      sectionLabel("Your orbs")
+      sectionLabel("Your Orbs")
       ScrollView(.horizontal, showsIndicators: false) {
         HStack(spacing: 10) {
           ForEach(orbs, id: \.id) { orb in
@@ -140,7 +140,7 @@ struct SettingsView: View {
           .background(Theme.ink.opacity(0.08), in: Circle())
           .foregroundStyle(Theme.ink)
 
-        Text("Create orb")
+        Text("Create Orb")
           .font(.headline)
           .foregroundStyle(Theme.ink)
 
@@ -158,7 +158,7 @@ struct SettingsView: View {
 
   private func peopleSection(space: SpaceInfo) -> some View {
     VStack(alignment: .leading, spacing: 8) {
-      sectionLabel("People in this orb")
+      sectionLabel("People in this Orb")
       VStack(alignment: .leading, spacing: 8) {
         ScrollView(.horizontal, showsIndicators: false) {
           HStack(spacing: 10) {
@@ -208,7 +208,7 @@ struct SettingsView: View {
       .padding(10)
       .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-      Text("An orb is your planning group — solo, two, or a few")
+      Text("An Orb is your planning group — solo, two, or a few")
         .font(.footnote)
         .foregroundStyle(Theme.inkFaint)
         .padding(.horizontal, 4)
@@ -231,7 +231,7 @@ struct SettingsView: View {
         ForEach(space.members.filter { $0.id != space.myId }, id: \.id) { member in
           if removeId == member.id {
             VStack(alignment: .leading, spacing: 10) {
-              Text("Remove \(member.name)? They get a copy of what was already here. This orb stays live for everyone else.")
+              Text("Remove \(member.name)? They get a copy of what was already here. This Orb stays live for everyone else.")
                 .font(.footnote)
                 .foregroundStyle(Theme.inkFaint)
 
@@ -265,8 +265,8 @@ struct SettingsView: View {
           VStack(alignment: .leading, spacing: 10) {
             Text(
               space.members.count <= 1
-                ? "You’re the last person — this deletes the orb."
-                : "They keep the live orb. You get a frozen copy of what’s already here."
+                ? "You’re the last person — this deletes the Orb."
+                : "They keep the live Orb. You get a frozen copy of what’s already here."
             )
             .font(.footnote)
             .foregroundStyle(Theme.inkFaint)
@@ -275,7 +275,7 @@ struct SettingsView: View {
               quietButton("Stay") {
                 leaveAsk = false
               }
-              dangerButton("Leave this orb") {
+              dangerButton("Leave this Orb") {
                 leaveOrb()
               }
             }
@@ -283,7 +283,7 @@ struct SettingsView: View {
           .padding(12)
           .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         } else {
-          Button("Leave this orb") {
+          Button("Leave this Orb") {
             leaveAsk = true
           }
           .buttonStyle(.plain)
@@ -410,6 +410,6 @@ struct SettingsView: View {
 
   private func orbSizeLabel(_ orb: SpaceInfo) -> String {
     let n = orb.members.isEmpty ? (orb.partner2Id == nil ? 1 : 2) : orb.members.count
-    return n <= 1 ? "Solo orb" : "\(n) people"
+    return n <= 1 ? "Solo Orb" : "\(n) people"
   }
 }

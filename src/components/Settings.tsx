@@ -50,7 +50,7 @@ function firstLetter(name: string): string {
 
 function orbSizeLabel(space: SpaceInfo): string {
   const n = space.members?.length || (space.partner2Id ? 2 : 1);
-  if (n <= 1) return 'Solo orb';
+  if (n <= 1) return 'Solo Orb';
   return `${n} people`;
 }
 
@@ -179,9 +179,9 @@ export default function Settings() {
     setSpaceBusy(true);
     try {
       await addSpace();
-      toast('New orb — just you, until you invite');
+      toast('New Orb — just you, until you invite');
     } catch (err) {
-      toast(err instanceof Error ? err.message : 'Couldn’t make an orb');
+      toast(err instanceof Error ? err.message : 'Couldn’t make an Orb');
     } finally {
       setSpaceBusy(false);
     }
@@ -252,7 +252,7 @@ export default function Settings() {
             </section>
 
             <section className={ui.section}>
-              <span className={ui.label}>Your orbs</span>
+              <span className={ui.label}>Your Orbs</span>
               <div className={ui.orbRail}>
                 {visibleOrbs.map((orb) => (
                   <button
@@ -278,7 +278,7 @@ export default function Settings() {
                   <span className={ui.orbPlus} aria-hidden>
                     +
                   </span>
-                  <span className={ui.orbTitle}>Create orb</span>
+                  <span className={ui.orbTitle}>Create Orb</span>
                   <span className={ui.orbMeta}>Start solo, or invite</span>
                 </button>
               </div>
@@ -286,7 +286,7 @@ export default function Settings() {
 
             {space && (
               <section className={ui.section}>
-                <span className={ui.label}>People in this orb</span>
+                <span className={ui.label}>People in this Orb</span>
                 <div className={ui.peopleCard}>
                   <div className={ui.peopleRail}>
                     {members.map((member) => {
@@ -320,7 +320,7 @@ export default function Settings() {
                     )}
                   </div>
                 </div>
-                <p className={ui.help}>An orb is your planning group — solo, two, or a few</p>
+                <p className={ui.help}>An Orb is your planning group — solo, two, or a few</p>
                 {space.frozen && (
                   <p className={ui.frozen}>This is a copy from when you left — you can look, not change</p>
                 )}
@@ -335,7 +335,7 @@ export default function Settings() {
                   removeId === member.id ? (
                     <div key={`confirm-${member.id}`} className={ui.removePrompt}>
                       <p className={f.rowNote}>
-                        Remove {member.name}? They get a copy of what was already here. This orb
+                        Remove {member.name}? They get a copy of what was already here. This Orb
                         stays live for everyone else.
                       </p>
                       <div className={f.group}>
@@ -375,8 +375,8 @@ export default function Settings() {
                     <>
                       <p className={f.rowNote}>
                         {members.length <= 1
-                          ? 'You’re the last person — this deletes the orb.'
-                          : 'They keep the live orb. You get a frozen copy of what’s already here.'}
+                          ? 'You’re the last person — this deletes the Orb.'
+                          : 'They keep the live Orb. You get a frozen copy of what’s already here.'}
                       </p>
                       <div className={f.group}>
                         <button
@@ -393,7 +393,7 @@ export default function Settings() {
                           disabled={spaceBusy}
                           onClick={() => void handleLeaveOrb()}
                         >
-                          <span className={f.rowLabel}>Leave this orb</span>
+                          <span className={f.rowLabel}>Leave this Orb</span>
                         </button>
                       </div>
                     </>
@@ -404,7 +404,7 @@ export default function Settings() {
                       disabled={spaceBusy}
                       onClick={() => setLeaveAsk(true)}
                     >
-                      Leave this orb
+                      Leave this Orb
                     </button>
                   ))}
               </section>

@@ -15,7 +15,7 @@ struct AddSheetView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
       HStack(alignment: .top) {
-        Text("Add to your orb")
+        Text("Add to your Orb")
           .font(.title2.weight(.semibold))
           .foregroundStyle(Theme.ink)
         Spacer(minLength: 12)

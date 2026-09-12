@@ -18,7 +18,7 @@ struct InviteShareView: View {
           .foregroundStyle(Theme.ink)
           .padding(.bottom, 8)
 
-        Text("They get their own login, then land in this orb with you. Send them the invite link.")
+        Text("They get their own login, then land in this Orb with you. Send them the invite link.")
           .font(.footnote)
           .foregroundStyle(Theme.inkFaint)
           .padding(.bottom, 16)
@@ -27,7 +27,7 @@ struct InviteShareView: View {
           Text("One thing you want to do")
             .font(.caption.weight(.semibold))
             .foregroundStyle(Theme.inkFaint)
-          Text("— optional, but nicer than an empty orb")
+          Text("— optional, but nicer than an empty Orb")
             .font(.caption)
             .foregroundStyle(Theme.inkFaint)
         }
@@ -74,8 +74,8 @@ struct InviteShareView: View {
       await app.createActivity(title: idea)
     }
     let text = idea.isEmpty
-      ? "Join my orb on Fordays: \(link)"
-      : "I added “\(idea)” to an orb for us — join here: \(link)"
+      ? "Join my Orb on Fordays: \(link)"
+      : "I added “\(idea)” to an Orb for us — join here: \(link)"
     UIPasteboard.general.string = text
     app.toast = "Invite link copied"
     dismiss()

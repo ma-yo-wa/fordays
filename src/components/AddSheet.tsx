@@ -42,7 +42,7 @@ export default function AddSheet() {
   return (
     <Sheet open={open} onClose={() => setOpen(false)}>
       <div className={s.head}>
-        <h3 className={s.title}>Add to your orb</h3>
+        <h3 className={s.title}>Add to your Orb</h3>
         <button
           type="button"
           className={s.close}
