@@ -50,7 +50,7 @@ function firstLetter(name: string): string {
 
 function orbSizeLabel(space: SpaceInfo): string {
   const n = space.members?.length || (space.partner2Id ? 2 : 1);
-  if (n <= 1) return 'Solo Orb';
+  if (n <= 1) return '1 person';
   return `${n} people`;
 }
 
@@ -86,6 +86,8 @@ export default function Settings() {
 
   const visibleOrbs = spaces.length ? spaces : space ? [space] : [];
   const members = space?.members ?? [];
+  const soloOrb = members.length <= 1;
+  const leaveLabel = soloOrb ? 'Delete this Orb' : 'Leave this Orb';
   const removableMembers =
     space && !space.frozen && space.myRole === 'admin' && members.length >= 3
       ? members.filter((m) => m.id !== space.myId)
@@ -264,9 +266,6 @@ export default function Settings() {
                   >
                     <span className={ui.orbTitle}>{spacePeopleLabel(orb)}</span>
                     <span className={ui.orbMeta}>{orbSizeLabel(orb)}</span>
-                    <span className={ui.orbState}>
-                      {orb.id === space?.id ? 'Active ✓' : 'Open ›'}
-                    </span>
                   </button>
                 ))}
                 <button
@@ -320,7 +319,9 @@ export default function Settings() {
                     )}
                   </div>
                 </div>
-                <p className={ui.help}>An Orb is your planning group — solo, two, or a few</p>
+                <p className={ui.help}>
+                  An Orb is your personal or shared capsule to plan, dream, and look back.
+                </p>
                 {space.frozen && (
                   <p className={ui.frozen}>This is a copy from when you left — you can look, not change</p>
                 )}
@@ -374,8 +375,8 @@ export default function Settings() {
                   (leaveAsk ? (
                     <>
                       <p className={f.rowNote}>
-                        {members.length <= 1
-                          ? 'You’re the last person — this deletes the Orb.'
+                        {soloOrb
+                          ? 'Delete this Orb? This removes everything in it for good.'
                           : 'They keep the live Orb. You get a frozen copy of what’s already here.'}
                       </p>
                       <div className={f.group}>
@@ -393,7 +394,7 @@ export default function Settings() {
                           disabled={spaceBusy}
                           onClick={() => void handleLeaveOrb()}
                         >
-                          <span className={f.rowLabel}>Leave this Orb</span>
+                          <span className={f.rowLabel}>{leaveLabel}</span>
                         </button>
                       </div>
                     </>
@@ -404,7 +405,7 @@ export default function Settings() {
                       disabled={spaceBusy}
                       onClick={() => setLeaveAsk(true)}
                     >
-                      Leave this Orb
+                      {leaveLabel}
                     </button>
                   ))}
               </section>

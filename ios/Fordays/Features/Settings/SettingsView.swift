@@ -99,12 +99,6 @@ struct SettingsView: View {
         Text(orbSizeLabel(orb))
           .font(.footnote)
           .foregroundStyle(Theme.inkSoft)
-
-        Spacer(minLength: 6)
-
-        Text(active ? "Active ✓" : "Open ›")
-          .font(.caption)
-          .foregroundStyle(Theme.inkFaint)
       }
       .frame(width: 168, minHeight: 116, alignment: .topLeading)
       .padding(12)
@@ -208,7 +202,7 @@ struct SettingsView: View {
       .padding(10)
       .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-      Text("An Orb is your planning group — solo, two, or a few")
+      Text("An Orb is your personal or shared capsule to plan, dream, and look back.")
         .font(.footnote)
         .foregroundStyle(Theme.inkFaint)
         .padding(.horizontal, 4)
@@ -224,6 +218,8 @@ struct SettingsView: View {
 
   @ViewBuilder
   private func orbActionsSection(space: SpaceInfo) -> some View {
+    let soloOrb = space.members.count <= 1
+    let leaveLabel = soloOrb ? "Delete this Orb" : "Leave this Orb"
     VStack(alignment: .leading, spacing: 8) {
       sectionLabel("Orb actions")
 
@@ -264,8 +260,8 @@ struct SettingsView: View {
         if leaveAsk {
           VStack(alignment: .leading, spacing: 10) {
             Text(
-              space.members.count <= 1
-                ? "You’re the last person — this deletes the Orb."
+              soloOrb
+                ? "Delete this Orb? This removes everything in it for good."
                 : "They keep the live Orb. You get a frozen copy of what’s already here."
             )
             .font(.footnote)
@@ -275,7 +271,7 @@ struct SettingsView: View {
               quietButton("Stay") {
                 leaveAsk = false
               }
-              dangerButton("Leave this Orb") {
+              dangerButton(leaveLabel) {
                 leaveOrb()
               }
             }
@@ -283,7 +279,7 @@ struct SettingsView: View {
           .padding(12)
           .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         } else {
-          Button("Leave this Orb") {
+          Button(leaveLabel) {
             leaveAsk = true
           }
           .buttonStyle(.plain)
@@ -410,6 +406,6 @@ struct SettingsView: View {
 
   private func orbSizeLabel(_ orb: SpaceInfo) -> String {
     let n = orb.members.isEmpty ? (orb.partner2Id == nil ? 1 : 2) : orb.members.count
-    return n <= 1 ? "Solo Orb" : "\(n) people"
+    return n <= 1 ? "1 person" : "\(n) people"
   }
 }

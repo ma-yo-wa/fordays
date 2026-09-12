@@ -134,14 +134,6 @@
   color: var(--ink-soft);
 }
 
-.orbState {
-  margin-top: auto;
-  display: block;
-  font: var(--t-caption);
-  letter-spacing: var(--tr-caption);
-  color: var(--ink-faint);
-}
-
 .peopleCard {
   border-radius: var(--r-control);
   background: var(--fill-quaternary);
