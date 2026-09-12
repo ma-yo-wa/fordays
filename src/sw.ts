@@ -61,7 +61,7 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'Fordays';
   event.waitUntil(
     self.registration.showNotification(title, {
-      body: data.body || 'Something changed in your space.',
+      body: data.body || 'Something changed in your orb.',
       icon: data.icon || '/icon-192.png',
       badge: data.badge || '/badge-96.png',
       // Same tag: a second update about the same activity replaces the

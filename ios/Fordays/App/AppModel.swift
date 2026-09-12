@@ -221,7 +221,7 @@ final class AppModel: ObservableObject {
     note: String?
   ) async {
     guard space?.isMatched == true, space?.canCompose == true else {
-      toast = "Suggest a date when someone else is in this space"
+      toast = "Suggest a date when someone else is in this orb"
       return
     }
     do {
@@ -369,7 +369,7 @@ final class AppModel: ObservableObject {
       ).execute().value
       storedSpaceId = created.id
       try await refreshSpaceAndData()
-      toast = "New space — just you, until you invite"
+      toast = "New orb — just you, until you invite"
     } catch {
       toast = error.localizedDescription
     }

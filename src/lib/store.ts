@@ -31,7 +31,7 @@ interface Toast {
 
 export type AuthPhase = 'loading' | 'local' | 'signedOut' | 'signedIn';
 
-/** Two or more people in this notebook. */
+/** Two or more people in this orb. */
 export function isMatched(space: SpaceInfo | null | undefined): boolean {
   if (!space) return false;
   if (space.members?.length) return space.members.length >= 2;
@@ -42,7 +42,7 @@ export function canCompose(space: SpaceInfo | null | undefined): boolean {
   return Boolean(space && !space.frozen);
 }
 
-/** Who this notebook is with — or that it’s a leftover copy. */
+/** Who this orb is with — or that it’s a leftover copy. */
 export function spacePeopleLabel(space: SpaceInfo): string {
   if (space.frozen) return 'Copy from when you left';
   const others = (space.members ?? []).filter((m) => m.id !== space.myId);
@@ -396,7 +396,7 @@ export const useApp = create<AppState>()((set, get) => {
     async suggestWhen(id, input) {
       if (!backend) throw new Error('Not connected — try signing out and back in');
       if (!isMatched(get().space) || !canCompose(get().space)) {
-        throw new Error('Suggest a date when someone else is in this space');
+        throw new Error('Suggest a date when someone else is in this orb');
       }
       try {
         await backend.suggestWhen(id, input);
@@ -474,7 +474,7 @@ export const useApp = create<AppState>()((set, get) => {
       if (!backend) throw new Error('Not connected');
       if (backend.name !== 'supabase') {
         throw new Error(
-          'Calendar sharing needs a signed-in cloud space — sign out and sign back in, then import again',
+          'Calendar sharing needs a signed-in cloud orb — sign out and sign back in, then import again',
         );
       }
       await backend.replaceExternal(events);

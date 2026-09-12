@@ -486,7 +486,7 @@ export default function Detail() {
       {mode === 'confirmDelete' && (
         <div className={s.confirm}>
           <p className={s.confirmText}>
-            Delete “{item.title}”? This removes it for everyone in this space.
+            Delete “{item.title}”? This removes it for everyone in this orb.
           </p>
           <div className={f.row} style={{ marginTop: 0 }}>
             <button

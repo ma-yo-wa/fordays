@@ -302,7 +302,7 @@ struct DetailView: View {
 
   private func confirmDelete(_ item: Activity) -> some View {
     VStack(alignment: .leading, spacing: 12) {
-      Text("Delete “\(item.title)”? This removes it for everyone in this space.")
+      Text("Delete “\(item.title)”? This removes it for everyone in this orb.")
         .foregroundStyle(Theme.ink2)
       HStack {
         ghostButton("Keep it") { mode = .view }

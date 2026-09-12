@@ -167,7 +167,7 @@ export default function Settings() {
             />
           </div>
 
-          <span className={f.label}>Spaces</span>
+          <span className={f.label}>Orbs</span>
           <div className={f.group}>
             {(spaces.length ? spaces : space ? [space] : []).map((sp) => (
               <button
@@ -201,16 +201,16 @@ export default function Settings() {
                   setSpaceBusy(true);
                   try {
                     await addSpace();
-                    toast('New space — just you, until you invite');
+                    toast('New orb — just you, until you invite');
                   } catch (err) {
-                    toast(err instanceof Error ? err.message : 'Couldn’t make a space');
+                    toast(err instanceof Error ? err.message : 'Couldn’t make an orb');
                   } finally {
                     setSpaceBusy(false);
                   }
                 })();
               }}
             >
-              <span className={f.rowLabel}>New space</span>
+              <span className={f.rowLabel}>New orb</span>
               <span className={f.hint}>›</span>
             </button>
             {space && !space.frozen && (
@@ -222,16 +222,16 @@ export default function Settings() {
                   setInviteShareOpen(true);
                 }}
               >
-                <span className={f.rowLabel}>Invite to this space</span>
+                <span className={f.rowLabel}>Invite to this orb</span>
                 <span className={f.hint}>›</span>
               </button>
             )}
           </div>
           <p className={f.rowNote}>
-            A space is a notebook for a we — solo, two, or a few
+            An orb is your planning group — solo, two, or a few
           </p>
 
-          <span className={f.label}>This space</span>
+          <span className={f.label}>This orb</span>
           {space?.frozen && (
             <p className={f.rowNote} style={{ marginTop: 0, marginBottom: 8 }}>
               This is a copy from when you left — you can look, not change
@@ -254,7 +254,7 @@ export default function Settings() {
                   <div key={`rm-${m.id}`}>
                     <p className={f.rowNote}>
                       Remove {m.name}? They get a copy of what’s already here.
-                      This notebook stays live for everyone else.
+                      This orb stays live for everyone else.
                     </p>
                     <div className={f.group}>
                       <button
@@ -305,8 +305,8 @@ export default function Settings() {
               <>
                 <p className={f.rowNote}>
                   {(space.members?.length ?? 1) <= 1
-                    ? 'You’re the last person — this deletes the notebook.'
-                    : 'They keep the live notebook. You get a frozen copy of what’s already here.'}
+                    ? 'You’re the last person — this deletes the orb.'
+                    : 'They keep the live orb. You get a frozen copy of what’s already here.'}
                 </p>
                 <div className={f.group}>
                   <button
@@ -335,7 +335,7 @@ export default function Settings() {
                       })();
                     }}
                   >
-                    <span className={f.rowLabel}>Leave this space</span>
+                    <span className={f.rowLabel}>Leave this orb</span>
                   </button>
                 </div>
               </>
@@ -346,7 +346,7 @@ export default function Settings() {
                 disabled={spaceBusy}
                 onClick={() => setLeaveAsk(true)}
               >
-                Leave this space
+                Leave this orb
               </button>
             )
           )}

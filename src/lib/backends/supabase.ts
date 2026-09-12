@@ -80,7 +80,7 @@ export class SupabaseBackend implements Backend {
     this.handlers = handlers;
 
     if (!this.spaceId) {
-      throw new Error('No space yet — sign out and sign back in.');
+      throw new Error('No orb yet — sign out and sign back in.');
     }
 
     const client = await getClient(this.config);
@@ -94,7 +94,7 @@ export class SupabaseBackend implements Backend {
     const { data: sessionData } = await this.client.auth.getSession();
     const user = sessionData.session?.user;
     if (!user) {
-      throw new Error('Sign in first — this space needs an authenticated user.');
+      throw new Error('Sign in first — this orb needs an authenticated user.');
     }
     this.uid = user.id;
 
@@ -160,7 +160,7 @@ export class SupabaseBackend implements Backend {
     this.uid = userData.user.id;
 
     if (!this.spaceId) {
-      throw new Error('No space yet — sign out and sign back in.');
+      throw new Error('No orb yet — sign out and sign back in.');
     }
 
     const row: Record<string, unknown> = {
@@ -190,7 +190,7 @@ export class SupabaseBackend implements Backend {
     }
     if (!data) {
       throw new Error(
-        'Save was blocked (no row returned). In Supabase, confirm schema.sql + migrations ran and you’re a member of the space.',
+        'Save was blocked (no row returned). In Supabase, confirm schema.sql + migrations ran and you’re a member of the orb.',
       );
     }
 
@@ -290,7 +290,7 @@ export class SupabaseBackend implements Backend {
     }
     this.uid = userData.user.id;
     if (!this.spaceId) {
-      throw new Error('No space yet — sign out and sign back in.');
+      throw new Error('No orb yet — sign out and sign back in.');
     }
 
     const { error: delErr } = await this.client

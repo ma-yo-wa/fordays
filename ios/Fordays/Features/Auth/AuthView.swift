@@ -85,7 +85,7 @@ struct AuthView: View {
           Text(
             mode == .signUp
               ? "Your name shows on the shared calendar."
-              : "Private space for two — sign in on each phone."
+              : "Private orb for two — sign in on each phone."
           )
           .font(.footnote)
           .foregroundStyle(Theme.inkFaint)

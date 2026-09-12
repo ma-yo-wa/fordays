@@ -472,7 +472,7 @@ function throwSb(error: { message?: string; hint?: string; code?: string }): nev
     /could not find|does not exist|schema cache/i.test(msg)
   ) {
     throw new Error(
-      'Spaces aren’t set up on the server yet. In Supabase SQL, run migrations/010_space_members.sql.',
+      'Orbs aren’t set up on the server yet. In Supabase SQL, run migrations/010_space_members.sql.',
     );
   }
   throw new Error(hint && hint !== msg ? `${msg} (${hint})` : msg);

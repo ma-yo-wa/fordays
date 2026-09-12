@@ -31,8 +31,8 @@ export default function InviteShare({ open, code, onClose }: Props) {
       }
 
       const text = idea
-        ? `I added “${idea}” to a space for us — join here: ${link}`
-        : `Join me on Fordays: ${link}`;
+        ? `I added “${idea}” to an orb for us — join here: ${link}`
+        : `Join my orb on Fordays: ${link}`;
 
       if (navigator.share) {
         await navigator.share({ title: 'Fordays', text, url: link });
@@ -53,13 +53,13 @@ export default function InviteShare({ open, code, onClose }: Props) {
   return (
     <Sheet open={open} onClose={onClose} heading="Invite someone">
       <p className={f.rowNote} style={{ marginTop: 8 }}>
-        They get their own login, then land in this space with you. Send them
-        the invite link.
+        They get their own login, then land in this orb with you. Send them the
+        invite link.
       </p>
 
       <span className={f.label}>
         One thing you want to do{' '}
-        <span className={f.hint}>— optional, but nicer than an empty space</span>
+        <span className={f.hint}>— optional, but nicer than an empty orb</span>
       </span>
       <div className={f.group}>
         <input

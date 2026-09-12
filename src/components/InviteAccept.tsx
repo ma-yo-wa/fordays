@@ -65,13 +65,13 @@ export default function InviteAccept({ code, open, onJoined, onDismiss }: Props)
         clearInviteFromUrl();
         onDismiss();
       }}
-      heading={peek ? `${peek.inviterName} invited you` : 'Join a space'}
+      heading={peek ? `${peek.inviterName} invited you` : 'Join an orb'}
     >
       <p className={f.rowNote} style={{ marginTop: 8 }}>
         {peek?.isOpen === false
-          ? 'This space is closed'
+          ? 'This orb is closed'
           : peek
-            ? `You’ll share this notebook with ${peek.inviterName}`
+            ? `You’ll share this orb with ${peek.inviterName}`
             : 'Looking up the invite…'}
       </p>
       <div className={f.row}>

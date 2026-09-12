@@ -40,7 +40,7 @@ struct SettingsView: View {
             Task { await app.addSpace() }
           } label: {
             HStack {
-              Text("New space").foregroundStyle(Theme.ink)
+              Text("New orb").foregroundStyle(Theme.ink)
               Spacer()
               Text("›").foregroundStyle(Theme.inkFaint)
             }
@@ -50,16 +50,16 @@ struct SettingsView: View {
               showInvite = true
             } label: {
               HStack {
-                Text("Invite to this space").foregroundStyle(Theme.ink)
+                Text("Invite to this orb").foregroundStyle(Theme.ink)
                 Spacer()
                 Text("›").foregroundStyle(Theme.inkFaint)
               }
             }
           }
         } header: {
-          Text("Spaces")
+          Text("Orbs")
         } footer: {
-          Text("A space is a notebook for a we — solo, two, or a few")
+          Text("An orb is your planning group — solo, two, or a few")
         }
 
         if let space = app.space {
@@ -98,26 +98,26 @@ struct SettingsView: View {
               if leaveAsk {
                 Text(
                   space.members.count <= 1
-                    ? "You’re the last person — this deletes the notebook."
-                    : "They keep the live notebook. You get a frozen copy of what’s already here."
+                    ? "You’re the last person — this deletes the orb."
+                    : "They keep the live orb. You get a frozen copy of what’s already here."
                 )
                 .font(.footnote)
                 .foregroundStyle(Theme.inkFaint)
                 Button("Stay") { leaveAsk = false }
-                Button("Leave this space", role: .destructive) {
+                Button("Leave this orb", role: .destructive) {
                   Task {
                     await app.leaveCurrentSpace()
                     leaveAsk = false
                   }
                 }
               } else {
-                Button("Leave this space", role: .destructive) {
+                Button("Leave this orb", role: .destructive) {
                   leaveAsk = true
                 }
               }
             }
           } header: {
-            Text("This space")
+            Text("This orb")
           }
         }
 
