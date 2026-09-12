@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { useApp, isMatched, type Screen } from '../lib/store';
+import { useApp, canCompose, type Screen } from '../lib/store';
 import s from './TabBar.module.css';
 
 /* Outlined when idle, solid when selected. Without labels the icon is
@@ -62,7 +62,7 @@ export default function TabBar() {
   const screen = useApp((st) => st.screen);
   const setScreen = useApp((st) => st.setScreen);
   const setAddOpen = useApp((st) => st.setAddOpen);
-  const matched = useApp((st) => isMatched(st.space));
+  const compose = useApp((st) => canCompose(st.space));
 
   const tab = (id: Screen, label: string, icon: (on: boolean) => React.ReactNode) => {
     const on = screen === id;
@@ -94,7 +94,7 @@ export default function TabBar() {
         {tab('memories', 'Memories', (on) => <MemoriesIcon on={on} />)}
       </div>
 
-      {matched && (
+      {compose && (
         <motion.button
           type="button"
           className={s.make}

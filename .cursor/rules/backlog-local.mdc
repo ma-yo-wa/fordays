@@ -1,0 +1,10 @@
+---
+description: BACKLOG.md is local-only — never commit or push it
+alwaysApply: true
+---
+
+# Backlog stays local
+
+Never `git add`, commit, or push `BACKLOG.md` / `backlog.md`. It is gitignored.
+
+Howbout notes and the longer queue live there for Mayowa only. Do not put that file on `origin`.

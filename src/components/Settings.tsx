@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Sheet from './Sheet';
 import Switch from './Switch';
 import GcalPicker from './GcalPicker';
-import { useApp } from '../lib/store';
+import { useApp, spacePeopleLabel } from '../lib/store';
 import { updateDisplayName } from '../lib/auth';
 import {
   clearGoogleToken,
@@ -55,6 +55,11 @@ export default function Settings() {
   const setInviteShareOpen = useApp((st) => st.setInviteShareOpen);
   const refreshSpace = useApp((st) => st.refreshSpace);
   const toast = useApp((st) => st.toast);
+  const spaces = useApp((st) => st.spaces);
+  const switchToSpace = useApp((st) => st.switchToSpace);
+  const addSpace = useApp((st) => st.addSpace);
+  const leaveCurrentSpace = useApp((st) => st.leaveCurrentSpace);
+  const removeMemberFromSpace = useApp((st) => st.removeMemberFromSpace);
 
   const signedIn = authPhase === 'signedIn';
   const [myName, setMyName] = useState(space?.myName ?? config.names[config.me]);
@@ -64,10 +69,15 @@ export default function Settings() {
   const [gcalBusy, setGcalBusy] = useState(false);
   const [bell, setBell] = useState<PushState>('default');
   const [bellBusy, setBellBusy] = useState(false);
+  const [spaceBusy, setSpaceBusy] = useState(false);
+  const [leaveAsk, setLeaveAsk] = useState(false);
+  const [removeId, setRemoveId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
     setMyName(space?.myName ?? config.names[config.me]);
+    setLeaveAsk(false);
+    setRemoveId(null);
     setGcalOn(Boolean(googleToken()));
     setGcalName(savedGoogleCalendar()?.summary ?? null);
     void registerPush().then(() => setBell(pushState()));
@@ -157,28 +167,188 @@ export default function Settings() {
             />
           </div>
 
-          <span className={f.label}>With</span>
-          {space?.partner2Id && space.partnerName ? (
-            <p className={f.withName}>{space.partnerName}</p>
-          ) : (
-            <>
-              <div className={f.group}>
-                <button
-                  type="button"
-                  className={f.listRow}
-                  onClick={() => {
-                    setOpen(false);
-                    setInviteShareOpen(true);
-                  }}
-                >
-                  <span className={f.rowLabel}>Invite your person</span>
-                  <span className={f.hint}>›</span>
-                </button>
-              </div>
-              <p className={f.rowNote}>
-                One open seat — share an invite when you’re ready
-              </p>
-            </>
+          <span className={f.label}>Spaces</span>
+          <div className={f.group}>
+            {(spaces.length ? spaces : space ? [space] : []).map((sp) => (
+              <button
+                key={sp.id}
+                type="button"
+                className={f.listRow}
+                disabled={spaceBusy || sp.id === space?.id}
+                onClick={() => {
+                  void (async () => {
+                    setSpaceBusy(true);
+                    try {
+                      await switchToSpace(sp.id);
+                    } catch (err) {
+                      toast(err instanceof Error ? err.message : 'Couldn’t switch');
+                    } finally {
+                      setSpaceBusy(false);
+                    }
+                  })();
+                }}
+              >
+                <span className={f.rowLabel}>{spacePeopleLabel(sp)}</span>
+                <span className={f.hint}>{sp.id === space?.id ? '✓' : '›'}</span>
+              </button>
+            ))}
+            <button
+              type="button"
+              className={f.listRow}
+              disabled={spaceBusy}
+              onClick={() => {
+                void (async () => {
+                  setSpaceBusy(true);
+                  try {
+                    await addSpace();
+                    toast('New space — just you, until you invite');
+                  } catch (err) {
+                    toast(err instanceof Error ? err.message : 'Couldn’t make a space');
+                  } finally {
+                    setSpaceBusy(false);
+                  }
+                })();
+              }}
+            >
+              <span className={f.rowLabel}>New space</span>
+              <span className={f.hint}>›</span>
+            </button>
+            {space && !space.frozen && (
+              <button
+                type="button"
+                className={f.listRow}
+                onClick={() => {
+                  setOpen(false);
+                  setInviteShareOpen(true);
+                }}
+              >
+                <span className={f.rowLabel}>Invite to this space</span>
+                <span className={f.hint}>›</span>
+              </button>
+            )}
+          </div>
+          <p className={f.rowNote}>
+            A space is a notebook for a we — solo, two, or a few
+          </p>
+
+          <span className={f.label}>This space</span>
+          {space?.frozen && (
+            <p className={f.rowNote} style={{ marginTop: 0, marginBottom: 8 }}>
+              This is a copy from when you left — you can look, not change
+            </p>
+          )}
+          {(space?.members ?? []).map((m) => (
+            <p key={m.id} className={f.withName}>
+              {m.name}
+              {m.id === space?.myId ? ' (you)' : ''}
+            </p>
+          ))}
+          {space &&
+            !space.frozen &&
+            space.myRole === 'admin' &&
+            (space.members?.length ?? 0) >= 3 &&
+            space.members
+              .filter((m) => m.id !== space.myId)
+              .map((m) =>
+                removeId === m.id ? (
+                  <div key={`rm-${m.id}`}>
+                    <p className={f.rowNote}>
+                      Remove {m.name}? They get a copy of what’s already here.
+                      This notebook stays live for everyone else.
+                    </p>
+                    <div className={f.group}>
+                      <button
+                        type="button"
+                        className={f.listRow}
+                        disabled={spaceBusy}
+                        onClick={() => setRemoveId(null)}
+                      >
+                        <span className={f.rowLabel}>Keep them</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={f.listRow}
+                        disabled={spaceBusy}
+                        onClick={() => {
+                          void (async () => {
+                            setSpaceBusy(true);
+                            try {
+                              await removeMemberFromSpace(m.id);
+                              setRemoveId(null);
+                              toast(`${m.name} is out — they have a copy`);
+                            } catch (err) {
+                              toast(err instanceof Error ? err.message : 'Couldn’t remove');
+                            } finally {
+                              setSpaceBusy(false);
+                            }
+                          })();
+                        }}
+                      >
+                        <span className={f.rowLabel}>Remove {m.name}</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    key={`ask-${m.id}`}
+                    type="button"
+                    className={f.textLink}
+                    disabled={spaceBusy}
+                    onClick={() => setRemoveId(m.id)}
+                  >
+                    Remove {m.name}
+                  </button>
+                ),
+              )}
+          {space && !space.frozen && (
+            leaveAsk ? (
+              <>
+                <p className={f.rowNote}>
+                  {(space.members?.length ?? 1) <= 1
+                    ? 'You’re the last person — this deletes the notebook.'
+                    : 'They keep the live notebook. You get a frozen copy of what’s already here.'}
+                </p>
+                <div className={f.group}>
+                  <button
+                    type="button"
+                    className={f.listRow}
+                    disabled={spaceBusy}
+                    onClick={() => setLeaveAsk(false)}
+                  >
+                    <span className={f.rowLabel}>Stay</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={f.listRow}
+                    disabled={spaceBusy}
+                    onClick={() => {
+                      void (async () => {
+                        setSpaceBusy(true);
+                        try {
+                          await leaveCurrentSpace();
+                          setLeaveAsk(false);
+                        } catch (err) {
+                          toast(err instanceof Error ? err.message : 'Couldn’t leave');
+                        } finally {
+                          setSpaceBusy(false);
+                        }
+                      })();
+                    }}
+                  >
+                    <span className={f.rowLabel}>Leave this space</span>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button
+                type="button"
+                className={f.textLink}
+                disabled={spaceBusy}
+                onClick={() => setLeaveAsk(true)}
+              >
+                Leave this space
+              </button>
+            )
           )}
         </>
       )}

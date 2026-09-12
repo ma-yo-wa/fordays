@@ -1,0 +1,495 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		03A0CE056B9983A5EF71CC29 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FB0FFC2A4D225F12EDC9838 /* DetailView.swift */; };
+		0651DB3C9829ACD683B0B49F /* TabIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C1DDC77D31F2E265BF0544 /* TabIcons.swift */; };
+		1091443FA7F64C8FD71F0298 /* AddActivitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4EBB535ABBFFC73548D5B4B /* AddActivitySheet.swift */; };
+		1C7CC0C7BE7875ED37D216FA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 472B49EF886BAF4F0DE4D928 /* Assets.xcassets */; };
+		4A9C299BE6211B6044D28565 /* Mapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 152F2260E49DE06874ECA5D3 /* Mapping.swift */; };
+		64EB2E148A845A64870915CF /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = C91C40C7F774368CDFEBEDFA /* Supabase */; };
+		67CD068CE6A816FE8F1C9C7F /* BucketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412FB2B7E55638A2B182DA85 /* BucketView.swift */; };
+		79539FCCEA4A670404F82F7D /* PlansView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3351142946F30E708F5A9F47 /* PlansView.swift */; };
+		7C48673361A091E5A6DD44F7 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2220F5B5358CFDCA0323FF88 /* Models.swift */; };
+		9942713DF9F91BACE7A39699 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230281E6660476AB193B9044 /* RootView.swift */; };
+		B9E187BA6DACC670E5DA5CC3 /* FordaysApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CE7C6FDBE348B28A340B03E /* FordaysApp.swift */; };
+		C808786345D1F366BD4FE8C0 /* MainShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C6534D4843BB76DDC865AC /* MainShellView.swift */; };
+		A81F3C2B9D4E7A6C5B0F1234 /* Art.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72E1D0A8C3F6B5D4A0E9876 /* Art.swift */; };
+		D47DCDE8DD8D9F6BE4186C97 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37BB6EA7FCB1CFE8069021D /* Theme.swift */; };
+		E12A4B8C7D9E1F0A6C3D2109 /* InviteShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23B5C9D8E0F2A1B7D4E3210 /* InviteShareView.swift */; };
+		D627591574F0838B119D01D7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D894045084BAC7ECF003D6DC /* SettingsView.swift */; };
+		D9176915A481EBD86A04B1E6 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0499C47B337DC05EAB80984C /* AuthView.swift */; };
+		FCF823D1FA959CF01E14B81B /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06275BDB4475A336F2D09A3 /* SupabaseService.swift */; };
+		FFF2EC3B34025F324B2EFA3C /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E2CF128B98BD9C0207520F /* AppModel.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0499C47B337DC05EAB80984C /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		152F2260E49DE06874ECA5D3 /* Mapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapping.swift; sourceTree = "<group>"; };
+		2220F5B5358CFDCA0323FF88 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		22C6534D4843BB76DDC865AC /* MainShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainShellView.swift; sourceTree = "<group>"; };
+		230281E6660476AB193B9044 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		3351142946F30E708F5A9F47 /* PlansView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansView.swift; sourceTree = "<group>"; };
+		412FB2B7E55638A2B182DA85 /* BucketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BucketView.swift; sourceTree = "<group>"; };
+		472B49EF886BAF4F0DE4D928 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5FB0FFC2A4D225F12EDC9838 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
+		6CACA43F6A8F99C69247A794 /* Fordays.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fordays.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7CE7C6FDBE348B28A340B03E /* FordaysApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FordaysApp.swift; sourceTree = "<group>"; };
+		A06275BDB4475A336F2D09A3 /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
+		A4EBB535ABBFFC73548D5B4B /* AddActivitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddActivitySheet.swift; sourceTree = "<group>"; };
+		B72E1D0A8C3F6B5D4A0E9876 /* Art.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Art.swift; sourceTree = "<group>"; };
+		C37BB6EA7FCB1CFE8069021D /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		D0E2CF128B98BD9C0207520F /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		D894045084BAC7ECF003D6DC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F23B5C9D8E0F2A1B7D4E3210 /* InviteShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteShareView.swift; sourceTree = "<group>"; };
+		E3C1DDC77D31F2E265BF0544 /* TabIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabIcons.swift; sourceTree = "<group>"; };
+		E459EA3C41279963E13A8BB8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F0841FD2839FB8039C7E6871 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				64EB2E148A845A64870915CF /* Supabase in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		24BBEFEC6412F83B07C74DD6 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				152F2260E49DE06874ECA5D3 /* Mapping.swift */,
+				A06275BDB4475A336F2D09A3 /* SupabaseService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		28D5CDFAD69D8A1B86C2C730 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				F23B5C9D8E0F2A1B7D4E3210 /* InviteShareView.swift */,
+				D894045084BAC7ECF003D6DC /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		398BA9C127505DAA63458883 /* Detail */ = {
+			isa = PBXGroup;
+			children = (
+				A4EBB535ABBFFC73548D5B4B /* AddActivitySheet.swift */,
+				5FB0FFC2A4D225F12EDC9838 /* DetailView.swift */,
+			);
+			path = Detail;
+			sourceTree = "<group>";
+		};
+		489DE53CEDB2E42E38058D18 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6CACA43F6A8F99C69247A794 /* Fordays.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4A84D225EBF6B8EF78DCD987 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				2220F5B5358CFDCA0323FF88 /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		6A59D5FD75491EB720451BBB /* Plans */ = {
+			isa = PBXGroup;
+			children = (
+				3351142946F30E708F5A9F47 /* PlansView.swift */,
+			);
+			path = Plans;
+			sourceTree = "<group>";
+		};
+		6DD994560A8556449BEEE9C8 = {
+			isa = PBXGroup;
+			children = (
+				B8A9CC38629375C301294F42 /* Fordays */,
+				489DE53CEDB2E42E38058D18 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		826D5658CC1ED2CDFA93EF33 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				B72E1D0A8C3F6B5D4A0E9876 /* Art.swift */,
+				E3C1DDC77D31F2E265BF0544 /* TabIcons.swift */,
+				C37BB6EA7FCB1CFE8069021D /* Theme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		92B6367F625A8ED803431753 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				0499C47B337DC05EAB80984C /* AuthView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		93AB5D83E7E9F78CEB8CBA2A /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				92B6367F625A8ED803431753 /* Auth */,
+				A8C7A1BFFFE94C6BD424FBBC /* Bucket */,
+				398BA9C127505DAA63458883 /* Detail */,
+				6A59D5FD75491EB720451BBB /* Plans */,
+				28D5CDFAD69D8A1B86C2C730 /* Settings */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		98D866978C97424A524991DD /* App */ = {
+			isa = PBXGroup;
+			children = (
+				D0E2CF128B98BD9C0207520F /* AppModel.swift */,
+				7CE7C6FDBE348B28A340B03E /* FordaysApp.swift */,
+				22C6534D4843BB76DDC865AC /* MainShellView.swift */,
+				230281E6660476AB193B9044 /* RootView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A8C7A1BFFFE94C6BD424FBBC /* Bucket */ = {
+			isa = PBXGroup;
+			children = (
+				412FB2B7E55638A2B182DA85 /* BucketView.swift */,
+			);
+			path = Bucket;
+			sourceTree = "<group>";
+		};
+		B8A9CC38629375C301294F42 /* Fordays */ = {
+			isa = PBXGroup;
+			children = (
+				98D866978C97424A524991DD /* App */,
+				93AB5D83E7E9F78CEB8CBA2A /* Features */,
+				4A84D225EBF6B8EF78DCD987 /* Models */,
+				BE01E94E3344A71467F6E56B /* Resources */,
+				24BBEFEC6412F83B07C74DD6 /* Services */,
+				826D5658CC1ED2CDFA93EF33 /* Theme */,
+				E459EA3C41279963E13A8BB8 /* Info.plist */,
+			);
+			path = Fordays;
+			sourceTree = "<group>";
+		};
+		BE01E94E3344A71467F6E56B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				472B49EF886BAF4F0DE4D928 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		391D0B064D30450B44608B4B /* Fordays */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CC9DAF446EBC2D428D995AC6 /* Build configuration list for PBXNativeTarget "Fordays" */;
+			buildPhases = (
+				54DE723F50428549A9D6F89C /* Sources */,
+				64692190C9651EA35C11FC4E /* Resources */,
+				F0841FD2839FB8039C7E6871 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Fordays;
+			packageProductDependencies = (
+				C91C40C7F774368CDFEBEDFA /* Supabase */,
+			);
+			productName = Fordays;
+			productReference = 6CACA43F6A8F99C69247A794 /* Fordays.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F13F4278257B9DB6A8C1DFEA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = B0C7AD342931EBF8122F5CC0 /* Build configuration list for PBXProject "Fordays" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 6DD994560A8556449BEEE9C8;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				4A36E6592953F834C220096F /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 489DE53CEDB2E42E38058D18 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				391D0B064D30450B44608B4B /* Fordays */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		64692190C9651EA35C11FC4E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C7CC0C7BE7875ED37D216FA /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		54DE723F50428549A9D6F89C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1091443FA7F64C8FD71F0298 /* AddActivitySheet.swift in Sources */,
+				FFF2EC3B34025F324B2EFA3C /* AppModel.swift in Sources */,
+				D9176915A481EBD86A04B1E6 /* AuthView.swift in Sources */,
+				67CD068CE6A816FE8F1C9C7F /* BucketView.swift in Sources */,
+				03A0CE056B9983A5EF71CC29 /* DetailView.swift in Sources */,
+				B9E187BA6DACC670E5DA5CC3 /* FordaysApp.swift in Sources */,
+				C808786345D1F366BD4FE8C0 /* MainShellView.swift in Sources */,
+				4A9C299BE6211B6044D28565 /* Mapping.swift in Sources */,
+				7C48673361A091E5A6DD44F7 /* Models.swift in Sources */,
+				79539FCCEA4A670404F82F7D /* PlansView.swift in Sources */,
+				9942713DF9F91BACE7A39699 /* RootView.swift in Sources */,
+				E12A4B8C7D9E1F0A6C3D2109 /* InviteShareView.swift in Sources */,
+				D627591574F0838B119D01D7 /* SettingsView.swift in Sources */,
+				FCF823D1FA959CF01E14B81B /* SupabaseService.swift in Sources */,
+				A81F3C2B9D4E7A6C5B0F1234 /* Art.swift in Sources */,
+				0651DB3C9829ACD683B0B49F /* TabIcons.swift in Sources */,
+				D47DCDE8DD8D9F6BE4186C97 /* Theme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		08BC287A12881963430A0626 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Fordays/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.fordays.ios;
+				PRODUCT_NAME = Fordays;
+				SDKROOT = iphoneos;
+				SUPPORTS_XR_DESIGNED_FOR_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		23860A4946093AB09E829831 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		65D8AE869C3800BC3F4440C4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		92C7C33D0D07E48601E232EE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Fordays/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.fordays.ios;
+				PRODUCT_NAME = Fordays;
+				SDKROOT = iphoneos;
+				SUPPORTS_XR_DESIGNED_FOR_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B0C7AD342931EBF8122F5CC0 /* Build configuration list for PBXProject "Fordays" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				23860A4946093AB09E829831 /* Debug */,
+				65D8AE869C3800BC3F4440C4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CC9DAF446EBC2D428D995AC6 /* Build configuration list for PBXNativeTarget "Fordays" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				08BC287A12881963430A0626 /* Debug */,
+				92C7C33D0D07E48601E232EE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4A36E6592953F834C220096F /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C91C40C7F774368CDFEBEDFA /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4A36E6592953F834C220096F /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = F13F4278257B9DB6A8C1DFEA /* Project object */;
+}

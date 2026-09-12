@@ -10,8 +10,8 @@ export default function BucketList() {
   const config = useApp((st) => st.config);
   const openDetail = useApp((st) => st.openDetail);
   const openComposer = useApp((st) => st.openComposer);
-  const setInviteShareOpen = useApp((st) => st.setInviteShareOpen);
   const matched = useApp((st) => isMatched(st.space));
+  const frozen = useApp((st) => Boolean(st.space?.frozen));
 
   const items = activities
     .filter(isBucketItem)
@@ -27,21 +27,20 @@ export default function BucketList() {
     return (
       <div className={s.board}>
         <div className={s.blank}>
-          {matched ? (
-            <>
-              <p>Things you both want to do, before they have a date</p>
+          <>
+            <p>
+              {frozen
+                ? 'A copy of this list from when you left'
+                : matched
+                  ? 'Things you both want to do, before they have a date'
+                  : 'Things you want to do, before they have a date'}
+            </p>
+            {!frozen && (
               <button type="button" onClick={() => openComposer('bucket')}>
                 Add the first one
               </button>
-            </>
-          ) : (
-            <>
-              <p>Invite your person — then fill this list together</p>
-              <button type="button" onClick={() => setInviteShareOpen(true)}>
-                Invite
-              </button>
-            </>
-          )}
+            )}
+          </>
         </div>
       </div>
     );

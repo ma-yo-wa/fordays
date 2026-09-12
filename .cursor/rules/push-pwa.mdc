@@ -14,3 +14,5 @@ After any change under the web PWA (`src/`, Worker config, `wrangler`, deploy wo
 Do **not** block on iOS/Swift work before shipping web. Push PWA changes as soon as they are ready, even mid-session.
 
 Native `ios/` changes do not need this auto-push unless the user asks.
+
+Never include `BACKLOG.md` in a commit or push. Local only.

@@ -67,7 +67,7 @@ function AppShell() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('compose') === '1') {
-      // setAddOpen gates on match — opens invite share when alone.
+      // Opens the add chooser — solo can create; frozen spaces stay shut.
       useApp.getState().setAddOpen(true);
       window.history.replaceState(null, '', window.location.pathname);
     }

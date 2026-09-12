@@ -40,7 +40,6 @@ export default function Calendar() {
   const setPicked = useApp((st) => st.setPicked);
   const openDetail = useApp((st) => st.openDetail);
   const openExternal = useApp((st) => st.openExternal);
-  const setInviteShareOpen = useApp((st) => st.setInviteShareOpen);
   const space = useApp((st) => st.space);
 
   const cursorDate = parseISO(cursor);
@@ -186,24 +185,17 @@ export default function Calendar() {
 
         {!dayPlans.length ? (
           <div className={s.blank}>
-            {matched ? (
-              <p>
-                {other
+            <p>
+              {space?.frozen
+                ? 'A copy from when you left'
+                : other
                   ? picked === today
                     ? `Nothing planned between you and ${other} today`
                     : `Nothing planned between you and ${other} this day`
                   : picked === today
                     ? 'Nothing planned today'
                     : 'Nothing planned this day'}
-              </p>
-            ) : (
-              <>
-                <p>Invite your person — Fordays is for the two of you</p>
-                <button type="button" onClick={() => setInviteShareOpen(true)}>
-                  Invite
-                </button>
-              </>
-            )}
+            </p>
           </div>
         ) : (
           <>

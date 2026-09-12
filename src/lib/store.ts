@@ -6,9 +6,14 @@ import { loadConfig, saveConfig, isSupabaseConfigured, type Config } from './con
 import {
   authConfigured,
   currentSession,
+  createSpace as createSpaceRemote,
   ensureSpace,
+  leaveSpace as leaveSpaceRemote,
+  loadSpaces,
+  removeSpaceMember as removeSpaceMemberRemote,
   pendingInvite,
   signOut,
+  switchSpace as switchSpaceRemote,
   type SpaceInfo,
 } from './auth';
 import { iso, todayISO } from './date';
@@ -26,9 +31,25 @@ interface Toast {
 
 export type AuthPhase = 'loading' | 'local' | 'signedOut' | 'signedIn';
 
-/** Shared space with both seats filled — create is locked until then. */
+/** Two or more people in this notebook. */
 export function isMatched(space: SpaceInfo | null | undefined): boolean {
-  return Boolean(space?.partner2Id);
+  if (!space) return false;
+  if (space.members?.length) return space.members.length >= 2;
+  return Boolean(space.partner2Id);
+}
+
+export function canCompose(space: SpaceInfo | null | undefined): boolean {
+  return Boolean(space && !space.frozen);
+}
+
+/** Who this notebook is with — or that it’s a leftover copy. */
+export function spacePeopleLabel(space: SpaceInfo): string {
+  if (space.frozen) return 'Copy from when you left';
+  const others = (space.members ?? []).filter((m) => m.id !== space.myId);
+  if (!others.length) return 'Just you';
+  if (others.length === 1) return others[0]!.name;
+  if (others.length === 2) return `${others[0]!.name} and ${others[1]!.name}`;
+  return others.map((m) => m.name).join(', ');
 }
 
 interface AppState {
@@ -44,6 +65,7 @@ interface AppState {
 
   config: Config;
   space: SpaceInfo | null;
+  spaces: SpaceInfo[];
 
   screen: Screen;
   /** Selected day, YYYY-MM-DD. */
@@ -73,6 +95,10 @@ interface AppState {
 
   boot: () => Promise<void>;
   refreshSpace: () => Promise<void>;
+  switchToSpace: (id: string) => Promise<void>;
+  addSpace: (name?: string) => Promise<void>;
+  leaveCurrentSpace: () => Promise<void>;
+  removeMemberFromSpace: (userId: string) => Promise<void>;
   signOutUser: () => Promise<void>;
   setPasswordRecovery: (v: boolean) => void;
   connect: (next: Partial<Config>) => Promise<void>;
@@ -143,6 +169,7 @@ export const useApp = create<AppState>()((set, get) => {
 
     config: loadConfig(),
     space: null,
+    spaces: [],
 
     screen: 'calendar',
     picked: todayISO(),
@@ -174,7 +201,8 @@ export const useApp = create<AppState>()((set, get) => {
             return;
           }
           const space = await ensureSpace();
-          set({ space, config: loadConfig(), authPhase: 'signedIn' });
+          const spaces = await loadSpaces().catch(() => (space ? [space] : []));
+          set({ space, spaces, config: loadConfig(), authPhase: 'signedIn' });
           if (space) {
             await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
             void import('./push').then((m) => m.syncPush());
@@ -208,34 +236,88 @@ export const useApp = create<AppState>()((set, get) => {
       }
 
       // Offline sandbox for local builds without Supabase env.
-      set({
-        authPhase: 'local',
-        space: {
-          id: 'local',
-          name: 'Fordays',
-          inviteCode: '',
-          partner1Id: '0',
-          partner2Id: '1',
-          myId: String(config.me),
-          myName: config.names[config.me] || 'Me',
-          partnerName: config.names[1 - config.me] || 'You',
-          me: config.me,
-        },
-      });
+      const localSpace = {
+        id: 'local',
+        name: 'Fordays',
+        inviteCode: '',
+        frozen: false,
+        forkedFrom: null,
+        partner1Id: '0',
+        partner2Id: '1',
+        myId: String(config.me),
+        myName: config.names[config.me] || 'Me',
+        myRole: 'admin' as const,
+        partnerName: config.names[1 - config.me] || 'You',
+        members: [
+          { id: '0', name: config.names[0] || 'Me', role: 'admin' as const },
+          { id: '1', name: config.names[1] || 'You', role: 'member' as const },
+        ],
+        me: config.me,
+      };
+      set({ authPhase: 'local', space: localSpace, spaces: [localSpace] });
       await start(new LocalBackend());
     },
 
     async refreshSpace() {
       const space = await ensureSpace();
-      set({ space, config: loadConfig(), authPhase: 'signedIn' });
+      const spaces = await loadSpaces().catch(() => (space ? [space] : []));
+      set({ space, spaces, config: loadConfig(), authPhase: 'signedIn' });
       if (space) {
         await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
       }
     },
 
+    async switchToSpace(id) {
+      const space = await switchSpaceRemote(id);
+      const spaces = await loadSpaces().catch(() => (space ? [space] : []));
+      set({ space, spaces, config: loadConfig(), detailId: null });
+      if (space?.frozen) get().toast('This is a copy from when you left');
+      if (space) {
+        await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
+      }
+    },
+
+    async addSpace(name) {
+      const space = await createSpaceRemote(name);
+      const spaces = await loadSpaces().catch(() => (space ? [space] : []));
+      set({ space, spaces, config: loadConfig() });
+      if (space) {
+        await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
+      }
+    },
+
+    async leaveCurrentSpace() {
+      const current = get().space;
+      if (!current) return;
+      await leaveSpaceRemote(current.id);
+      const spaces = await loadSpaces();
+      const space = spaces.find((s) => s.id === loadConfig().spaceId) ?? spaces[0] ?? null;
+      if (space) {
+        const config = { ...loadConfig(), spaceId: space.id };
+        saveConfig(config);
+        set({ space, spaces, config, detailId: null });
+        await start(await supabaseBackend(config));
+      } else {
+        const space = await ensureSpace();
+        const next = await loadSpaces().catch(() => (space ? [space] : []));
+        set({ space, spaces: next, config: loadConfig(), detailId: null });
+        if (space) {
+          await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
+        }
+      }
+      if (get().space?.frozen) get().toast('This is a copy from when you left');
+    },
+
+    async removeMemberFromSpace(userId) {
+      const current = get().space;
+      if (!current) return;
+      await removeSpaceMemberRemote(current.id, userId);
+      await get().refreshSpace();
+    },
+
     async signOutUser() {
       await signOut();
-      set({ space: null, authPhase: 'signedOut', activities: [], logs: [] });
+      set({ space: null, spaces: [], authPhase: 'signedOut', activities: [], logs: [] });
       backend?.dispose();
       backend = null;
       set({ ready: true, backendName: 'local', live: false, liveLabel: 'Signed out' });
@@ -279,14 +361,18 @@ export const useApp = create<AppState>()((set, get) => {
 
     async create(input) {
       if (!backend) throw new Error('Not connected — try signing out and back in');
-      if (!isMatched(get().space)) {
-        throw new Error('Invite your person before adding plans');
+      if (!canCompose(get().space)) {
+        throw new Error('This is a copy from when you left — it can’t take new plans');
       }
       await backend.create(input);
     },
 
     async patch(id, changes) {
       if (!backend) throw new Error('Not connected — try signing out and back in');
+      if (!canCompose(get().space)) {
+        get().toast('This is a copy from when you left');
+        return;
+      }
       try {
         await backend.patch(id, changes);
       } catch (err) {
@@ -296,6 +382,10 @@ export const useApp = create<AppState>()((set, get) => {
 
     async remove(id) {
       if (!backend) throw new Error('Not connected — try signing out and back in');
+      if (!canCompose(get().space)) {
+        get().toast('This is a copy from when you left');
+        return;
+      }
       try {
         await backend.remove(id);
       } catch (err) {
@@ -305,8 +395,8 @@ export const useApp = create<AppState>()((set, get) => {
 
     async suggestWhen(id, input) {
       if (!backend) throw new Error('Not connected — try signing out and back in');
-      if (!isMatched(get().space)) {
-        throw new Error('Invite your person before suggesting a time');
+      if (!isMatched(get().space) || !canCompose(get().space)) {
+        throw new Error('Suggest a date when someone else is in this space');
       }
       try {
         await backend.suggestWhen(id, input);
@@ -318,6 +408,9 @@ export const useApp = create<AppState>()((set, get) => {
 
     async acceptSuggestion(id) {
       if (!backend) throw new Error('Not connected — try signing out and back in');
+      if (!canCompose(get().space)) {
+        throw new Error('This is a copy from when you left');
+      }
       try {
         await backend.acceptSuggestion(id);
       } catch (err) {
@@ -328,6 +421,9 @@ export const useApp = create<AppState>()((set, get) => {
 
     async dismissSuggestion(id) {
       if (!backend) throw new Error('Not connected — try signing out and back in');
+      if (!canCompose(get().space)) {
+        throw new Error('This is a copy from when you left');
+      }
       try {
         await backend.dismissSuggestion(id);
       } catch (err) {
@@ -348,17 +444,15 @@ export const useApp = create<AppState>()((set, get) => {
     openDetail: (detailId) => set({ detailId }),
     openExternal: (externalId) => set({ externalId }),
     setAddOpen: (addOpen) => {
-      if (addOpen && !isMatched(get().space)) {
-        set({ inviteShareOpen: true, addOpen: false });
+      if (addOpen && !canCompose(get().space)) {
+        get().toast('This is a copy from when you left');
         return;
       }
       set({ addOpen });
     },
-    // The menu always closes behind the form, so backing out of the form
-    // returns you to the app rather than to the menu you just left.
     openComposer: (composerMode) => {
-      if (!isMatched(get().space)) {
-        set({ inviteShareOpen: true, addOpen: false, composerMode: null });
+      if (!canCompose(get().space)) {
+        get().toast('This is a copy from when you left');
         return;
       }
       set({ composerMode, addOpen: false });
@@ -406,6 +500,8 @@ export function partnerName(config: Config, createdBy: string): string {
   const space = useApp.getState().space;
   if (space) {
     if (createdBy === space.myId) return space.myName;
+    const named = space.members?.find((m) => m.id === createdBy)?.name;
+    if (named) return named;
     if (createdBy === space.partner1Id || createdBy === space.partner2Id) {
       return space.partnerName ?? config.names[1 - space.me] ?? 'Them';
     }

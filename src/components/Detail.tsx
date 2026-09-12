@@ -135,6 +135,7 @@ export default function Detail() {
 
   const planned = isPlan(item);
   const matched = isMatched(space);
+  const frozen = Boolean(space?.frozen);
   const pending = Boolean(item.suggested_date_time && item.suggested_by);
   const minePending = pending && item.suggested_by === myId;
   const history = logs
@@ -284,7 +285,7 @@ export default function Detail() {
               : 'On the bucket list'}
           </div>
         </div>
-        {mode === 'view' && (
+        {mode === 'view' && !frozen && (
           <button
             type="button"
             className={s.round}
@@ -326,6 +327,7 @@ export default function Detail() {
           {item.suggested_note && (
             <p className={s.suggestNote}>{item.suggested_note}</p>
           )}
+          {!frozen && (
           <div className={s.suggestActions}>
             {minePending ? (
               <button
@@ -365,6 +367,7 @@ export default function Detail() {
               </>
             )}
           </div>
+          )}
         </div>
       )}
 
@@ -483,7 +486,7 @@ export default function Detail() {
       {mode === 'confirmDelete' && (
         <div className={s.confirm}>
           <p className={s.confirmText}>
-            Delete “{item.title}”? This removes it for both of you.
+            Delete “{item.title}”? This removes it for everyone in this space.
           </p>
           <div className={f.row} style={{ marginTop: 0 }}>
             <button
@@ -508,7 +511,13 @@ export default function Detail() {
         </div>
       )}
 
-      {mode === 'view' && (
+      {mode === 'view' && frozen && (
+        <p className={f.rowNote} style={{ marginTop: 14 }}>
+          This is a copy from when you left — you can look, not change
+        </p>
+      )}
+
+      {mode === 'view' && !frozen && (
         <div className={s.actions}>
           <button type="button" className={s.action} onClick={() => setMode('when')}>
             <CalendarPlusIcon />

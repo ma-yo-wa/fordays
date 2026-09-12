@@ -37,15 +37,28 @@ export default function NavBar() {
   const isCalendar = screen === 'calendar';
   const matched = isMatched(space);
   const me = space?.me ?? config.me;
-  const labelFor = (i: 0 | 1) => {
-    if (space) {
-      if (i === space.me) return space.myName;
-      return space.partnerName ?? '';
-    }
-    return config.names[i] ?? '';
-  };
-  // One face until someone joins — two only when the space is matched.
-  const seats: (0 | 1)[] = matched ? [0, 1] : [me];
+  const faces = space?.members?.length
+    ? space.members.slice(0, 3).map((m) => ({
+        key: m.id,
+        letter: (m.name[0] ?? '?').toUpperCase(),
+        them: m.id !== space.myId,
+      }))
+    : [
+        {
+          key: 'me',
+          letter: (space?.myName ?? config.names[me] ?? '?')[0]!.toUpperCase(),
+          them: false,
+        },
+        ...(matched
+          ? [
+              {
+                key: 'them',
+                letter: (space?.partnerName ?? '?')[0]!.toUpperCase(),
+                them: true,
+              },
+            ]
+          : []),
+      ];
 
   const monthLabel = `${MONTHS[cursorDate.getMonth()]}${
     cursorDate.getFullYear() === new Date().getFullYear()
@@ -91,18 +104,15 @@ export default function NavBar() {
             onClick={() => setSettingsOpen(true)}
             aria-label="Settings"
           >
-            {seats.map((i) => {
-              const label = labelFor(i);
-              return (
-                <span
-                  key={i}
-                  className={`${s.face} ${matched && me !== i ? s.dim : ''}`}
-                  style={{ background: faceColor(i) }}
-                >
-                  {(label[0] ?? '?').toUpperCase()}
-                </span>
-              );
-            })}
+            {faces.map((f) => (
+              <span
+                key={f.key}
+                className={`${s.face} ${f.them ? s.dim : ''}`}
+                style={{ background: faceColor(f.them ? 1 : 0) }}
+              >
+                {f.letter}
+              </span>
+            ))}
             {/* Only ever amber, only when sync is down. A light that's always
                 on reads as presence and gets tuned out. */}
             {!live && backendName === 'supabase' && (

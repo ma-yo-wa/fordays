@@ -10,7 +10,7 @@ partners, and one question: *does this have a day yet?*
 | **Plan** | Has a day (optional From / Until). |
 | **Bucket List** | No day yet — make it a plan when you’re ready. |
 
-Ethos: [`ETHOS.md`](./ETHOS.md). Backlog: [`BACKLOG.md`](./BACKLOG.md).
+Ethos: [`ETHOS.md`](./ETHOS.md).
 
 Imported Google Calendar events stay read-only overlays — they never become
 plans. Create always asks which of the two you’re making; nothing is inferred.
@@ -67,7 +67,7 @@ demo mode still works for you both to poke at the UI.
    - `migrations/002_partner_joined_push.sql` (if `push.sql` was already
      applied earlier — adds the “she joined” ping)
    - `migrations/003_external_events.sql` (shared Google calendar overlays)
-   - later numbered files through `009_fordays_rename.sql`
+   - later numbered files through `010_space_members.sql`
 3. **Authentication → Providers → Email**
    - Enable Email
    - Turn **Confirm email** **off** so sign-up works inside the app (no
@@ -75,8 +75,9 @@ demo mode still works for you both to poke at the UI.
 4. Copy **Project URL** and the **anon public** key  
    (Settings → API).
 
-Spaces are created automatically on signup (`handle_new_user`). Partner 2
-joins with an invite link or code from the empty seat in the nav bar.
+Spaces are created automatically on signup (`handle_new_user`). You can
+have several. Invite is a link for *this* space — join does not delete
+your other notebooks. Leave keeps a frozen copy for you.
 
 ### 2. Frontend (Cloudflare Pages)
 

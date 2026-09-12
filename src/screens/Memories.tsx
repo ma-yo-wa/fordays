@@ -59,7 +59,7 @@ export default function Memories() {
           <p>
             {matched
               ? 'Plans you’ve lived together will land here'
-              : 'Invite your person — memories gather as you keep plans'}
+              : 'Plans you’ve lived will land here'}
           </p>
         </div>
       </div>

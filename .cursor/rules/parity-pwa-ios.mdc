@@ -12,7 +12,8 @@ Fordays has two clients that must stay in sync:
 
 ## Rules
 
-- Do **not** ship a fix or feature on only one client. If you change Detail, plans timing, tab icons, copy, empty states, etc. on the PWA, mirror it in Swift (and vice versa) before considering the task done.
+- **PWA is the source of truth.** Mayowa always checks the PWA first, then iOS. iOS must mimic the PWA to a tee: same copy, same fields, same sheet flow, same empty states, on every screen. Do not invent iOS-only chrome (e.g. a native Form “Add” when the PWA asks “Add to your space”).
+- Do **not** ship a fix or feature on only one client. If you change Detail, plans timing, tab icons, copy, empty states, etc. on the PWA, mirror it in Swift before considering the task done.
 - Prefer shared product language: plans, days, bucket — not “calendar app” chrome.
 - Native `ios/` does not auto-push; PWA does (see push-pwa rule). Still implement both.
 - If something is web-only by nature (service worker, Add to Home Screen), note it briefly; everything else is dual.
