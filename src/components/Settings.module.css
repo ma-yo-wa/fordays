@@ -1,0 +1,253 @@
+.section {
+  margin-top: 24px;
+}
+
+.label {
+  display: block;
+  margin: 0 0 8px;
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  font-weight: 600;
+  color: var(--ink-faint);
+}
+
+.profileCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: var(--r-control);
+  background: var(--fill-quaternary);
+  padding: 10px 12px;
+}
+
+.face {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  font-weight: 700;
+  color: #fff;
+}
+
+.faceMe {
+  background: var(--sage-ink);
+}
+
+.profileInput {
+  width: 100%;
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--ink);
+  font: var(--t-body);
+  letter-spacing: var(--tr-body);
+  padding: 2px 0;
+}
+
+.profileInput::placeholder {
+  color: var(--ink-faint);
+}
+
+.orbRail {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 2px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.orbRail::-webkit-scrollbar {
+  display: none;
+}
+
+.orbCard {
+  flex: 0 0 168px;
+  min-height: 118px;
+  border: none;
+  border-radius: 18px;
+  background: var(--fill-quaternary);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.14s var(--ease-ios),
+    opacity 0.14s var(--ease-ios),
+    box-shadow 0.18s var(--ease-ios);
+}
+
+.orbCard:active {
+  transform: scale(0.97);
+}
+
+.orbCard:disabled {
+  cursor: default;
+}
+
+.orbCardOn {
+  box-shadow: var(--shadow-card);
+  background:
+    radial-gradient(
+      100% 100% at 14% 12%,
+      rgba(242, 100, 139, 0.18) 0%,
+      rgba(168, 206, 133, 0.16) 85%
+    ),
+    var(--fill-quaternary);
+}
+
+.orbCreate {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.orbPlus {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--fill-tertiary);
+  font: var(--t-title3);
+  letter-spacing: var(--tr-title3);
+  line-height: 1;
+}
+
+.orbTitle {
+  display: block;
+  font: var(--t-headline);
+  letter-spacing: var(--tr-headline);
+}
+
+.orbMeta {
+  display: block;
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-soft);
+}
+
+.orbState {
+  margin-top: auto;
+  display: block;
+  font: var(--t-caption);
+  letter-spacing: var(--tr-caption);
+  color: var(--ink-faint);
+}
+
+.peopleCard {
+  border-radius: var(--r-control);
+  background: var(--fill-quaternary);
+  padding: 10px 10px 6px;
+}
+
+.peopleRail {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.peopleRail::-webkit-scrollbar {
+  display: none;
+}
+
+.person {
+  flex: 0 0 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.personButton {
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.personButton:active {
+  opacity: 0.74;
+}
+
+.personFace {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  font-weight: 700;
+  color: #fff;
+}
+
+.personFaceMe {
+  background: var(--sage-ink);
+}
+
+.personFaceThem {
+  background: var(--rose-ink);
+}
+
+.personFaceAdd {
+  color: var(--ink);
+  background: var(--fill-tertiary);
+  border: var(--hairline-w) solid var(--separator);
+}
+
+.personName {
+  font: var(--t-caption);
+  letter-spacing: var(--tr-caption);
+  color: var(--ink);
+  line-height: 1.2;
+  max-width: 100%;
+}
+
+.personTag {
+  min-height: 13px;
+  font: var(--t-caption2);
+  letter-spacing: var(--tr-caption2);
+  color: var(--ink-faint);
+}
+
+.help,
+.frozen {
+  margin-top: 8px;
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-faint);
+  padding: 0 4px;
+}
+
+.removePrompt {
+  margin-top: 10px;
+}
+
+.textLink {
+  display: block;
+  margin: 14px 4px 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 600;
+  color: var(--rose-ink);
+  text-align: left;
+}
+
+.textLink:active {
+  opacity: 0.7;
+}
