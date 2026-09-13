@@ -158,17 +158,77 @@ struct ExternalEvent: Identifiable, Hashable, Codable {
   var endsAt: String
   var allDay: Bool
   var calendar: String
+  var sharedWithSpace: Bool
 
   enum CodingKeys: String, CodingKey {
     case id
     case spaceId = "space_id"
+    case ownerId = "owner_id"
     case userId = "user_id"
     case title
     case location
     case startsAt = "starts_at"
     case endsAt = "ends_at"
     case allDay = "all_day"
+    case calendarName = "calendar_name"
     case calendar
+    case sharedWithSpace = "shared_with_space"
+  }
+
+  init(
+    id: String,
+    spaceId: String? = nil,
+    userId: String,
+    title: String? = nil,
+    location: String? = nil,
+    startsAt: String,
+    endsAt: String,
+    allDay: Bool,
+    calendar: String,
+    sharedWithSpace: Bool = false
+  ) {
+    self.id = id
+    self.spaceId = spaceId
+    self.userId = userId
+    self.title = title
+    self.location = location
+    self.startsAt = startsAt
+    self.endsAt = endsAt
+    self.allDay = allDay
+    self.calendar = calendar
+    self.sharedWithSpace = sharedWithSpace
+  }
+
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    id = try container.decode(String.self, forKey: .id)
+    spaceId = try container.decodeIfPresent(String.self, forKey: .spaceId)
+    userId = try container.decodeIfPresent(String.self, forKey: .ownerId)
+      ?? container.decodeIfPresent(String.self, forKey: .userId)
+      ?? ""
+    title = try container.decodeIfPresent(String.self, forKey: .title)
+    location = try container.decodeIfPresent(String.self, forKey: .location)
+    startsAt = try container.decode(String.self, forKey: .startsAt)
+    endsAt = try container.decode(String.self, forKey: .endsAt)
+    allDay = try container.decodeIfPresent(Bool.self, forKey: .allDay) ?? false
+    calendar = try container.decodeIfPresent(String.self, forKey: .calendarName)
+      ?? container.decodeIfPresent(String.self, forKey: .calendar)
+      ?? "Google"
+    sharedWithSpace = try container.decodeIfPresent(Bool.self, forKey: .sharedWithSpace) ?? false
+  }
+
+  func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(id, forKey: .id)
+    try container.encodeIfPresent(spaceId, forKey: .spaceId)
+    try container.encode(userId, forKey: .ownerId)
+    try container.encodeIfPresent(title, forKey: .title)
+    try container.encodeIfPresent(location, forKey: .location)
+    try container.encode(startsAt, forKey: .startsAt)
+    try container.encode(endsAt, forKey: .endsAt)
+    try container.encode(allDay, forKey: .allDay)
+    try container.encode(calendar, forKey: .calendarName)
+    try container.encode(sharedWithSpace, forKey: .sharedWithSpace)
   }
 
   func isFutureOrToday(today: String) -> Bool {

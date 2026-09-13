@@ -5,7 +5,7 @@ import Sheet from './Sheet';
 import CoverPicker from './CoverPicker';
 import WhenFields from './WhenFields';
 import { useApp } from '../lib/store';
-import { addDays, composeWhen, describePlan, iso, nextSaturday, parseISO } from '../lib/date';
+import { addDays, composeWhen, describePlan, iso, nextSaturday, parseISO, prettyLower } from '../lib/date';
 import f from './Form.module.css';
 
 /* Still one form and still one nullable column underneath, but which of
@@ -22,6 +22,9 @@ export default function Composer() {
   const setPicked = useApp((st) => st.setPicked);
   const setScreen = useApp((st) => st.setScreen);
   const setCursor = useApp((st) => st.setCursor);
+  const external = useApp((st) => st.external);
+  const space = useApp((st) => st.space);
+  const config = useApp((st) => st.config);
 
   const isPlan = mode === 'plan';
 
@@ -56,6 +59,31 @@ export default function Composer() {
     ['Tomorrow', addDays(1)],
     ['This weekend', nextSaturday()],
   ];
+
+  const dayContext = external.filter((e) => {
+    const isMine = e.ownerId === (space?.myId ?? String(space?.me ?? config.me));
+    if (!isMine && !e.sharedWithSpace) return false;
+    const start = e.startsAt.slice(0, 10);
+    const last = e.endsAt ? e.endsAt.slice(0, 10) : start;
+    return date >= start && date <= last;
+  });
+
+  const whisper = (() => {
+    if (!isPlan || !dayContext.length) return null;
+    if (dayContext.length === 1) {
+      const first = dayContext[0];
+      if (!first) return null;
+      const isMine = first.ownerId === (space?.myId ?? String(space?.me ?? config.me));
+      const name = isMine ? 'You' : (space?.partnerName ?? config.names[first.ownerId === '1' ? 1 : 0] ?? 'Partner');
+      const eventTitle = first.title || 'Busy';
+      if (first.allDay) return `${name} · ${eventTitle} (All day)`;
+      const tStart = first.startsAt.length > 10 ? prettyLower(first.startsAt.slice(11, 16)) : '';
+      const tEnd = first.endsAt?.length > 10 ? prettyLower(first.endsAt.slice(11, 16)) : '';
+      const timeStr = tStart && tEnd ? `${tStart} – ${tEnd}` : tStart || tEnd;
+      return `${name} · ${eventTitle}${timeStr ? ` (${timeStr})` : ''}`;
+    }
+    return `${dayContext.length} shared events or plans on this day`;
+  })();
 
   async function save() {
     const clean = title.trim();
@@ -198,6 +226,13 @@ export default function Composer() {
               }).ends_at,
             )}
           </p>
+
+          {whisper && (
+            <div className={f.whisper}>
+              <span className={f.whisperGlyph} aria-hidden>💬</span>
+              <span className={f.whisperText}>{whisper}</span>
+            </div>
+          )}
         </>
       )}
 

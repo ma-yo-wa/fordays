@@ -353,6 +353,16 @@ export class SupabaseBackend implements Backend {
     await this.refreshExternal();
   }
 
+  async toggleExternalShare(id: string, shared: boolean): Promise<void> {
+    if (!this.client) return;
+    const { error } = await this.client
+      .from('external_events')
+      .update({ shared_with_space: shared, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) throw mapExternalError(error);
+    await this.refreshExternal();
+  }
+
   /* ---------------- internals ---------------- */
 
   private async refresh(): Promise<void> {
@@ -471,6 +481,7 @@ interface ExternalRow {
   ends_at: string;
   all_day: boolean;
   calendar_name: string;
+  shared_with_space?: boolean | null;
 }
 
 function mapExternal(r: ExternalRow): ExternalEvent {
@@ -483,5 +494,6 @@ function mapExternal(r: ExternalRow): ExternalEvent {
     endsAt: fromTimestamptz(r.ends_at, r.all_day) ?? r.ends_at,
     allDay: r.all_day,
     calendar: r.calendar_name,
+    sharedWithSpace: Boolean(r.shared_with_space),
   };
 }

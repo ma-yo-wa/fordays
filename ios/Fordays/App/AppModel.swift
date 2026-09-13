@@ -129,6 +129,28 @@ final class AppModel: ObservableObject {
     }
   }
 
+  func toggleExternalShare(event: ExternalEvent, shared: Bool) async {
+    struct UpdateShare: Encodable {
+      let shared_with_space: Bool
+      let updated_at: String
+    }
+    do {
+      try await sb.from("external_events")
+        .update(UpdateShare(
+          shared_with_space: shared,
+          updated_at: ISO8601DateFormatter().string(from: Date())
+        ))
+        .eq("id", value: event.id)
+        .execute()
+      if let idx = externalEvents.firstIndex(where: { $0.id == event.id }) {
+        externalEvents[idx].sharedWithSpace = shared
+      }
+      toast = shared ? Copy.Availability.sharedTitle : Copy.Availability.privateTitle
+    } catch {
+      toast = error.localizedDescription
+    }
+  }
+
   func createActivity(
     title: String,
     description: String? = nil,

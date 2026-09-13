@@ -197,6 +197,21 @@ struct ComposerView: View {
             .font(.footnote)
             .foregroundStyle(Theme.inkFaint)
             .padding(.top, 12)
+
+          if let whisper = contextWhisper {
+            HStack(spacing: 8) {
+              Text("💬")
+                .font(.footnote)
+              Text(whisper)
+                .font(.footnote)
+                .foregroundStyle(Theme.ink)
+                .lineLimit(1)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .padding(.top, 10)
+          }
         }
 
         fieldLabel("Cover", hint: "— optional")
@@ -302,6 +317,33 @@ struct ComposerView: View {
     }
     saving = false
     onClose()
+  }
+
+  private var contextWhisper: String? {
+    guard isPlan else { return nil }
+    let myId = app.space?.myId
+    let day = date
+    let matching = app.externalEvents.filter { e in
+      let isMine = myId == e.userId || e.userId == "0"
+      if !isMine && !e.sharedWithSpace { return false }
+      let start = String(e.startsAt.prefix(10))
+      let end = e.endsAt.isEmpty ? start : String(e.endsAt.prefix(10))
+      return day >= start && day <= end
+    }
+    guard !matching.isEmpty else { return nil }
+    if matching.count == 1, let first = matching.first {
+      let isMine = myId == first.userId || first.userId == "0"
+      let name = isMine ? "You" : (app.space?.displayName(for: first.userId) ?? "Partner")
+      let eventTitle = first.title ?? Copy.Availability.busy
+      if first.allDay {
+        return "\(name) · \(eventTitle) (All day)"
+      }
+      let tStart = first.startsAt.count > 10 ? DateLocal.prettyLower(String(first.startsAt.dropFirst(11).prefix(5))) : ""
+      let tEnd = first.endsAt.count > 10 ? DateLocal.prettyLower(String(first.endsAt.dropFirst(11).prefix(5))) : ""
+      let timeStr = (!tStart.isEmpty && !tEnd.isEmpty) ? "\(tStart) – \(tEnd)" : (tStart.isEmpty ? tEnd : tStart)
+      return "\(name) · \(eventTitle)\(timeStr.isEmpty ? "" : " (\(timeStr))")"
+    }
+    return "\(matching.count) shared events or plans on this day"
   }
 
   private func fieldLabel(_ text: String, hint: String? = nil) -> some View {

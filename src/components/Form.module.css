@@ -357,6 +357,32 @@ textarea.input {
   display: none;
 }
 
+.whisper {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: var(--paper-warm);
+  border-radius: 10px;
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.whisperGlyph {
+  font-size: 14px;
+  flex: none;
+}
+
+.whisperText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .advanced[open] .advancedSum {
   margin-bottom: 4px;
 }

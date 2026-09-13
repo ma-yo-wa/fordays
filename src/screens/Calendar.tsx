@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import CoverArt from '../components/CoverArt';
-import { useApp, partnerName, isMatched, canCompose } from '../lib/store';
-import { isPlan, planDraftFromExternal, isExternalFutureOrToday, type ExternalEvent } from '../lib/types';
+import { useApp, partnerName, isMatched } from '../lib/store';
+import { isPlan, type ExternalEvent } from '../lib/types';
 import { artFor } from '../lib/art';
 import { faceColor, faceIndexFor } from '../lib/tint';
 import {
@@ -41,7 +41,6 @@ export default function Calendar() {
   const setPicked = useApp((st) => st.setPicked);
   const openDetail = useApp((st) => st.openDetail);
   const openExternal = useApp((st) => st.openExternal);
-  const openComposer = useApp((st) => st.openComposer);
   const space = useApp((st) => st.space);
 
   const cursorDate = parseISO(cursor);
@@ -66,9 +65,11 @@ export default function Calendar() {
   }
 
   /* Imported events land on every day they touch, so a four-night hotel
-     booking shows up across all four. */
+     booking shows up across all four. Non-owners only see events if shared. */
   const extByDate = new Map<string, ExternalEvent[]>();
   for (const e of external) {
+    const isMine = e.ownerId === (space?.myId ?? String(space?.me ?? config.me));
+    if (!isMine && !e.sharedWithSpace) continue;
     for (const day of spanDays(e.startsAt, e.endsAt)) {
       extByDate.set(day, [...(extByDate.get(day) ?? []), e]);
     }
@@ -125,18 +126,30 @@ export default function Calendar() {
           const startsHere = spanningPlans.some((p) => dtDate(p.date_time) === date);
           const endsHere = spanningPlans.some((p) => (dtDate(p.ends_at) ?? dtDate(p.date_time)) === date);
           const isSpanning = spanningPlans.length > 0;
+          const isContinuationToNext = isRowEnd && !endsHere;
+          const isContinuationFromPrev = isRowStart && !startsHere;
 
           let trackStyle: React.CSSProperties | undefined;
           if (isSpanning) {
-            const roundLeft = startsHere ? '15px' : isRowStart ? '6px' : '0';
-            const roundRight = endsHere ? '15px' : isRowEnd ? '6px' : '0';
-            const leftInset = startsHere ? 'calc(50% - 15px)' : isRowStart ? '2px' : '0';
-            const rightInset = endsHere ? 'calc(50% - 15px)' : isRowEnd ? '2px' : '0';
+            const roundLeft = startsHere ? '15px' : '0';
+            const roundRight = endsHere ? '15px' : '0';
+            const leftInset = startsHere ? 'calc(50% - 15px)' : '0';
+            const rightInset = endsHere ? 'calc(50% - 15px)' : '0';
+
+            let clipPath: string | undefined;
+            if (isContinuationToNext && isContinuationFromPrev) {
+              clipPath = 'polygon(5px 0%, calc(100% - 5px) 0%, 100% 50%, calc(100% - 5px) 100%, 5px 100%, 0% 50%)';
+            } else if (isContinuationToNext) {
+              clipPath = 'polygon(0% 0%, calc(100% - 5px) 0%, 100% 50%, calc(100% - 5px) 100%, 0% 100%)';
+            } else if (isContinuationFromPrev) {
+              clipPath = 'polygon(5px 0%, 100% 0%, 100% 100%, 5px 100%, 0% 50%)';
+            }
 
             trackStyle = {
               left: leftInset,
               right: rightInset,
               borderRadius: `${roundLeft} ${roundRight} ${roundRight} ${roundLeft}`,
+              clipPath,
             };
           }
 
@@ -166,6 +179,7 @@ export default function Calendar() {
                   <i key={p.id} />
                 ))}
               </span>
+              {date === picked && <span className={s.cursorPip} />}
             </button>
           );
         })}
@@ -265,18 +279,6 @@ export default function Calendar() {
                         {pillWhen(e, picked)} · {ownerName}
                       </span>
                     </div>
-                    {e.title && isExternalFutureOrToday(e, today) && canCompose(space) && (
-                      <button
-                        type="button"
-                        className={s.makePlanAction}
-                        onClick={(ev) => {
-                          ev.stopPropagation();
-                          openComposer('plan', planDraftFromExternal(e));
-                        }}
-                      >
-                        {Copy.availability.makePlanShort}
-                      </button>
-                    )}
                     <span
                       className={s.availabilityWho}
                       style={{ background: faceColor(owner) }}

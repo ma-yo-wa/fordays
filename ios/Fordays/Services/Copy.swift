@@ -69,6 +69,7 @@ enum Copy {
     static let googleCalendar = "Google Calendar"
     static let makePlan = "Make it a plan"
     static let makePlanShort = "Make plan"
+    static let convertToPlan = "Copy to shared plan"
     static let busy = "Busy"
     static let busyPrivate = "Busy only — the title stays private"
     static func notSharedPlan(_ owner: String) -> String {
@@ -77,5 +78,18 @@ enum Copy {
     static func importedFoot(_ owner: String) -> String {
       "Imported events aren’t plans — they just show what’s already on \(owner) calendar"
     }
+    static let sharedTitle = "Shared with this Orb"
+    static let privateTitle = "Private to you"
+    static let shareWithOrb = "Share with this Orb"
+    static let makePrivate = "Make private"
+    static let sharedWithOrbDesc = "Others in this Orb can see this context on their day agenda."
+    static let privateDesc = "Only you can see this. Private to you."
+    static func sharedBy(_ owner: String) -> String {
+      "Shared by \(owner)"
+    }
+    static func sharedByDesc(_ owner: String) -> String {
+      "\(owner) shared this context with the Orb."
+    }
+    static let noConflicts = "No other plans or shared context on this day"
   }
 }

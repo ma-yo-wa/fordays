@@ -24,7 +24,10 @@ struct PlansView: View {
 
   private var dayExternal: [ExternalEvent] {
     let day = app.pickedDay
+    let myId = app.space?.myId
     return app.externalEvents.filter { e in
+      let isMine = myId == e.userId || e.userId == "0"
+      if !isMine && !e.sharedWithSpace { return false }
       let start = String(e.startsAt.prefix(10))
       let end = e.endsAt.isEmpty ? start : String(e.endsAt.prefix(10))
       return day >= start && day <= end
@@ -116,21 +119,6 @@ struct PlansView: View {
                 }
 
                 Spacer(minLength: 4)
-
-                if e.title != nil && e.isFutureOrToday(today: DateLocal.todayISO()) && app.space?.canCompose == true {
-                  Button {
-                    onMakePlanFromExternal?(e)
-                  } label: {
-                    Text(Copy.Availability.makePlanShort)
-                      .font(.caption2.weight(.semibold))
-                      .foregroundStyle(Theme.roseInk)
-                      .padding(.horizontal, 9)
-                      .padding(.vertical, 4)
-                      .background(Theme.rose.opacity(0.18), in: Capsule())
-                      .overlay(Capsule().stroke(Theme.roseInk.opacity(0.4), lineWidth: 0.8))
-                  }
-                  .buttonStyle(.plain)
-                }
 
                 face(for: e.userId)
               }
@@ -263,18 +251,12 @@ struct PlansView: View {
             } label: {
               VStack(spacing: 2) {
                 Text("\(calendar.component(.day, from: day))")
-                  .font(.callout.weight(isToday ? .semibold : (isPicked ? .semibold : .regular)))
+                  .font(.callout.weight(isToday ? .semibold : (isPicked ? .bold : .regular)))
                   .foregroundStyle(Theme.ink)
                   .frame(width: 30, height: 30)
                   .background {
                     if isToday {
                       Circle().fill(Theme.rose)
-                    }
-                  }
-                  .overlay {
-                    if isPicked {
-                      Circle()
-                        .stroke(Theme.roseInk, style: StrokeStyle(lineWidth: 1.5, dash: [3, 2]))
                     }
                   }
 
@@ -284,6 +266,15 @@ struct PlansView: View {
                   }
                 }
                 .frame(height: 5)
+
+                if isPicked {
+                  Circle()
+                    .fill(Theme.ink)
+                    .frame(width: 4, height: 4)
+                } else {
+                  Color.clear
+                    .frame(width: 4, height: 4)
+                }
               }
               .frame(maxWidth: .infinity, minHeight: 52)
               .background(alignment: .top) {
@@ -316,21 +307,23 @@ struct PlansView: View {
       let end = a.endsAt.map { String($0.prefix(10)) } ?? String(a.dateTime?.prefix(10) ?? "")
       return end == iso
     }
+    let isContinuationToNext = isRowEnd && !endsHere
+    let isContinuationFromPrev = isRowStart && !startsHere
 
     if !spanning.isEmpty {
       GeometryReader { geo in
         let midX = geo.size.width / 2
-        let left: CGFloat = startsHere ? (midX - 15) : (isRowStart ? 2 : 0)
-        let right: CGFloat = endsHere ? (midX - 15) : (isRowEnd ? 2 : 0)
-        let roundL: CGFloat = startsHere ? 15 : (isRowStart ? 6 : 0)
-        let roundR: CGFloat = endsHere ? 15 : (isRowEnd ? 6 : 0)
+        let left: CGFloat = startsHere ? (midX - 15) : 0
+        let right: CGFloat = endsHere ? (midX - 15) : 0
+        let roundL: CGFloat = startsHere ? 15 : 0
+        let roundR: CGFloat = endsHere ? 15 : 0
         let width = max(0, geo.size.width - left - right)
 
-        UnevenRoundedRectangle(
-          topLeadingRadius: roundL,
-          bottomLeadingRadius: roundL,
-          bottomTrailingRadius: roundR,
-          topTrailingRadius: roundR
+        SpanningTrackShape(
+          roundLeading: roundL,
+          roundTrailing: roundR,
+          chevronStart: isContinuationFromPrev,
+          chevronEnd: isContinuationToNext
         )
         .fill(Theme.sage.opacity(0.26))
         .frame(width: width, height: 30)
@@ -369,3 +362,69 @@ struct PlansView: View {
     return "\(names[parts[1] - 1]) \(parts[2])"
   }
 }
+
+struct SpanningTrackShape: Shape {
+  let roundLeading: CGFloat
+  let roundTrailing: CGFloat
+  let chevronStart: Bool
+  let chevronEnd: Bool
+
+  func path(in rect: CGRect) -> Path {
+    var path = Path()
+    let depth: CGFloat = 5
+    let startX = rect.minX
+    let endX = rect.maxX
+    let midY = rect.midY
+
+    // Start at top-left
+    if chevronStart {
+      path.move(to: CGPoint(x: startX + depth, y: rect.minY))
+    } else if roundLeading > 0 {
+      path.move(to: CGPoint(x: startX + roundLeading, y: rect.minY))
+    } else {
+      path.move(to: CGPoint(x: startX, y: rect.minY))
+    }
+
+    // Top-right & Right edge
+    if chevronEnd {
+      path.addLine(to: CGPoint(x: endX - depth, y: rect.minY))
+      path.addLine(to: CGPoint(x: endX, y: midY))
+      path.addLine(to: CGPoint(x: endX - depth, y: rect.maxY))
+    } else if roundTrailing > 0 {
+      path.addLine(to: CGPoint(x: endX - roundTrailing, y: rect.minY))
+      path.addArc(
+        center: CGPoint(x: endX - roundTrailing, y: rect.minY + roundTrailing),
+        radius: roundTrailing,
+        startAngle: .degrees(-90),
+        endAngle: .degrees(90),
+        clockwise: false
+      )
+    } else {
+      path.addLine(to: CGPoint(x: endX, y: rect.minY))
+      path.addLine(to: CGPoint(x: endX, y: rect.maxY))
+    }
+
+    // Bottom-left & Left edge
+    if chevronStart {
+      path.addLine(to: CGPoint(x: startX + depth, y: rect.maxY))
+      path.addLine(to: CGPoint(x: startX, y: midY))
+      path.closeSubpath()
+    } else if roundLeading > 0 {
+      path.addLine(to: CGPoint(x: startX + roundLeading, y: rect.maxY))
+      path.addArc(
+        center: CGPoint(x: startX + roundLeading, y: rect.minY + roundLeading),
+        radius: roundLeading,
+        startAngle: .degrees(90),
+        endAngle: .degrees(270),
+        clockwise: false
+      )
+      path.closeSubpath()
+    } else {
+      path.addLine(to: CGPoint(x: startX, y: rect.maxY))
+      path.closeSubpath()
+    }
+
+    return path
+  }
+}
+

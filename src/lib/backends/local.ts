@@ -226,6 +226,13 @@ export class LocalBackend implements Backend {
     this.commit();
   }
 
+  async toggleExternalShare(id: string, shared: boolean): Promise<void> {
+    this.data.external = this.data.external.map((e) =>
+      e.id === id ? { ...e, sharedWithSpace: shared } : e,
+    );
+    this.commit();
+  }
+
   /* ---------------- internals ---------------- */
 
   private log(activityId: string, action: ActionType, details: string): void {

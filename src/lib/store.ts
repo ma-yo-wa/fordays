@@ -136,6 +136,7 @@ interface AppState {
   updateConfig: (patch: Partial<Config>) => void;
   setExternal: (events: ExternalEvent[]) => void;
   syncExternal: (events: ExternalEventInput[]) => Promise<void>;
+  toggleExternalShare: (id: string, shared: boolean) => Promise<void>;
   toast: (text: string) => void;
 }
 
@@ -525,6 +526,16 @@ export const useApp = create<AppState>()((set, get) => {
         );
       }
       await backend.replaceExternal(events);
+    },
+
+    async toggleExternalShare(id, shared) {
+      if (!backend) throw new Error('Not connected');
+      await backend.toggleExternalShare(id, shared);
+      set({
+        external: get().external.map((e) =>
+          e.id === id ? { ...e, sharedWithSpace: shared } : e,
+        ),
+      });
     },
 
     toast: (text) => {

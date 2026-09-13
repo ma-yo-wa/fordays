@@ -51,9 +51,19 @@
     "googleCalendar": "Google Calendar",
     "makePlan": "Make it a plan",
     "makePlanShort": "Make plan",
+    "convertToPlan": "Copy to shared plan",
     "busy": "Busy",
     "busyPrivate": "Busy only — the title stays private",
     "notSharedPlan": "From {owner} calendar — not a shared plan",
-    "importedFoot": "Imported events aren’t plans — they just show what’s already on {owner} calendar"
+    "importedFoot": "Imported events aren’t plans — they just show what’s already on {owner} calendar",
+    "sharedTitle": "Shared with this Orb",
+    "privateTitle": "Private to you",
+    "shareWithOrb": "Share with this Orb",
+    "makePrivate": "Make private",
+    "sharedWithOrbDesc": "Others in this Orb can see this context on their day agenda.",
+    "privateDesc": "Only you can see this. Private to you.",
+    "sharedBy": "Shared by {owner}",
+    "sharedByDesc": "{owner} shared this context with the Orb.",
+    "noConflicts": "No other plans or shared context on this day"
   }
 }

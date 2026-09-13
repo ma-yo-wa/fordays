@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Sheet from './Sheet';
 import { useApp, canCompose } from '../lib/store';
 import { artFor } from '../lib/art';
@@ -47,6 +48,9 @@ export default function ExternalDetail() {
   const config = useApp((st) => st.config);
   const openExternal = useApp((st) => st.openExternal);
   const openComposer = useApp((st) => st.openComposer);
+  const toggleExternalShare = useApp((st) => st.toggleExternalShare);
+  const toast = useApp((st) => st.toast);
+  const [sharingBusy, setSharingBusy] = useState(false);
 
   const space = useApp((st) => st.space);
   const event = external.find((e) => e.id === externalId) ?? null;
@@ -66,6 +70,21 @@ export default function ExternalDetail() {
     .trim()
     .charAt(0)
     .toUpperCase() || '?';
+
+  const isShared = Boolean(event?.sharedWithSpace);
+
+  async function handleToggleShare() {
+    if (!event) return;
+    setSharingBusy(true);
+    try {
+      await toggleExternalShare(event.id, !isShared);
+      toast(!isShared ? Copy.availability.sharedTitle : Copy.availability.makePrivate);
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Couldn’t update sharing');
+    } finally {
+      setSharingBusy(false);
+    }
+  }
 
   return (
     <Sheet open={!!event} onClose={() => openExternal(null)}>
@@ -113,6 +132,35 @@ export default function ExternalDetail() {
             </div>
           </div>
 
+          <div className={s.shareBox}>
+            <div className={s.shareBoxInfo}>
+              <div className={s.shareBoxTitle}>
+                {isMine
+                  ? isShared
+                    ? Copy.availability.sharedTitle
+                    : Copy.availability.privateTitle
+                  : formatCopy(Copy.availability.sharedBy, { owner: ownerName })}
+              </div>
+              <div className={s.shareBoxSub}>
+                {isMine
+                  ? isShared
+                    ? Copy.availability.sharedWithOrbDesc
+                    : Copy.availability.privateDesc
+                  : formatCopy(Copy.availability.sharedByDesc, { owner: ownerName })}
+              </div>
+            </div>
+            {isMine && (
+              <button
+                type="button"
+                className={isShared ? s.makePrivateBtn : s.shareWithOrbBtn}
+                onClick={handleToggleShare}
+                disabled={sharingBusy}
+              >
+                {isShared ? Copy.availability.makePrivate : Copy.availability.shareWithOrb}
+              </button>
+            )}
+          </div>
+
           {event.title && isExternalFutureOrToday(event, todayISO()) && canCompose(space) && (
             <button
               type="button"
@@ -122,7 +170,7 @@ export default function ExternalDetail() {
                 openComposer('plan', planDraftFromExternal(event));
               }}
             >
-              {Copy.availability.makePlan}
+              {Copy.availability.convertToPlan}
             </button>
           )}
 

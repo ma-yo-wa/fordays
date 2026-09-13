@@ -113,11 +113,24 @@
   font-weight: 600;
 }
 
-/* Selected day is an outline, not a fill — a fill would fight with
-   today's marker and with the multi-day band underneath. */
+/* Selected day uses a bold number and a quiet floating cursor pip underneath,
+   letting multi-day sage ribbons flow behind the numbers unbroken. */
 .picked .num {
-  outline: 1.5px dashed var(--rose-ink);
-  outline-offset: 1px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.cursorPip {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ink);
+  z-index: 3;
+  pointer-events: none;
 }
 
 .marks {

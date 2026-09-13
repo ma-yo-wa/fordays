@@ -3,6 +3,7 @@ import SwiftUI
 struct ExternalDetailView: View {
   @EnvironmentObject private var app: AppModel
   @Environment(\.dismiss) private var dismiss
+  @State private var isSharingBusy = false
 
   let event: ExternalEvent
   var onMakePlan: ((PlanDraft) -> Void)? = nil
@@ -104,13 +105,64 @@ struct ExternalDetailView: View {
         Divider()
           .overlay(Theme.ink.opacity(0.08))
 
+        // Share Box
+        HStack(alignment: .center, spacing: 12) {
+          VStack(alignment: .leading, spacing: 2) {
+            Text(isMine
+                 ? (event.sharedWithSpace ? Copy.Availability.sharedTitle : Copy.Availability.privateTitle)
+                 : Copy.Availability.sharedBy(ownerName))
+              .font(.subheadline.weight(.semibold))
+              .foregroundStyle(Theme.ink)
+            Text(isMine
+                 ? (event.sharedWithSpace ? Copy.Availability.sharedWithOrbDesc : Copy.Availability.privateDesc)
+                 : Copy.Availability.sharedByDesc(ownerName))
+              .font(.caption)
+              .foregroundStyle(Theme.inkSoft)
+              .lineLimit(2)
+          }
+
+          Spacer(minLength: 4)
+
+          if isMine {
+            Button {
+              Task {
+                isSharingBusy = true
+                await app.toggleExternalShare(event: event, shared: !event.sharedWithSpace)
+                isSharingBusy = false
+              }
+            } label: {
+              Text(event.sharedWithSpace ? Copy.Availability.makePrivate : Copy.Availability.shareWithOrb)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(event.sharedWithSpace ? Theme.inkSoft : Theme.faceSage)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(
+                  event.sharedWithSpace ? Color.clear : Theme.sageWash,
+                  in: Capsule()
+                )
+                .overlay(
+                  Capsule().stroke(
+                    event.sharedWithSpace ? Theme.ink.opacity(0.18) : Theme.faceSage.opacity(0.4),
+                    lineWidth: 0.8
+                  )
+                )
+            }
+            .buttonStyle(.plain)
+            .disabled(isSharingBusy)
+          }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .padding(.top, 16)
+
         // Make plan primary button
         if event.title != nil && event.isFutureOrToday(today: DateLocal.todayISO()) && app.space?.canCompose == true {
           Button {
             dismiss()
             onMakePlan?(PlanDraft.from(external: event))
           } label: {
-            Text(Copy.Availability.makePlan)
+            Text(Copy.Availability.convertToPlan)
               .font(.headline.weight(.semibold))
               .foregroundStyle(Theme.paperWarm)
               .frame(maxWidth: .infinity)

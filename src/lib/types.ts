@@ -73,6 +73,7 @@ export interface ExternalEvent {
   endsAt: string;
   allDay: boolean;
   calendar: string;
+  sharedWithSpace?: boolean;
 }
 
 export interface Partner {

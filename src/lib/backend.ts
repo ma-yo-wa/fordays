@@ -45,6 +45,8 @@ export interface Backend {
   dismissSuggestion(id: string): Promise<void>;
   /** Replace this user’s imported calendar overlay for the space. */
   replaceExternal(events: ExternalEventInput[]): Promise<void>;
+  /** Toggle whether an external event is shared with the space for availability context. */
+  toggleExternalShare(id: string, shared: boolean): Promise<void>;
   dispose(): void;
 }
 
