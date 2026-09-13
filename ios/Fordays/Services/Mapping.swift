@@ -58,6 +58,25 @@ enum DateLocal {
     return addDays(offset == 0 ? 7 : offset)
   }
 
+  static func monthTitle(for date: Date) -> String {
+    let f = DateFormatter()
+    let currentYear = Calendar.current.component(.year, from: Date())
+    let cursorYear = Calendar.current.component(.year, from: date)
+    if cursorYear == currentYear {
+      f.dateFormat = "MMMM"
+    } else {
+      f.dateFormat = "MMMM yyyy"
+    }
+    return f.string(from: date)
+  }
+
+  static func isOffCurrentMonth(_ date: Date) -> Bool {
+    let c = Calendar.current
+    let now = Date()
+    return c.component(.month, from: date) != c.component(.month, from: now)
+      || c.component(.year, from: date) != c.component(.year, from: now)
+  }
+
   static func prettyLower(_ hhmm: String) -> String {
     prettyTime(hhmm).replacingOccurrences(of: "AM", with: "am").replacingOccurrences(of: "PM", with: "pm")
   }

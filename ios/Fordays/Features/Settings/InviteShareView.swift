@@ -68,16 +68,51 @@ struct InviteShareView: View {
 
   private func share() async {
     busy = true
-    defer { busy = false }
     let idea = first.trimmingCharacters(in: .whitespacesAndNewlines)
     if !idea.isEmpty {
       await app.createActivity(title: idea)
     }
+    busy = false
+
     let text = idea.isEmpty
       ? "Join my Orb on Fordays: \(link)"
       : "I added “\(idea)” to an Orb for us — join here: \(link)"
     UIPasteboard.general.string = text
-    app.toast = "Invite link copied"
-    dismiss()
+
+    presentShare(text: text)
+  }
+
+  @MainActor
+  private func presentShare(text: String) {
+    guard let windowScene = UIApplication.shared.connectedScenes
+      .compactMap({ $0 as? UIWindowScene })
+      .first(where: { $0.activationState == .foregroundActive }),
+      let root = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController
+    else {
+      app.toast = "Invite link copied"
+      dismiss()
+      return
+    }
+
+    var top = root
+    while let next = top.presentedViewController, !next.isBeingDismissed {
+      top = next
+    }
+
+    let vc = UIActivityViewController(activityItems: [text], applicationActivities: nil)
+    if let popover = vc.popoverPresentationController {
+      popover.sourceView = top.view
+      popover.sourceRect = CGRect(x: top.view.bounds.midX, y: top.view.bounds.midY, width: 0, height: 0)
+      popover.permittedArrowDirections = []
+    }
+
+    vc.completionWithItemsHandler = { _, completed, _, _ in
+      if completed {
+        app.toast = "Invite shared"
+      }
+      dismiss()
+    }
+
+    top.present(vc, animated: true)
   }
 }

@@ -33,3 +33,5 @@ A space is **the notebook for a specific we.** Plans belong to the notebook, not
 3. **Calendar UI**
 4. **Importing calendar**
 5. **Copy**
+6. **Error handling** — friendly failures for join / leave / create space, missing `010`, frozen writes. PWA + iOS.
+7. **Testing**

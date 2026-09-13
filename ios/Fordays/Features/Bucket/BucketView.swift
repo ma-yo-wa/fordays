@@ -141,18 +141,9 @@ struct ActivityCard: View {
           endPoint: .bottomTrailing
         )
 
-        if let urlStr = activity.imageUrl, let url = URL(string: urlStr) {
-          AsyncImage(url: url) { phase in
-            switch phase {
-            case .success(let img):
-              img
-                .resizable()
-                .scaledToFill()
-            default:
-              Color.clear
-            }
-          }
-          .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+        if let urlStr = activity.imageUrl, !urlStr.isEmpty {
+          RemoteOrDataImage(urlString: urlStr, contentMode: .fill)
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
         }
 
         LinearGradient(

@@ -155,7 +155,11 @@ struct MainShellView: View {
       }
       .buttonStyle(.plain)
       .accessibilityLabel("Open Orb settings")
-      Spacer(minLength: 0)
+      Spacer(minLength: 8)
+
+      if app.tab == .plans {
+        trailingCalendarControls
+      }
     }
     .overlay {
       Text(title)
@@ -167,18 +171,54 @@ struct MainShellView: View {
     .padding(.vertical, 10)
   }
 
-  private var title: String {
-    switch app.tab {
-    case .bucket: return "Bucket List"
-    case .plans: return monthTitle
-    case .memories: return "Memories"
+  private var trailingCalendarControls: some View {
+    HStack(spacing: 2) {
+      if DateLocal.isOffCurrentMonth(app.cursorMonth) {
+        Button {
+          app.goToday()
+        } label: {
+          Text("Today")
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(Theme.roseInk)
+            .padding(.horizontal, 10)
+            .frame(height: 30)
+            .background(Theme.ink.opacity(0.07), in: Capsule())
+        }
+        .buttonStyle(.plain)
+      }
+
+      Button {
+        app.shiftMonth(by: -1)
+      } label: {
+        Image(systemName: "chevron.left")
+          .font(.subheadline.weight(.semibold))
+          .foregroundStyle(Theme.roseInk)
+          .frame(width: 32, height: 32)
+          .contentShape(Rectangle())
+      }
+      .buttonStyle(.plain)
+      .accessibilityLabel("Previous month")
+
+      Button {
+        app.shiftMonth(by: 1)
+      } label: {
+        Image(systemName: "chevron.right")
+          .font(.subheadline.weight(.semibold))
+          .foregroundStyle(Theme.roseInk)
+          .frame(width: 32, height: 32)
+          .contentShape(Rectangle())
+      }
+      .buttonStyle(.plain)
+      .accessibilityLabel("Next month")
     }
   }
 
-  private var monthTitle: String {
-    let f = DateFormatter()
-    f.dateFormat = "MMMM"
-    return f.string(from: Date())
+  private var title: String {
+    switch app.tab {
+    case .bucket: return "Bucket List"
+    case .plans: return DateLocal.monthTitle(for: app.cursorMonth)
+    case .memories: return "Memories"
+    }
   }
 
   private var activeOrbTitle: String {

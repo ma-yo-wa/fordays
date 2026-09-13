@@ -3,16 +3,14 @@ description: Always commit and push PWA (web) changes to main so deploy updates 
 alwaysApply: true
 ---
 
-# Always push the PWA
+# Always push PWA and iOS equally
 
-After any change under the web PWA (`src/`, Worker config, `wrangler`, deploy workflow, public assets, etc.):
+After changes to either client — web PWA (`src/`, Worker config, `wrangler`, deploy workflow, public assets, etc.) or native iOS (`ios/`):
 
-1. **Commit** the relevant web files (do not wait to be asked).
-2. **Push to `origin/main`** so GitHub Actions deploys and the user can check live immediately.
-3. Mention the live URL briefly when done (Workers / fordays.app as configured).
+1. **Commit** the relevant files (do not wait to be asked).
+2. **Push to `origin/main`** so both PWA (via GitHub Actions deploy) and iOS code stay in sync and up to date on origin.
+3. Mention the live URL briefly when web changes are included (Workers / fordays.app as configured).
 
-Do **not** block on iOS/Swift work before shipping web. Push PWA changes as soon as they are ready, even mid-session.
-
-Native `ios/` changes do not need this auto-push unless the user asks.
+Keep PWA and iOS equally updated on `origin/main`.
 
 Never include `BACKLOG.md` in a commit or push. Local only.

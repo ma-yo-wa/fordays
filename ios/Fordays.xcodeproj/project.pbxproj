@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B81E2F3A4B5C6D7E8F9A0B1C /* CoverPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92F1A0B2C3D4E5F6A7B8C90 /* CoverPickerView.swift */; };
 		03A0CE056B9983A5EF71CC29 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FB0FFC2A4D225F12EDC9838 /* DetailView.swift */; };
 		0651DB3C9829ACD683B0B49F /* TabIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C1DDC77D31F2E265BF0544 /* TabIcons.swift */; };
 		1091443FA7F64C8FD71F0298 /* AddActivitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4EBB535ABBFFC73548D5B4B /* AddActivitySheet.swift */; };
@@ -42,6 +43,7 @@
 		7CE7C6FDBE348B28A340B03E /* FordaysApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FordaysApp.swift; sourceTree = "<group>"; };
 		A06275BDB4475A336F2D09A3 /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
 		A4EBB535ABBFFC73548D5B4B /* AddActivitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddActivitySheet.swift; sourceTree = "<group>"; };
+		C92F1A0B2C3D4E5F6A7B8C90 /* CoverPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPickerView.swift; sourceTree = "<group>"; };
 		B72E1D0A8C3F6B5D4A0E9876 /* Art.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Art.swift; sourceTree = "<group>"; };
 		C37BB6EA7FCB1CFE8069021D /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		D0E2CF128B98BD9C0207520F /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
@@ -85,6 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				A4EBB535ABBFFC73548D5B4B /* AddActivitySheet.swift */,
+				C92F1A0B2C3D4E5F6A7B8C90 /* CoverPickerView.swift */,
 				5FB0FFC2A4D225F12EDC9838 /* DetailView.swift */,
 			);
 			path = Detail;
@@ -266,6 +269,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1091443FA7F64C8FD71F0298 /* AddActivitySheet.swift in Sources */,
+				B81E2F3A4B5C6D7E8F9A0B1C /* CoverPickerView.swift in Sources */,
 				FFF2EC3B34025F324B2EFA3C /* AppModel.swift in Sources */,
 				D9176915A481EBD86A04B1E6 /* AuthView.swift in Sources */,
 				67CD068CE6A816FE8F1C9C7F /* BucketView.swift in Sources */,

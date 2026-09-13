@@ -8,8 +8,19 @@ final class AppModel: ObservableObject {
   @Published var spaces: [SpaceInfo] = []
   @Published var activities: [Activity] = []
   @Published var tab: HomeTab = .plans
+  @Published var cursorMonth: Date = Date()
+  @Published var pickedDay: String = DateLocal.todayISO()
   @Published var errorMessage: String?
   @Published var toast: String?
+
+  func shiftMonth(by delta: Int) {
+    cursorMonth = Calendar.current.date(byAdding: .month, value: delta, to: cursorMonth) ?? cursorMonth
+  }
+
+  func goToday() {
+    pickedDay = DateLocal.todayISO()
+    cursorMonth = Date()
+  }
 
   private var sb: SupabaseClient { SupabaseService.shared.client }
 

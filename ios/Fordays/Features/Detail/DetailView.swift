@@ -62,18 +62,11 @@ struct DetailView: View {
       VStack(alignment: .leading, spacing: 16) {
         header(item)
 
-        if mode == .view, let urlStr = item.imageUrl, let url = URL(string: urlStr) {
-          AsyncImage(url: url) { phase in
-            switch phase {
-            case .success(let img):
-              img.resizable().scaledToFill()
-            default:
-              Theme.roseWash
-            }
-          }
-          .frame(maxWidth: .infinity)
-          .frame(height: 200)
-          .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        if mode == .view, let urlStr = item.imageUrl, !urlStr.isEmpty {
+          RemoteOrDataImage(urlString: urlStr, contentMode: .fill)
+            .frame(maxWidth: .infinity)
+            .frame(height: 200)
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
 
         if mode == .view, let description = item.description, !description.isEmpty {
@@ -220,11 +213,8 @@ struct DetailView: View {
         .lineLimit(3...6)
         .textFieldStyle(.roundedBorder)
 
-      fieldLabel("Cover", hint: "— image URL")
-      TextField("https://…", text: $cover)
-        .textInputAutocapitalization(.never)
-        .keyboardType(.URL)
-        .textFieldStyle(.roundedBorder)
+      fieldLabel("Cover", hint: "— optional")
+      CoverPickerView(cover: $cover, titleHint: { title })
 
       HStack {
         ghostButton("Cancel") { mode = .view }

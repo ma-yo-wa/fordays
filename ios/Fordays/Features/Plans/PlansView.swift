@@ -5,9 +5,6 @@ struct PlansView: View {
   var onSelect: (Activity) -> Void
   var onInvite: () -> Void = {}
 
-  @State private var cursorMonth: Date = Date()
-  @State private var pickedDay: String = DateLocal.todayISO()
-
   private var calendar: Calendar { Calendar.current }
 
   private var plans: [Activity] {
@@ -18,7 +15,7 @@ struct PlansView: View {
     plans.filter { activity in
       guard let start = activity.dateTime.map({ String($0.prefix(10)) }) else { return false }
       let end = activity.endsAt.map { String($0.prefix(10)) } ?? start
-      return pickedDay >= start && pickedDay <= end
+      return app.pickedDay >= start && app.pickedDay <= end
     }
     .sorted { ($0.dateTime ?? "") < ($1.dateTime ?? "") }
   }
@@ -93,19 +90,8 @@ struct PlansView: View {
   @ViewBuilder
   private func planThumb(_ a: Activity) -> some View {
     Group {
-      if let urlStr = a.imageUrl, let url = URL(string: urlStr) {
-        AsyncImage(url: url) { phase in
-          switch phase {
-          case .success(let img):
-            img.resizable().scaledToFill()
-          default:
-            LinearGradient(
-              colors: Theme.orbColors(for: a.id, title: a.title),
-              startPoint: .topLeading,
-              endPoint: .bottomTrailing
-            )
-          }
-        }
+      if let urlStr = a.imageUrl, !urlStr.isEmpty {
+        RemoteOrDataImage(urlString: urlStr, contentMode: .fill)
       } else {
         LinearGradient(
           colors: Theme.orbColors(for: a.id, title: a.title),
@@ -119,7 +105,7 @@ struct PlansView: View {
   }
 
   private var dayTitle: String {
-    pickedDay == DateLocal.todayISO() ? "Today" : prettyDay(pickedDay)
+    app.pickedDay == DateLocal.todayISO() ? "Today" : prettyDay(app.pickedDay)
   }
 
   private var emptyCopy: String {
@@ -127,7 +113,7 @@ struct PlansView: View {
       return "A copy from when you left"
     }
     let other = app.space?.isMatched == true ? app.space?.partnerName : nil
-    let today = pickedDay == DateLocal.todayISO()
+    let today = app.pickedDay == DateLocal.todayISO()
     if let other {
       return today
         ? "Nothing planned between you and \(other) today"
@@ -137,7 +123,7 @@ struct PlansView: View {
   }
 
   private func planTiming(_ a: Activity) -> String {
-    let start = a.dateTime.map { String($0.prefix(10)) } ?? pickedDay
+    let start = a.dateTime.map { String($0.prefix(10)) } ?? app.pickedDay
     let when = DateLocal.relativeDay(start)
     if let t = DateLocal.dtTime(a.dateTime) {
       return "\(when) · \(DateLocal.prettyLower(t))"
@@ -164,24 +150,6 @@ struct PlansView: View {
   private var monthGrid: some View {
     let days = monthDays()
     return VStack(spacing: 8) {
-      HStack {
-        Button {
-          cursorMonth = calendar.date(byAdding: .month, value: -1, to: cursorMonth) ?? cursorMonth
-        } label: {
-          Image(systemName: "chevron.left").foregroundStyle(Theme.roseInk)
-        }
-        Spacer()
-        Text(monthHeader)
-          .font(.headline)
-        Spacer()
-        Button {
-          cursorMonth = calendar.date(byAdding: .month, value: 1, to: cursorMonth) ?? cursorMonth
-        } label: {
-          Image(systemName: "chevron.right").foregroundStyle(Theme.roseInk)
-        }
-      }
-      .padding(.horizontal, 8)
-
       LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 6) {
         ForEach(["S", "M", "T", "W", "T", "F", "S"], id: \.self) { d in
           Text(d)
@@ -193,15 +161,15 @@ struct PlansView: View {
             let iso = DateLocal.todayISO(day)
             let count = planCount(on: iso)
             Button {
-              pickedDay = iso
+              app.pickedDay = iso
             } label: {
               VStack(spacing: 3) {
                 Text("\(calendar.component(.day, from: day))")
-                  .font(.body.weight(pickedDay == iso ? .semibold : .regular))
+                  .font(.body.weight(app.pickedDay == iso ? .semibold : .regular))
                   .foregroundStyle(Theme.ink)
                   .frame(width: 36, height: 36)
                   .background {
-                    if pickedDay == iso {
+                    if app.pickedDay == iso {
                       Circle().fill(Theme.rose)
                     }
                   }
@@ -222,14 +190,8 @@ struct PlansView: View {
     }
   }
 
-  private var monthHeader: String {
-    let f = DateFormatter()
-    f.dateFormat = "MMMM"
-    return f.string(from: cursorMonth)
-  }
-
   private func monthDays() -> [Date?] {
-    guard let interval = calendar.dateInterval(of: .month, for: cursorMonth) else { return [] }
+    guard let interval = calendar.dateInterval(of: .month, for: app.cursorMonth) else { return [] }
     let firstWeekday = calendar.component(.weekday, from: interval.start) // 1=Sun
     var days: [Date?] = Array(repeating: nil, count: firstWeekday - 1)
     var d = interval.start

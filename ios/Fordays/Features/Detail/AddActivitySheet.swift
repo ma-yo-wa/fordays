@@ -186,9 +186,7 @@ struct ComposerView: View {
         }
 
         fieldLabel("Cover", hint: "— optional")
-        textField("https://…", text: $cover)
-          .textInputAutocapitalization(.never)
-          .keyboardType(.URL)
+        CoverPickerView(cover: $cover, titleHint: { title })
 
         HStack(spacing: 10) {
           ghost("Cancel", action: onClose)

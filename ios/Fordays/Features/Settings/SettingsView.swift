@@ -100,7 +100,7 @@ struct SettingsView: View {
           .font(.footnote)
           .foregroundStyle(Theme.inkSoft)
       }
-      .frame(width: 168, minHeight: 116, alignment: .topLeading)
+      .frame(width: 168, height: 116, alignment: .topLeading)
       .padding(12)
       .background {
         RoundedRectangle(cornerRadius: 18, style: .continuous)
@@ -142,7 +142,7 @@ struct SettingsView: View {
           .font(.footnote)
           .foregroundStyle(Theme.inkSoft)
       }
-      .frame(width: 168, minHeight: 116)
+      .frame(width: 168, height: 116)
       .padding(12)
       .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
