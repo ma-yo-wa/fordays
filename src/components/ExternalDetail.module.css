@@ -77,6 +77,29 @@
   overflow-wrap: anywhere;
 }
 
+.makePlanBtn {
+  margin-top: 18px;
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 14px;
+  border: none;
+  background: var(--rose-ink);
+  color: var(--paper-warm);
+  font: var(--t-headline);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.makePlanBtn:active {
+  opacity: 0.85;
+  transform: scale(0.99);
+}
+
 .foot {
   margin-top: 14px;
   font-size: 13px;

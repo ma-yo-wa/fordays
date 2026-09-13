@@ -36,4 +36,24 @@ enum Art {
     (["dance", "salsa", "club"], 1),
     (["spa", "massage", "rest", "lazy", "sleep"], 1),
   ]
+
+  static func emoji(for title: String?) -> String {
+    guard let title = title?.lowercased(), !title.isEmpty else { return "🗓" }
+    if title.contains("flight") || title.contains("fly") || title.contains("airline") || title.contains("airport") || title.contains("trip") || title.contains("travel") { return "✈️" }
+    if title.contains("hotel") || title.contains("airbnb") || title.contains("booking") || title.contains("room") { return "🏨" }
+    if title.contains("train") || title.contains("rail") || title.contains("amtrak") { return "🚆" }
+    if title.contains("drive") || title.contains("road") { return "🛣" }
+    if title.contains("beach") || title.contains("ocean") || title.contains("sunset") || title.contains("island") { return "🌅" }
+    if title.contains("hike") || title.contains("trail") || title.contains("mountain") || title.contains("camp") { return "🏔" }
+    if title.contains("kayak") || title.contains("canoe") || title.contains("boat") || title.contains("cruise") { return "🛶" }
+    if title.contains("gym") || title.contains("workout") || title.contains("run") || title.contains("training") { return "🏃" }
+    if title.contains("bike") || title.contains("ride") || title.contains("cycl") { return "🚲" }
+    if title.contains("dinner") || title.contains("restaurant") || title.contains("ramen") || title.contains("sushi") || title.contains("eat") || title.contains("lunch") || title.contains("food") { return "🍜" }
+    if title.contains("coffee") || title.contains("cafe") { return "☕" }
+    if title.contains("movie") || title.contains("cinema") || title.contains("film") { return "🎞" }
+    if title.contains("concert") || title.contains("music") || title.contains("festival") { return "🎶" }
+    if title.contains("museum") || title.contains("gallery") { return "🖼" }
+    if title.contains("doctor") || title.contains("dentist") || title.contains("clinic") || title.contains("hospital") { return "🩺" }
+    return "🗓"
+  }
 }

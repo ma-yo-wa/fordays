@@ -14,6 +14,7 @@ import f from './Form.module.css';
    wondering what happens if they leave it blank. */
 export default function Composer() {
   const mode = useApp((st) => st.composerMode);
+  const draft = useApp((st) => st.composerDraft);
   const close = useApp((st) => st.closeComposer);
   const create = useApp((st) => st.create);
   const toast = useApp((st) => st.toast);
@@ -37,18 +38,18 @@ export default function Composer() {
 
   useEffect(() => {
     if (!mode) return;
-    setTitle('');
-    setNotes('');
+    setTitle(draft?.title ?? '');
+    setNotes(draft?.notes ?? '');
     setCover(null);
-    // A plan opens on the day you were already looking at.
-    setDate(picked);
-    setFrom('');
-    setUntil('');
-    setEnd(null);
-    setMultiDay(false);
+    // A plan opens on the draft date if provided, or the day you were already looking at.
+    setDate(draft?.date ?? picked);
+    setFrom(draft?.from ?? '');
+    setUntil(draft?.until ?? '');
+    setEnd(draft?.endDate ?? null);
+    setMultiDay(draft?.multiDay ?? Boolean(draft?.endDate));
     setPickerOpen(false);
     setSaving(false);
-  }, [mode, picked]);
+  }, [mode, picked, draft]);
 
   const quick: Array<[string, string]> = [
     ['Today', addDays(0)],

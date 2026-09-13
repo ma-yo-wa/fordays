@@ -147,3 +147,56 @@ struct RemoveMemberParams: Encodable {
   let sid: String
   let uid: String
 }
+
+struct ExternalEvent: Identifiable, Hashable, Codable {
+  var id: String
+  var spaceId: String?
+  var userId: String
+  var title: String?
+  var location: String?
+  var startsAt: String
+  var endsAt: String
+  var allDay: Bool
+  var calendar: String
+
+  enum CodingKeys: String, CodingKey {
+    case id
+    case spaceId = "space_id"
+    case userId = "user_id"
+    case title
+    case location
+    case startsAt = "starts_at"
+    case endsAt = "ends_at"
+    case allDay = "all_day"
+    case calendar
+  }
+}
+
+struct PlanDraft: Hashable {
+  var title: String?
+  var notes: String?
+  var date: String?
+  var from: String?
+  var until: String?
+  var end: String?
+  var multiDay: Bool?
+
+  static func from(external: ExternalEvent) -> PlanDraft {
+    let startDate = String(external.startsAt.prefix(10))
+    let rawEnd = external.endsAt.isEmpty ? nil : String(external.endsAt.prefix(10))
+    let isMulti = rawEnd != nil && (rawEnd ?? "") > startDate
+    let startTime = external.allDay ? "" : (external.startsAt.count > 10 ? String(external.startsAt.dropFirst(11).prefix(5)) : "")
+    let endTime = external.allDay ? "" : (external.endsAt.count > 10 ? String(external.endsAt.dropFirst(11).prefix(5)) : "")
+    let notes = (external.location?.isEmpty == false) ? "Location: \(external.location!)" : nil
+
+    return PlanDraft(
+      title: external.title,
+      notes: notes,
+      date: startDate,
+      from: startTime,
+      until: endTime,
+      end: isMulti ? rawEnd : nil,
+      multiDay: isMulti
+    )
+  }
+}

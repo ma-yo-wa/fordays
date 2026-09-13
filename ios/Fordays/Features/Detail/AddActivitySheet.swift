@@ -87,18 +87,32 @@ struct AddSheetView: View {
 struct ComposerView: View {
   @EnvironmentObject private var app: AppModel
   let kind: ComposerKind
+  var draft: PlanDraft? = nil
   var onClose: () -> Void
 
-  @State private var title = ""
-  @State private var notes = ""
-  @State private var cover = ""
-  @State private var date = DateLocal.todayISO()
-  @State private var from = ""
-  @State private var until = ""
+  @State private var title: String
+  @State private var notes: String
+  @State private var cover: String = ""
+  @State private var date: String
+  @State private var from: String
+  @State private var until: String
   @State private var end: String?
-  @State private var multiDay = false
+  @State private var multiDay: Bool
   @State private var pickerOpen = false
   @State private var saving = false
+
+  init(kind: ComposerKind, draft: PlanDraft? = nil, onClose: @escaping () -> Void) {
+    self.kind = kind
+    self.draft = draft
+    self.onClose = onClose
+    _title = State(initialValue: draft?.title ?? "")
+    _notes = State(initialValue: draft?.notes ?? "")
+    _date = State(initialValue: draft?.date ?? DateLocal.todayISO())
+    _from = State(initialValue: draft?.from ?? "")
+    _until = State(initialValue: draft?.until ?? "")
+    _end = State(initialValue: draft?.end)
+    _multiDay = State(initialValue: draft?.multiDay ?? (draft?.end != nil))
+  }
 
   private var isPlan: Bool { kind.isPlan }
 
@@ -279,6 +293,13 @@ struct ComposerView: View {
       dateTime: when?.dateTime,
       endsAt: when?.endsAt
     )
+    if isPlan {
+      app.pickedDay = date
+      if let d = DateLocal.parseLocalDay(date) {
+        app.cursorMonth = d
+      }
+      app.tab = .plans
+    }
     saving = false
     onClose()
   }

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Activity, AuditLog, ExternalEvent } from './types';
+import type { Activity, AuditLog, ExternalEvent, PlanDraft } from './types';
 import type { Backend, ExternalEventInput, NewActivity, WhenSuggestion } from './backend';
 import { LocalBackend } from './backends/local';
 import { loadConfig, saveConfig, isSupabaseConfigured, type Config } from './config';
@@ -91,6 +91,7 @@ interface AppState {
   /* Which of the two things you're making, chosen before the form opens
      rather than inferred from whether a date got filled in. null = shut. */
   composerMode: Kind | null;
+  composerDraft: PlanDraft | null;
   /* The little menu that asks which one. */
   addOpen: boolean;
   settingsOpen: boolean;
@@ -127,7 +128,7 @@ interface AppState {
   openDetail: (id: string | null) => void;
   openExternal: (id: string | null) => void;
   setAddOpen: (v: boolean) => void;
-  openComposer: (mode: Kind) => void;
+  openComposer: (mode: Kind, draft?: PlanDraft | null) => void;
   closeComposer: () => void;
   setSettingsOpen: (v: boolean) => void;
   setInviteShareOpen: (v: boolean) => void;
@@ -187,6 +188,7 @@ export const useApp = create<AppState>()((set, get) => {
     detailId: null,
     externalId: null,
     composerMode: null,
+    composerDraft: null,
     addOpen: false,
     settingsOpen: false,
     inviteShareOpen: false,
@@ -495,14 +497,14 @@ export const useApp = create<AppState>()((set, get) => {
       }
       set({ addOpen });
     },
-    openComposer: (composerMode) => {
+    openComposer: (composerMode, draft = null) => {
       if (!canCompose(get().space)) {
         get().toast('This is a copy from when you left');
         return;
       }
-      set({ composerMode, addOpen: false });
+      set({ composerMode, composerDraft: draft, addOpen: false });
     },
-    closeComposer: () => set({ composerMode: null }),
+    closeComposer: () => set({ composerMode: null, composerDraft: null }),
     setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
     setInviteShareOpen: (inviteShareOpen) => set({ inviteShareOpen }),
     setInviteCode: (inviteCode) => set({ inviteCode }),

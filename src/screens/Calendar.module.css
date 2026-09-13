@@ -263,6 +263,27 @@
   flex-shrink: 0;
 }
 
+.makePlanAction {
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--rose-ink);
+  background: rgba(225, 112, 133, 0.08);
+  color: var(--rose-ink);
+  font: var(--t-caption);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.makePlanAction:active {
+  transform: scale(0.96);
+  background: rgba(225, 112, 133, 0.18);
+}
+
 /* An iOS list row: the separator starts where the text starts, not at
    the edge of the screen, so the leading column reads as a gutter. */
 .entry {

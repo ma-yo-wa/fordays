@@ -45,5 +45,15 @@
     "multiDayPrompt": "Runs more than one day?",
     "notesHint": "— optional",
     "coverHint": "— optional"
+  },
+  "availability": {
+    "title": "Availability",
+    "googleCalendar": "Google Calendar",
+    "makePlan": "Make it a plan",
+    "makePlanShort": "Make plan",
+    "busy": "Busy",
+    "busyPrivate": "Busy only — the title stays private",
+    "notSharedPlan": "From {owner} calendar — not a shared plan",
+    "importedFoot": "Imported events aren’t plans — they just show what’s already on {owner} calendar"
   }
 }

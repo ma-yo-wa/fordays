@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import CoverArt from '../components/CoverArt';
-import { useApp, partnerName, isMatched } from '../lib/store';
-import { isPlan, type ExternalEvent } from '../lib/types';
+import { useApp, partnerName, isMatched, canCompose } from '../lib/store';
+import { isPlan, planDraftFromExternal, type ExternalEvent } from '../lib/types';
 import { artFor } from '../lib/art';
 import { faceColor, faceIndexFor } from '../lib/tint';
 import {
@@ -41,6 +41,7 @@ export default function Calendar() {
   const setPicked = useApp((st) => st.setPicked);
   const openDetail = useApp((st) => st.openDetail);
   const openExternal = useApp((st) => st.openExternal);
+  const openComposer = useApp((st) => st.openComposer);
   const space = useApp((st) => st.space);
 
   const cursorDate = parseISO(cursor);
@@ -111,29 +112,19 @@ export default function Calendar() {
           }
           const date = cell.date;
           const mine = plansByDate.get(date) ?? [];
-          const theirs = extByDate.get(date) ?? [];
 
           const isRowStart = i % 7 === 0;
           const isRowEnd = i % 7 === 6;
 
-          // Multi-day shared plans
+          // Multi-day shared plans draw the soft sage ribbon. External events do not.
           const spanningPlans = mine.filter((p) => {
             const from = dtDate(p.date_time);
             const to = dtDate(p.ends_at) ?? from;
             return from && to && spanDays(from, to).length > 1;
           });
-          const planStartsHere = spanningPlans.some((p) => dtDate(p.date_time) === date);
-          const planEndsHere = spanningPlans.some((p) => (dtDate(p.ends_at) ?? dtDate(p.date_time)) === date);
-
-          // Multi-day external events
-          const spanningExt = theirs.filter((e) => spanDays(e.startsAt, e.endsAt).length > 1);
-          const extStartsHere = spanningExt.some((e) => dtDate(e.startsAt) === date);
-          const extEndsHere = spanningExt.some((e) => dtDate(e.endsAt) === date);
-
-          // Multi-day spans (either a multi-day shared plan or multi-day imported event)
-          const isSpanning = spanningPlans.length > 0 || spanningExt.length > 0;
-          const startsHere = planStartsHere || extStartsHere;
-          const endsHere = planEndsHere || extEndsHere;
+          const startsHere = spanningPlans.some((p) => dtDate(p.date_time) === date);
+          const endsHere = spanningPlans.some((p) => (dtDate(p.ends_at) ?? dtDate(p.date_time)) === date);
+          const isSpanning = spanningPlans.length > 0;
 
           let trackStyle: React.CSSProperties | undefined;
           if (isSpanning) {
@@ -149,13 +140,12 @@ export default function Calendar() {
             };
           }
 
-          // Single-day plans and single-day external events get discrete marks
+          // Discrete marks on the month grid are strictly Fordays plans
           const singlePlans = mine.filter((p) => {
             const from = dtDate(p.date_time);
             const to = dtDate(p.ends_at) ?? from;
             return !from || !to || spanDays(from, to).length <= 1;
           });
-          const singleExt = theirs.filter((e) => spanDays(e.startsAt, e.endsAt).length <= 1);
 
           const classes: string[] = [];
           if (s.day) classes.push(s.day);
@@ -174,13 +164,6 @@ export default function Calendar() {
               <span className={s.marks}>
                 {singlePlans.slice(0, 3).map((p) => (
                   <i key={p.id} />
-                ))}
-                {singleExt.slice(0, 2).map((e) => (
-                  <i
-                    key={e.id}
-                    className={s.ext}
-                    style={{ color: faceColor(ownerIndex(e.ownerId)) }}
-                  />
                 ))}
               </span>
             </button>
@@ -255,36 +238,52 @@ export default function Calendar() {
         {dayExternal.length > 0 && (
           <div className={s.availabilitySection}>
             <div className={s.availabilityHeader}>
-              <span className={s.availabilityTitle}>Availability</span>
-              <span className={s.availabilitySub}>Google Calendar</span>
+              <span className={s.availabilityTitle}>{Copy.availability.title}</span>
+              <span className={s.availabilitySub}>{Copy.availability.googleCalendar}</span>
             </div>
             <div className={s.availabilityList}>
               {dayExternal.map((e) => {
                 const owner = ownerIndex(e.ownerId);
                 const ownerName = config.names[owner] ?? 'Them';
                 return (
-                  <button
+                  <div
                     key={e.id}
-                    type="button"
                     className={s.availabilityRow}
                     onClick={() => openExternal(e.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(ev) => {
+                      if (ev.key === 'Enter' || ev.key === ' ') openExternal(e.id);
+                    }}
                   >
                     <span className={s.availabilityGlyph} aria-hidden>
                       {artFor(e.title)}
                     </span>
                     <div className={s.availabilityText}>
-                      <span className={s.availabilityName}>{e.title || 'Busy'}</span>
+                      <span className={s.availabilityName}>{e.title || Copy.availability.busy}</span>
                       <span className={s.availabilityTime}>
                         {pillWhen(e, picked)} · {ownerName}
                       </span>
                     </div>
+                    {e.title && canCompose(space) && (
+                      <button
+                        type="button"
+                        className={s.makePlanAction}
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          openComposer('plan', planDraftFromExternal(e));
+                        }}
+                      >
+                        {Copy.availability.makePlanShort}
+                      </button>
+                    )}
                     <span
                       className={s.availabilityWho}
                       style={{ background: faceColor(owner) }}
                     >
                       {(ownerName[0] ?? '?').toUpperCase()}
                     </span>
-                  </button>
+                  </div>
                 );
               })}
             </div>

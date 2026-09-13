@@ -1,8 +1,10 @@
 import Sheet from './Sheet';
-import { useApp } from '../lib/store';
+import { useApp, canCompose } from '../lib/store';
 import { artFor } from '../lib/art';
 import { faceColor } from '../lib/tint';
 import { formatRange } from '../lib/date';
+import { planDraftFromExternal } from '../lib/types';
+import { Copy, formatCopy } from '../lib/copy';
 import s from './ExternalDetail.module.css';
 
 function resolveOwner(
@@ -44,6 +46,7 @@ export default function ExternalDetail() {
   const external = useApp((st) => st.external);
   const config = useApp((st) => st.config);
   const openExternal = useApp((st) => st.openExternal);
+  const openComposer = useApp((st) => st.openComposer);
 
   const space = useApp((st) => st.space);
   const event = external.find((e) => e.id === externalId) ?? null;
@@ -104,15 +107,27 @@ export default function ExternalDetail() {
               <LockIcon />
               <span>
                 {event.title
-                  ? `From ${possessive} calendar — not a shared plan`
-                  : 'Busy only — the title stays private'}
+                  ? formatCopy(Copy.availability.notSharedPlan, { owner: possessive })
+                  : Copy.availability.busyPrivate}
               </span>
             </div>
           </div>
 
+          {event.title && canCompose(space) && (
+            <button
+              type="button"
+              className={s.makePlanBtn}
+              onClick={() => {
+                openExternal(null);
+                openComposer('plan', planDraftFromExternal(event));
+              }}
+            >
+              {Copy.availability.makePlan}
+            </button>
+          )}
+
           <p className={s.foot}>
-            Imported events aren’t plans — they just show what’s already on{' '}
-            {possessive} calendar
+            {formatCopy(Copy.availability.importedFoot, { owner: possessive })}
           </p>
         </div>
       )}

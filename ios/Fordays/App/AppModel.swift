@@ -7,6 +7,7 @@ final class AppModel: ObservableObject {
   @Published var space: SpaceInfo?
   @Published var spaces: [SpaceInfo] = []
   @Published var activities: [Activity] = []
+  @Published var externalEvents: [ExternalEvent] = []
   @Published var tab: HomeTab = .plans
   @Published var cursorMonth: Date = Date()
   @Published var pickedDay: String = DateLocal.todayISO()
@@ -93,6 +94,7 @@ final class AppModel: ObservableObject {
   func refreshActivities() async {
     guard let space else {
       activities = []
+      externalEvents = []
       return
     }
     do {
@@ -105,6 +107,25 @@ final class AppModel: ObservableObject {
       activities = rows.map { $0.asActivity() }
     } catch {
       toast = error.localizedDescription
+    }
+    await refreshExternal()
+  }
+
+  func refreshExternal() async {
+    guard let space else {
+      externalEvents = []
+      return
+    }
+    do {
+      let rows: [ExternalEvent] = try await sb.from("external_events")
+        .select()
+        .eq("space_id", value: space.id)
+        .order("starts_at", ascending: true)
+        .execute()
+        .value
+      externalEvents = rows
+    } catch {
+      externalEvents = []
     }
   }
 

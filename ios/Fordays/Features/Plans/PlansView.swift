@@ -3,6 +3,8 @@ import SwiftUI
 struct PlansView: View {
   @EnvironmentObject private var app: AppModel
   var onSelect: (Activity) -> Void
+  var onSelectExternal: ((ExternalEvent) -> Void)? = nil
+  var onMakePlanFromExternal: ((ExternalEvent) -> Void)? = nil
   var onInvite: () -> Void = {}
 
   private var calendar: Calendar { Calendar.current }
@@ -18,6 +20,15 @@ struct PlansView: View {
       return app.pickedDay >= start && app.pickedDay <= end
     }
     .sorted { ($0.dateTime ?? "") < ($1.dateTime ?? "") }
+  }
+
+  private var dayExternal: [ExternalEvent] {
+    let day = app.pickedDay
+    return app.externalEvents.filter { e in
+      let start = String(e.startsAt.prefix(10))
+      let end = e.endsAt.isEmpty ? start : String(e.endsAt.prefix(10))
+      return day >= start && day <= end
+    }
   }
 
   var body: some View {
@@ -73,6 +84,66 @@ struct PlansView: View {
             .buttonStyle(.plain)
           }
         }
+
+        if !dayExternal.isEmpty {
+          VStack(alignment: .leading, spacing: 8) {
+            HStack {
+              Text(Copy.Availability.title)
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Theme.inkFaint)
+              Spacer()
+              Text(Copy.Availability.googleCalendar)
+                .font(.caption2)
+                .foregroundStyle(Theme.inkFaint)
+            }
+            .padding(.top, 10)
+
+            ForEach(dayExternal) { e in
+              let isMine = app.space?.myId == e.userId || e.userId == "0"
+              let ownerName = isMine ? "You" : displayName(for: e.userId)
+              HStack(spacing: 10) {
+                Text(Art.emoji(for: e.title))
+                  .font(.system(size: 20))
+
+                VStack(alignment: .leading, spacing: 2) {
+                  Text(e.title ?? Copy.Availability.busy)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Theme.ink)
+                    .lineLimit(1)
+                  Text("\(externalTiming(e)) · \(ownerName)")
+                    .font(.caption)
+                    .foregroundStyle(Theme.inkSoft)
+                }
+
+                Spacer(minLength: 4)
+
+                if e.title != nil && app.space?.canCompose == true {
+                  Button {
+                    onMakePlanFromExternal?(e)
+                  } label: {
+                    Text(Copy.Availability.makePlanShort)
+                      .font(.caption2.weight(.semibold))
+                      .foregroundStyle(Theme.roseInk)
+                      .padding(.horizontal, 9)
+                      .padding(.vertical, 4)
+                      .background(Theme.rose.opacity(0.18), in: Capsule())
+                      .overlay(Capsule().stroke(Theme.roseInk.opacity(0.4), lineWidth: 0.8))
+                  }
+                  .buttonStyle(.plain)
+                }
+
+                face(for: e.userId)
+              }
+              .padding(.horizontal, 14)
+              .padding(.vertical, 10)
+              .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+              .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+              .onTapGesture {
+                onSelectExternal?(e)
+              }
+            }
+          }
+        }
         Spacer(minLength: 0)
       }
       .padding(.horizontal, 20)
@@ -112,6 +183,9 @@ struct PlansView: View {
     if app.space?.frozen == true {
       return Copy.Plans.emptyFrozen
     }
+    if !dayExternal.isEmpty {
+      return Copy.Plans.emptyTogether
+    }
     let other = app.space?.isMatched == true ? app.space?.partnerName : nil
     let today = app.pickedDay == DateLocal.todayISO()
     if let other {
@@ -120,6 +194,26 @@ struct PlansView: View {
         : Copy.Plans.emptyDayPartner(other)
     }
     return today ? Copy.Plans.emptyToday : Copy.Plans.emptyDay
+  }
+
+  private func externalTiming(_ e: ExternalEvent) -> String {
+    let day = app.pickedDay
+    if e.allDay { return "All day" }
+    let startsToday = String(e.startsAt.prefix(10)) == day
+    let endsToday = String(e.endsAt.prefix(10)) == day
+    if startsToday && endsToday {
+      let t = String(e.startsAt.dropFirst(11).prefix(5))
+      return DateLocal.prettyLower(t)
+    }
+    if startsToday {
+      let t = String(e.startsAt.dropFirst(11).prefix(5))
+      return "From \(DateLocal.prettyLower(t))"
+    }
+    if endsToday {
+      let t = String(e.endsAt.dropFirst(11).prefix(5))
+      return "Until \(DateLocal.prettyLower(t))"
+    }
+    return "All day"
   }
 
   private func planTiming(_ a: Activity) -> String {

@@ -81,6 +81,34 @@ export interface Partner {
   color: string;
 }
 
+export interface PlanDraft {
+  title?: string;
+  notes?: string;
+  date?: string;
+  from?: string;
+  until?: string;
+  endDate?: string | null;
+  multiDay?: boolean;
+}
+
+export function planDraftFromExternal(e: ExternalEvent): PlanDraft {
+  const startDate = e.startsAt.slice(0, 10);
+  const rawEnd = e.endsAt ? e.endsAt.slice(0, 10) : null;
+  const isMulti = Boolean(rawEnd && rawEnd > startDate);
+  const startTime = e.allDay ? '' : (e.startsAt.length > 10 ? e.startsAt.slice(11, 16) : '');
+  const endTime = e.allDay ? '' : (e.endsAt && e.endsAt.length > 10 ? e.endsAt.slice(11, 16) : '');
+
+  return {
+    title: e.title ?? '',
+    notes: e.location ? `Location: ${e.location}` : '',
+    date: startDate,
+    from: startTime,
+    until: endTime,
+    endDate: isMulti ? rawEnd : null,
+    multiDay: isMulti,
+  };
+}
+
 /* One nullable column is still the whole distinction — a bucket-list item
    becomes a plan the moment it gets a date, with nothing to migrate. */
 export const isPlan = (a: Activity): boolean => Boolean(a.date_time);

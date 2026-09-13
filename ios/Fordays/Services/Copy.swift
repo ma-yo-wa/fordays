@@ -63,4 +63,19 @@ enum Copy {
     static let notesHint = "— optional"
     static let coverHint = "— optional"
   }
+
+  enum Availability {
+    static let title = "Availability"
+    static let googleCalendar = "Google Calendar"
+    static let makePlan = "Make it a plan"
+    static let makePlanShort = "Make plan"
+    static let busy = "Busy"
+    static let busyPrivate = "Busy only — the title stays private"
+    static func notSharedPlan(_ owner: String) -> String {
+      "From \(owner) calendar — not a shared plan"
+    }
+    static func importedFoot(_ owner: String) -> String {
+      "Imported events aren’t plans — they just show what’s already on \(owner) calendar"
+    }
+  }
 }

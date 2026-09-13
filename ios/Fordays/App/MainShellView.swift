@@ -4,6 +4,8 @@ struct MainShellView: View {
   @EnvironmentObject private var app: AppModel
   @State private var showAddChooser = false
   @State private var composer: ComposerKind?
+  @State private var composerDraft: PlanDraft?
+  @State private var selectedExternal: ExternalEvent?
   @State private var showInvite = false
   @State private var showSettings = false
   @State private var selected: Activity?
@@ -23,7 +25,15 @@ struct MainShellView: View {
               onInvite: { showInvite = true }
             )
           case .plans:
-            PlansView(onSelect: { selected = $0 }, onInvite: { showInvite = true })
+            PlansView(
+              onSelect: { selected = $0 },
+              onSelectExternal: { selectedExternal = $0 },
+              onMakePlanFromExternal: { event in
+                composerDraft = PlanDraft.from(external: event)
+                composer = .plan
+              },
+              onInvite: { showInvite = true }
+            )
           case .memories:
             MemoriesView(onSelect: { selected = $0 })
           }
@@ -96,8 +106,25 @@ struct MainShellView: View {
       )
     }
     .sheet(item: $composer) { kind in
-      ComposerView(kind: kind, onClose: { composer = nil })
-        .environmentObject(app)
+      ComposerView(kind: kind, draft: composerDraft, onClose: {
+        composer = nil
+        composerDraft = nil
+      })
+      .environmentObject(app)
+    }
+    .sheet(item: $selectedExternal) { event in
+      ExternalDetailView(
+        event: event,
+        onMakePlan: { draft in
+          selectedExternal = nil
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            composerDraft = draft
+            composer = .plan
+          }
+        },
+        onClose: { selectedExternal = nil }
+      )
+      .environmentObject(app)
     }
     .sheet(isPresented: $showInvite) {
       InviteShareView()
