@@ -316,15 +316,21 @@ export async function leaveSpace(id: string): Promise<string | null> {
   if (!sb) throw new Error(MISSING_BACKEND);
   const { data, error } = await sb.rpc('leave_space', { sid: id });
   if (error) throwSb(error);
-  const frozenId = typeof data === 'string' ? data : null;
-  if (frozenId) {
-    const config = loadConfig();
-    saveConfig({ ...config, spaceId: frozenId });
-  } else {
-    const config = loadConfig();
-    saveConfig({ ...config, spaceId: '' });
-  }
-  return frozenId;
+  return typeof data === 'string' ? data : null;
+}
+
+export async function restoreSpace(id: string): Promise<void> {
+  const sb = await getClient();
+  if (!sb) throw new Error(MISSING_BACKEND);
+  const { error } = await sb.rpc('restore_space', { sid: id });
+  if (error) throwSb(error);
+}
+
+export async function deleteFrozenSpace(id: string): Promise<void> {
+  const sb = await getClient();
+  if (!sb) throw new Error(MISSING_BACKEND);
+  const { error } = await sb.rpc('delete_frozen_space', { sid: id });
+  if (error) throwSb(error);
 }
 
 function persistSpaceConfig(space: SpaceInfo): void {

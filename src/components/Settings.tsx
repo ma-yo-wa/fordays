@@ -90,6 +90,8 @@ export default function Settings() {
   const switchToSpace = useApp((st) => st.switchToSpace);
   const addSpace = useApp((st) => st.addSpace);
   const leaveCurrentSpace = useApp((st) => st.leaveCurrentSpace);
+  const restorePastOrb = useApp((st) => st.restorePastOrb);
+  const deletePastOrb = useApp((st) => st.deletePastOrb);
   const removeMemberFromSpace = useApp((st) => st.removeMemberFromSpace);
 
   const signedIn = authPhase === 'signedIn';
@@ -103,8 +105,13 @@ export default function Settings() {
   const [spaceBusy, setSpaceBusy] = useState(false);
   const [leaveAsk, setLeaveAsk] = useState(false);
   const [removeId, setRemoveId] = useState<string | null>(null);
+  const [pastOrbsOpen, setPastOrbsOpen] = useState(false);
+  const [deleteAskId, setDeleteAskId] = useState<string | null>(null);
 
-  const visibleOrbs = spaces.length ? spaces : space ? [space] : [];
+  const allOrbs = spaces.length ? spaces : space ? [space] : [];
+  const activeOrbs = allOrbs.filter((s) => !s.frozen);
+  const pastOrbs = allOrbs.filter((s) => s.frozen);
+  const visibleOrbs = activeOrbs;
   const members = space?.members ?? [];
   const soloOrb = members.length <= 1;
   const leaveLabel = soloOrb ? 'Delete this Orb' : 'Leave this Orb';
@@ -240,11 +247,56 @@ export default function Settings() {
     }
   }
 
+  async function handleRestorePastOrb(id: string) {
+    if (spaceBusy) return;
+    setSpaceBusy(true);
+    try {
+      await restorePastOrb(id);
+      setDeleteAskId(null);
+      setPastOrbsOpen(false);
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Couldn’t restore Orb');
+    } finally {
+      setSpaceBusy(false);
+    }
+  }
+
+  async function handleDeletePastOrb(id: string) {
+    if (spaceBusy) return;
+    setSpaceBusy(true);
+    try {
+      await deletePastOrb(id);
+      setDeleteAskId(null);
+      if (pastOrbs.length <= 1) {
+        setPastOrbsOpen(false);
+      }
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Couldn’t delete Orb');
+    } finally {
+      setSpaceBusy(false);
+    }
+  }
+
   return (
     <>
       <Sheet open={open} onClose={() => setOpen(false)} heading="Settings">
         {signedIn && (
           <>
+            {space?.frozen && (
+              <div className={ui.frozenBanner}>
+                <p className={ui.frozenBannerText}>{Copy.orbs.viewingFrozenBanner}</p>
+                {activeOrbs[0] && (
+                  <button
+                    type="button"
+                    className={ui.frozenBannerBtn}
+                    onClick={() => void handleSwitchOrb(activeOrbs[0]!)}
+                  >
+                    {Copy.orbs.switchBackToActive}
+                  </button>
+                )}
+              </div>
+            )}
+
             <section className={ui.section}>
               <span className={ui.label}>Your profile</span>
               <div className={ui.profileCard}>
@@ -427,8 +479,8 @@ export default function Settings() {
                   ),
                 )}
 
-                {!space.frozen &&
-                  (leaveAsk ? (
+                {!space.frozen ? (
+                  leaveAsk ? (
                     <>
                       <p className={f.rowNote}>
                         {soloOrb
@@ -463,7 +515,52 @@ export default function Settings() {
                     >
                       {leaveLabel}
                     </button>
-                  ))}
+                  )
+                ) : (
+                  <>
+                    {soloOrb && (
+                      <button
+                        type="button"
+                        className={ui.textLink}
+                        disabled={spaceBusy}
+                        onClick={() => void handleRestorePastOrb(space.id)}
+                      >
+                        {Copy.orbs.restoreOrb}
+                      </button>
+                    )}
+                    {deleteAskId === space.id ? (
+                      <div className={ui.dangerAskBox}>
+                        <p className={ui.dangerAskText}>{Copy.orbs.deletePermanentConfirm}</p>
+                        <div className={ui.dangerAskButtons}>
+                          <button
+                            type="button"
+                            className={ui.pastOrbBtn}
+                            onClick={() => setDeleteAskId(null)}
+                          >
+                            Keep
+                          </button>
+                          <button
+                            type="button"
+                            className={`${ui.pastOrbBtn} ${ui.pastOrbBtnDanger}`}
+                            disabled={spaceBusy}
+                            onClick={() => void handleDeletePastOrb(space.id)}
+                          >
+                            {Copy.orbs.deletePermanent}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className={`${ui.textLink} ${ui.pastOrbBtnDanger}`}
+                        disabled={spaceBusy}
+                        onClick={() => setDeleteAskId(space.id)}
+                      >
+                        {Copy.orbs.deletePermanent}
+                      </button>
+                    )}
+                  </>
+                )}
               </section>
             )}
           </>
@@ -628,6 +725,28 @@ export default function Settings() {
           </details>
         )}
 
+        {pastOrbs.length > 0 && (
+          <section className={ui.section}>
+            <span className={ui.label}>{Copy.orbs.pastOrbs}</span>
+            <button
+              type="button"
+              className={ui.pastOrbsRow}
+              onClick={() => setPastOrbsOpen(true)}
+            >
+              <div className={ui.pastOrbsLeft}>
+                <span className={ui.pastOrbsTitle}>{Copy.orbs.pastOrbs}</span>
+                <span className={ui.pastOrbsSub}>{Copy.orbs.pastOrbsSub}</span>
+              </div>
+              <div className={ui.pastOrbsRight}>
+                <span className={ui.pastOrbsCount}>{pastOrbs.length}</span>
+                <span className={ui.pastOrbsChevron} aria-hidden>
+                  ›
+                </span>
+              </div>
+            </button>
+          </section>
+        )}
+
         {signedIn && (
           <div className={f.row}>
             <button
@@ -643,6 +762,110 @@ export default function Settings() {
 
       {/* Outside Settings sheet — nested fixed sheets get clipped by the
           parent’s transform and never cover the screen. */}
+      <Sheet
+        open={pastOrbsOpen}
+        onClose={() => {
+          setPastOrbsOpen(false);
+          setDeleteAskId(null);
+        }}
+        heading={Copy.orbs.pastOrbs}
+      >
+        <p className={f.rowNote}>{Copy.orbs.pastOrbsSub} — kept as read-only keepsakes.</p>
+        <div className={ui.pastOrbList}>
+          {pastOrbs.map((pOrb) => {
+            const pFaces = orbFaceChips(pOrb);
+            const isCurrent = pOrb.id === space?.id;
+            const isSolo = (pOrb.members?.length ?? 0) <= 1;
+            return (
+              <div key={pOrb.id} className={ui.pastOrbCard}>
+                <div className={ui.pastOrbTop}>
+                  <div className={ui.pastOrbInfo}>
+                    <span className={ui.pastOrbName}>{spacePeopleLabel(pOrb)}</span>
+                    <span className={ui.pastOrbBadge}>{Copy.orbs.frozenSnapshot}</span>
+                  </div>
+                  <div className={ui.orbFaceStack}>
+                    {pFaces.slice(0, 3).map((fc, idx) => (
+                      <span
+                        key={fc.key}
+                        className={`${ui.orbMiniFace} ${fc.them ? ui.orbMiniFaceThem : ui.orbMiniFaceMe}`}
+                        style={{ zIndex: 4 - idx }}
+                        aria-hidden
+                      >
+                        {fc.letter}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={ui.pastOrbActions}>
+                  {isCurrent ? (
+                    <span className={`${ui.pastOrbBtn} ${ui.pastOrbBtnActive}`}>
+                      Currently viewing
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      className={ui.pastOrbBtn}
+                      disabled={spaceBusy}
+                      onClick={() => {
+                        void handleSwitchOrb(pOrb);
+                        setPastOrbsOpen(false);
+                        setOpen(false);
+                      }}
+                    >
+                      View
+                    </button>
+                  )}
+
+                  {isSolo && (
+                    <button
+                      type="button"
+                      className={ui.pastOrbBtn}
+                      disabled={spaceBusy}
+                      onClick={() => void handleRestorePastOrb(pOrb.id)}
+                    >
+                      {Copy.orbs.restoreOrb}
+                    </button>
+                  )}
+
+                  {deleteAskId === pOrb.id ? (
+                    <div className={ui.dangerAskBox} style={{ width: '100%' }}>
+                      <p className={ui.dangerAskText}>{Copy.orbs.deletePermanentConfirm}</p>
+                      <div className={ui.dangerAskButtons}>
+                        <button
+                          type="button"
+                          className={ui.pastOrbBtn}
+                          onClick={() => setDeleteAskId(null)}
+                        >
+                          Keep
+                        </button>
+                        <button
+                          type="button"
+                          className={`${ui.pastOrbBtn} ${ui.pastOrbBtnDanger}`}
+                          disabled={spaceBusy}
+                          onClick={() => void handleDeletePastOrb(pOrb.id)}
+                        >
+                          {Copy.orbs.deletePermanent}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className={`${ui.pastOrbBtn} ${ui.pastOrbBtnDanger}`}
+                      disabled={spaceBusy}
+                      onClick={() => setDeleteAskId(pOrb.id)}
+                    >
+                      {Copy.orbs.deletePermanent}
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Sheet>
+
       <GcalPicker
         open={!!gcalList?.length}
         calendars={gcalList ?? []}

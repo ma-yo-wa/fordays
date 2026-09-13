@@ -4,14 +4,24 @@ struct SettingsView: View {
   @EnvironmentObject private var app: AppModel
   @Environment(\.dismiss) private var dismiss
   @State private var showInvite = false
+  @State private var showPastOrbs = false
   @State private var leaveAsk = false
   @State private var removeId: String?
+  @State private var deleteAskId: String?
   @State private var spaceBusy = false
 
-  private var orbs: [SpaceInfo] {
+  private var allOrbs: [SpaceInfo] {
     if !app.spaces.isEmpty { return app.spaces }
     if let one = app.space { return [one] }
     return []
+  }
+
+  private var activeOrbs: [SpaceInfo] {
+    allOrbs.filter { !$0.frozen }
+  }
+
+  private var pastOrbs: [SpaceInfo] {
+    allOrbs.filter { $0.frozen }
   }
 
   var body: some View {
@@ -19,6 +29,9 @@ struct SettingsView: View {
       ScrollView {
         VStack(alignment: .leading, spacing: 22) {
           if let space = app.space {
+            if space.frozen {
+              frozenBanner
+            }
             profileSection(space: space)
             orbsSection
             peopleSection(space: space)
@@ -26,6 +39,10 @@ struct SettingsView: View {
           }
 
           calendarsSection
+
+          if !pastOrbs.isEmpty {
+            pastOrbsSection
+          }
 
           if app.authPhase == .signedIn {
             signOutSection
@@ -44,12 +61,41 @@ struct SettingsView: View {
       .onChange(of: app.space?.id) { _, _ in
         leaveAsk = false
         removeId = nil
+        deleteAskId = nil
       }
     }
     .sheet(isPresented: $showInvite) {
       InviteShareView()
         .environmentObject(app)
     }
+    .sheet(isPresented: $showPastOrbs) {
+      pastOrbsSheet
+    }
+  }
+
+  private var frozenBanner: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      Text(Copy.Orbs.viewingFrozenBanner)
+        .font(.footnote)
+        .foregroundStyle(Theme.inkSoft)
+      if let firstActive = activeOrbs.first {
+        Button {
+          switchOrb(firstActive.id)
+        } label: {
+          Text(Copy.Orbs.switchBackToActive)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(Theme.ink)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Theme.paperWarm, in: Capsule())
+            .overlay(Capsule().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
+        }
+        .buttonStyle(.plain)
+      }
+    }
+    .padding(14)
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
   }
 
   private func profileSection(space: SpaceInfo) -> some View {
@@ -74,7 +120,7 @@ struct SettingsView: View {
       ScrollView(.horizontal, showsIndicators: false) {
         HStack(spacing: 10) {
           createOrbCard
-          ForEach(orbs, id: \.id) { orb in
+          ForEach(activeOrbs, id: \.id) { orb in
             orbCard(orb)
           }
         }
@@ -388,6 +434,227 @@ struct SettingsView: View {
           .padding(.top, 4)
           .disabled(spaceBusy)
         }
+      } else {
+        if soloOrb {
+          Button(Copy.Orbs.restoreOrb) {
+            restoreOrb(space.id)
+          }
+          .buttonStyle(.plain)
+          .font(.subheadline.weight(.semibold))
+          .foregroundStyle(Theme.ink)
+          .padding(.horizontal, 4)
+          .padding(.top, 4)
+          .disabled(spaceBusy)
+        }
+
+        if deleteAskId == space.id {
+          VStack(alignment: .leading, spacing: 10) {
+            Text(Copy.Orbs.deletePermanentConfirm)
+              .font(.footnote)
+              .foregroundStyle(Theme.inkFaint)
+
+            HStack(spacing: 10) {
+              quietButton("Keep") {
+                deleteAskId = nil
+              }
+              dangerButton(Copy.Orbs.deletePermanent) {
+                deleteOrb(space.id)
+              }
+            }
+          }
+          .padding(12)
+          .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        } else {
+          Button(Copy.Orbs.deletePermanent) {
+            deleteAskId = space.id
+          }
+          .buttonStyle(.plain)
+          .font(.subheadline.weight(.semibold))
+          .foregroundStyle(Theme.roseInk)
+          .padding(.horizontal, 4)
+          .padding(.top, 4)
+          .disabled(spaceBusy)
+        }
+      }
+    }
+  }
+
+  private var pastOrbsSection: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      sectionLabel(Copy.Orbs.pastOrbs)
+      Button {
+        showPastOrbs = true
+      } label: {
+        HStack {
+          VStack(alignment: .leading, spacing: 2) {
+            Text(Copy.Orbs.pastOrbs)
+              .font(.subheadline.weight(.semibold))
+              .foregroundStyle(Theme.ink)
+            Text(Copy.Orbs.pastOrbsSub)
+              .font(.caption)
+              .foregroundStyle(Theme.inkFaint)
+          }
+          Spacer()
+          Text("\(pastOrbs.count)")
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(Theme.inkSoft)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 2)
+            .background(Theme.ink.opacity(0.06), in: Capsule())
+          Image(systemName: "chevron.right")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(Theme.inkFaint)
+        }
+        .padding(14)
+        .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+      }
+      .buttonStyle(.plain)
+    }
+  }
+
+  private var pastOrbsSheet: some View {
+    NavigationStack {
+      ScrollView {
+        VStack(alignment: .leading, spacing: 16) {
+          Text("\(Copy.Orbs.pastOrbsSub) — kept as read-only keepsakes.")
+            .font(.footnote)
+            .foregroundStyle(Theme.inkSoft)
+            .padding(.top, 4)
+
+          ForEach(pastOrbs, id: \.id) { pOrb in
+            let isCurrent = pOrb.id == app.space?.id
+            let isSolo = pOrb.members.count <= 1
+            let faces = orbFaceChips(for: pOrb)
+
+            VStack(alignment: .leading, spacing: 12) {
+              HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                  Text(pOrb.peopleLabel)
+                    .font(.headline)
+                    .foregroundStyle(Theme.ink)
+                  Text(Copy.Orbs.frozenSnapshot)
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(Theme.inkFaint)
+                }
+
+                Spacer()
+
+                HStack(spacing: -6) {
+                  ForEach(faces.prefix(3)) { f in
+                    ZStack {
+                      Circle()
+                        .fill(f.them ? Theme.faceRose : Theme.faceSage)
+                      Text(f.letter)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.white)
+                        .offset(y: -0.5)
+                    }
+                    .frame(width: 22, height: 22)
+                    .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
+                    .fixedSize()
+                  }
+                }
+              }
+
+              Divider()
+
+              HStack(spacing: 10) {
+                if isCurrent {
+                  Text("Currently viewing")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Theme.ink, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                } else {
+                  Button("View") {
+                    switchOrb(pOrb.id)
+                    showPastOrbs = false
+                    dismiss()
+                  }
+                  .buttonStyle(.plain)
+                  .font(.caption.weight(.semibold))
+                  .foregroundStyle(Theme.ink)
+                  .padding(.horizontal, 12)
+                  .padding(.vertical, 6)
+                  .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                  .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
+                }
+
+                if isSolo {
+                  Button(Copy.Orbs.restoreOrb) {
+                    restoreOrb(pOrb.id)
+                  }
+                  .buttonStyle(.plain)
+                  .font(.caption.weight(.semibold))
+                  .foregroundStyle(Theme.ink)
+                  .padding(.horizontal, 12)
+                  .padding(.vertical, 6)
+                  .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                  .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
+                }
+
+                Spacer()
+
+                if deleteAskId != pOrb.id {
+                  Button(Copy.Orbs.deletePermanent) {
+                    deleteAskId = pOrb.id
+                  }
+                  .buttonStyle(.plain)
+                  .font(.caption.weight(.semibold))
+                  .foregroundStyle(Theme.roseInk)
+                }
+              }
+
+              if deleteAskId == pOrb.id {
+                VStack(alignment: .leading, spacing: 8) {
+                  Text(Copy.Orbs.deletePermanentConfirm)
+                    .font(.caption)
+                    .foregroundStyle(Theme.inkSoft)
+
+                  HStack(spacing: 8) {
+                    Button("Keep") {
+                      deleteAskId = nil
+                    }
+                    .buttonStyle(.plain)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.ink)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
+
+                    Button(Copy.Orbs.deletePermanent) {
+                      deleteOrb(pOrb.id)
+                    }
+                    .buttonStyle(.plain)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Theme.roseInk, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                  }
+                }
+                .padding(10)
+                .background(Theme.ink.opacity(0.04), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+              }
+            }
+            .padding(14)
+            .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+          }
+        }
+        .padding(20)
+      }
+      .background(Theme.paper.ignoresSafeArea())
+      .navigationTitle(Copy.Orbs.pastOrbs)
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+        ToolbarItem(placement: .topBarTrailing) {
+          Button("Done") {
+            showPastOrbs = false
+            deleteAskId = nil
+          }
+        }
       }
     }
   }
@@ -499,6 +766,30 @@ struct SettingsView: View {
     Task {
       await app.leaveCurrentSpace()
       leaveAsk = false
+      spaceBusy = false
+    }
+  }
+
+  private func restoreOrb(_ id: String) {
+    guard !spaceBusy else { return }
+    spaceBusy = true
+    Task {
+      await app.restorePastOrb(id)
+      deleteAskId = nil
+      showPastOrbs = false
+      spaceBusy = false
+    }
+  }
+
+  private func deleteOrb(_ id: String) {
+    guard !spaceBusy else { return }
+    spaceBusy = true
+    Task {
+      await app.deletePastOrb(id)
+      deleteAskId = nil
+      if pastOrbs.count <= 1 {
+        showPastOrbs = false
+      }
       spaceBusy = false
     }
   }

@@ -318,3 +318,186 @@
 .textLink:active {
   opacity: 0.7;
 }
+
+.frozenBanner {
+  background: var(--fill-tertiary);
+  border: var(--hairline-w) solid var(--separator);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.frozenBannerText {
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-soft);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.frozenBannerBtn {
+  align-self: flex-start;
+  padding: 6px 12px;
+  background: var(--paper-warm);
+  border: var(--hairline-w) solid var(--separator);
+  border-radius: 999px;
+  font: var(--t-caption);
+  letter-spacing: var(--tr-caption);
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.pastOrbsRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--fill-tertiary);
+  border: var(--hairline-w) solid var(--separator);
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: opacity 0.15s var(--ease-ios);
+}
+
+.pastOrbsRow:active {
+  opacity: 0.7;
+}
+
+.pastOrbsLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pastOrbsTitle {
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pastOrbsSub {
+  font: var(--t-caption);
+  letter-spacing: var(--tr-caption);
+  color: var(--ink-faint);
+}
+
+.pastOrbsRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pastOrbsCount {
+  font: var(--t-footnote);
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--fill-quaternary);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.pastOrbsChevron {
+  font-size: 16px;
+  color: var(--ink-faint);
+}
+
+.pastOrbList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.pastOrbCard {
+  background: var(--fill-tertiary);
+  border: var(--hairline-w) solid var(--separator);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pastOrbTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pastOrbInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pastOrbName {
+  font: var(--t-headline);
+  letter-spacing: var(--tr-headline);
+  color: var(--ink);
+}
+
+.pastOrbBadge {
+  font: var(--t-caption2);
+  letter-spacing: var(--tr-caption2);
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+.pastOrbActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: var(--hairline-w) solid var(--separator);
+}
+
+.pastOrbBtn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: var(--hairline-w) solid var(--separator);
+  background: var(--paper-warm);
+  font: var(--t-footnote);
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.pastOrbBtnActive {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.pastOrbBtnDanger {
+  color: var(--rose-ink);
+}
+
+.dangerAskBox {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--fill-quaternary);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dangerAskText {
+  font: var(--t-caption);
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.dangerAskButtons {
+  display: flex;
+  gap: 8px;
+}

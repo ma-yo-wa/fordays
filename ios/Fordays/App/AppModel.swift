@@ -389,20 +389,57 @@ final class AppModel: ObservableObject {
   func leaveCurrentSpace() async {
     guard let current = space else { return }
     do {
-      let data = try await sb.rpc("leave_space", params: LeaveSpaceParams(sid: current.id)).execute().data
-      if let copyId = decodeUUID(data) {
-        storedSpaceId = copyId
+      _ = try await sb.rpc("leave_space", params: SpaceIdParams(sid: current.id)).execute()
+      let list = try await loadSpaces()
+      spaces = list
+      let active = list.filter { !$0.frozen }
+      if let next = active.first {
+        storedSpaceId = next.id
+        space = next
+        await refreshActivities()
       } else {
-        storedSpaceId = nil
-      }
-      try await refreshSpaceAndData()
-      if space == nil {
         try await ensureSpace()
         try await refreshSpaceAndData()
       }
-      if space?.frozen == true {
-        toast = "This is a copy from when you left"
+      toast = "Saved to Past Orbs"
+    } catch {
+      toast = error.localizedDescription
+    }
+  }
+
+  func restorePastOrb(_ spaceId: String) async {
+    do {
+      _ = try await sb.rpc("restore_space", params: SpaceIdParams(sid: spaceId)).execute()
+      let list = try await loadSpaces()
+      spaces = list
+      if let restored = list.first(where: { $0.id == spaceId }) {
+        storedSpaceId = restored.id
+        space = restored
+        await refreshActivities()
       }
+      toast = "Orb restored to active"
+    } catch {
+      toast = error.localizedDescription
+    }
+  }
+
+  func deletePastOrb(_ spaceId: String) async {
+    do {
+      _ = try await sb.rpc("delete_frozen_space", params: SpaceIdParams(sid: spaceId)).execute()
+      let list = try await loadSpaces()
+      spaces = list
+      if space?.id == spaceId {
+        let active = list.filter { !$0.frozen }
+        if let next = active.first {
+          storedSpaceId = next.id
+          space = next
+          await refreshActivities()
+        } else {
+          try await ensureSpace()
+          try await refreshSpaceAndData()
+        }
+      }
+      toast = "Orb permanently deleted"
     } catch {
       toast = error.localizedDescription
     }

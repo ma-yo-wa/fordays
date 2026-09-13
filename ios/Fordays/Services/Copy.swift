@@ -18,6 +18,14 @@ enum Copy {
     static func removeConfirm(name: String) -> String {
       "Remove \(name)? They get a copy of what was already here. This Orb stays live for everyone else."
     }
+    static let pastOrbs = "Past Orbs"
+    static let pastOrbsSub = "Orbs you’ve left or set aside"
+    static let frozenSnapshot = "Frozen snapshot"
+    static let viewingFrozenBanner = "Viewing a past Orb — you can look back, but plans are frozen"
+    static let switchBackToActive = "Switch back to active Orb"
+    static let restoreOrb = "Restore Orb"
+    static let deletePermanent = "Delete permanently"
+    static let deletePermanentConfirm = "Permanently delete this Orb? All past plans here will be purged forever."
   }
 
   enum Plans {

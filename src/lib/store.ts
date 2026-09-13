@@ -9,6 +9,8 @@ import {
   createSpace as createSpaceRemote,
   ensureSpace,
   leaveSpace as leaveSpaceRemote,
+  restoreSpace as restoreSpaceRemote,
+  deleteFrozenSpace as deleteFrozenSpaceRemote,
   loadSpaces,
   removeSpaceMember as removeSpaceMemberRemote,
   pendingInvite,
@@ -42,11 +44,16 @@ export function canCompose(space: SpaceInfo | null | undefined): boolean {
   return Boolean(space && !space.frozen);
 }
 
-/** Who this orb is with — or that it’s a leftover copy. */
+/** Who this orb is with. */
 export function spacePeopleLabel(space: SpaceInfo): string {
-  if (space.frozen) return 'Copy from when you left';
   const others = (space.members ?? []).filter((m) => m.id !== space.myId);
-  if (!others.length) return 'Just you';
+  if (!others.length) {
+    const raw = space.name?.trim() ?? '';
+    if (raw && !/^(fordays|someday)$/i.test(raw)) {
+      return raw;
+    }
+    return 'Just you';
+  }
   if (others.length === 1) return others[0]!.name;
   if (others.length === 2) return `${others[0]!.name} and ${others[1]!.name}`;
   return others.map((m) => m.name).join(', ');
@@ -98,6 +105,8 @@ interface AppState {
   switchToSpace: (id: string) => Promise<void>;
   addSpace: (name?: string) => Promise<void>;
   leaveCurrentSpace: () => Promise<void>;
+  restorePastOrb: (spaceId: string) => Promise<void>;
+  deletePastOrb: (spaceId: string) => Promise<void>;
   removeMemberFromSpace: (userId: string) => Promise<void>;
   signOutUser: () => Promise<void>;
   setPasswordRecovery: (v: boolean) => void;
@@ -291,21 +300,57 @@ export const useApp = create<AppState>()((set, get) => {
       if (!current) return;
       await leaveSpaceRemote(current.id);
       const spaces = await loadSpaces();
-      const space = spaces.find((s) => s.id === loadConfig().spaceId) ?? spaces[0] ?? null;
-      if (space) {
-        const config = { ...loadConfig(), spaceId: space.id };
+      const active = spaces.filter((s) => !s.frozen);
+      let target = active[0] ?? null;
+      if (!target) {
+        target = await ensureSpace();
+      }
+      const allSpaces = await loadSpaces().catch(() => (target ? [target] : []));
+      if (target) {
+        const config = { ...loadConfig(), spaceId: target.id };
         saveConfig(config);
-        set({ space, spaces, config, detailId: null });
+        set({ space: target, spaces: allSpaces, config, detailId: null });
+        await start(await supabaseBackend(config));
+      }
+      get().toast('Saved to Past Orbs');
+    },
+
+    async restorePastOrb(spaceId) {
+      await restoreSpaceRemote(spaceId);
+      const spaces = await loadSpaces();
+      const restored = spaces.find((s) => s.id === spaceId);
+      if (restored) {
+        const config = { ...loadConfig(), spaceId: restored.id };
+        saveConfig(config);
+        set({ space: restored, spaces, config, detailId: null });
         await start(await supabaseBackend(config));
       } else {
-        const space = await ensureSpace();
-        const next = await loadSpaces().catch(() => (space ? [space] : []));
-        set({ space, spaces: next, config: loadConfig(), detailId: null });
-        if (space) {
-          await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
-        }
+        set({ spaces });
       }
-      if (get().space?.frozen) get().toast('This is a copy from when you left');
+      get().toast('Orb restored to active');
+    },
+
+    async deletePastOrb(spaceId) {
+      await deleteFrozenSpaceRemote(spaceId);
+      const spaces = await loadSpaces();
+      const current = get().space;
+      if (current?.id === spaceId) {
+        const active = spaces.filter((s) => !s.frozen);
+        let target = active[0] ?? null;
+        if (!target) {
+          target = await ensureSpace();
+        }
+        const allSpaces = await loadSpaces().catch(() => (target ? [target] : []));
+        if (target) {
+          const config = { ...loadConfig(), spaceId: target.id };
+          saveConfig(config);
+          set({ space: target, spaces: allSpaces, config, detailId: null });
+          await start(await supabaseBackend(config));
+        }
+      } else {
+        set({ spaces });
+      }
+      get().toast('Orb permanently deleted');
     },
 
     async removeMemberFromSpace(userId) {

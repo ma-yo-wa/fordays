@@ -63,9 +63,14 @@ struct SpaceInfo: Hashable {
   var canCompose: Bool { !frozen }
 
   var peopleLabel: String {
-    if frozen { return "Copy from when you left" }
     let others = members.filter { $0.id != myId }
-    if others.isEmpty { return "Just you" }
+    if others.isEmpty {
+      let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+      if !trimmed.isEmpty && trimmed.caseInsensitiveCompare("Fordays") != .orderedSame && trimmed.caseInsensitiveCompare("Someday") != .orderedSame {
+        return trimmed
+      }
+      return "Just you"
+    }
     if others.count == 1 { return others[0].name }
     if others.count == 2 { return "\(others[0].name) and \(others[1].name)" }
     return others.map(\.name).joined(separator: ", ")
@@ -131,6 +136,10 @@ struct CreateSpaceParams: Encodable {
 }
 
 struct LeaveSpaceParams: Encodable {
+  let sid: String
+}
+
+struct SpaceIdParams: Encodable {
   let sid: String
 }
 
