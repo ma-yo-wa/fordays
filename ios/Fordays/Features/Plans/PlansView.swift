@@ -192,8 +192,8 @@ struct PlansView: View {
                 .frame(height: 5)
               }
               .frame(maxWidth: .infinity, minHeight: 52)
-              .overlay(alignment: .bottom) {
-                multiDayRail(for: iso, index: index)
+              .background(alignment: .top) {
+                multiDayTrack(for: iso, index: index)
               }
             }
             .buttonStyle(.plain)
@@ -206,7 +206,7 @@ struct PlansView: View {
   }
 
   @ViewBuilder
-  private func multiDayRail(for iso: String, index: Int) -> some View {
+  private func multiDayTrack(for iso: String, index: Int) -> some View {
     let isRowStart = index % 7 == 0
     let isRowEnd = index % 7 == 6
     let spanning = plans.filter { a in
@@ -222,17 +222,25 @@ struct PlansView: View {
       let end = a.endsAt.map { String($0.prefix(10)) } ?? String(a.dateTime?.prefix(10) ?? "")
       return end == iso
     }
-    let isSegStart = startsHere || isRowStart
-    let isSegEnd = endsHere || isRowEnd
 
     if !spanning.isEmpty {
       GeometryReader { geo in
-        let left: CGFloat = isSegStart ? 4 : 0
-        let right: CGFloat = isSegEnd ? 4 : 0
-        Capsule()
-          .fill(Theme.roseInk.opacity(0.8))
-          .frame(width: max(0, geo.size.width - left - right), height: 3)
-          .offset(x: left, y: geo.size.height - 4)
+        let midX = geo.size.width / 2
+        let left: CGFloat = startsHere ? (midX - 15) : (isRowStart ? 2 : 0)
+        let right: CGFloat = endsHere ? (midX - 15) : (isRowEnd ? 2 : 0)
+        let roundL: CGFloat = startsHere ? 15 : (isRowStart ? 6 : 0)
+        let roundR: CGFloat = endsHere ? 15 : (isRowEnd ? 6 : 0)
+        let width = max(0, geo.size.width - left - right)
+
+        UnevenRoundedRectangle(
+          topLeadingRadius: roundL,
+          bottomLeadingRadius: roundL,
+          bottomTrailingRadius: roundR,
+          topTrailingRadius: roundR
+        )
+        .fill(Theme.sage.opacity(0.26))
+        .frame(width: width, height: 30)
+        .offset(x: left, y: 0)
       }
     }
   }

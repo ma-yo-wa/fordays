@@ -130,26 +130,23 @@ export default function Calendar() {
           const extStartsHere = spanningExt.some((e) => dtDate(e.startsAt) === date);
           const extEndsHere = spanningExt.some((e) => dtDate(e.endsAt) === date);
 
-          const hasPlanRail = spanningPlans.length > 0;
-          const hasExtRail = !hasPlanRail && spanningExt.length > 0;
+          // Multi-day spans (either a multi-day shared plan or multi-day imported event)
+          const isSpanning = spanningPlans.length > 0 || spanningExt.length > 0;
+          const startsHere = planStartsHere || extStartsHere;
+          const endsHere = planEndsHere || extEndsHere;
 
-          const railClasses: string[] = [];
-          if (hasPlanRail) {
-            const isSegStart = planStartsHere || isRowStart;
-            const isSegEnd = planEndsHere || isRowEnd;
-            if (s.rail) railClasses.push(s.rail);
-            if (s.planRail) railClasses.push(s.planRail);
-            if (isSegStart && isSegEnd && s.railOnly) railClasses.push(s.railOnly);
-            else if (isSegStart && s.railStart) railClasses.push(s.railStart);
-            else if (isSegEnd && s.railEnd) railClasses.push(s.railEnd);
-          } else if (hasExtRail) {
-            const isSegStart = extStartsHere || isRowStart;
-            const isSegEnd = extEndsHere || isRowEnd;
-            if (s.rail) railClasses.push(s.rail);
-            if (s.extRail) railClasses.push(s.extRail);
-            if (isSegStart && isSegEnd && s.railOnly) railClasses.push(s.railOnly);
-            else if (isSegStart && s.railStart) railClasses.push(s.railStart);
-            else if (isSegEnd && s.railEnd) railClasses.push(s.railEnd);
+          let trackStyle: React.CSSProperties | undefined;
+          if (isSpanning) {
+            const roundLeft = startsHere ? '15px' : isRowStart ? '6px' : '0';
+            const roundRight = endsHere ? '15px' : isRowEnd ? '6px' : '0';
+            const leftInset = startsHere ? 'calc(50% - 15px)' : isRowStart ? '2px' : '0';
+            const rightInset = endsHere ? 'calc(50% - 15px)' : isRowEnd ? '2px' : '0';
+
+            trackStyle = {
+              left: leftInset,
+              right: rightInset,
+              borderRadius: `${roundLeft} ${roundRight} ${roundRight} ${roundLeft}`,
+            };
           }
 
           // Single-day plans and single-day external events get discrete marks
@@ -172,7 +169,7 @@ export default function Calendar() {
               className={classes.join(' ')}
               onClick={() => setPicked(date)}
             >
-              {railClasses.length > 0 && <span className={railClasses.join(' ')} />}
+              {trackStyle && <span className={s.track} style={trackStyle} />}
               <span className={s.num}>{cell.label}</span>
               <span className={s.marks}>
                 {singlePlans.slice(0, 3).map((p) => (

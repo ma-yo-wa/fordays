@@ -53,42 +53,48 @@
   pointer-events: none;
 }
 
-/* A multi-day event or plan reads as a continuous slim connector rail under the numbers,
-   with rounded caps at week and span boundaries so the numbers keep 100% contrast. */
-.rail {
+/* A multi-day event or plan reads as a continuous soft sage ribbon behind the numbers.
+   Height matches the numbers (30px), leaving breathing room above and below so dots never collide. */
+.track {
   position: absolute;
+  top: 15px;
+  height: 30px;
   left: 0;
   right: 0;
-  bottom: 6px;
-  height: 3px;
+  background: rgba(168, 206, 133, 0.22);
   z-index: 1;
   pointer-events: none;
 }
 
-.planRail {
-  background: var(--rose-ink);
-  opacity: 0.8;
+/* Event starts on this day: curve around the number */
+.trackStart {
+  left: calc(50% - 15px);
+  border-radius: 15px 0 0 15px;
 }
 
-.extRail {
-  background: var(--ink-soft);
-  opacity: 0.3;
+/* Event ends on this day: curve around the number */
+.trackEnd {
+  right: calc(50% - 15px);
+  border-radius: 0 15px 15px 0;
 }
 
-.railStart {
-  left: 6px;
-  border-radius: 3px 0 0 3px;
+/* Event starts AND ends on this same day */
+.trackOnly {
+  left: calc(50% - 15px);
+  right: calc(50% - 15px);
+  border-radius: 15px;
 }
 
-.railEnd {
-  right: 6px;
-  border-radius: 0 3px 3px 0;
+/* Event carried over from the previous week (Sunday start of row, but not start of event) */
+.trackRowStart {
+  left: 2px;
+  border-radius: 6px 0 0 6px;
 }
 
-.railOnly {
-  left: 6px;
-  right: 6px;
-  border-radius: 3px;
+/* Event carries over to the next week (Saturday end of row, but not end of event) */
+.trackRowEnd {
+  right: 2px;
+  border-radius: 0 6px 6px 0;
 }
 
 .num {
