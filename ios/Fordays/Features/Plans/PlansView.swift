@@ -117,7 +117,7 @@ struct PlansView: View {
 
                 Spacer(minLength: 4)
 
-                if e.title != nil && app.space?.canCompose == true {
+                if e.title != nil && e.isFutureOrToday(today: DateLocal.todayISO()) && app.space?.canCompose == true {
                   Button {
                     onMakePlanFromExternal?(e)
                   } label: {

@@ -2,8 +2,8 @@ import Sheet from './Sheet';
 import { useApp, canCompose } from '../lib/store';
 import { artFor } from '../lib/art';
 import { faceColor } from '../lib/tint';
-import { formatRange } from '../lib/date';
-import { planDraftFromExternal } from '../lib/types';
+import { formatRange, todayISO } from '../lib/date';
+import { planDraftFromExternal, isExternalFutureOrToday } from '../lib/types';
 import { Copy, formatCopy } from '../lib/copy';
 import s from './ExternalDetail.module.css';
 
@@ -113,7 +113,7 @@ export default function ExternalDetail() {
             </div>
           </div>
 
-          {event.title && canCompose(space) && (
+          {event.title && isExternalFutureOrToday(event, todayISO()) && canCompose(space) && (
             <button
               type="button"
               className={s.makePlanBtn}

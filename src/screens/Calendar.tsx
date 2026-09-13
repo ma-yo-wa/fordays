@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import CoverArt from '../components/CoverArt';
 import { useApp, partnerName, isMatched, canCompose } from '../lib/store';
-import { isPlan, planDraftFromExternal, type ExternalEvent } from '../lib/types';
+import { isPlan, planDraftFromExternal, isExternalFutureOrToday, type ExternalEvent } from '../lib/types';
 import { artFor } from '../lib/art';
 import { faceColor, faceIndexFor } from '../lib/tint';
 import {
@@ -265,7 +265,7 @@ export default function Calendar() {
                         {pillWhen(e, picked)} · {ownerName}
                       </span>
                     </div>
-                    {e.title && canCompose(space) && (
+                    {e.title && isExternalFutureOrToday(e, today) && canCompose(space) && (
                       <button
                         type="button"
                         className={s.makePlanAction}

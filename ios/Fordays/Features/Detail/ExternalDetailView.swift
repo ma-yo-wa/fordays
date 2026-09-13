@@ -105,7 +105,7 @@ struct ExternalDetailView: View {
           .overlay(Theme.ink.opacity(0.08))
 
         // Make plan primary button
-        if event.title != nil && app.space?.canCompose == true {
+        if event.title != nil && event.isFutureOrToday(today: DateLocal.todayISO()) && app.space?.canCompose == true {
           Button {
             dismiss()
             onMakePlan?(PlanDraft.from(external: event))

@@ -109,6 +109,13 @@ export function planDraftFromExternal(e: ExternalEvent): PlanDraft {
   };
 }
 
+/** Whether an external event is ongoing today or upcoming (not already in the past). */
+export function isExternalFutureOrToday(e: ExternalEvent, today?: string): boolean {
+  const day = today ?? new Date().toISOString().slice(0, 10);
+  const last = (e.endsAt || e.startsAt).slice(0, 10);
+  return last >= day;
+}
+
 /* One nullable column is still the whole distinction — a bucket-list item
    becomes a plan the moment it gets a date, with nothing to migrate. */
 export const isPlan = (a: Activity): boolean => Boolean(a.date_time);

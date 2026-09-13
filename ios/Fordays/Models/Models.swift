@@ -170,6 +170,11 @@ struct ExternalEvent: Identifiable, Hashable, Codable {
     case allDay = "all_day"
     case calendar
   }
+
+  func isFutureOrToday(today: String) -> Bool {
+    let last = endsAt.isEmpty ? String(startsAt.prefix(10)) : String(endsAt.prefix(10))
+    return last >= today
+  }
 }
 
 struct PlanDraft: Hashable {
