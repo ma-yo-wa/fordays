@@ -56,7 +56,7 @@ struct SettingsView: View {
     VStack(alignment: .leading, spacing: 8) {
       sectionLabel("Your profile")
       HStack(spacing: 12) {
-        face(space.myName, mine: true, size: 34)
+        face(space.myName, mine: true, size: 32)
         Text(space.myName)
           .font(.body)
           .foregroundStyle(Theme.ink)
@@ -137,20 +137,30 @@ struct SettingsView: View {
 
         HStack(spacing: -6) {
           ForEach(faces.prefix(3)) { f in
-            Text(f.letter)
-              .font(.system(size: 10, weight: .bold))
-              .foregroundStyle(.white)
-              .frame(width: 20, height: 20)
-              .background(f.them ? Theme.faceRose : Theme.faceSage, in: Circle())
-              .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
+            ZStack {
+              Circle()
+                .fill(f.them ? Theme.faceRose : Theme.faceSage)
+              Text(f.letter)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(.white)
+                .offset(y: -0.5)
+            }
+            .frame(width: 22, height: 22)
+            .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
+            .fixedSize()
           }
           if faces.count > 3 {
-            Text("+\(faces.count - 3)")
-              .font(.system(size: 9, weight: .semibold))
-              .foregroundStyle(.white)
-              .frame(width: 20, height: 20)
-              .background(Theme.inkSoft, in: Circle())
-              .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
+            ZStack {
+              Circle()
+                .fill(Theme.inkSoft)
+              Text("+\(faces.count - 3)")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.white)
+                .offset(y: -0.5)
+            }
+            .frame(width: 22, height: 22)
+            .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
+            .fixedSize()
           }
         }
         .padding(.vertical, 1)
@@ -187,17 +197,22 @@ struct SettingsView: View {
       createOrb()
     } label: {
       VStack(spacing: 7) {
-        Text("+")
-          .font(.title3.weight(.semibold))
-          .frame(width: 34, height: 34)
-          .background(Theme.ink.opacity(0.08), in: Circle())
-          .foregroundStyle(Theme.ink)
+        ZStack {
+          Circle()
+            .fill(Theme.ink.opacity(0.08))
+          Text("+")
+            .font(.system(size: 16, weight: .semibold))
+            .foregroundStyle(Theme.ink)
+            .offset(y: -0.5)
+        }
+        .frame(width: 32, height: 32)
+        .fixedSize()
 
-        Text("Create Orb")
+        Text(Copy.Orbs.createOrb)
           .font(.headline)
           .foregroundStyle(Theme.ink)
 
-        Text("Start solo, or invite")
+        Text(Copy.Orbs.createOrbSub)
           .font(.footnote)
           .foregroundStyle(Theme.inkSoft)
       }
@@ -220,11 +235,17 @@ struct SettingsView: View {
                 showInvite = true
               } label: {
                 VStack(spacing: 4) {
-                  Text("+")
-                    .font(.title3.weight(.semibold))
-                    .frame(width: 44, height: 44)
-                    .background(Theme.ink.opacity(0.08), in: Circle())
-                    .foregroundStyle(Theme.ink)
+                  ZStack {
+                    Circle()
+                      .fill(Theme.ink.opacity(0.08))
+                    Text("+")
+                      .font(.system(size: 16, weight: .semibold))
+                      .foregroundStyle(Theme.ink)
+                      .offset(y: -0.5)
+                  }
+                  .frame(width: 32, height: 32)
+                  .fixedSize()
+
                   Text("Invite")
                     .font(.caption)
                     .foregroundStyle(Theme.ink)
@@ -233,7 +254,7 @@ struct SettingsView: View {
                     .foregroundStyle(Theme.inkFaint)
                     .frame(height: 13)
                 }
-                .frame(width: 72)
+                .frame(width: 64)
               }
               .buttonStyle(.plain)
             }
@@ -242,27 +263,27 @@ struct SettingsView: View {
               let removable = !space.frozen && space.myRole == "admin" && space.members.count >= 3 && member.id != space.myId
               ZStack(alignment: .topLeading) {
                 VStack(spacing: 4) {
-                  face(member.name, mine: member.id == space.myId, size: 44)
+                  face(member.name, mine: member.id == space.myId, size: 32)
                   Text(member.name)
                     .font(.caption)
                     .foregroundStyle(Theme.ink)
                     .lineLimit(1)
-                    .frame(width: 72)
+                    .frame(width: 64)
                   Text(member.id == space.myId ? "You" : " ")
                     .font(.caption2)
                     .foregroundStyle(Theme.inkFaint)
                     .frame(height: 13)
                 }
-                .frame(width: 72)
+                .frame(width: 64)
 
                 if removable {
                   Button {
                     removeId = member.id
                   } label: {
                     Image(systemName: "minus")
-                      .font(.system(size: 10, weight: .bold))
+                      .font(.system(size: 9, weight: .bold))
                       .foregroundStyle(Theme.inkSoft)
-                      .frame(width: 18, height: 18)
+                      .frame(width: 16, height: 16)
                       .background(Theme.paperWarm, in: Circle())
                       .overlay(Circle().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
                       .shadow(color: Color.black.opacity(0.1), radius: 2, y: 1)
@@ -280,13 +301,13 @@ struct SettingsView: View {
       .padding(10)
       .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-      Text("An Orb is your personal or shared capsule to plan, dream, and look back.")
+      Text(Copy.Orbs.descriptor)
         .font(.footnote)
         .foregroundStyle(Theme.inkFaint)
         .padding(.horizontal, 4)
 
       if space.frozen {
-        Text("This is a copy from when you left — you can look, not change")
+        Text(Copy.Orbs.frozenNotice)
           .font(.footnote)
           .foregroundStyle(Theme.inkFaint)
           .padding(.horizontal, 4)
@@ -297,7 +318,7 @@ struct SettingsView: View {
   @ViewBuilder
   private func orbActionsSection(space: SpaceInfo) -> some View {
     let soloOrb = space.members.count <= 1
-    let leaveLabel = soloOrb ? "Delete this Orb" : "Leave this Orb"
+    let leaveLabel = soloOrb ? Copy.Orbs.deleteSoloAction : Copy.Orbs.leaveAction
     VStack(alignment: .leading, spacing: 8) {
       sectionLabel("Orb actions")
 
@@ -305,7 +326,7 @@ struct SettingsView: View {
         ForEach(space.members.filter { $0.id != space.myId }, id: \.id) { member in
           if removeId == member.id {
             VStack(alignment: .leading, spacing: 10) {
-              Text("Remove \(member.name)? They get a copy of what was already here. This Orb stays live for everyone else.")
+              Text(Copy.Orbs.removeConfirm(name: member.name))
                 .font(.footnote)
                 .foregroundStyle(Theme.inkFaint)
 
@@ -339,8 +360,8 @@ struct SettingsView: View {
           VStack(alignment: .leading, spacing: 10) {
             Text(
               soloOrb
-                ? "Delete this Orb? You’ll keep a frozen copy so nothing here is lost."
-                : "They keep the live Orb. You get a frozen copy of what’s already here."
+                ? Copy.Orbs.deleteSoloConfirm
+                : Copy.Orbs.leaveSharedConfirm
             )
             .font(.footnote)
             .foregroundStyle(Theme.inkFaint)
@@ -431,12 +452,17 @@ struct SettingsView: View {
     .disabled(spaceBusy)
   }
 
-  private func face(_ name: String, mine: Bool, size: CGFloat) -> some View {
-    Text(initial(name))
-      .font(.caption.weight(.bold))
-      .foregroundStyle(.white)
-      .frame(width: size, height: size)
-      .background(mine ? Theme.faceSage : Theme.faceRose, in: Circle())
+  private func face(_ name: String, mine: Bool, size: CGFloat = 32) -> some View {
+    ZStack {
+      Circle()
+        .fill(mine ? Theme.faceSage : Theme.faceRose)
+      Text(initial(name))
+        .font(.system(size: size * 0.44, weight: .bold))
+        .foregroundStyle(.white)
+        .offset(y: -0.5)
+    }
+    .frame(width: size, height: size)
+    .fixedSize()
   }
 
   private func switchOrb(_ id: String) {

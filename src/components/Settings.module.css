@@ -21,8 +21,8 @@
 }
 
 .face {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -30,6 +30,7 @@
   letter-spacing: var(--tr-footnote);
   font-weight: 700;
   color: #fff;
+  flex-shrink: 0;
 }
 
 .faceMe {
@@ -110,15 +111,16 @@
 }
 
 .orbPlus {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: grid;
   place-items: center;
   background: var(--fill-tertiary);
-  font: var(--t-title3);
-  letter-spacing: var(--tr-title3);
+  font-size: 18px;
+  font-weight: 600;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .orbTitle {
@@ -138,12 +140,12 @@
 }
 
 .orbMiniFace {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   color: #fff;
   border: 1.5px solid var(--paper);
@@ -195,7 +197,7 @@
 }
 
 .person {
-  flex: 0 0 72px;
+  flex: 0 0 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -211,17 +213,17 @@
 
 .removeBadge {
   position: absolute;
-  top: -3px;
-  left: -3px;
-  width: 18px;
-  height: 18px;
+  top: -2px;
+  left: -2px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--paper-warm);
   border: var(--hairline-w) solid var(--separator);
   color: var(--ink-soft);
   display: grid;
   place-items: center;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
@@ -246,15 +248,15 @@
 }
 
 .personFace {
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font: var(--t-footnote);
-  letter-spacing: var(--tr-footnote);
+  font-size: 14px;
   font-weight: 700;
   color: #fff;
+  flex-shrink: 0;
 }
 
 .personFaceMe {

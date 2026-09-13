@@ -13,6 +13,7 @@
 		1091443FA7F64C8FD71F0298 /* AddActivitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4EBB535ABBFFC73548D5B4B /* AddActivitySheet.swift */; };
 		1C7CC0C7BE7875ED37D216FA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 472B49EF886BAF4F0DE4D928 /* Assets.xcassets */; };
 		4A9C299BE6211B6044D28565 /* Mapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 152F2260E49DE06874ECA5D3 /* Mapping.swift */; };
+		C1A2B3C4D5E6F7A8B9C0D1E2 /* Copy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B3C4D5E6F7A8B9C0D1E2F3 /* Copy.swift */; };
 		64EB2E148A845A64870915CF /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = C91C40C7F774368CDFEBEDFA /* Supabase */; };
 		67CD068CE6A816FE8F1C9C7F /* BucketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412FB2B7E55638A2B182DA85 /* BucketView.swift */; };
 		79539FCCEA4A670404F82F7D /* PlansView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3351142946F30E708F5A9F47 /* PlansView.swift */; };
@@ -32,6 +33,7 @@
 /* Begin PBXFileReference section */
 		0499C47B337DC05EAB80984C /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		152F2260E49DE06874ECA5D3 /* Mapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapping.swift; sourceTree = "<group>"; };
+		C2B3C4D5E6F7A8B9C0D1E2F3 /* Copy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Copy.swift; sourceTree = "<group>"; };
 		2220F5B5358CFDCA0323FF88 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		22C6534D4843BB76DDC865AC /* MainShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainShellView.swift; sourceTree = "<group>"; };
 		230281E6660476AB193B9044 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -69,6 +71,7 @@
 			isa = PBXGroup;
 			children = (
 				152F2260E49DE06874ECA5D3 /* Mapping.swift */,
+				C2B3C4D5E6F7A8B9C0D1E2F3 /* Copy.swift */,
 				A06275BDB4475A336F2D09A3 /* SupabaseService.swift */,
 			);
 			path = Services;
@@ -277,6 +280,7 @@
 				B9E187BA6DACC670E5DA5CC3 /* FordaysApp.swift in Sources */,
 				C808786345D1F366BD4FE8C0 /* MainShellView.swift in Sources */,
 				4A9C299BE6211B6044D28565 /* Mapping.swift in Sources */,
+				C1A2B3C4D5E6F7A8B9C0D1E2 /* Copy.swift in Sources */,
 				7C48673361A091E5A6DD44F7 /* Models.swift in Sources */,
 				79539FCCEA4A670404F82F7D /* PlansView.swift in Sources */,
 				9942713DF9F91BACE7A39699 /* RootView.swift in Sources */,

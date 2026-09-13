@@ -23,6 +23,7 @@ import {
   syncPush,
   type PushState,
 } from '../lib/push';
+import { Copy, formatCopy } from '../lib/copy';
 import f from './Form.module.css';
 import ui from './Settings.module.css';
 
@@ -284,8 +285,8 @@ export default function Settings() {
                   <span className={ui.orbPlus} aria-hidden>
                     +
                   </span>
-                  <span className={ui.orbTitle}>Create Orb</span>
-                  <span className={ui.orbMeta}>Start solo, or invite</span>
+                  <span className={ui.orbTitle}>{Copy.orbs.createOrb}</span>
+                  <span className={ui.orbMeta}>{Copy.orbs.createOrbSub}</span>
                 </button>
                 {visibleOrbs.map((orb) => {
                   const faces = orbFaceChips(orb);
@@ -376,10 +377,10 @@ export default function Settings() {
                   </div>
                 </div>
                 <p className={ui.help}>
-                  An Orb is your personal or shared capsule to plan, dream, and look back.
+                  {Copy.orbs.descriptor}
                 </p>
                 {space.frozen && (
-                  <p className={ui.frozen}>This is a copy from when you left — you can look, not change</p>
+                  <p className={ui.frozen}>{Copy.orbs.frozenNotice}</p>
                 )}
               </section>
             )}
@@ -392,8 +393,7 @@ export default function Settings() {
                   removeId === member.id ? (
                     <div key={`confirm-${member.id}`} className={ui.removePrompt}>
                       <p className={f.rowNote}>
-                        Remove {member.name}? They get a copy of what was already here. This Orb
-                        stays live for everyone else.
+                        {formatCopy(Copy.orbs.removeConfirm, { name: member.name })}
                       </p>
                       <div className={f.group}>
                         <button
@@ -432,8 +432,8 @@ export default function Settings() {
                     <>
                       <p className={f.rowNote}>
                         {soloOrb
-                          ? 'Delete this Orb? You’ll keep a frozen copy so nothing here is lost.'
-                          : 'They keep the live Orb. You get a frozen copy of what’s already here.'}
+                          ? Copy.orbs.deleteSoloConfirm
+                          : Copy.orbs.leaveSharedConfirm}
                       </p>
                       <div className={f.group}>
                         <button

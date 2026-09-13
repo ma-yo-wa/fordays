@@ -1,0 +1,40 @@
+{
+  "orbs": {
+    "soloLabel": "Just you",
+    "onePerson": "1 person",
+    "peopleCount": "{count} people",
+    "createOrb": "Create Orb",
+    "createOrbSub": "Start solo, or invite",
+    "descriptor": "An Orb is your personal or shared capsule to plan, dream, and look back.",
+    "frozenNotice": "This is a copy from when you left — you can look, not change",
+    "leaveAction": "Leave this Orb",
+    "deleteSoloAction": "Delete this Orb",
+    "deleteSoloConfirm": "Delete this Orb? You’ll keep a frozen copy so nothing here is lost.",
+    "leaveSharedConfirm": "They keep the live Orb. You get a frozen copy of what’s already here.",
+    "removeConfirm": "Remove {name}? They get a copy of what was already here. This Orb stays live for everyone else."
+  },
+  "plans": {
+    "emptyToday": "Nothing planned today",
+    "emptyDay": "Nothing planned this day",
+    "emptyTodayPartner": "Nothing planned between you and {partner} today",
+    "emptyDayPartner": "Nothing planned between you and {partner} this day",
+    "emptyFrozen": "A copy from when you left"
+  },
+  "invite": {
+    "title": "Invite someone",
+    "subtitle": "They get their own login, then land in this Orb with you. Send them the invite link.",
+    "ideaLabel": "One thing you want to do",
+    "ideaHint": "— optional, but nicer than an empty Orb",
+    "shareSolo": "Join my Orb on Fordays: {link}",
+    "shareWithIdea": "I added “{idea}” to an Orb for us — join here: {link}"
+  },
+  "composer": {
+    "newPlan": "New plan",
+    "newIdea": "New bucket-list idea",
+    "editPlan": "Edit plan",
+    "editIdea": "Edit idea",
+    "multiDayPrompt": "Runs more than one day?",
+    "notesHint": "— optional",
+    "coverHint": "— optional"
+  }
+}
