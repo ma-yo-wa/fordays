@@ -74,20 +74,9 @@ export default function NavBar() {
       ];
   const visibleFaces = faceChips.slice(0, 2);
   const moreCount = Math.max(0, faceChips.length - 2);
-  const orbName = space?.name?.trim() ?? '';
-  const genericOrbName = /^(fordays|someday)$/i.test(orbName);
-  const orbTitle = (() => {
-    if (orbName && !genericOrbName) return orbName;
-    const members = space?.members ?? [];
-    if (members.length) {
-      const others = members.filter((m) => m.id !== space?.myId);
-      if (!others.length) return 'Your Orb';
-      if (others.length === 1) return `${others[0]!.name}'s Orb`;
-      return `${others[0]!.name} +${others.length - 1}`;
-    }
-    const fallbackPartner = (space?.partnerName ?? config.names[1 - me] ?? '').trim();
-    return fallbackPartner ? `${fallbackPartner}'s Orb` : 'Your Orb';
-  })();
+  const rawOrbName = space?.name?.trim() ?? '';
+  const genericOrbName = /^(fordays|someday)$/i.test(rawOrbName);
+  const customOrbName = rawOrbName && !genericOrbName ? rawOrbName : null;
 
   const monthLabel = `${MONTHS[cursorDate.getMonth()]}${
     cursorDate.getFullYear() === new Date().getFullYear()
@@ -129,33 +118,36 @@ export default function NavBar() {
         <div className={s.leading}>
           <button
             type="button"
-            className={s.who}
+            className={`${s.who} ${customOrbName ? s.whoNamed : s.whoAvatars}`}
             onClick={() => setSettingsOpen(true)}
-            aria-label="Open Orb settings"
-            title={orbTitle}
+            aria-label={customOrbName ? `Open settings for ${customOrbName}` : 'Open Orb settings'}
+            title={customOrbName ?? 'Orb settings'}
           >
-            <span className={s.faceStack}>
-              {visibleFaces.map((f) => (
-                <span
-                  key={f.key}
-                  className={`${s.face} ${f.them ? s.dim : ''}`}
-                  style={{ background: faceColor(f.them ? 1 : 0) }}
-                >
-                  {f.letter}
-                </span>
-              ))}
-              {moreCount > 0 && (
-                <span className={`${s.face} ${s.more}`} aria-label={`${moreCount} more people`}>
-                  +{moreCount}
-                </span>
-              )}
-              {/* Only ever amber, only when sync is down. A light that's always
-                  on reads as presence and gets tuned out. */}
-              {!live && backendName === 'supabase' && (
-                <span className={s.bulb} aria-hidden />
-              )}
-            </span>
-            <span className={s.whoTitle}>{orbTitle}</span>
+            {customOrbName ? (
+              <span className={s.whoTitle}>{customOrbName}</span>
+            ) : (
+              <span className={s.faceStack}>
+                {visibleFaces.map((f) => (
+                  <span
+                    key={f.key}
+                    className={`${s.face} ${f.them ? s.dim : ''}`}
+                    style={{ background: faceColor(f.them ? 1 : 0) }}
+                  >
+                    {f.letter}
+                  </span>
+                ))}
+                {moreCount > 0 && (
+                  <span className={`${s.face} ${s.more}`} aria-label={`${moreCount} more people`}>
+                    +{moreCount}
+                  </span>
+                )}
+                {/* Only ever amber, only when sync is down. A light that's always
+                    on reads as presence and gets tuned out. */}
+                {!live && backendName === 'supabase' && (
+                  <span className={s.bulb} aria-hidden />
+                )}
+              </span>
+            )}
             <span className={s.whoChevron} aria-hidden>
               <ChevronDown />
             </span>

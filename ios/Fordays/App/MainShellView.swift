@@ -116,45 +116,46 @@ struct MainShellView: View {
   private var topBar: some View {
     HStack {
       Button { showSettings = true } label: {
-        HStack(spacing: 8) {
-          HStack(spacing: -8) {
-            if let members = app.space?.members, !members.isEmpty {
-              let ordered = orderedHeaderMembers(members, myId: app.space?.myId)
-              ForEach(ordered.prefix(2), id: \.id) { member in
-                face(member.name, them: member.id != app.space?.myId)
-              }
-              let more = max(0, ordered.count - 2)
-              if more > 0 {
-                moreFace(more)
-              }
-            } else {
-              face(app.space?.myName, them: false)
-              if app.space?.isMatched == true {
-                face(app.space?.partnerName, them: true)
+        HStack(spacing: customOrbName != nil ? 7 : 6) {
+          if let custom = customOrbName {
+            Text(custom)
+              .font(.subheadline.weight(.semibold))
+              .foregroundStyle(Theme.ink)
+              .lineLimit(1)
+              .truncationMode(.tail)
+              .frame(maxWidth: 110, alignment: .leading)
+          } else {
+            HStack(spacing: -8) {
+              if let members = app.space?.members, !members.isEmpty {
+                let ordered = orderedHeaderMembers(members, myId: app.space?.myId)
+                ForEach(ordered.prefix(2), id: \.id) { member in
+                  face(member.name, them: member.id != app.space?.myId)
+                }
+                let more = max(0, ordered.count - 2)
+                if more > 0 {
+                  moreFace(more)
+                }
+              } else {
+                face(app.space?.myName, them: false)
+                if app.space?.isMatched == true {
+                  face(app.space?.partnerName, them: true)
+                }
               }
             }
           }
-          .padding(.trailing, 2)
-
-          Text(activeOrbTitle)
-            .font(.subheadline)
-            .foregroundStyle(Theme.ink)
-            .lineLimit(1)
-            .truncationMode(.tail)
 
           Image(systemName: "chevron.down")
             .font(.caption2.weight(.semibold))
             .foregroundStyle(Theme.inkSoft)
         }
-        .frame(maxWidth: 190, alignment: .leading)
-        .padding(.leading, 2)
-        .padding(.trailing, 10)
+        .padding(.leading, customOrbName != nil ? 12 : 2)
+        .padding(.trailing, customOrbName != nil ? 10 : 8)
         .frame(height: 36)
         .background(.ultraThinMaterial, in: Capsule())
         .overlay(Capsule().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
       }
       .buttonStyle(.plain)
-      .accessibilityLabel("Open Orb settings")
+      .accessibilityLabel(customOrbName.map { "Open settings for \($0)" } ?? "Open Orb settings")
       Spacer(minLength: 8)
 
       if app.tab == .plans {
@@ -221,21 +222,13 @@ struct MainShellView: View {
     }
   }
 
-  private var activeOrbTitle: String {
+  private var customOrbName: String? {
     let orbName = app.space?.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
     let genericNames = ["fordays", "someday"]
     if !orbName.isEmpty && !genericNames.contains(orbName.lowercased()) {
       return orbName
     }
-    if let space = app.space, !space.members.isEmpty {
-      let others = space.members.filter { $0.id.compare(space.myId, options: .caseInsensitive) != .orderedSame }
-      if others.isEmpty { return "Your Orb" }
-      if others.count == 1 { return "\(others[0].name)'s Orb" }
-      return "\(others[0].name) +\(others.count - 1)"
-    }
-    let partner = app.space?.partnerName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-    if !partner.isEmpty { return "\(partner)'s Orb" }
-    return "Your Orb"
+    return nil
   }
 
   /// You = sage, everyone else in this space = rose.
