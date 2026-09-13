@@ -1,10 +1,10 @@
 ---
-description: BACKLOG.md is local-only — never commit or push it
+description: BACKLOG.md and ETHOS.md are local-only — never commit or push them
 alwaysApply: true
 ---
 
-# Backlog stays local
+# Backlog and Ethos stay local
 
-Never `git add`, commit, or push `BACKLOG.md` / `backlog.md`. It is gitignored.
+Never `git add`, commit, or push `BACKLOG.md` / `backlog.md` or `ETHOS.md` / `ethos.md`. They are gitignored and strictly internal.
 
-Howbout notes and the longer queue live there for Mayowa only. Do not put that file on `origin`.
+Howbout research, longer queues, and internal product ethos notes live there for Mayowa only. Do not put those files on `origin`.

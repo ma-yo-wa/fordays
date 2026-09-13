@@ -13,4 +13,4 @@ After changes to either client — web PWA (`src/`, Worker config, `wrangler`, d
 
 Keep PWA and iOS equally updated on `origin/main`.
 
-Never include `BACKLOG.md` in a commit or push. Local only.
+Never include `BACKLOG.md` or `ETHOS.md` in a commit or push. Local only.

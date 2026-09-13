@@ -3,6 +3,8 @@ dist
 .DS_Store
 BACKLOG.md
 backlog.md
+ETHOS.md
+ethos.md
 .env
 .env.*
 !.env.example
