@@ -53,32 +53,42 @@
   pointer-events: none;
 }
 
-/* A multi-day event reads as a continuous band under the numbers, so a
-   trip looks like one thing instead of five unrelated days. */
-.band {
+/* A multi-day event or plan reads as a continuous slim connector rail under the numbers,
+   with rounded caps at week and span boundaries so the numbers keep 100% contrast. */
+.rail {
   position: absolute;
   left: 0;
   right: 0;
-  top: 14px;
   bottom: 6px;
-  background: var(--rose-wash);
-  z-index: 0;
+  height: 3px;
+  z-index: 1;
+  pointer-events: none;
 }
 
-.bandStart {
-  left: 3px;
-  border-radius: 10px 0 0 10px;
+.planRail {
+  background: var(--rose-ink);
+  opacity: 0.8;
 }
 
-.bandEnd {
-  right: 3px;
-  border-radius: 0 10px 10px 0;
+.extRail {
+  background: var(--ink-soft);
+  opacity: 0.3;
 }
 
-.bandOnly {
-  left: 3px;
-  right: 3px;
-  border-radius: 10px;
+.railStart {
+  left: 6px;
+  border-radius: 3px 0 0 3px;
+}
+
+.railEnd {
+  right: 6px;
+  border-radius: 0 3px 3px 0;
+}
+
+.railOnly {
+  left: 6px;
+  right: 6px;
+  border-radius: 3px;
 }
 
 .num {
@@ -127,95 +137,124 @@
   border: 1.5px solid currentColor;
 }
 
-/* ---------------- imported strip ---------------- */
-
-.busy {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 12px 20px 2px;
-  scrollbar-width: none;
-}
-
-.busy::-webkit-scrollbar {
-  display: none;
-}
-
-.busyPill {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 34px;
-  padding: 0 10px 0 9px;
-  border-radius: var(--r-capsule);
-  border: var(--hairline-w) solid var(--hairline);
-  background: var(--mat-thin-bg);
-  -webkit-backdrop-filter: var(--mat-thin);
-  backdrop-filter: var(--mat-thin);
-  color: var(--ink-2);
-  cursor: pointer;
-  transition:
-    transform 0.14s var(--ease-ios),
-    opacity 0.14s var(--ease-ios);
-}
-
-.busyPill:active {
-  transform: scale(0.95);
-  opacity: 0.7;
-}
-
-.busyWhen {
-  font: var(--t-footnote);
-  letter-spacing: var(--tr-footnote);
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.busyWho {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--paper-warm);
-  padding-bottom: 1px;
-}
-
 /* ---------------- agenda ---------------- */
 
 .agenda {
   flex: 1;
-  margin-top: 14px;
-  /* Paint into the home-indicator zone so the day sheet meets the
-     bottom edge like a native app — tab dock floats above it. */
-  padding: 14px max(20px, var(--safe-l))
+  padding: 18px max(20px, var(--safe-l))
     calc(var(--safe-b) + 116px)
     max(20px, var(--safe-r));
-  background: var(--mat-thin-bg);
-  -webkit-backdrop-filter: var(--mat-thin);
-  backdrop-filter: var(--mat-thin);
-  border-radius: var(--r-card) var(--r-card) 0 0;
   border-top: var(--hairline-w) solid var(--hairline);
   min-height: 0;
-}
-
-.grip {
-  width: 36px;
-  height: 5px;
-  border-radius: 3px;
-  background: var(--fill-secondary);
-  margin: -4px auto 14px;
 }
 
 .dayLabel {
   font: var(--t-headline);
   letter-spacing: var(--tr-headline);
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+
+.plansList {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------- availability ---------------- */
+
+.availabilitySection {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: var(--hairline-w) solid var(--hairline);
+}
+
+.availabilityHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   margin-bottom: 10px;
+}
+
+.availabilityTitle {
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.availabilitySub {
+  font: var(--t-caption2);
+  color: var(--ink-faint);
+}
+
+.availabilityList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.availabilityRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: var(--hairline-w) solid var(--hairline);
+  background: var(--paper-warm);
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.12s var(--ease-ios),
+    opacity 0.12s var(--ease-ios);
+}
+
+.availabilityRow:active {
+  transform: scale(0.98);
+  opacity: 0.74;
+}
+
+.availabilityGlyph {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.availabilityText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.availabilityName {
+  font: var(--t-body);
+  letter-spacing: var(--tr-body);
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.availabilityTime {
+  font: var(--t-caption);
+  letter-spacing: var(--tr-caption);
+  color: var(--ink-soft);
+}
+
+.availabilityWho {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
 }
 
 /* An iOS list row: the separator starts where the text starts, not at

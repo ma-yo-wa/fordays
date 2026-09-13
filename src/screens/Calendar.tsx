@@ -15,6 +15,7 @@ import {
   spanDays,
   todayISO,
 } from '../lib/date';
+import { Copy, formatCopy } from '../lib/copy';
 import s from './Calendar.module.css';
 
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -112,21 +113,57 @@ export default function Calendar() {
           const mine = plansByDate.get(date) ?? [];
           const theirs = extByDate.get(date) ?? [];
 
-          // A band is drawn for any imported event that spans more than
-          // this one day, and it knows whether it's an end so the
-          // corners round only where the run actually stops.
-          const spanning = theirs.filter((e) => spanDays(e.startsAt, e.endsAt).length > 1);
-          const startsHere = spanning.some((e) => dtDate(e.startsAt) === date);
-          const endsHere = spanning.some((e) => dtDate(e.endsAt) === date);
+          const isRowStart = i % 7 === 0;
+          const isRowEnd = i % 7 === 6;
 
-          const classes = [s.day];
-          if (date === picked) classes.push(s.picked);
-          if (date === today) classes.push(s.isToday);
+          // Multi-day shared plans
+          const spanningPlans = mine.filter((p) => {
+            const from = dtDate(p.date_time);
+            const to = dtDate(p.ends_at) ?? from;
+            return from && to && spanDays(from, to).length > 1;
+          });
+          const planStartsHere = spanningPlans.some((p) => dtDate(p.date_time) === date);
+          const planEndsHere = spanningPlans.some((p) => (dtDate(p.ends_at) ?? dtDate(p.date_time)) === date);
 
-          const bandClasses = [s.band];
-          if (startsHere && endsHere) bandClasses.push(s.bandOnly);
-          else if (startsHere) bandClasses.push(s.bandStart);
-          else if (endsHere) bandClasses.push(s.bandEnd);
+          // Multi-day external events
+          const spanningExt = theirs.filter((e) => spanDays(e.startsAt, e.endsAt).length > 1);
+          const extStartsHere = spanningExt.some((e) => dtDate(e.startsAt) === date);
+          const extEndsHere = spanningExt.some((e) => dtDate(e.endsAt) === date);
+
+          const hasPlanRail = spanningPlans.length > 0;
+          const hasExtRail = !hasPlanRail && spanningExt.length > 0;
+
+          const railClasses: string[] = [];
+          if (hasPlanRail) {
+            const isSegStart = planStartsHere || isRowStart;
+            const isSegEnd = planEndsHere || isRowEnd;
+            if (s.rail) railClasses.push(s.rail);
+            if (s.planRail) railClasses.push(s.planRail);
+            if (isSegStart && isSegEnd && s.railOnly) railClasses.push(s.railOnly);
+            else if (isSegStart && s.railStart) railClasses.push(s.railStart);
+            else if (isSegEnd && s.railEnd) railClasses.push(s.railEnd);
+          } else if (hasExtRail) {
+            const isSegStart = extStartsHere || isRowStart;
+            const isSegEnd = extEndsHere || isRowEnd;
+            if (s.rail) railClasses.push(s.rail);
+            if (s.extRail) railClasses.push(s.extRail);
+            if (isSegStart && isSegEnd && s.railOnly) railClasses.push(s.railOnly);
+            else if (isSegStart && s.railStart) railClasses.push(s.railStart);
+            else if (isSegEnd && s.railEnd) railClasses.push(s.railEnd);
+          }
+
+          // Single-day plans and single-day external events get discrete marks
+          const singlePlans = mine.filter((p) => {
+            const from = dtDate(p.date_time);
+            const to = dtDate(p.ends_at) ?? from;
+            return !from || !to || spanDays(from, to).length <= 1;
+          });
+          const singleExt = theirs.filter((e) => spanDays(e.startsAt, e.endsAt).length <= 1);
+
+          const classes: string[] = [];
+          if (s.day) classes.push(s.day);
+          if (date === picked && s.picked) classes.push(s.picked);
+          if (date === today && s.isToday) classes.push(s.isToday);
 
           return (
             <button
@@ -135,13 +172,13 @@ export default function Calendar() {
               className={classes.join(' ')}
               onClick={() => setPicked(date)}
             >
-              {spanning.length > 0 && <span className={bandClasses.join(' ')} />}
+              {railClasses.length > 0 && <span className={railClasses.join(' ')} />}
               <span className={s.num}>{cell.label}</span>
               <span className={s.marks}>
-                {mine.slice(0, 3).map((p) => (
+                {singlePlans.slice(0, 3).map((p) => (
                   <i key={p.id} />
                 ))}
-                {theirs.slice(0, 2).map((e) => (
+                {singleExt.slice(0, 2).map((e) => (
                   <i
                     key={e.id}
                     className={s.ext}
@@ -154,51 +191,27 @@ export default function Calendar() {
         })}
       </div>
 
-      {/* Imported events live on the calendar, not in the plans list. A
-          work meeting isn't something you two decided to do, so it gets
-          a strip of its own above the sheet rather than a card inside it. */}
-      {dayExternal.length > 0 && (
-        <div className={s.busy}>
-          {dayExternal.map((e) => {
-            const owner = ownerIndex(e.ownerId);
-            return (
-              <button
-                key={e.id}
-                type="button"
-                className={s.busyPill}
-                onClick={() => openExternal(e.id)}
-              >
-                <span aria-hidden>{artFor(e.title)}</span>
-                <span className={s.busyWhen}>{pillWhen(e, picked)}</span>
-                <span className={s.busyWho} style={{ background: faceColor(owner) }}>
-                  {(config.names[owner]?.[0] ?? '?').toUpperCase()}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
       <div className={s.agenda}>
-        <div className={s.grip} />
         <div className={s.dayLabel}>{dayHeading}</div>
 
         {!dayPlans.length ? (
           <div className={s.blank}>
             <p>
               {space?.frozen
-                ? 'A copy from when you left'
-                : other
-                  ? picked === today
-                    ? `Nothing planned between you and ${other} today`
-                    : `Nothing planned between you and ${other} this day`
-                  : picked === today
-                    ? 'Nothing planned today'
-                    : 'Nothing planned this day'}
+                ? Copy.plans.emptyFrozen
+                : dayExternal.length > 0
+                  ? Copy.plans.emptyTogether
+                  : other
+                    ? picked === today
+                      ? formatCopy(Copy.plans.emptyTodayPartner, { partner: other })
+                      : formatCopy(Copy.plans.emptyDayPartner, { partner: other })
+                    : picked === today
+                      ? Copy.plans.emptyToday
+                      : Copy.plans.emptyDay}
             </p>
           </div>
         ) : (
-          <>
+          <div className={s.plansList}>
             {dayPlans.map((a, i) => {
               const when = relativeDay(dtDate(a.date_time) ?? picked);
               const time = dtTime(a.date_time);
@@ -239,7 +252,46 @@ export default function Calendar() {
                 </motion.button>
               );
             })}
-          </>
+          </div>
+        )}
+
+        {dayExternal.length > 0 && (
+          <div className={s.availabilitySection}>
+            <div className={s.availabilityHeader}>
+              <span className={s.availabilityTitle}>Availability</span>
+              <span className={s.availabilitySub}>Google Calendar</span>
+            </div>
+            <div className={s.availabilityList}>
+              {dayExternal.map((e) => {
+                const owner = ownerIndex(e.ownerId);
+                const ownerName = config.names[owner] ?? 'Them';
+                return (
+                  <button
+                    key={e.id}
+                    type="button"
+                    className={s.availabilityRow}
+                    onClick={() => openExternal(e.id)}
+                  >
+                    <span className={s.availabilityGlyph} aria-hidden>
+                      {artFor(e.title)}
+                    </span>
+                    <div className={s.availabilityText}>
+                      <span className={s.availabilityName}>{e.title || 'Busy'}</span>
+                      <span className={s.availabilityTime}>
+                        {pillWhen(e, picked)} · {ownerName}
+                      </span>
+                    </div>
+                    <span
+                      className={s.availabilityWho}
+                      style={{ background: faceColor(owner) }}
+                    >
+                      {(ownerName[0] ?? '?').toUpperCase()}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         )}
       </div>
     </div>

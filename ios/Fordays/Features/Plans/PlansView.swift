@@ -75,14 +75,14 @@ struct PlansView: View {
         }
         Spacer(minLength: 0)
       }
-      .padding(20)
+      .padding(.horizontal, 20)
+      .padding(.top, 18)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-      .background(
-        Theme.paperWarm
-          .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-          .shadow(color: Theme.ink.opacity(0.08), radius: 20, y: -4)
-          .ignoresSafeArea(edges: .bottom)
-      )
+      .overlay(alignment: .top) {
+        Rectangle()
+          .fill(Theme.ink.opacity(0.08))
+          .frame(height: 0.5)
+      }
       .padding(.bottom, 88)
     }
   }
@@ -110,16 +110,16 @@ struct PlansView: View {
 
   private var emptyCopy: String {
     if app.space?.frozen == true {
-      return "A copy from when you left"
+      return Copy.Plans.emptyFrozen
     }
     let other = app.space?.isMatched == true ? app.space?.partnerName : nil
     let today = app.pickedDay == DateLocal.todayISO()
     if let other {
       return today
-        ? "Nothing planned between you and \(other) today"
-        : "Nothing planned between you and \(other) this day"
+        ? Copy.Plans.emptyTodayPartner(other)
+        : Copy.Plans.emptyDayPartner(other)
     }
-    return today ? "Nothing planned today" : "Nothing planned this day"
+    return today ? Copy.Plans.emptyToday : Copy.Plans.emptyDay
   }
 
   private func planTiming(_ a: Activity) -> String {
@@ -149,45 +149,100 @@ struct PlansView: View {
 
   private var monthGrid: some View {
     let days = monthDays()
+    let today = DateLocal.todayISO()
     return VStack(spacing: 8) {
-      LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 6) {
+      LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: 6) {
         ForEach(["S", "M", "T", "W", "T", "F", "S"], id: \.self) { d in
           Text(d)
-            .font(.caption2)
+            .font(.caption2.weight(.semibold))
             .foregroundStyle(Theme.inkFaint)
         }
-        ForEach(Array(days.enumerated()), id: \.offset) { _, day in
+        ForEach(days.indices, id: \.self) { index in
+          let day = days[index]
           if let day {
             let iso = DateLocal.todayISO(day)
-            let count = planCount(on: iso)
+            let count = singlePlanCount(on: iso)
+            let isToday = iso == today
+            let isPicked = app.pickedDay == iso
             Button {
               app.pickedDay = iso
             } label: {
-              VStack(spacing: 3) {
+              VStack(spacing: 2) {
                 Text("\(calendar.component(.day, from: day))")
-                  .font(.body.weight(app.pickedDay == iso ? .semibold : .regular))
+                  .font(.callout.weight(isToday ? .semibold : (isPicked ? .semibold : .regular)))
                   .foregroundStyle(Theme.ink)
-                  .frame(width: 36, height: 36)
+                  .frame(width: 30, height: 30)
                   .background {
-                    if app.pickedDay == iso {
+                    if isToday {
                       Circle().fill(Theme.rose)
                     }
                   }
+                  .overlay {
+                    if isPicked {
+                      Circle()
+                        .stroke(Theme.roseInk, style: StrokeStyle(lineWidth: 1.5, dash: [3, 2]))
+                    }
+                  }
+
                 HStack(spacing: 2) {
                   ForEach(0..<min(count, 3), id: \.self) { _ in
-                    Circle().fill(Theme.rose).frame(width: 4, height: 4)
+                    Circle().fill(Theme.roseInk).frame(width: 4, height: 4)
                   }
                 }
-                .frame(height: 6)
+                .frame(height: 5)
+              }
+              .frame(maxWidth: .infinity, minHeight: 52)
+              .overlay(alignment: .bottom) {
+                multiDayRail(for: iso, index: index)
               }
             }
             .buttonStyle(.plain)
           } else {
-            Color.clear.frame(height: 48)
+            Color.clear.frame(height: 52)
           }
         }
       }
     }
+  }
+
+  @ViewBuilder
+  private func multiDayRail(for iso: String, index: Int) -> some View {
+    let isRowStart = index % 7 == 0
+    let isRowEnd = index % 7 == 6
+    let spanning = plans.filter { a in
+      guard let start = a.dateTime.map({ String($0.prefix(10)) }) else { return false }
+      let end = a.endsAt.map { String($0.prefix(10)) } ?? start
+      return start < end && iso >= start && iso <= end
+    }
+    let startsHere = spanning.contains { a in
+      guard let start = a.dateTime.map({ String($0.prefix(10)) }) else { return false }
+      return start == iso
+    }
+    let endsHere = spanning.contains { a in
+      let end = a.endsAt.map { String($0.prefix(10)) } ?? String(a.dateTime?.prefix(10) ?? "")
+      return end == iso
+    }
+    let isSegStart = startsHere || isRowStart
+    let isSegEnd = endsHere || isRowEnd
+
+    if !spanning.isEmpty {
+      GeometryReader { geo in
+        let left: CGFloat = isSegStart ? 4 : 0
+        let right: CGFloat = isSegEnd ? 4 : 0
+        Capsule()
+          .fill(Theme.roseInk.opacity(0.8))
+          .frame(width: max(0, geo.size.width - left - right), height: 3)
+          .offset(x: left, y: geo.size.height - 4)
+      }
+    }
+  }
+
+  private func singlePlanCount(on day: String) -> Int {
+    plans.filter { a in
+      guard let start = a.dateTime.map({ String($0.prefix(10)) }) else { return false }
+      let end = a.endsAt.map { String($0.prefix(10)) } ?? start
+      return start == end && day == start
+    }.count
   }
 
   private func monthDays() -> [Date?] {
@@ -200,14 +255,6 @@ struct PlansView: View {
       d = calendar.date(byAdding: .day, value: 1, to: d) ?? d.addingTimeInterval(86400)
     }
     return days
-  }
-
-  private func planCount(on day: String) -> Int {
-    plans.filter { a in
-      guard let start = a.dateTime.map({ String($0.prefix(10)) }) else { return false }
-      let end = a.endsAt.map { String($0.prefix(10)) } ?? start
-      return day >= start && day <= end
-    }.count
   }
 
   private func prettyDay(_ iso: String) -> String {
