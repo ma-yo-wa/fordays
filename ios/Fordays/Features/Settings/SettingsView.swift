@@ -261,7 +261,7 @@ struct SettingsView: View {
           VStack(alignment: .leading, spacing: 10) {
             Text(
               soloOrb
-                ? "Delete this Orb? This removes everything in it for good."
+                ? "Delete this Orb? You’ll keep a frozen copy so nothing here is lost."
                 : "They keep the live Orb. You get a frozen copy of what’s already here."
             )
             .font(.footnote)
