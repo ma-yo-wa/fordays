@@ -16,6 +16,14 @@ function Chevron({ dir }: { dir: 'left' | 'right' }) {
   );
 }
 
+function ChevronDown() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
+      <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /* Two bar styles, because iOS has two and uses them for different things:
    a list gets a large title that collapses as you scroll it, and a fixed
    view like a month grid gets a compact bar. Using the large title
@@ -66,6 +74,8 @@ export default function NavBar() {
       ];
   const visibleFaces = faceChips.slice(0, 2);
   const moreCount = Math.max(0, faceChips.length - 2);
+  const fallbackPartner = (space?.partnerName ?? config.names[1 - me] ?? '').trim();
+  const orbTitle = space?.name?.trim() || (fallbackPartner ? `${fallbackPartner}'s Orb` : 'Your Orb');
 
   const monthLabel = `${MONTHS[cursorDate.getMonth()]}${
     cursorDate.getFullYear() === new Date().getFullYear()
@@ -109,27 +119,34 @@ export default function NavBar() {
             type="button"
             className={s.who}
             onClick={() => setSettingsOpen(true)}
-            aria-label="Settings"
+            aria-label="Open Orb settings"
+            title={orbTitle}
           >
-            {visibleFaces.map((f) => (
-              <span
-                key={f.key}
-                className={`${s.face} ${f.them ? s.dim : ''}`}
-                style={{ background: faceColor(f.them ? 1 : 0) }}
-              >
-                {f.letter}
-              </span>
-            ))}
-            {moreCount > 0 && (
-              <span className={`${s.face} ${s.more}`} aria-label={`${moreCount} more people`}>
-                +{moreCount}
-              </span>
-            )}
-            {/* Only ever amber, only when sync is down. A light that's always
-                on reads as presence and gets tuned out. */}
-            {!live && backendName === 'supabase' && (
-              <span className={s.bulb} aria-hidden />
-            )}
+            <span className={s.faceStack}>
+              {visibleFaces.map((f) => (
+                <span
+                  key={f.key}
+                  className={`${s.face} ${f.them ? s.dim : ''}`}
+                  style={{ background: faceColor(f.them ? 1 : 0) }}
+                >
+                  {f.letter}
+                </span>
+              ))}
+              {moreCount > 0 && (
+                <span className={`${s.face} ${s.more}`} aria-label={`${moreCount} more people`}>
+                  +{moreCount}
+                </span>
+              )}
+              {/* Only ever amber, only when sync is down. A light that's always
+                  on reads as presence and gets tuned out. */}
+              {!live && backendName === 'supabase' && (
+                <span className={s.bulb} aria-hidden />
+              )}
+            </span>
+            <span className={s.whoTitle}>{orbTitle}</span>
+            <span className={s.whoChevron} aria-hidden>
+              <ChevronDown />
+            </span>
           </button>
         </div>
 

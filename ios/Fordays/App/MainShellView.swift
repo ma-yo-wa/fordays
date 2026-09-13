@@ -116,30 +116,52 @@ struct MainShellView: View {
   private var topBar: some View {
     HStack {
       Button { showSettings = true } label: {
-        HStack(spacing: -8) {
-          if let members = app.space?.members, !members.isEmpty {
-            let ordered = orderedHeaderMembers(members, myId: app.space?.myId)
-            ForEach(ordered.prefix(2), id: \.id) { member in
-              face(member.name, them: member.id != app.space?.myId)
-            }
-            let more = max(0, ordered.count - 2)
-            if more > 0 {
-              moreFace(more)
-            }
-          } else {
-            face(app.space?.myName, them: false)
-            if app.space?.isMatched == true {
-              face(app.space?.partnerName, them: true)
+        HStack(spacing: 8) {
+          HStack(spacing: -8) {
+            if let members = app.space?.members, !members.isEmpty {
+              let ordered = orderedHeaderMembers(members, myId: app.space?.myId)
+              ForEach(ordered.prefix(2), id: \.id) { member in
+                face(member.name, them: member.id != app.space?.myId)
+              }
+              let more = max(0, ordered.count - 2)
+              if more > 0 {
+                moreFace(more)
+              }
+            } else {
+              face(app.space?.myName, them: false)
+              if app.space?.isMatched == true {
+                face(app.space?.partnerName, them: true)
+              }
             }
           }
+          .padding(.trailing, 2)
+
+          Text(activeOrbTitle)
+            .font(.subheadline)
+            .foregroundStyle(Theme.ink)
+            .lineLimit(1)
+            .truncationMode(.tail)
+
+          Image(systemName: "chevron.down")
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(Theme.inkSoft)
         }
+        .frame(maxWidth: 190, alignment: .leading)
+        .padding(.leading, 2)
+        .padding(.trailing, 10)
+        .frame(height: 36)
+        .background(.ultraThinMaterial, in: Capsule())
+        .overlay(Capsule().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
       }
-      Spacer()
+      .buttonStyle(.plain)
+      .accessibilityLabel("Open Orb settings")
+      Spacer(minLength: 0)
+    }
+    .overlay {
       Text(title)
         .font(.headline)
         .foregroundStyle(Theme.ink)
-      Spacer()
-      Color.clear.frame(width: 44, height: 44)
+        .allowsHitTesting(false)
     }
     .padding(.horizontal, 16)
     .padding(.vertical, 10)
@@ -157,6 +179,14 @@ struct MainShellView: View {
     let f = DateFormatter()
     f.dateFormat = "MMMM"
     return f.string(from: Date())
+  }
+
+  private var activeOrbTitle: String {
+    let orbName = app.space?.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    if !orbName.isEmpty { return orbName }
+    let partner = app.space?.partnerName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    if !partner.isEmpty { return "\(partner)'s Orb" }
+    return "Your Orb"
   }
 
   /// You = sage, everyone else in this space = rose.
