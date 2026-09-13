@@ -148,6 +148,14 @@
   padding-bottom: 1px;
 }
 
+.more {
+  background: var(--ink-soft);
+  color: #fffdfb;
+  font: var(--t-caption2);
+  font-weight: 700;
+  padding-bottom: 0;
+}
+
 .face + .face {
   margin-left: -11px;
 }

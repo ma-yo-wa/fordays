@@ -37,12 +37,17 @@ export default function NavBar() {
   const isCalendar = screen === 'calendar';
   const matched = isMatched(space);
   const me = space?.me ?? config.me;
-  const faces = space?.members?.length
-    ? space.members.slice(0, 3).map((m) => ({
-        key: m.id,
-        letter: (m.name[0] ?? '?').toUpperCase(),
-        them: m.id !== space.myId,
-      }))
+  const faceChips = space?.members?.length
+    ? (() => {
+        const mine = space.members.find((m) => m.id === space.myId);
+        const others = space.members.filter((m) => m.id !== space.myId);
+        const ordered = mine ? [mine, ...others] : space.members;
+        return ordered.map((m) => ({
+          key: m.id,
+          letter: (m.name[0] ?? '?').toUpperCase(),
+          them: m.id !== space.myId,
+        }));
+      })()
     : [
         {
           key: 'me',
@@ -59,6 +64,8 @@ export default function NavBar() {
             ]
           : []),
       ];
+  const visibleFaces = faceChips.slice(0, 2);
+  const moreCount = Math.max(0, faceChips.length - 2);
 
   const monthLabel = `${MONTHS[cursorDate.getMonth()]}${
     cursorDate.getFullYear() === new Date().getFullYear()
@@ -104,7 +111,7 @@ export default function NavBar() {
             onClick={() => setSettingsOpen(true)}
             aria-label="Settings"
           >
-            {faces.map((f) => (
+            {visibleFaces.map((f) => (
               <span
                 key={f.key}
                 className={`${s.face} ${f.them ? s.dim : ''}`}
@@ -113,6 +120,11 @@ export default function NavBar() {
                 {f.letter}
               </span>
             ))}
+            {moreCount > 0 && (
+              <span className={`${s.face} ${s.more}`} aria-label={`${moreCount} more people`}>
+                +{moreCount}
+              </span>
+            )}
             {/* Only ever amber, only when sync is down. A light that's always
                 on reads as presence and gets tuned out. */}
             {!live && backendName === 'supabase' && (

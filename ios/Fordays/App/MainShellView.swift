@@ -118,8 +118,13 @@ struct MainShellView: View {
       Button { showSettings = true } label: {
         HStack(spacing: -8) {
           if let members = app.space?.members, !members.isEmpty {
-            ForEach(members.prefix(3), id: \.id) { member in
+            let ordered = orderedHeaderMembers(members, myId: app.space?.myId)
+            ForEach(ordered.prefix(2), id: \.id) { member in
               face(member.name, them: member.id != app.space?.myId)
+            }
+            let more = max(0, ordered.count - 2)
+            if more > 0 {
+              moreFace(more)
             }
           } else {
             face(app.space?.myName, them: false)
@@ -163,6 +168,22 @@ struct MainShellView: View {
       .frame(width: 32, height: 32)
       .background(fill, in: Circle())
       .overlay(Circle().stroke(Theme.paper, lineWidth: 2))
+  }
+
+  private func moreFace(_ count: Int) -> some View {
+    Text("+\(count)")
+      .font(.caption2.weight(.bold))
+      .foregroundStyle(.white)
+      .frame(width: 32, height: 32)
+      .background(Theme.inkSoft, in: Circle())
+      .overlay(Circle().stroke(Theme.paper, lineWidth: 2))
+  }
+
+  private func orderedHeaderMembers(_ members: [SpaceMember], myId: String?) -> [SpaceMember] {
+    guard let myId else { return members }
+    let mine = members.filter { $0.id.compare(myId, options: .caseInsensitive) == .orderedSame }
+    let others = members.filter { $0.id.compare(myId, options: .caseInsensitive) != .orderedSame }
+    return mine + others
   }
 }
 
