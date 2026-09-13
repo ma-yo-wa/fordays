@@ -54,6 +54,25 @@ function orbSizeLabel(space: SpaceInfo): string {
   return `${n} people`;
 }
 
+function orbFaceChips(space: SpaceInfo): { key: string; letter: string; them: boolean }[] {
+  if (space.members?.length) {
+    const mine = space.members.find((m) => m.id === space.myId);
+    const others = space.members.filter((m) => m.id !== space.myId);
+    const ordered = mine ? [mine, ...others] : space.members;
+    return ordered.map((m) => ({
+      key: m.id,
+      letter: firstLetter(m.name),
+      them: m.id !== space.myId,
+    }));
+  }
+  return [
+    { key: 'me', letter: firstLetter(space.myName || '?'), them: false },
+    ...(space.partnerName
+      ? [{ key: 'them', letter: firstLetter(space.partnerName), them: true }]
+      : []),
+  ];
+}
+
 export default function Settings() {
   const open = useApp((st) => st.settingsOpen);
   const setOpen = useApp((st) => st.setSettingsOpen);
@@ -256,18 +275,6 @@ export default function Settings() {
             <section className={ui.section}>
               <span className={ui.label}>Your Orbs</span>
               <div className={ui.orbRail}>
-                {visibleOrbs.map((orb) => (
-                  <button
-                    key={orb.id}
-                    type="button"
-                    className={`${ui.orbCard} ${orb.id === space?.id ? ui.orbCardOn : ''}`}
-                    disabled={spaceBusy || orb.id === space?.id}
-                    onClick={() => void handleSwitchOrb(orb)}
-                  >
-                    <span className={ui.orbTitle}>{spacePeopleLabel(orb)}</span>
-                    <span className={ui.orbMeta}>{orbSizeLabel(orb)}</span>
-                  </button>
-                ))}
                 <button
                   type="button"
                   className={`${ui.orbCard} ${ui.orbCreate}`}
@@ -280,6 +287,38 @@ export default function Settings() {
                   <span className={ui.orbTitle}>Create Orb</span>
                   <span className={ui.orbMeta}>Start solo, or invite</span>
                 </button>
+                {visibleOrbs.map((orb) => {
+                  const faces = orbFaceChips(orb);
+                  return (
+                    <button
+                      key={orb.id}
+                      type="button"
+                      className={`${ui.orbCard} ${orb.id === space?.id ? ui.orbCardOn : ''}`}
+                      disabled={spaceBusy || orb.id === space?.id}
+                      onClick={() => void handleSwitchOrb(orb)}
+                    >
+                      <span className={ui.orbTitle}>{spacePeopleLabel(orb)}</span>
+                      <div className={ui.orbFaceStack}>
+                        {faces.slice(0, 3).map((f, idx) => (
+                          <span
+                            key={f.key}
+                            className={`${ui.orbMiniFace} ${f.them ? ui.orbMiniFaceThem : ui.orbMiniFaceMe}`}
+                            style={{ zIndex: 4 - idx }}
+                            aria-hidden
+                          >
+                            {f.letter}
+                          </span>
+                        ))}
+                        {faces.length > 3 && (
+                          <span className={`${ui.orbMiniFace} ${ui.orbMiniMore}`}>
+                            +{faces.length - 3}
+                          </span>
+                        )}
+                      </div>
+                      <span className={ui.orbMeta}>{orbSizeLabel(orb)}</span>
+                    </button>
+                  );
+                })}
               </div>
             </section>
 
@@ -288,22 +327,6 @@ export default function Settings() {
                 <span className={ui.label}>People in this Orb</span>
                 <div className={ui.peopleCard}>
                   <div className={ui.peopleRail}>
-                    {members.map((member) => {
-                      const mine = member.id === space.myId;
-                      return (
-                        <div key={member.id} className={ui.person}>
-                          <span
-                            className={`${ui.personFace} ${mine ? ui.personFaceMe : ui.personFaceThem}`}
-                            aria-hidden
-                          >
-                            {firstLetter(member.name)}
-                          </span>
-                          <span className={ui.personName}>{member.name}</span>
-                          <span className={ui.personTag}>{mine ? 'You' : ''}</span>
-                        </div>
-                      );
-                    })}
-
                     {!space.frozen && (
                       <button
                         type="button"
@@ -317,6 +340,39 @@ export default function Settings() {
                         <span className={ui.personTag}>More</span>
                       </button>
                     )}
+
+                    {members.map((member) => {
+                      const mine = member.id === space.myId;
+                      const removable = removableMembers.some((m) => m.id === member.id);
+                      return (
+                        <div key={member.id} className={ui.person}>
+                          <div className={ui.personWrap}>
+                            <span
+                              className={`${ui.personFace} ${mine ? ui.personFaceMe : ui.personFaceThem}`}
+                              aria-hidden
+                            >
+                              {firstLetter(member.name)}
+                            </span>
+                            {removable && (
+                              <button
+                                type="button"
+                                className={ui.removeBadge}
+                                title={`Remove ${member.name}`}
+                                aria-label={`Remove ${member.name}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setRemoveId(member.id);
+                                }}
+                              >
+                                –
+                              </button>
+                            )}
+                          </div>
+                          <span className={ui.personName}>{member.name}</span>
+                          <span className={ui.personTag}>{mine ? 'You' : ''}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
                 <p className={ui.help}>

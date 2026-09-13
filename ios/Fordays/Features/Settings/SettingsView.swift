@@ -73,10 +73,10 @@ struct SettingsView: View {
       sectionLabel("Your Orbs")
       ScrollView(.horizontal, showsIndicators: false) {
         HStack(spacing: 10) {
+          createOrbCard
           ForEach(orbs, id: \.id) { orb in
             orbCard(orb)
           }
-          createOrbCard
         }
         .padding(.horizontal, 1)
         .padding(.vertical, 2)
@@ -84,17 +84,76 @@ struct SettingsView: View {
     }
   }
 
+  private struct OrbFaceChip: Identifiable {
+    let id: String
+    let letter: String
+    let them: Bool
+  }
+
+  private func orbFaceChips(for orb: SpaceInfo) -> [OrbFaceChip] {
+    if !orb.members.isEmpty {
+      let mine = orb.members.first { $0.id.compare(orb.myId, options: .caseInsensitive) == .orderedSame }
+      let others = orb.members.filter { $0.id.compare(orb.myId, options: .caseInsensitive) != .orderedSame }
+      let ordered = (mine != nil) ? ([mine!] + others) : orb.members
+      return ordered.map { m in
+        OrbFaceChip(
+          id: m.id,
+          letter: String(m.name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(1)).uppercased(),
+          them: m.id.compare(orb.myId, options: .caseInsensitive) != .orderedSame
+        )
+      }
+    }
+    var list: [OrbFaceChip] = [
+      OrbFaceChip(
+        id: "me",
+        letter: String(orb.myName.prefix(1)).uppercased(),
+        them: false
+      )
+    ]
+    if let partner = orb.partnerName, !partner.isEmpty {
+      list.append(
+        OrbFaceChip(
+          id: "them",
+          letter: String(partner.prefix(1)).uppercased(),
+          them: true
+        )
+      )
+    }
+    return list
+  }
+
   private func orbCard(_ orb: SpaceInfo) -> some View {
     let active = orb.id == app.space?.id
+    let faces = orbFaceChips(for: orb)
     return Button {
       switchOrb(orb.id)
     } label: {
-      VStack(alignment: .leading, spacing: 7) {
+      VStack(alignment: .leading, spacing: 5) {
         Text(orb.peopleLabel)
           .font(.headline)
           .foregroundStyle(Theme.ink)
-          .lineLimit(2)
+          .lineLimit(1)
           .multilineTextAlignment(.leading)
+
+        HStack(spacing: -6) {
+          ForEach(faces.prefix(3)) { f in
+            Text(f.letter)
+              .font(.system(size: 10, weight: .bold))
+              .foregroundStyle(.white)
+              .frame(width: 20, height: 20)
+              .background(f.them ? Theme.faceRose : Theme.faceSage, in: Circle())
+              .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
+          }
+          if faces.count > 3 {
+            Text("+\(faces.count - 3)")
+              .font(.system(size: 9, weight: .semibold))
+              .foregroundStyle(.white)
+              .frame(width: 20, height: 20)
+              .background(Theme.inkSoft, in: Circle())
+              .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
+          }
+        }
+        .padding(.vertical, 1)
 
         Text(orbSizeLabel(orb))
           .font(.footnote)
@@ -156,22 +215,6 @@ struct SettingsView: View {
       VStack(alignment: .leading, spacing: 8) {
         ScrollView(.horizontal, showsIndicators: false) {
           HStack(spacing: 10) {
-            ForEach(space.members, id: \.id) { member in
-              VStack(spacing: 4) {
-                face(member.name, mine: member.id == space.myId, size: 44)
-                Text(member.name)
-                  .font(.caption)
-                  .foregroundStyle(Theme.ink)
-                  .lineLimit(1)
-                  .frame(width: 72)
-                Text(member.id == space.myId ? "You" : " ")
-                  .font(.caption2)
-                  .foregroundStyle(Theme.inkFaint)
-                  .frame(height: 13)
-              }
-              .frame(width: 72)
-            }
-
             if !space.frozen {
               Button {
                 showInvite = true
@@ -193,6 +236,41 @@ struct SettingsView: View {
                 .frame(width: 72)
               }
               .buttonStyle(.plain)
+            }
+
+            ForEach(space.members, id: \.id) { member in
+              let removable = !space.frozen && space.myRole == "admin" && space.members.count >= 3 && member.id != space.myId
+              ZStack(alignment: .topLeading) {
+                VStack(spacing: 4) {
+                  face(member.name, mine: member.id == space.myId, size: 44)
+                  Text(member.name)
+                    .font(.caption)
+                    .foregroundStyle(Theme.ink)
+                    .lineLimit(1)
+                    .frame(width: 72)
+                  Text(member.id == space.myId ? "You" : " ")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.inkFaint)
+                    .frame(height: 13)
+                }
+                .frame(width: 72)
+
+                if removable {
+                  Button {
+                    removeId = member.id
+                  } label: {
+                    Image(systemName: "minus")
+                      .font(.system(size: 10, weight: .bold))
+                      .foregroundStyle(Theme.inkSoft)
+                      .frame(width: 18, height: 18)
+                      .background(Theme.paperWarm, in: Circle())
+                      .overlay(Circle().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
+                      .shadow(color: Color.black.opacity(0.1), radius: 2, y: 1)
+                  }
+                  .buttonStyle(.plain)
+                  .offset(x: 10, y: -2)
+                }
+              }
             }
           }
           .padding(.horizontal, 2)

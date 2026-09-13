@@ -125,6 +125,48 @@
   display: block;
   font: var(--t-headline);
   letter-spacing: var(--tr-headline);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.orbFaceStack {
+  display: flex;
+  align-items: center;
+  margin: 3px 0 2px;
+}
+
+.orbMiniFace {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  border: 1.5px solid var(--paper);
+  margin-left: -6px;
+  flex-shrink: 0;
+}
+
+.orbMiniFace:first-child {
+  margin-left: 0;
+}
+
+.orbMiniFaceMe {
+  background: var(--sage-ink);
+}
+
+.orbMiniFaceThem {
+  background: var(--rose-ink);
+}
+
+.orbMiniMore {
+  background: var(--ink-soft);
+  font-size: 9px;
+  font-weight: 600;
 }
 
 .orbMeta {
@@ -159,6 +201,37 @@
   align-items: center;
   text-align: center;
   gap: 4px;
+}
+
+.personWrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.removeBadge {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--paper-warm);
+  border: var(--hairline-w) solid var(--separator);
+  color: var(--ink-soft);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  transition: transform 0.12s var(--ease-ios);
+}
+
+.removeBadge:active {
+  transform: scale(0.9);
 }
 
 .personButton {
