@@ -183,7 +183,16 @@ struct MainShellView: View {
 
   private var activeOrbTitle: String {
     let orbName = app.space?.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-    if !orbName.isEmpty { return orbName }
+    let genericNames = ["fordays", "someday"]
+    if !orbName.isEmpty && !genericNames.contains(orbName.lowercased()) {
+      return orbName
+    }
+    if let space = app.space, !space.members.isEmpty {
+      let others = space.members.filter { $0.id.compare(space.myId, options: .caseInsensitive) != .orderedSame }
+      if others.isEmpty { return "Your Orb" }
+      if others.count == 1 { return "\(others[0].name)'s Orb" }
+      return "\(others[0].name) +\(others.count - 1)"
+    }
     let partner = app.space?.partnerName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
     if !partner.isEmpty { return "\(partner)'s Orb" }
     return "Your Orb"

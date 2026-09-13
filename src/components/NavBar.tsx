@@ -74,8 +74,20 @@ export default function NavBar() {
       ];
   const visibleFaces = faceChips.slice(0, 2);
   const moreCount = Math.max(0, faceChips.length - 2);
-  const fallbackPartner = (space?.partnerName ?? config.names[1 - me] ?? '').trim();
-  const orbTitle = space?.name?.trim() || (fallbackPartner ? `${fallbackPartner}'s Orb` : 'Your Orb');
+  const orbName = space?.name?.trim() ?? '';
+  const genericOrbName = /^(fordays|someday)$/i.test(orbName);
+  const orbTitle = (() => {
+    if (orbName && !genericOrbName) return orbName;
+    const members = space?.members ?? [];
+    if (members.length) {
+      const others = members.filter((m) => m.id !== space?.myId);
+      if (!others.length) return 'Your Orb';
+      if (others.length === 1) return `${others[0]!.name}'s Orb`;
+      return `${others[0]!.name} +${others.length - 1}`;
+    }
+    const fallbackPartner = (space?.partnerName ?? config.names[1 - me] ?? '').trim();
+    return fallbackPartner ? `${fallbackPartner}'s Orb` : 'Your Orb';
+  })();
 
   const monthLabel = `${MONTHS[cursorDate.getMonth()]}${
     cursorDate.getFullYear() === new Date().getFullYear()
