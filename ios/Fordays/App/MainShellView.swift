@@ -130,6 +130,18 @@ struct MainShellView: View {
       InviteShareView()
         .environmentObject(app)
     }
+    .onAppear {
+      if app.pendingInviteShare {
+        app.pendingInviteShare = false
+        showInvite = true
+      }
+    }
+    .onChange(of: app.pendingInviteShare) { _, pending in
+      if pending {
+        app.pendingInviteShare = false
+        showInvite = true
+      }
+    }
     .sheet(item: $selected) { activity in
       DetailView(activityId: activity.id)
         .environmentObject(app)

@@ -15,6 +15,7 @@ final class AppModel: ObservableObject {
   @Published var errorMessage: String?
   @Published var toast: String?
   @Published var showJoinOrb: Bool = false
+  @Published var pendingInviteShare = false
 
   func shiftMonth(by delta: Int) {
     cursorMonth = Calendar.current.date(byAdding: .month, value: delta, to: cursorMonth) ?? cursorMonth
@@ -23,6 +24,33 @@ final class AppModel: ObservableObject {
   func goToday() {
     pickedDay = DateLocal.todayISO()
     cursorMonth = Date()
+  }
+
+  var needsFirstOrbSetup: Bool {
+    guard let space, !space.frozen, !showJoinOrb else { return false }
+    let others = space.members.filter { $0.id.compare(space.myId, options: .caseInsensitive) != .orderedSame }
+    if !others.isEmpty || space.partner2Id != nil { return false }
+    let trimmed = space.name.trimmingCharacters(in: .whitespacesAndNewlines)
+    return trimmed.isEmpty
+      || trimmed.caseInsensitiveCompare("Fordays") == .orderedSame
+      || trimmed.caseInsensitiveCompare("Someday") == .orderedSame
+  }
+
+  func completeFirstOrb(name: String, withPeople: Bool) async {
+    guard let id = space?.id else { return }
+    let fallback = withPeople ? Copy.Orbs.crewPlaceholder : Copy.Orbs.personalPlaceholder
+    let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    let finalName = clean.isEmpty ? fallback : clean
+    do {
+      try await sb.from("spaces")
+        .update(SpaceNameUpdate(name: finalName))
+        .eq("id", value: id)
+        .execute()
+      try await refreshSpaceAndData()
+      pendingInviteShare = withPeople
+    } catch {
+      toast = error.localizedDescription
+    }
   }
 
   private var lastAppleSync: Date?

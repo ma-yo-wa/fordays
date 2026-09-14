@@ -123,6 +123,10 @@ struct NewSpaceInsert: Encodable {
   let name: String
 }
 
+struct SpaceNameUpdate: Encodable {
+  let name: String
+}
+
 struct ProfileNameUpdate: Encodable {
   let display_name: String
 }

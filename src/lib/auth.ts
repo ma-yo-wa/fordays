@@ -24,6 +24,22 @@ export interface SpaceInfo {
   me: 0 | 1;
 }
 
+export function isDefaultSpaceName(name: string): boolean {
+  const raw = name.trim();
+  return !raw || /^(fordays|someday)$/i.test(raw);
+}
+
+/** First notebook still has the trigger’s default name — ask Just you / With people. */
+export function spaceNeedsFirstSetup(
+  space: SpaceInfo | null,
+  pendingInvite = false,
+): boolean {
+  if (!space || space.frozen || pendingInvite) return false;
+  const others = (space.members ?? []).filter((m) => m.id !== space.myId);
+  if (others.length > 0 || space.partner2Id) return false;
+  return isDefaultSpaceName(space.name);
+}
+
 export interface InvitePeek {
   spaceId: string;
   spaceName: string;
@@ -296,6 +312,15 @@ export async function createSpace(name = 'Fordays'): Promise<SpaceInfo | null> {
     saveConfig({ ...config, spaceId: row.id });
   }
   return loadSpace();
+}
+
+export async function renameSpace(id: string, name: string): Promise<void> {
+  const sb = await getClient();
+  if (!sb) throw new Error(MISSING_BACKEND);
+  const clean = name.trim();
+  if (!clean) throw new Error('Add a name for this Orb');
+  const { error } = await sb.from('spaces').update({ name: clean }).eq('id', id);
+  if (error) throwSb(error);
 }
 
 export async function switchSpace(id: string): Promise<SpaceInfo | null> {

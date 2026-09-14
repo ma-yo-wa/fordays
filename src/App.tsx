@@ -10,12 +10,13 @@ import ExternalDetail from './components/ExternalDetail';
 import InviteAccept from './components/InviteAccept';
 import InviteShare from './components/InviteShare';
 import Auth from './components/Auth';
+import OrbSetup from './components/OrbSetup';
 import Toasts from './components/Toasts';
 import UpdateBanner from './components/UpdateBanner';
 import BucketList from './screens/BucketList';
 import Calendar from './screens/Calendar';
 import Memories from './screens/Memories';
-import { peekInvite, watchPasswordRecovery } from './lib/auth';
+import { peekInvite, spaceNeedsFirstSetup, watchPasswordRecovery } from './lib/auth';
 import { completeOutlookOAuthReturn, consumeOutlookRedirect } from './lib/outlook';
 import { isDesktopBrowser } from './lib/device';
 import { useApp } from './lib/store';
@@ -130,6 +131,18 @@ function AppShell() {
             }
           }}
         />
+        <UpdateBanner />
+        <Toasts />
+      </div>
+    );
+  }
+
+  if (
+    spaceNeedsFirstSetup(space, Boolean(inviteCode) || joinOrbOpen)
+  ) {
+    return (
+      <div className={s.app}>
+        <OrbSetup />
         <UpdateBanner />
         <Toasts />
       </div>

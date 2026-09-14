@@ -21,6 +21,10 @@
   margin-bottom: 28px;
 }
 
+.kinds {
+  margin-bottom: 4px;
+}
+
 .error {
   margin-top: 12px;
   font: var(--t-footnote);

@@ -15,6 +15,7 @@ import {
   deleteFrozenSpace as deleteFrozenSpaceRemote,
   loadSpaces,
   removeSpaceMember as removeSpaceMemberRemote,
+  renameSpace as renameSpaceRemote,
   pendingInvite,
   signOut,
   switchSpace as switchSpaceRemote,
@@ -108,6 +109,7 @@ interface AppState {
   refreshSpace: () => Promise<void>;
   switchToSpace: (id: string) => Promise<void>;
   addSpace: (name?: string) => Promise<void>;
+  completeFirstOrb: (name: string, withPeople: boolean) => Promise<void>;
   leaveCurrentSpace: () => Promise<void>;
   restorePastOrb: (spaceId: string) => Promise<void>;
   deletePastOrb: (spaceId: string) => Promise<void>;
@@ -308,6 +310,15 @@ export const useApp = create<AppState>()((set, get) => {
         await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
         void get().pullImportedCalendars();
       }
+    },
+
+    async completeFirstOrb(name, withPeople) {
+      const current = get().space;
+      if (!current) return;
+      const placeholder = withPeople ? Copy.orbs.crewPlaceholder : Copy.orbs.personalPlaceholder;
+      await renameSpaceRemote(current.id, name.trim() || placeholder);
+      await get().refreshSpace();
+      if (withPeople) get().setInviteShareOpen(true);
     },
 
     async leaveCurrentSpace() {

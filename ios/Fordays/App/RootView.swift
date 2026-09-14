@@ -15,7 +15,11 @@ struct RootView: View {
       case .signedOut:
         AuthView()
       case .signedIn:
-        MainShellView()
+        if app.needsFirstOrbSetup {
+          OrbSetupView()
+        } else {
+          MainShellView()
+        }
       }
     }
     .animation(.easeInOut(duration: 0.2), value: app.authPhase)
