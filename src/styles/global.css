@@ -40,12 +40,12 @@ html {
   /* Stops the whole document rubber-banding under the fixed chrome. */
   overflow: hidden;
   -webkit-text-size-adjust: 100%;
+  color-scheme: light;
 }
 
-/* Marketing landing stays paper-light and must scroll. */
+/* Marketing landing must scroll; the planner html is overflow:hidden. */
 html.marketing {
   overflow: auto;
-  color-scheme: light;
 }
 
 html.marketing,
@@ -58,18 +58,6 @@ html.marketing #root {
 html.marketing body {
   overflow: auto;
   overscroll-behavior: auto;
-  background:
-    radial-gradient(
-      88% 46% at 50% -10%,
-      rgba(253, 122, 154, 0.4) 0%,
-      rgba(253, 164, 146, 0.2) 44%,
-      transparent 74%
-    ),
-    radial-gradient(64% 40% at 104% 16%, rgba(205, 231, 179, 0.52) 0%, transparent 62%),
-    radial-gradient(64% 42% at -6% 30%, rgba(214, 222, 170, 0.44) 0%, transparent 64%),
-    radial-gradient(130% 56% at 50% 114%, rgba(240, 194, 150, 0.34) 0%, transparent 66%),
-    #f9f6f2;
-  color: #17140f;
 }
 
 body {
@@ -115,31 +103,6 @@ body::after {
   opacity: 0.5;
   mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.36'/%3E%3C/svg%3E");
-}
-
-@media (prefers-color-scheme: dark) {
-  /* Same orb, held far back. At full strength these pastels glow against
-     black and the text on top stops being readable. */
-  html:not(.marketing) body {
-    background:
-      radial-gradient(
-        88% 46% at 50% -10%,
-        rgba(253, 122, 154, 0.17) 0%,
-        rgba(253, 164, 146, 0.08) 44%,
-        transparent 74%
-      ),
-      radial-gradient(64% 40% at 104% 16%, rgba(205, 231, 179, 0.1) 0%, transparent 62%),
-      radial-gradient(64% 42% at -6% 30%, rgba(214, 222, 170, 0.08) 0%, transparent 64%),
-      radial-gradient(130% 56% at 50% 114%, rgba(240, 194, 150, 0.07) 0%, transparent 66%),
-      var(--paper);
-    background-attachment: fixed;
-  }
-
-  /* Multiply on a near-black ground just paints black on black. */
-  html:not(.marketing) body::after {
-    mix-blend-mode: overlay;
-    opacity: 0.24;
-  }
 }
 
 /* Text the user wrote is content, and content is selectable. */

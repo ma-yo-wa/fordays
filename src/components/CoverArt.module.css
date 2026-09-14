@@ -39,9 +39,3 @@
 .thumb.emoji span {
   font-size: 36px;
 }
-
-@media (prefers-color-scheme: dark) {
-  .emoji {
-    background: linear-gradient(155deg, #3a1a24 0%, #2a2418 55%, #1e2a17 100%);
-  }
-}

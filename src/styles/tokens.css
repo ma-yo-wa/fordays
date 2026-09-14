@@ -148,50 +148,7 @@
   --fill-secondary: rgba(23, 20, 15, 0.11);
 }
 
-/* =====================================================================
-   Dark. An app that stays bright when the phone goes dark is the single
-   loudest tell that it isn't native. The orb keeps its hues but loses
-   most of its lightness, because the same pastels over a dark ground
-   glare; the -ink variants swap direction and become the light ones.
-   ===================================================================== */
-@media (prefers-color-scheme: dark) {
-  :root:not(.marketing) {
-    --paper: #0d0c0b;
-    --paper-warm: #1a1815;
-    --paper-sunk: #000000;
-
-    --ink: #f6f2ec;
-    --ink-2: #cdc6bb;
-    --ink-soft: #989184;
-    --ink-faint: #6b6459;
-    --rule: #302c26;
-
-    --rose: #f2648b;
-    --rose-ink: #ff9db5;
-    --rose-wash: #3a1a24;
-
-    --sage: #a8ce85;
-    --sage-ink: #bcdd9f;
-    --sage-wash: #1e2a17;
-
-    --ext: #8a8375;
-    --ext-wash: #24211c;
-
-    --mat-thin-bg: rgba(36, 33, 29, 0.62);
-    --mat-regular-bg: rgba(30, 27, 24, 0.76);
-    --mat-thick-bg: rgba(24, 22, 19, 0.9);
-
-    --hairline: rgba(255, 250, 242, 0.14);
-    --separator: rgba(255, 250, 242, 0.1);
-
-    --fill-quaternary: rgba(255, 250, 242, 0.06);
-    --fill-tertiary: rgba(255, 250, 242, 0.1);
-    --fill-secondary: rgba(255, 250, 242, 0.16);
-
-    --shadow-card: 0 1px 0 rgba(0, 0, 0, 0.4), 0 10px 26px -14px rgba(0, 0, 0, 0.8);
-    --shadow-lift: 0 2px 0 rgba(0, 0, 0, 0.4), 0 22px 44px -18px rgba(0, 0, 0, 0.9);
-  }
-}
+/* Paper only — Fordays does not follow system dark mode. */
 
 /* A hairline is one device pixel, so it has to get thinner as the screen
    gets denser — 1px on a retina phone is a visibly heavy line. */

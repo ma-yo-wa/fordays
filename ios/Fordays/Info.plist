@@ -35,6 +35,8 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow Fordays to use photos for plan covers.</string>
 	<key>UILaunchScreen</key>

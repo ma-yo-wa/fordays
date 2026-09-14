@@ -11,22 +11,13 @@ export default function DesktopGate() {
 
   useEffect(() => {
     document.documentElement.classList.add('marketing');
-    document.documentElement.style.colorScheme = 'light';
-    const theme = document.querySelector('meta[name="theme-color"]:not([media])')
-      ?? document.querySelector('meta[name="theme-color"]');
-    const prev = theme?.getAttribute('content');
-    theme?.setAttribute('content', '#F9F6F2');
-
     if (typeof window !== 'undefined') {
       const href = window.location.href;
       setTargetUrl(href);
       setHasInvite(href.includes('invite='));
     }
-
     return () => {
       document.documentElement.classList.remove('marketing');
-      document.documentElement.style.colorScheme = '';
-      if (theme && prev) theme.setAttribute('content', prev);
     };
   }, []);
 
