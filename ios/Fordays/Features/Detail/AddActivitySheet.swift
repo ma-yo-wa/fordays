@@ -154,15 +154,6 @@ struct ComposerView: View {
             .tint(Theme.rose)
           }
 
-          fieldLabel("From", hint: "— optional")
-          timeRow($from)
-
-          fieldLabel(
-            "Until",
-            hint: multiDay ? "— on the last day, optional" : "— optional"
-          )
-          timeRow($until)
-
           if multiDay {
             fieldLabel("Ends on", hint: "— last day")
             DatePicker(
@@ -180,8 +171,17 @@ struct ComposerView: View {
             }
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(Theme.roseInk)
-            .padding(.top, 14)
-          } else {
+            .padding(.top, 10)
+            .padding(.bottom, 4)
+          }
+
+          fieldLabel("Time", hint: "— optional")
+          HStack(spacing: 8) {
+            timeBox(label: multiDay ? "Starts at" : "From", text: $from)
+            timeBox(label: multiDay ? "Ends at" : "Until", text: $until)
+          }
+
+          if !multiDay {
             Button("Runs more than one day?") {
               multiDay = true
               if end == nil || (end ?? "") <= date {
@@ -237,26 +237,46 @@ struct ComposerView: View {
     let today = DateLocal.todayISO()
     let tomorrow = DateLocal.addDays(1)
     let weekend = DateLocal.nextSaturday()
-    return HStack(spacing: 8) {
-      chip("Today", value: today)
-      chip("Tomorrow", value: tomorrow)
-      chip("This weekend", value: weekend)
-      Button {
-        pickerOpen.toggle()
-      } label: {
-        Text(pickerOpen ? "Done" : "Another day…")
-          .font(.subheadline.weight(.semibold))
-          .foregroundStyle(Theme.ink)
-          .padding(.horizontal, 12)
-          .padding(.vertical, 8)
-          .background(
-            pickerOpen ? Theme.ink.opacity(0.12) : Theme.ink.opacity(0.06),
-            in: Capsule()
-          )
+    let isQuick = (date == today || date == tomorrow || date == weekend)
+
+    let customLabel: String = {
+      let formatted = DateLocal.mediumDate(date)
+      if isQuick {
+        return pickerOpen ? "Pick date ⌃" : "Pick date ⌵"
+      } else {
+        return "\(formatted) \(pickerOpen ? "⌃" : "⌵")"
       }
-      .buttonStyle(.plain)
+    }()
+
+    return VStack(spacing: 8) {
+      HStack(spacing: 8) {
+        chip("Today", value: today)
+        chip("Tomorrow", value: tomorrow)
+      }
+      HStack(spacing: 8) {
+        chip("This weekend", value: weekend)
+        Button {
+          pickerOpen.toggle()
+        } label: {
+          HStack(spacing: 4) {
+            Text("📅")
+              .font(.caption)
+            Text(customLabel)
+              .font(.subheadline.weight(.semibold))
+              .lineLimit(1)
+          }
+          .foregroundStyle((!isQuick || pickerOpen) ? .white : Theme.ink)
+          .frame(maxWidth: .infinity)
+          .padding(.vertical, 12)
+          .background(
+            (!isQuick ? Theme.rose : (pickerOpen ? Theme.ink : Theme.ink.opacity(0.06))),
+            in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+          )
+        }
+        .buttonStyle(.plain)
+      }
     }
-    .padding(.bottom, 8)
+    .padding(.bottom, 4)
   }
 
   private func chip(_ label: String, value: String) -> some View {
@@ -268,9 +288,9 @@ struct ComposerView: View {
       Text(label)
         .font(.subheadline.weight(.semibold))
         .foregroundStyle(on ? .white : Theme.ink)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(on ? Theme.rose : Theme.ink.opacity(0.06), in: Capsule())
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .background(on ? Theme.rose : Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
     .buttonStyle(.plain)
   }
@@ -372,18 +392,38 @@ struct ComposerView: View {
       .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
   }
 
-  private func timeRow(_ text: Binding<String>) -> some View {
-    HStack(spacing: 8) {
-      TextField("HH:MM", text: text)
-        .keyboardType(.numbersAndPunctuation)
-        .padding(12)
-        .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-      if !text.wrappedValue.isEmpty {
-        Button("Clear") { text.wrappedValue = "" }
-          .font(.subheadline.weight(.semibold))
-          .foregroundStyle(Theme.inkFaint)
+  private func timeBox(label: String, text: Binding<String>) -> some View {
+    VStack(alignment: .leading, spacing: 4) {
+      Text(label)
+        .font(.caption2.weight(.medium))
+        .foregroundStyle(Theme.inkFaint)
+        .textCase(.uppercase)
+        .padding(.leading, 4)
+
+      HStack(spacing: 4) {
+        TextField("e.g. 7:00 PM", text: text)
+          .keyboardType(.numbersAndPunctuation)
+          .font(.subheadline)
+          .padding(.vertical, 12)
+          .padding(.leading, 12)
+
+        if !text.wrappedValue.isEmpty {
+          Button {
+            text.wrappedValue = ""
+          } label: {
+            Image(systemName: "xmark")
+              .font(.system(size: 10, weight: .bold))
+              .foregroundStyle(Theme.paperWarm)
+              .frame(width: 20, height: 20)
+              .background(Theme.inkFaint, in: Circle())
+              .padding(.trailing, 8)
+          }
+          .buttonStyle(.plain)
+        }
       }
+      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
+    .frame(maxWidth: .infinity)
   }
 
   private func ghost(_ label: String, action: @escaping () -> Void) -> some View {

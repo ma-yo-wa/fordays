@@ -231,15 +231,6 @@ struct DetailView: View {
         .frame(maxWidth: .infinity)
         .tint(Theme.rose)
 
-      fieldLabel("From", hint: "— optional")
-      timeField($fromTime)
-
-      fieldLabel(
-        "Until",
-        hint: multiDay ? "— on the last day, optional" : "— optional"
-      )
-      timeField($untilTime)
-
       if multiDay {
         fieldLabel("Ends on", hint: "— last day")
         DatePicker(
@@ -257,7 +248,17 @@ struct DetailView: View {
         }
         .font(.subheadline.weight(.semibold))
         .foregroundStyle(Theme.roseInk)
-      } else {
+        .padding(.top, 10)
+        .padding(.bottom, 4)
+      }
+
+      fieldLabel("Time", hint: "— optional")
+      HStack(spacing: 8) {
+        timeBox(label: multiDay ? "Starts at" : "From", text: $fromTime)
+        timeBox(label: multiDay ? "Ends at" : "Until", text: $untilTime)
+      }
+
+      if !multiDay {
         Button("Runs more than one day?") {
           multiDay = true
           if endDay == nil || (endDay.map { DateLocal.todayISO($0) } ?? "") <= DateLocal.todayISO(day) {
@@ -266,6 +267,7 @@ struct DetailView: View {
         }
         .font(.subheadline.weight(.semibold))
         .foregroundStyle(Theme.roseInk)
+        .padding(.top, 10)
       }
 
       if suggest {
@@ -369,17 +371,38 @@ struct DetailView: View {
     }
   }
 
-  private func timeField(_ text: Binding<String>) -> some View {
-    HStack(spacing: 8) {
-      TextField("HH:MM", text: text)
-        .keyboardType(.numbersAndPunctuation)
-        .textFieldStyle(.roundedBorder)
-      if !text.wrappedValue.isEmpty {
-        Button("Clear") { text.wrappedValue = "" }
-          .font(.subheadline.weight(.semibold))
-          .foregroundStyle(Theme.inkFaint)
+  private func timeBox(label: String, text: Binding<String>) -> some View {
+    VStack(alignment: .leading, spacing: 4) {
+      Text(label)
+        .font(.caption2.weight(.medium))
+        .foregroundStyle(Theme.inkFaint)
+        .textCase(.uppercase)
+        .padding(.leading, 4)
+
+      HStack(spacing: 4) {
+        TextField("e.g. 7:00 PM", text: text)
+          .keyboardType(.numbersAndPunctuation)
+          .font(.subheadline)
+          .padding(.vertical, 12)
+          .padding(.leading, 12)
+
+        if !text.wrappedValue.isEmpty {
+          Button {
+            text.wrappedValue = ""
+          } label: {
+            Image(systemName: "xmark")
+              .font(.system(size: 10, weight: .bold))
+              .foregroundStyle(Theme.paperWarm)
+              .frame(width: 20, height: 20)
+              .background(Theme.inkFaint, in: Circle())
+              .padding(.trailing, 8)
+          }
+          .buttonStyle(.plain)
+        }
       }
+      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
+    .frame(maxWidth: .infinity)
   }
 
   private func fieldLabel(_ text: String, hint: String? = nil) -> some View {

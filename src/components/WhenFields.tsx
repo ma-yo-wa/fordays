@@ -14,7 +14,7 @@ type Props = {
   onMultiDay: (open: boolean) => void;
 };
 
-function TimeInput({
+function TimeField({
   value,
   onChange,
 }: {
@@ -23,33 +23,42 @@ function TimeInput({
 }) {
   const [tick, setTick] = useState(0);
 
-  function set(next: string) {
-    onChange(next);
-    if (!next) setTick((n) => n + 1);
+  function clear(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    onChange('');
+    setTick((n) => n + 1);
   }
 
   return (
-    <div className={f.group}>
-      <div className={f.inputRow}>
-        <input
-          key={tick}
-          className={f.input}
-          type="time"
-          value={value}
-          onChange={(e) => set(e.target.value)}
-          onInput={(e) => set((e.target as HTMLInputElement).value)}
-        />
-        {value ? (
-          <button type="button" className={f.fieldClear} onClick={() => set('')}>
-            Clear
-          </button>
-        ) : null}
-      </div>
+    <div className={f.timeBox}>
+      <input
+        key={tick}
+        className={f.timeInput}
+        type="time"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onInput={(e) => onChange((e.target as HTMLInputElement).value)}
+      />
+      {value ? (
+        <button
+          type="button"
+          className={f.timeClear}
+          onClick={clear}
+          aria-label="Clear time"
+          title="Clear time"
+        >
+          ×
+        </button>
+      ) : null}
     </div>
   );
 }
 
-/** Day is chosen elsewhere. Default: From + Until. Multi-day stays hidden. */
+/**
+ * WhenFields: Multi-day end date sits right next to the date flow,
+ * followed by a compact side-by-side time row (From & Until) with in-app clear buttons.
+ */
 export default function WhenFields({
   date,
   from,
@@ -75,25 +84,8 @@ export default function WhenFields({
 
   return (
     <>
-      <span className={f.label}>
-        From <span className={f.hint}>— optional</span>
-      </span>
-      <TimeInput value={from} onChange={onFrom} />
-
-      <span className={f.label}>
-        Until{' '}
-        <span className={f.hint}>
-          {multiDay ? '— on the last day, optional' : '— optional'}
-        </span>
-      </span>
-      <TimeInput value={until} onChange={onUntil} />
-
-      {!multiDay ? (
-        <button type="button" className={f.textLink} onClick={openMultiDay}>
-          Runs more than one day?
-        </button>
-      ) : (
-        <>
+      {multiDay && (
+        <div style={{ marginTop: 14 }}>
           <span className={f.label}>
             Ends on <span className={f.hint}>— last day</span>
           </span>
@@ -106,10 +98,40 @@ export default function WhenFields({
               onChange={(e) => onEnd(e.target.value || null)}
             />
           </div>
-          <button type="button" className={f.textLink} onClick={closeMultiDay}>
+          <button
+            type="button"
+            className={f.textLink}
+            onClick={closeMultiDay}
+            style={{ marginTop: 6, marginBottom: 12 }}
+          >
             Just one day
           </button>
-        </>
+        </div>
+      )}
+
+      <span className={f.label} style={{ marginTop: multiDay ? 0 : 14 }}>
+        Time <span className={f.hint}>— optional</span>
+      </span>
+      <div className={f.timeRow}>
+        <div className={f.timeCol}>
+          <span className={f.timeColLabel}>{multiDay ? 'Starts at' : 'From'}</span>
+          <TimeField value={from} onChange={onFrom} />
+        </div>
+        <div className={f.timeCol}>
+          <span className={f.timeColLabel}>{multiDay ? 'Ends at' : 'Until'}</span>
+          <TimeField value={until} onChange={onUntil} />
+        </div>
+      </div>
+
+      {!multiDay && (
+        <button
+          type="button"
+          className={f.textLink}
+          onClick={openMultiDay}
+          style={{ marginTop: 14 }}
+        >
+          Runs more than one day?
+        </button>
       )}
     </>
   );

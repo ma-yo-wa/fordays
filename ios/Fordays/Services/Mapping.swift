@@ -77,6 +77,13 @@ enum DateLocal {
       || c.component(.year, from: date) != c.component(.year, from: now)
   }
 
+  static func mediumDate(_ dateISO: String) -> String {
+    guard let date = parseLocalDay(dateISO) else { return dateISO }
+    let f = DateFormatter()
+    f.dateFormat = "EEE, MMM d"
+    return f.string(from: date)
+  }
+
   static func prettyLower(_ hhmm: String) -> String {
     prettyTime(hhmm).replacingOccurrences(of: "AM", with: "am").replacingOccurrences(of: "PM", with: "pm")
   }

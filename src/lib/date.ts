@@ -9,6 +9,12 @@ export const MON3 = [
 export const DAYS = [
   'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
 ];
+export const DAYS3 = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+export function mediumDate(dateISO: string): string {
+  const d = parseISO(dateISO);
+  return `${DAYS3[d.getDay()]}, ${MON3[d.getMonth()]} ${d.getDate()}`;
+}
 
 const pad = (n: number) => String(n).padStart(2, '0');
 

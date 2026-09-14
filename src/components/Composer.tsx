@@ -5,7 +5,7 @@ import Sheet from './Sheet';
 import CoverPicker from './CoverPicker';
 import WhenFields from './WhenFields';
 import { useApp } from '../lib/store';
-import { addDays, composeWhen, describePlan, iso, nextSaturday, parseISO, prettyLower } from '../lib/date';
+import { addDays, composeWhen, describePlan, iso, mediumDate, nextSaturday, parseISO, prettyLower } from '../lib/date';
 import f from './Form.module.css';
 
 /* Still one form and still one nullable column underneath, but which of
@@ -59,6 +59,13 @@ export default function Composer() {
     ['Tomorrow', addDays(1)],
     ['This weekend', nextSaturday()],
   ];
+
+  const isQuick = quick.some(([, val]) => val === date);
+  const customDateLabel = isQuick
+    ? pickerOpen
+      ? 'Pick date ⌃'
+      : 'Pick date ⌵'
+    : `${mediumDate(date)} ${pickerOpen ? '⌃' : '⌵'}`;
 
   const dayContext = external.filter((e) => {
     const isMine = e.ownerId === (space?.myId ?? String(space?.me ?? config.me));
@@ -159,26 +166,32 @@ export default function Composer() {
       {isPlan && (
         <>
           <span className={f.label}>When</span>
-          <div className={f.chips}>
-            {quick.map(([label, value]) => (
-              <button
-                key={label}
-                type="button"
-                className={`${f.chip} ${date === value && !pickerOpen ? f.chipOn : ''}`}
-                onClick={() => {
-                  setDate(value);
-                  setPickerOpen(false);
-                }}
-              >
-                {label}
-              </button>
-            ))}
+          <div className={f.chipsGrid}>
+            {quick.map(([label, value]) => {
+              const on = date === value && !pickerOpen;
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  className={`${f.chipGridBtn} ${on ? f.chipGridBtnOn : ''}`}
+                  onClick={() => {
+                    setDate(value);
+                    setPickerOpen(false);
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
             <button
               type="button"
-              className={`${f.chip} ${pickerOpen ? f.chipNeutralOn : ''}`}
+              className={`${f.chipGridBtn} ${
+                !isQuick ? f.chipGridBtnOn : pickerOpen ? f.chipGridBtnOpen : ''
+              }`}
               onClick={() => setPickerOpen((v) => !v)}
+              aria-label="Pick date"
             >
-              {pickerOpen ? 'Done' : 'Another day…'}
+              📅 {customDateLabel}
             </button>
           </div>
 

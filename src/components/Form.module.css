@@ -203,6 +203,115 @@ textarea.input {
   gap: 8px;
 }
 
+.chipsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.chipGridBtn {
+  border: none;
+  background: var(--fill-tertiary);
+  color: var(--ink-2);
+  border-radius: var(--r-card);
+  cursor: pointer;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 600;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    transform 0.14s var(--ease-ios),
+    background-color 0.18s var(--ease-ios),
+    color 0.18s var(--ease-ios);
+}
+
+.chipGridBtn:active {
+  transform: scale(0.97);
+}
+
+.chipGridBtnOn {
+  background: var(--rose);
+  color: #17140f;
+}
+
+.chipGridBtnOpen {
+  background: var(--fill-secondary);
+  color: var(--ink);
+  box-shadow: 0 0 0 1.5px var(--rose-ink);
+}
+
+.timeRow {
+  display: flex;
+  gap: 8px;
+}
+
+.timeCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timeColLabel {
+  font: var(--t-caption2);
+  letter-spacing: var(--tr-caption2);
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  padding-left: 4px;
+}
+
+.timeBox {
+  display: flex;
+  align-items: center;
+  background: var(--fill-tertiary);
+  border-radius: var(--r-card);
+  padding: 0 8px 0 12px;
+  min-height: 46px;
+}
+
+.timeInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font: var(--t-body);
+  letter-spacing: var(--tr-body);
+  outline: none;
+  padding: 11px 0;
+  box-sizing: border-box;
+}
+
+.timeClear {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: var(--ink-faint);
+  color: var(--paper-warm);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  margin-left: 6px;
+  padding: 0;
+}
+
+.timeClear:active {
+  transform: scale(0.9);
+}
+
 .chip {
   border: none;
   background: var(--fill-tertiary);
