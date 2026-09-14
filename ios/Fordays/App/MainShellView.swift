@@ -318,7 +318,7 @@ struct TabDock: View {
           .font(.system(size: 12, weight: .regular))
           .lineLimit(1)
       }
-      .foregroundStyle(Theme.ink)
+      .foregroundStyle(on ? Theme.ink : Theme.inkSoft)
       .frame(width: 84, height: 56)
       .background {
         if on {

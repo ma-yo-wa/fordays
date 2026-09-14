@@ -46,7 +46,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--ink);
+  color: var(--ink-soft);
   transition: color 0.2s var(--ease-ios);
 }
 
