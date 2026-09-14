@@ -5,6 +5,7 @@ struct SettingsView: View {
   @Environment(\.dismiss) private var dismiss
   @State private var showInvite = false
   @State private var showPastOrbs = false
+  @State private var showAnotherOrb = false
   @State private var leaveAsk = false
   @State private var removeId: String?
   @State private var deleteAskId: String?
@@ -77,6 +78,9 @@ struct SettingsView: View {
     .sheet(isPresented: $showPastOrbs) {
       pastOrbsSheet
     }
+    .sheet(isPresented: $showAnotherOrb) {
+      anotherOrbSheet
+    }
     .sheet(isPresented: $showApplePicker) {
       applePickerSheet
     }
@@ -130,25 +134,15 @@ struct SettingsView: View {
   private var orbsSection: some View {
     VStack(alignment: .leading, spacing: 8) {
       sectionLabel("Your Orbs")
-      VStack(spacing: 0) {
-        ForEach(Array(activeOrbs.enumerated()), id: \.element.id) { index, orb in
-          if index > 0 { orbRowDivider }
-          orbRow(orb)
+      LazyVGrid(columns: [GridItem(.adaptive(minimum: 64), spacing: 12)], alignment: .leading, spacing: 14) {
+        plusTile
+        ForEach(activeOrbs, id: \.id) { orb in
+          orbTile(orb)
         }
-        if !activeOrbs.isEmpty { orbRowDivider }
-        createOrbRow
-        orbRowDivider
-        joinOrbRow
       }
+      .padding(12)
       .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-      .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
-  }
-
-  private var orbRowDivider: some View {
-    Rectangle()
-      .fill(Theme.ink.opacity(0.08))
-      .frame(height: 0.5)
   }
 
   private struct OrbFaceChip: Identifiable {
@@ -189,40 +183,63 @@ struct SettingsView: View {
     return list
   }
 
-  private func orbRow(_ orb: SpaceInfo) -> some View {
+  private func orbTile(_ orb: SpaceInfo) -> some View {
     let active = orb.id == app.space?.id
     let faces = orbFaceChips(for: orb)
     return Button {
       switchOrb(orb.id)
     } label: {
-      HStack(spacing: 12) {
-        orbFaceStack(faces)
-        VStack(alignment: .leading, spacing: 1) {
-          Text(orb.peopleLabel)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(Theme.ink)
-            .lineLimit(1)
-          Text(orbSizeLabel(orb))
-            .font(.footnote)
-            .foregroundStyle(Theme.inkSoft)
+      VStack(spacing: 6) {
+        ZStack {
+          RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .fill(Theme.ink.opacity(0.08))
+          if active {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+              .fill(
+                LinearGradient(
+                  colors: [Theme.rose.opacity(0.55), Theme.sage.opacity(0.4)],
+                  startPoint: .topLeading,
+                  endPoint: .bottomTrailing
+                )
+              )
+          }
+          orbFaceStack(faces)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-      }
-      .padding(.horizontal, 12)
-      .padding(.vertical, 10)
-      .frame(minHeight: 56)
-      .background {
-        if active {
-          LinearGradient(
-            colors: [Theme.rose.opacity(0.46), Theme.sage.opacity(0.34)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-          )
-        }
+        .frame(width: 56, height: 56)
+
+        Text(orb.peopleLabel)
+          .font(.caption)
+          .foregroundStyle(Theme.inkSoft)
+          .lineLimit(1)
+          .frame(width: 64)
       }
     }
     .buttonStyle(.plain)
     .disabled(spaceBusy)
+  }
+
+  private var plusTile: some View {
+    Button {
+      showAnotherOrb = true
+    } label: {
+      VStack(spacing: 6) {
+        ZStack {
+          RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .fill(Theme.ink.opacity(0.08))
+          Text("+")
+            .font(.title2.weight(.medium))
+            .foregroundStyle(Theme.ink)
+            .offset(y: -0.5)
+        }
+        .frame(width: 56, height: 56)
+        Text("\u{00a0}")
+          .font(.caption)
+          .frame(width: 64)
+      }
+    }
+    .buttonStyle(.plain)
+    .disabled(spaceBusy)
+    .accessibilityLabel(Copy.Orbs.anotherOrb)
   }
 
   private func orbFaceStack(_ faces: [OrbFaceChip]) -> some View {
@@ -256,53 +273,61 @@ struct SettingsView: View {
     }
   }
 
-  private var createOrbRow: some View {
-    Button {
-      createOrb()
-    } label: {
-      orbActionLabel(mark: "+", title: Copy.Orbs.createOrb, subtitle: Copy.Orbs.createOrbSub)
-    }
-    .buttonStyle(.plain)
-    .disabled(spaceBusy)
-  }
+  private var anotherOrbSheet: some View {
+    VStack(alignment: .leading, spacing: 0) {
+      Text(Copy.Orbs.anotherOrb)
+        .font(.title2.weight(.semibold))
+        .foregroundStyle(Theme.ink)
+        .padding(.bottom, 20)
 
-  private var joinOrbRow: some View {
-    Button {
-      dismiss()
-      DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-        app.showJoinOrb = true
+      Button {
+        showAnotherOrb = false
+        createOrb()
+      } label: {
+        VStack(alignment: .leading, spacing: 2) {
+          Text(Copy.Orbs.startNew)
+            .font(.headline)
+            .foregroundStyle(Theme.ink)
+          Text(Copy.Orbs.startNewNote)
+            .font(.subheadline)
+            .foregroundStyle(Theme.inkSoft)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 16)
+        .contentShape(Rectangle())
       }
-    } label: {
-      orbActionLabel(mark: "→", title: Copy.Orbs.joinOrb, subtitle: Copy.Orbs.joinOrbSub)
-    }
-    .buttonStyle(.plain)
-    .disabled(spaceBusy)
-  }
+      .buttonStyle(.plain)
 
-  private func orbActionLabel(mark: String, title: String, subtitle: String) -> some View {
-    HStack(spacing: 12) {
-      ZStack {
-        Circle()
-          .fill(Theme.ink.opacity(0.08))
-        Text(mark)
-          .font(.system(size: 15, weight: .semibold))
-          .foregroundStyle(Theme.ink)
-          .offset(y: -0.5)
+      Rectangle()
+        .fill(Theme.ink.opacity(0.08))
+        .frame(height: 0.5)
+
+      Button {
+        showAnotherOrb = false
+        dismiss()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+          app.showJoinOrb = true
+        }
+      } label: {
+        VStack(alignment: .leading, spacing: 2) {
+          Text(Copy.Orbs.joinWithCode)
+            .font(.headline)
+            .foregroundStyle(Theme.ink)
+          Text(Copy.Orbs.joinWithCodeNote)
+            .font(.subheadline)
+            .foregroundStyle(Theme.inkSoft)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 16)
+        .contentShape(Rectangle())
       }
-      .frame(width: 28, height: 28)
-      VStack(alignment: .leading, spacing: 1) {
-        Text(title)
-          .font(.subheadline.weight(.semibold))
-          .foregroundStyle(Theme.ink)
-        Text(subtitle)
-          .font(.footnote)
-          .foregroundStyle(Theme.inkSoft)
-      }
-      .frame(maxWidth: .infinity, alignment: .leading)
+      .buttonStyle(.plain)
     }
-    .padding(.horizontal, 12)
-    .padding(.vertical, 10)
-    .frame(minHeight: 56)
+    .padding(20)
+    .padding(.bottom, 8)
+    .background(Theme.paper)
+    .presentationDetents([.height(280)])
+    .presentationDragIndicator(.visible)
   }
 
   private func peopleSection(space: SpaceInfo) -> some View {
@@ -996,10 +1021,5 @@ struct SettingsView: View {
   private func initial(_ name: String) -> String {
     let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
     return String(clean.prefix(1)).uppercased()
-  }
-
-  private func orbSizeLabel(_ orb: SpaceInfo) -> String {
-    let n = orb.members.isEmpty ? (orb.partner2Id == nil ? 1 : 2) : orb.members.count
-    return n <= 1 ? "1 person" : "\(n) people"
   }
 }

@@ -52,86 +52,77 @@
   color: var(--ink-faint);
 }
 
-.orbList {
+.orbGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 12px;
+  padding: 14px 12px 12px;
   border-radius: var(--r-control);
   background: var(--fill-quaternary);
-  overflow: hidden;
 }
 
-.orbList > * + * {
-  border-top: var(--hairline-w) solid var(--separator);
-}
-
-.orbRow {
+.orbTile {
+  width: 64px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 56px;
-  padding: 10px 12px;
+  gap: 6px;
   border: none;
   background: none;
+  padding: 0;
   color: var(--ink);
-  text-align: left;
   cursor: pointer;
-  transition:
-    transform 0.14s var(--ease-ios),
-    opacity 0.14s var(--ease-ios);
 }
 
-.orbRow:active {
-  transform: scale(0.99);
-  opacity: 0.88;
+.orbTile:active {
+  opacity: 0.7;
 }
 
-.orbRow:disabled {
+.orbTile:disabled {
   cursor: default;
   opacity: 1;
 }
 
-.orbRow:disabled:active {
-  transform: none;
+.orbTile:disabled:active {
+  opacity: 1;
 }
 
-.orbRowOn {
+.orbSquircle {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--fill-tertiary);
+  overflow: hidden;
+}
+
+.orbTileOn .orbSquircle {
   background:
     radial-gradient(
-      120% 140% at 8% 20%,
-      rgba(242, 100, 139, 0.46) 0%,
-      rgba(168, 206, 133, 0.34) 72%
+      120% 140% at 12% 18%,
+      rgba(242, 100, 139, 0.55) 0%,
+      rgba(168, 206, 133, 0.4) 78%
     );
 }
 
-.orbRowBody {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.orbPlus {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--fill-tertiary);
-  font-size: 16px;
-  font-weight: 600;
+.orbAddMark {
+  font-size: 22px;
+  font-weight: 500;
   line-height: 1;
-  flex-shrink: 0;
+  color: var(--ink);
 }
 
-.orbTitle {
-  display: block;
-  font: var(--t-subhead);
-  letter-spacing: var(--tr-subhead);
-  font-weight: 600;
+.orbTileName {
+  width: 100%;
+  font: var(--t-caption);
+  letter-spacing: var(--tr-caption);
+  color: var(--ink-soft);
+  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
 }
 
 .orbFaceStack {
@@ -170,13 +161,6 @@
   background: var(--ink-soft);
   font-size: 9px;
   font-weight: 600;
-}
-
-.orbMeta {
-  display: block;
-  font: var(--t-footnote);
-  letter-spacing: var(--tr-footnote);
-  color: var(--ink-soft);
 }
 
 .peopleCard {

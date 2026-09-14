@@ -38,6 +38,7 @@ import {
 } from '../lib/push';
 import { Copy, formatCopy } from '../lib/copy';
 import f from './Form.module.css';
+import add from './AddSheet.module.css';
 import ui from './Settings.module.css';
 
 function pushCopy(state: PushState, partnerName: string | null | undefined): string {
@@ -60,12 +61,6 @@ function pushCopy(state: PushState, partnerName: string | null | undefined): str
 
 function firstLetter(name: string): string {
   return (name.trim()[0] ?? '?').toUpperCase();
-}
-
-function orbSizeLabel(space: SpaceInfo): string {
-  const n = space.members?.length || (space.partner2Id ? 2 : 1);
-  if (n <= 1) return '1 person';
-  return `${n} people`;
 }
 
 function orbFaceChips(space: SpaceInfo): { key: string; letter: string; them: boolean }[] {
@@ -124,6 +119,7 @@ export default function Settings() {
   const [leaveAsk, setLeaveAsk] = useState(false);
   const [removeId, setRemoveId] = useState<string | null>(null);
   const [pastOrbsOpen, setPastOrbsOpen] = useState(false);
+  const [orbAddOpen, setOrbAddOpen] = useState(false);
   const [deleteAskId, setDeleteAskId] = useState<string | null>(null);
 
   const allOrbs = spaces.length ? spaces : space ? [space] : [];
@@ -290,6 +286,7 @@ export default function Settings() {
     try {
       await addSpace();
       toast('New Orb — just you, until you invite');
+      setOrbAddOpen(false);
       setOpen(false);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t make an Orb');
@@ -395,7 +392,20 @@ export default function Settings() {
 
             <section className={ui.section}>
               <span className={ui.label}>Your Orbs</span>
-              <div className={ui.orbList}>
+              <div className={ui.orbGrid}>
+                <button
+                  type="button"
+                  className={ui.orbTile}
+                  disabled={spaceBusy}
+                  aria-label="Another Orb"
+                  onClick={() => setOrbAddOpen(true)}
+                >
+                  <span className={ui.orbSquircle}>
+                    <span className={ui.orbAddMark} aria-hidden>
+                      +
+                    </span>
+                  </span>
+                </button>
                 {visibleOrbs.map((orb) => {
                   const faces = orbFaceChips(orb);
                   const on = orb.id === space?.id;
@@ -403,65 +413,33 @@ export default function Settings() {
                     <button
                       key={orb.id}
                       type="button"
-                      className={`${ui.orbRow} ${on ? ui.orbRowOn : ''}`}
-                      disabled={spaceBusy || on}
+                      className={`${ui.orbTile} ${on ? ui.orbTileOn : ''}`}
+                      disabled={spaceBusy}
                       onClick={() => void handleSwitchOrb(orb)}
                     >
-                      <div className={ui.orbFaceStack}>
-                        {faces.slice(0, 3).map((f, idx) => (
-                          <span
-                            key={f.key}
-                            className={`${ui.orbMiniFace} ${f.them ? ui.orbMiniFaceThem : ui.orbMiniFaceMe}`}
-                            style={{ zIndex: 4 - idx }}
-                            aria-hidden
-                          >
-                            {f.letter}
-                          </span>
-                        ))}
-                        {faces.length > 3 && (
-                          <span className={`${ui.orbMiniFace} ${ui.orbMiniMore}`}>
-                            +{faces.length - 3}
-                          </span>
-                        )}
-                      </div>
-                      <span className={ui.orbRowBody}>
-                        <span className={ui.orbTitle}>{spacePeopleLabel(orb)}</span>
-                        <span className={ui.orbMeta}>{orbSizeLabel(orb)}</span>
+                      <span className={ui.orbSquircle}>
+                        <span className={ui.orbFaceStack}>
+                          {faces.slice(0, 3).map((f, idx) => (
+                            <span
+                              key={f.key}
+                              className={`${ui.orbMiniFace} ${f.them ? ui.orbMiniFaceThem : ui.orbMiniFaceMe}`}
+                              style={{ zIndex: 4 - idx }}
+                              aria-hidden
+                            >
+                              {f.letter}
+                            </span>
+                          ))}
+                          {faces.length > 3 && (
+                            <span className={`${ui.orbMiniFace} ${ui.orbMiniMore}`}>
+                              +{faces.length - 3}
+                            </span>
+                          )}
+                        </span>
                       </span>
+                      <span className={ui.orbTileName}>{spacePeopleLabel(orb)}</span>
                     </button>
                   );
                 })}
-                <button
-                  type="button"
-                  className={ui.orbRow}
-                  disabled={spaceBusy}
-                  onClick={() => void handleCreateOrb()}
-                >
-                  <span className={ui.orbPlus} aria-hidden>
-                    +
-                  </span>
-                  <span className={ui.orbRowBody}>
-                    <span className={ui.orbTitle}>{Copy.orbs.createOrb}</span>
-                    <span className={ui.orbMeta}>{Copy.orbs.createOrbSub}</span>
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className={ui.orbRow}
-                  disabled={spaceBusy}
-                  onClick={() => {
-                    setOpen(false);
-                    setJoinOrbOpen(true);
-                  }}
-                >
-                  <span className={ui.orbPlus} aria-hidden>
-                    →
-                  </span>
-                  <span className={ui.orbRowBody}>
-                    <span className={ui.orbTitle}>{Copy.orbs.joinOrb}</span>
-                    <span className={ui.orbMeta}>{Copy.orbs.joinOrbSub}</span>
-                  </span>
-                </button>
               </div>
             </section>
 
@@ -954,6 +932,44 @@ export default function Settings() {
 
       {/* Outside Settings sheet — nested fixed sheets get clipped by the
           parent’s transform and never cover the screen. */}
+      <Sheet
+        open={orbAddOpen}
+        onClose={() => setOrbAddOpen(false)}
+        heading={Copy.orbs.anotherOrb}
+        stacked
+      >
+        <button
+          type="button"
+          className={add.option}
+          onClick={() => void handleCreateOrb()}
+        >
+          <span className={add.glyph} aria-hidden>
+            +
+          </span>
+          <span>
+            <span className={add.optionTitle}>{Copy.orbs.startNew}</span>
+            <span className={add.optionNote}>{Copy.orbs.startNewNote}</span>
+          </span>
+        </button>
+        <button
+          type="button"
+          className={add.option}
+          onClick={() => {
+            setOrbAddOpen(false);
+            setOpen(false);
+            setJoinOrbOpen(true);
+          }}
+        >
+          <span className={add.glyph} aria-hidden>
+            →
+          </span>
+          <span>
+            <span className={add.optionTitle}>{Copy.orbs.joinWithCode}</span>
+            <span className={add.optionNote}>{Copy.orbs.joinWithCodeNote}</span>
+          </span>
+        </button>
+      </Sheet>
+
       <Sheet
         open={pastOrbsOpen}
         onClose={() => {
