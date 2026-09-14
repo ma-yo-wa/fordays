@@ -9,7 +9,7 @@ final class AppModel: ObservableObject {
   @Published var spaces: [SpaceInfo] = []
   @Published var activities: [Activity] = []
   @Published var externalEvents: [ExternalEvent] = []
-  @Published var tab: HomeTab = .bucket
+  @Published var tab: HomeTab = .plans
   @Published var cursorMonth: Date = Date()
   @Published var pickedDay: String = DateLocal.todayISO()
   @Published var errorMessage: String?

@@ -197,7 +197,7 @@ export const useApp = create<AppState>()((set, get) => {
     space: null,
     spaces: [],
 
-    screen: 'bucket',
+    screen: 'calendar',
     picked: todayISO(),
     cursor: firstOfMonth(new Date()),
     navScroll: 0,

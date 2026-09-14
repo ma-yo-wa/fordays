@@ -87,6 +87,8 @@ Empty: things you want to do (together, if a we), before they have a day.
 
 A plan has a **day**. Soft blanks are valid.
 
+The app **opens here**. Someday and Memories stay in the dock; this is the default page.
+
 Default when-flow:
 
 1. **Day** — required once it’s a plan
