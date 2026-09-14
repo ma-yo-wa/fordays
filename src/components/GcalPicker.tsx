@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Sheet from './Sheet';
 import type { GoogleCalendar } from '../lib/gcal';
+import { Copy } from '../lib/copy';
 import f from './Form.module.css';
 import s from './GcalPicker.module.css';
 
@@ -33,8 +34,17 @@ export default function GcalPicker({
   const [pending, setPending] = useState<string | null>(selectedId);
 
   useEffect(() => {
-    if (open) setPending(selectedId);
-  }, [open, selectedId]);
+    if (!open) return;
+    if (selectedId) {
+      setPending(selectedId);
+      return;
+    }
+    const main =
+      calendars.find((c) => c.primary) ??
+      calendars.find((c) => c.accessRole === 'owner') ??
+      calendars[0];
+    setPending(main?.id ?? null);
+  }, [open, selectedId, calendars]);
 
   const sections = useMemo(() => {
     const mine = calendars.filter((c) => c.accessRole === 'owner' || c.primary);
@@ -50,10 +60,7 @@ export default function GcalPicker({
 
   return (
     <Sheet open={open} onClose={onClose} heading="Import calendars" stacked>
-      <p className={s.lead}>
-        Pick a calendar meant for sharing — travel, stays, appointments. Not
-        gym, commute, or your whole life. One overlay, not a Google dump
-      </p>
+      <p className={s.lead}>{Copy.availability.pickerLead}</p>
 
       {sections.map((sec) => (
         <div key={sec.label} className={s.section}>

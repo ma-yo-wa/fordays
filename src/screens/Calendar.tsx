@@ -94,6 +94,23 @@ export default function Calendar() {
     .slice()
     .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 
+  const dayItems = [
+    ...dayPlans.map((plan) => ({
+      kind: 'plan' as const,
+      plan,
+      sort: startKey(plan.date_time),
+    })),
+    ...dayExternal.map((event) => ({
+      kind: 'external' as const,
+      event,
+      sort: event.allDay
+        ? `${picked} 99`
+        : event.startsAt.includes('T')
+          ? event.startsAt.replace('T', ' ')
+          : `${event.startsAt} 99`,
+    })),
+  ].sort((a, b) => a.sort.localeCompare(b.sort));
+
   const pickedDate = parseISO(picked);
   const dayHeading =
     picked === today
@@ -119,6 +136,7 @@ export default function Calendar() {
           }
           const date = cell.date;
           const mine = plansByDate.get(date) ?? [];
+          const imported = extByDate.get(date) ?? [];
 
           const isRowStart = i % 7 === 0;
           const isRowEnd = i % 7 === 6;
@@ -184,6 +202,9 @@ export default function Calendar() {
                 {singlePlans.slice(0, 3).map((p) => (
                   <i key={p.id} />
                 ))}
+                {imported.slice(0, Math.max(0, 3 - Math.min(singlePlans.length, 3))).map((e) => (
+                  <i key={e.id} className={s.ext} />
+                ))}
               </span>
               {date === picked && <span className={s.cursorPip} />}
             </button>
@@ -194,107 +215,104 @@ export default function Calendar() {
       <div className={s.agenda}>
         <div className={s.dayLabel}>{dayHeading}</div>
 
-        {!dayPlans.length ? (
+        {!dayPlans.length && !dayExternal.length ? (
           <div className={s.blank}>
             <p>
               {space?.frozen
                 ? Copy.plans.emptyFrozen
-                : dayExternal.length > 0
-                  ? Copy.plans.emptyTogether
-                  : other
-                    ? picked === today
-                      ? formatCopy(Copy.plans.emptyTodayPartner, { partner: other })
-                      : formatCopy(Copy.plans.emptyDayPartner, { partner: other })
-                    : picked === today
-                      ? Copy.plans.emptyToday
-                      : Copy.plans.emptyDay}
+                : other
+                  ? picked === today
+                    ? formatCopy(Copy.plans.emptyTodayPartner, { partner: other })
+                    : formatCopy(Copy.plans.emptyDayPartner, { partner: other })
+                  : picked === today
+                    ? Copy.plans.emptyToday
+                    : Copy.plans.emptyDay}
             </p>
           </div>
         ) : (
           <div className={s.plansList}>
-            {dayPlans.map((a, i) => {
-              const when = relativeDay(dtDate(a.date_time) ?? picked);
-              const time = dtTime(a.date_time);
-              const timing = time ? `${when} · ${prettyLower(time)}` : `${when} · All day`;
+            {dayItems.map((item, i) => {
+              if (item.kind === 'plan') {
+                const a = item.plan;
+                const when = relativeDay(dtDate(a.date_time) ?? picked);
+                const time = dtTime(a.date_time);
+                const timing = time ? `${when} · ${prettyLower(time)}` : `${when} · All day`;
+                return (
+                  <motion.button
+                    key={a.id}
+                    type="button"
+                    className={s.entry}
+                    onClick={() => openDetail(a.id)}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05, duration: 0.4 }}
+                  >
+                    <CoverArt
+                      url={a.image_url}
+                      washId={a.id}
+                      washTitle={a.title}
+                      size="thumb"
+                      className={s.thumb}
+                    />
+                    <span>
+                      <span className={s.title}>{a.title}</span>
+                      <div className={s.range}>{timing}</div>
+                      {a.description && <div className={s.note}>{a.description}</div>}
+                      <div className={s.meta}>
+                        <span
+                          className={s.avatar}
+                          style={{
+                            background: faceColor(faceIndexFor(a.created_by, faceCtx)),
+                          }}
+                        >
+                          {(partnerName(config, a.created_by)[0] ?? '?').toUpperCase()}
+                        </span>
+                        {partnerName(config, a.created_by)}
+                      </div>
+                    </span>
+                  </motion.button>
+                );
+              }
+
+              const e = item.event;
+              const owner = ownerIndex(e.ownerId);
+              const myId = space?.myId ?? String(space?.me ?? config.me);
+              const isMine = e.ownerId === myId || e.ownerId === String(space?.me ?? config.me);
+              const ownerName = isMine
+                ? (space?.myName ?? config.names[owner] ?? 'You')
+                : (config.names[owner] ?? 'Them');
+              const when = relativeDay(dtDate(e.startsAt) ?? picked);
+              const timing = `${when} · ${pillWhen(e, picked)}`;
               return (
                 <motion.button
-                  key={a.id}
+                  key={e.id}
                   type="button"
-                  className={s.entry}
-                  onClick={() => openDetail(a.id)}
+                  className={`${s.entry} ${s.entryCal}`}
+                  onClick={() => openExternal(e.id)}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05, duration: 0.4 }}
                 >
-                  <CoverArt
-                    url={a.image_url}
-                    washId={a.id}
-                    washTitle={a.title}
-                    size="thumb"
-                    className={s.thumb}
-                  />
+                  <span className={s.calThumb} aria-hidden>
+                    {artFor(e.title)}
+                  </span>
                   <span>
-                    <span className={s.title}>{a.title}</span>
+                    <span className={s.title}>{e.title || Copy.availability.busy}</span>
                     <div className={s.range}>{timing}</div>
-                    {a.description && <div className={s.note}>{a.description}</div>}
                     <div className={s.meta}>
-                      <span
-                        className={s.avatar}
-                        style={{
-                          background: faceColor(faceIndexFor(a.created_by, faceCtx)),
-                        }}
-                      >
-                        {(partnerName(config, a.created_by)[0] ?? '?').toUpperCase()}
+                      <span className={s.avatar} style={{ background: faceColor(owner) }}>
+                        {(ownerName[0] ?? '?').toUpperCase()}
                       </span>
-                      {partnerName(config, a.created_by)}
+                      {ownerName}
+                      <span className={s.sourceTag}>{Copy.availability.google}</span>
+                      {isMine && !e.sharedWithSpace && (
+                        <span className={s.privateTag}>{Copy.availability.onlyYou}</span>
+                      )}
                     </div>
                   </span>
                 </motion.button>
               );
             })}
-          </div>
-        )}
-
-        {dayExternal.length > 0 && (
-          <div className={s.availabilitySection}>
-            <div className={s.availabilityHeader}>
-              <span className={s.availabilityTitle}>{Copy.availability.title}</span>
-              <span className={s.availabilitySub}>{Copy.availability.googleCalendar}</span>
-            </div>
-            <div className={s.availabilityList}>
-              {dayExternal.map((e) => {
-                const owner = ownerIndex(e.ownerId);
-                const ownerName = config.names[owner] ?? 'Them';
-                return (
-                  <div
-                    key={e.id}
-                    className={s.availabilityRow}
-                    onClick={() => openExternal(e.id)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(ev) => {
-                      if (ev.key === 'Enter' || ev.key === ' ') openExternal(e.id);
-                    }}
-                  >
-                    <span className={s.availabilityGlyph} aria-hidden>
-                      {artFor(e.title)}
-                    </span>
-                    <div className={s.availabilityText}>
-                      <span className={s.availabilityName}>{e.title || Copy.availability.busy}</span>
-                      <span className={s.availabilityTime}>
-                        {pillWhen(e, picked)} · {ownerName}
-                      </span>
-                    </div>
-                    <span
-                      className={s.availabilityWho}
-                      style={{ background: faceColor(owner) }}
-                    >
-                      {(ownerName[0] ?? '?').toUpperCase()}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
           </div>
         )}
       </div>

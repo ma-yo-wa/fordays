@@ -95,13 +95,18 @@ struct ExternalDetailView: View {
               .font(.subheadline)
               .foregroundStyle(Theme.inkSoft)
               .frame(width: 18)
-            Text(event.title != nil ? Copy.Availability.notSharedPlan(possessive) : Copy.Availability.busyPrivate)
+            Text(
+              isMine && !event.sharedWithSpace
+                ? Copy.Availability.privateTitle
+                : Copy.Availability.notSharedPlan(possessive)
+            )
               .font(.subheadline)
               .foregroundStyle(Theme.ink)
           }
         }
         .padding(.vertical, 16)
 
+        if app.space?.isMatched == true {
         Divider()
           .overlay(Theme.ink.opacity(0.08))
 
@@ -155,6 +160,7 @@ struct ExternalDetailView: View {
         .padding(.vertical, 12)
         .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .padding(.top, 16)
+        }
 
         // Make plan primary button
         if event.title != nil && event.isFutureOrToday(today: DateLocal.todayISO()) && app.space?.canCompose == true {

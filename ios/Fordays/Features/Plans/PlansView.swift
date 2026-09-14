@@ -34,6 +34,33 @@ struct PlansView: View {
     }
   }
 
+  private enum AgendaItem: Identifiable {
+    case plan(Activity)
+    case external(ExternalEvent)
+
+    var id: String {
+      switch self {
+      case .plan(let a): return "p-\(a.id)"
+      case .external(let e): return "e-\(e.id)"
+      }
+    }
+
+    var sort: String {
+      switch self {
+      case .plan(let a): return a.dateTime ?? ""
+      case .external(let e):
+        if e.allDay { return "\(String(e.startsAt.prefix(10)))T99:00" }
+        return e.startsAt
+      }
+    }
+  }
+
+  private var dayAgenda: [AgendaItem] {
+    let plans = dayPlans.map { AgendaItem.plan($0) }
+    let imported = dayExternal.map { AgendaItem.external($0) }
+    return (plans + imported).sorted { $0.sort < $1.sort }
+  }
+
   var body: some View {
     VStack(spacing: 0) {
       monthGrid
@@ -44,7 +71,7 @@ struct PlansView: View {
         Text(dayTitle)
           .font(.title3.weight(.semibold))
           .foregroundStyle(Theme.ink)
-        if dayPlans.isEmpty {
+        if dayPlans.isEmpty && dayExternal.isEmpty {
           VStack(spacing: 14) {
             Text(emptyCopy)
               .font(.subheadline)
@@ -54,81 +81,84 @@ struct PlansView: View {
           .frame(maxWidth: .infinity)
           .padding(.top, 24)
         } else {
-          ForEach(dayPlans) { a in
-            Button {
-              onSelect(a)
-            } label: {
-              HStack(alignment: .top, spacing: 12) {
-                planThumb(a)
-                VStack(alignment: .leading, spacing: 4) {
-                  Text(a.title)
-                    .font(.body.weight(.medium))
-                    .foregroundStyle(Theme.ink)
-                  Text(planTiming(a))
-                    .font(.footnote)
-                    .foregroundStyle(Theme.inkSoft)
-                  if let note = a.description, !note.isEmpty {
-                    Text(note)
-                      .font(.footnote)
-                      .foregroundStyle(Theme.inkFaint)
-                  }
-                  HStack(spacing: 6) {
-                    face(for: a.createdBy)
-                    Text(displayName(for: a.createdBy))
+          ForEach(dayAgenda) { item in
+            switch item {
+            case .plan(let a):
+              Button {
+                onSelect(a)
+              } label: {
+                HStack(alignment: .top, spacing: 12) {
+                  planThumb(a)
+                  VStack(alignment: .leading, spacing: 4) {
+                    Text(a.title)
+                      .font(.body.weight(.medium))
+                      .foregroundStyle(Theme.ink)
+                    Text(planTiming(a))
                       .font(.footnote)
                       .foregroundStyle(Theme.inkSoft)
+                    if let note = a.description, !note.isEmpty {
+                      Text(note)
+                        .font(.footnote)
+                        .foregroundStyle(Theme.inkFaint)
+                    }
+                    HStack(spacing: 6) {
+                      face(for: a.createdBy)
+                      Text(displayName(for: a.createdBy))
+                        .font(.footnote)
+                        .foregroundStyle(Theme.inkSoft)
+                    }
                   }
+                  Spacer(minLength: 0)
                 }
-                Spacer(minLength: 0)
+                .padding(14)
+                .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
               }
-              .padding(14)
-              .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-            }
-            .buttonStyle(.plain)
-          }
-        }
-
-        if !dayExternal.isEmpty {
-          VStack(alignment: .leading, spacing: 8) {
-            HStack {
-              Text(Copy.Availability.title)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(Theme.inkFaint)
-              Spacer()
-              Text(Copy.Availability.googleCalendar)
-                .font(.caption2)
-                .foregroundStyle(Theme.inkFaint)
-            }
-            .padding(.top, 10)
-
-            ForEach(dayExternal) { e in
+              .buttonStyle(.plain)
+            case .external(let e):
               let isMine = app.space?.myId == e.userId || e.userId == "0"
-              let ownerName = isMine ? "You" : displayName(for: e.userId)
-              HStack(spacing: 10) {
-                Text(Art.emoji(for: e.title))
-                  .font(.system(size: 20))
-
-                VStack(alignment: .leading, spacing: 2) {
-                  Text(e.title ?? Copy.Availability.busy)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(Theme.ink)
-                    .lineLimit(1)
-                  Text("\(externalTiming(e)) · \(ownerName)")
-                    .font(.caption)
-                    .foregroundStyle(Theme.inkSoft)
-                }
-
-                Spacer(minLength: 4)
-
-                face(for: e.userId)
-              }
-              .padding(.horizontal, 14)
-              .padding(.vertical, 10)
-              .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-              .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-              .onTapGesture {
+              let ownerName = isMine ? (app.space?.myName ?? "You") : displayName(for: e.userId)
+              Button {
                 onSelectExternal?(e)
+              } label: {
+                HStack(alignment: .top, spacing: 12) {
+                  Text(Art.emoji(for: e.title))
+                    .font(.system(size: 20))
+                    .frame(width: 42, height: 42)
+                    .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                  VStack(alignment: .leading, spacing: 4) {
+                    Text(e.title ?? Copy.Availability.busy)
+                      .font(.body.weight(.medium))
+                      .foregroundStyle(Theme.ink)
+                    Text(planExternalTiming(e))
+                      .font(.footnote)
+                      .foregroundStyle(Theme.inkSoft)
+                    HStack(spacing: 6) {
+                      face(for: e.userId)
+                      Text(ownerName)
+                        .font(.footnote)
+                        .foregroundStyle(Theme.inkSoft)
+                      Text(Copy.Availability.google)
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(Theme.inkSoft)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 1)
+                        .background(Theme.ink.opacity(0.06), in: Capsule())
+                      if isMine && !e.sharedWithSpace {
+                        Text(Copy.Availability.onlyYou)
+                          .font(.caption2.weight(.medium))
+                          .foregroundStyle(Theme.inkSoft)
+                          .padding(.horizontal, 6)
+                          .padding(.vertical, 1)
+                          .overlay(Capsule().stroke(Theme.ink.opacity(0.14), lineWidth: 0.5))
+                      }
+                    }
+                  }
+                  Spacer(minLength: 0)
+                }
+                .padding(14)
+                .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
               }
+              .buttonStyle(.plain)
             }
           }
         }
@@ -171,9 +201,6 @@ struct PlansView: View {
     if app.space?.frozen == true {
       return Copy.Plans.emptyFrozen
     }
-    if !dayExternal.isEmpty {
-      return Copy.Plans.emptyTogether
-    }
     var other: String? = nil
     if let space = app.space {
       let others = space.members.filter { $0.id != space.myId }
@@ -210,6 +237,12 @@ struct PlansView: View {
       return "Until \(DateLocal.prettyLower(t))"
     }
     return "All day"
+  }
+
+  private func planExternalTiming(_ e: ExternalEvent) -> String {
+    let start = String(e.startsAt.prefix(10))
+    let when = DateLocal.relativeDay(start)
+    return "\(when) · \(externalTiming(e))"
   }
 
   private func planTiming(_ a: Activity) -> String {
@@ -252,6 +285,7 @@ struct PlansView: View {
           if let day {
             let iso = DateLocal.todayISO(day)
             let count = singlePlanCount(on: iso)
+            let extCount = visibleExternalCount(on: iso)
             let isToday = iso == today
             let isPicked = app.pickedDay == iso
             Button {
@@ -271,6 +305,11 @@ struct PlansView: View {
                 HStack(spacing: 2) {
                   ForEach(0..<min(count, 3), id: \.self) { _ in
                     Circle().fill(Theme.roseInk).frame(width: 4, height: 4)
+                  }
+                  ForEach(0..<min(extCount, max(0, 3 - min(count, 3))), id: \.self) { _ in
+                    Circle()
+                      .stroke(Theme.roseInk, lineWidth: 1)
+                      .frame(width: 4, height: 4)
                   }
                 }
                 .frame(height: 5)
@@ -338,6 +377,17 @@ struct PlansView: View {
         .offset(x: left, y: 0)
       }
     }
+  }
+
+  private func visibleExternalCount(on day: String) -> Int {
+    let myId = app.space?.myId
+    return app.externalEvents.filter { e in
+      let isMine = myId == e.userId || e.userId == "0"
+      if !isMine && !e.sharedWithSpace { return false }
+      let start = String(e.startsAt.prefix(10))
+      let end = e.endsAt.isEmpty ? start : String(e.endsAt.prefix(10))
+      return day >= start && day <= end
+    }.count
   }
 
   private func singlePlanCount(on day: String) -> Int {

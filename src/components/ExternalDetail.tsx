@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Sheet from './Sheet';
-import { useApp, canCompose } from '../lib/store';
+import { useApp, canCompose, isMatched } from '../lib/store';
 import { artFor } from '../lib/art';
 import { faceColor } from '../lib/tint';
 import { formatRange, todayISO } from '../lib/date';
@@ -72,6 +72,7 @@ export default function ExternalDetail() {
     .toUpperCase() || '?';
 
   const isShared = Boolean(event?.sharedWithSpace);
+  const hasWe = isMatched(space);
 
   async function handleToggleShare() {
     if (!event) return;
@@ -125,13 +126,14 @@ export default function ExternalDetail() {
             <div className={s.row}>
               <LockIcon />
               <span>
-                {event.title
-                  ? formatCopy(Copy.availability.notSharedPlan, { owner: possessive })
-                  : Copy.availability.busyPrivate}
+                {isMine && !isShared
+                  ? Copy.availability.privateTitle
+                  : formatCopy(Copy.availability.notSharedPlan, { owner: possessive })}
               </span>
             </div>
           </div>
 
+          {hasWe && (
           <div className={s.shareBox}>
             <div className={s.shareBoxInfo}>
               <div className={s.shareBoxTitle}>
@@ -160,6 +162,7 @@ export default function ExternalDetail() {
               </button>
             )}
           </div>
+          )}
 
           {event.title && isExternalFutureOrToday(event, todayISO()) && canCompose(space) && (
             <button

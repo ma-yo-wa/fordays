@@ -105,31 +105,35 @@ enum Copy {
   }
 
   enum Availability {
-    static let title = "Availability"
+    static let title = "From your calendar"
     static let googleCalendar = "Google Calendar"
+    static let google = "Google"
+    static let apple = "Apple"
+    static let onlyYou = "Only you"
+    static let pickerLead = "Your main calendar is picked. That’s usually where appointments land. You can choose another."
     static let makePlan = "Make it a plan"
     static let makePlanShort = "Make plan"
-    static let convertToPlan = "Copy to shared plan"
+    static let convertToPlan = "Make it a plan"
     static let busy = "Busy"
-    static let busyPrivate = "Busy only — the title stays private"
+    static let busyPrivate = "Just show busy — they won’t see the title"
     static func notSharedPlan(_ owner: String) -> String {
-      "From \(owner) calendar — not a shared plan"
+      "From \(owner) calendar — not an Orb plan"
     }
     static func importedFoot(_ owner: String) -> String {
-      "Imported events aren’t plans — they just show what’s already on \(owner) calendar"
+      "This lives on \(owner) calendar. Cancel or change it there."
     }
     static let sharedTitle = "Shared with this Orb"
-    static let privateTitle = "Private to you"
-    static let shareWithOrb = "Share with this Orb"
-    static let makePrivate = "Make private"
-    static let sharedWithOrbDesc = "Others in this Orb can see this context on their day agenda."
-    static let privateDesc = "Only you can see this. Private to you."
+    static let privateTitle = "Only you can see this"
+    static let shareWithOrb = "Share with the Orb"
+    static let makePrivate = "Only you"
+    static let sharedWithOrbDesc = "They’ll see this on the day — a flight, an appointment, or just so they know."
+    static let privateDesc = "Private to you. Share it if you want them to know."
     static func sharedBy(_ owner: String) -> String {
       "Shared by \(owner)"
     }
     static func sharedByDesc(_ owner: String) -> String {
-      "\(owner) shared this context with the Orb."
+      "\(owner) wanted you to see this."
     }
-    static let noConflicts = "No other plans or shared context on this day"
+    static let noConflicts = "Nothing else on this day"
   }
 }
