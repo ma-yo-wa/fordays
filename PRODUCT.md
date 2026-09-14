@@ -91,6 +91,8 @@ A plan has a **day**. Soft blanks are valid.
 
 The app **opens here**. Someday and Memories stay in the dock; this is the default page.
 
+Empty: the line only. Plus adds. No empty CTA.
+
 Default when-flow:
 
 1. **Day** — required once it’s a plan

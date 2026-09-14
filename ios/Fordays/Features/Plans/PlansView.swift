@@ -72,14 +72,12 @@ struct PlansView: View {
           .font(.title3.weight(.semibold))
           .foregroundStyle(Theme.ink)
         if dayPlans.isEmpty && dayExternal.isEmpty {
-          VStack(spacing: 14) {
-            Text(emptyCopy)
-              .font(.subheadline)
-              .foregroundStyle(Theme.inkSoft)
-              .multilineTextAlignment(.center)
-          }
-          .frame(maxWidth: .infinity)
-          .padding(.top, 24)
+          Text(emptyCopy)
+            .font(.subheadline)
+            .foregroundStyle(Theme.inkSoft)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 24)
         } else {
           ForEach(dayAgenda) { item in
             switch item {
