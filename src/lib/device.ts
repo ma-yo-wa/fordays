@@ -12,6 +12,12 @@ export function isDesktopBrowser(): boolean {
     return false;
   }
 
+  // Allow password recovery flow to be completed on desktop if the user clicks the email link on a computer
+  const href = window.location.href;
+  if (/type=recovery/i.test(href) || params.get('type') === 'recovery') {
+    return false;
+  }
+
   const nav = window.navigator as Navigator & { standalone?: boolean };
   // Standalone installed PWA on iOS
   if (nav.standalone === true) return false;
