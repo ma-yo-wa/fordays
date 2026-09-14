@@ -40,7 +40,8 @@ jobs:
           esac
           npm run build
           # Fail loud if Vite didn't bake project credentials into the client.
-          if ! grep -R -q 'supabase\.co' dist/assets/index-*.js; then
+          # URL often lands in a split chunk (config-*.js), not index-*.js.
+          if ! grep -Rql 'supabase\.co' dist --include='*.js'; then
             echo "Built bundle is missing Supabase URL — check VITE_SUPABASE_* secrets"
             exit 1
           fi
