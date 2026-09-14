@@ -760,7 +760,7 @@ struct SettingsView: View {
       }
       .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-      Text("Phone calendars only here — Google and Outlook stay on the web so a Gmail calendar already on this iPhone doesn’t show twice.")
+      Text(Copy.Availability.settingsNoteIos)
         .font(.footnote)
         .foregroundStyle(Theme.inkSoft)
     }

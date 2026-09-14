@@ -138,5 +138,7 @@ enum Copy {
       "\(owner) wanted you to see this."
     }
     static let noConflicts = "Nothing else on this day"
+    static let settingsNoteIos = "Calendars already on this iPhone — including Google, if it’s in the Calendar app. Don’t see it? iPhone Settings → Calendar → Accounts → Add Account → Google, then come back and refresh."
+    static let settingsNoteWeb = "Google here. On iPhone, Fordays reads the Calendar app instead — add Gmail there if those days should show, so they don’t land twice."
   }
 }

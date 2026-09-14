@@ -107,6 +107,8 @@
     "privateDesc": "Private to you. Share it if you want them to know.",
     "sharedBy": "Shared by {owner}",
     "sharedByDesc": "{owner} wanted you to see this.",
-    "noConflicts": "Nothing else on this day"
+    "noConflicts": "Nothing else on this day",
+    "settingsNoteIos": "Calendars already on this iPhone — including Google, if it’s in the Calendar app. Don’t see it? iPhone Settings → Calendar → Accounts → Add Account → Google, then come back and refresh.",
+    "settingsNoteWeb": "Google here. On iPhone, Fordays reads the Calendar app instead — add Gmail there if those days should show, so they don’t land twice."
   }
 }

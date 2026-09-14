@@ -748,6 +748,8 @@ export default function Settings() {
               <span className={f.hint}>{calBusy ? '…' : '›'}</span>
             </button>
           )}
+          {Boolean(msClientId()) && (
+            <>
           <div className={f.listRow}>
             <span className={f.rowLabel}>{Copy.availability.outlookCalendar}</span>
             <Switch
@@ -838,12 +840,10 @@ export default function Settings() {
               <span className={f.hint}>{calBusy ? '…' : '›'}</span>
             </button>
           )}
+            </>
+          )}
         </div>
-        <p className={f.rowNote}>
-          Overlay one calendar per account so your person can see what reshapes the week — trips,
-          stays, appointments. Skip daily routines and private clutter; still not plans. Apple
-          Calendar is on the iPhone app, so those appointments don’t double here.
-        </p>
+        <p className={f.rowNote}>{Copy.availability.settingsNoteWeb}</p>
 
         <span className={f.label}>Notifications</span>
         <div className={f.group}>
