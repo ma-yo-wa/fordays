@@ -1,0 +1,14 @@
+---
+description: Product rules live in PRODUCT.md — add a section when we decide
+alwaysApply: true
+---
+
+# Product rules
+
+Read and follow [`PRODUCT.md`](../../PRODUCT.md).
+
+When we decide a rule (Orbs, Plans, Someday, Memories, Invite, Auth), write it in that file in the matching section — before or with the code. Do not leave it only in chat.
+
+Taste and language stay in local `ETHOS.md`. Execution order stays in `work-order.mdc`. This is who can leave, what a plan is, how Orbs work.
+
+Never commit `ETHOS.md` or `BACKLOG.md`. **Do** commit `PRODUCT.md`.
