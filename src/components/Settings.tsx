@@ -16,6 +16,19 @@ import {
   type GoogleCalendar,
 } from '../lib/gcal';
 import {
+  clearOutlookTokens,
+  connectOutlook,
+  consumeOutlookRedirect,
+  fetchOutlookEvents,
+  listOutlookCalendars,
+  msClientId,
+  saveOutlookCalendar,
+  savedOutlookCalendar,
+  ensureOutlookToken,
+  type OutlookCalendar,
+} from '../lib/outlook';
+import type { ImportedCalendar } from '../lib/calendars';
+import {
   disablePush,
   enablePush,
   pushState,
@@ -97,10 +110,15 @@ export default function Settings() {
 
   const signedIn = authPhase === 'signedIn';
   const [myName, setMyName] = useState(space?.myName ?? config.names[config.me]);
-  const [gcalOn, setGcalOn] = useState(Boolean(googleToken()));
+  const [gcalOn, setGcalOn] = useState(Boolean(savedGoogleCalendar() || googleToken()));
   const [gcalName, setGcalName] = useState(savedGoogleCalendar()?.summary ?? null);
-  const [gcalList, setGcalList] = useState<GoogleCalendar[] | null>(null);
-  const [gcalBusy, setGcalBusy] = useState(false);
+  const [outlookOn, setOutlookOn] = useState(Boolean(savedOutlookCalendar()));
+  const [outlookName, setOutlookName] = useState(savedOutlookCalendar()?.summary ?? null);
+  const [calPicker, setCalPicker] = useState<{
+    source: 'google' | 'outlook';
+    items: ImportedCalendar[];
+  } | null>(null);
+  const [calBusy, setCalBusy] = useState(false);
   const [bell, setBell] = useState<PushState>('default');
   const [bellBusy, setBellBusy] = useState(false);
   const [spaceBusy, setSpaceBusy] = useState(false);
@@ -126,10 +144,24 @@ export default function Settings() {
     setMyName(space?.myName ?? config.names[config.me]);
     setLeaveAsk(false);
     setRemoveId(null);
-    setGcalOn(Boolean(googleToken()));
+    setGcalOn(Boolean(savedGoogleCalendar() || googleToken()));
     setGcalName(savedGoogleCalendar()?.summary ?? null);
+    setOutlookOn(Boolean(savedOutlookCalendar()));
+    setOutlookName(savedOutlookCalendar()?.summary ?? null);
     void registerPush().then(() => setBell(pushState()));
     void syncPush().then(() => setBell(pushState()));
+    void (async () => {
+      const redirected = await consumeOutlookRedirect();
+      const token = redirected || (await ensureOutlookToken());
+      if (!token || savedOutlookCalendar()) return;
+      setOutlookOn(true);
+      try {
+        const calendars = await listOutlookCalendars(token);
+        if (calendars.length) setCalPicker({ source: 'outlook', items: calendars });
+      } catch {
+        /* wait for an explicit connect */
+      }
+    })();
   }, [open, space?.myName, config.names, config.me]);
 
   useEffect(() => {
@@ -142,17 +174,16 @@ export default function Settings() {
     if (!token) {
       toast('Connect Google again');
       setGcalOn(false);
-      setGcalList(null);
+      setCalPicker(null);
       return;
     }
-    setGcalBusy(true);
+    setCalBusy(true);
     try {
       saveGoogleCalendar(cal);
       setGcalName(cal.summary);
-      setGcalList(null);
-      const owner = space?.myId ?? String(config.me);
-      const events = await fetchGoogleEvents(token, owner, cal.id);
-      await syncExternal(events);
+      setCalPicker(null);
+      const events = await fetchGoogleEvents(token, cal.id, cal.summary);
+      await syncExternal(events, 'google');
       setGcalOn(true);
       const withPlace = events.filter((e) => e.location).length;
       toast(
@@ -165,11 +196,43 @@ export default function Settings() {
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t load that calendar');
     } finally {
-      setGcalBusy(false);
+      setCalBusy(false);
     }
   }
 
-  async function pickGoogleCalendar(cal: GoogleCalendar) {
+  async function importOutlookCalendar(cal: OutlookCalendar) {
+    const token = await ensureOutlookToken();
+    if (!token) {
+      toast('Connect Outlook again');
+      setOutlookOn(false);
+      setCalPicker(null);
+      return;
+    }
+    setCalBusy(true);
+    try {
+      saveOutlookCalendar(cal);
+      setOutlookName(cal.summary);
+      setCalPicker(null);
+      const events = await fetchOutlookEvents(token, cal.id, cal.summary);
+      await syncExternal(events, 'outlook');
+      setOutlookOn(true);
+      toast(
+        events.length
+          ? `${cal.summary} — ${events.length} events`
+          : `${cal.summary} — nothing in the next few months`,
+      );
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Couldn’t load that calendar');
+    } finally {
+      setCalBusy(false);
+    }
+  }
+
+  async function pickImportedCalendar(cal: ImportedCalendar) {
+    if (calPicker?.source === 'outlook') {
+      await importOutlookCalendar(cal);
+      return;
+    }
     await importGoogleCalendar(cal);
   }
 
@@ -182,10 +245,27 @@ export default function Settings() {
     await importGoogleCalendar(cal);
   }
 
-  function closeGcalPicker() {
-    const had = savedGoogleCalendar();
-    setGcalList(null);
-    if (!had) {
+  async function refreshOutlookOverlay() {
+    const cal = savedOutlookCalendar();
+    if (!cal) {
+      toast('Choose a calendar first');
+      return;
+    }
+    await importOutlookCalendar(cal);
+  }
+
+  function closeCalPicker() {
+    const source = calPicker?.source;
+    setCalPicker(null);
+    if (source === 'outlook') {
+      if (!savedOutlookCalendar()) {
+        clearOutlookTokens();
+        setOutlookOn(false);
+        setOutlookName(null);
+      }
+      return;
+    }
+    if (!savedGoogleCalendar()) {
       clearGoogleToken();
       setGcalOn(false);
       setGcalName(null);
@@ -585,27 +665,27 @@ export default function Settings() {
         <span className={f.label}>External calendars</span>
         <div className={f.group}>
           <div className={f.listRow}>
-            <span className={f.rowLabel}>Google Calendar</span>
+            <span className={f.rowLabel}>{Copy.availability.googleCalendar}</span>
             <Switch
               on={gcalOn}
-              disabled={gcalBusy}
+              disabled={calBusy}
               label="Connect Google Calendar"
               onChange={(on) => {
                 void (async () => {
                   if (!on) {
                     clearGoogleToken();
                     saveGoogleCalendar(null);
-                    setGcalList(null);
+                    setCalPicker(null);
                     setGcalName(null);
                     setGcalOn(false);
-                    void syncExternal([])
+                    void syncExternal([], 'google')
                       .then(() => toast('Google Calendar disconnected'))
                       .catch((err) =>
                         toast(err instanceof Error ? err.message : 'Couldn’t clear overlay'),
                       );
                     return;
                   }
-                  setGcalBusy(true);
+                  setCalBusy(true);
                   try {
                     const token = await connectGoogle();
                     const calendars = await listGoogleCalendars(token);
@@ -615,12 +695,12 @@ export default function Settings() {
                       return;
                     }
                     setGcalOn(true);
-                    setGcalList(calendars);
+                    setCalPicker({ source: 'google', items: calendars });
                   } catch (err) {
                     setGcalOn(false);
                     toast(err instanceof Error ? err.message : 'Google connect failed');
                   } finally {
-                    setGcalBusy(false);
+                    setCalBusy(false);
                   }
                 })();
               }}
@@ -630,7 +710,7 @@ export default function Settings() {
             <button
               type="button"
               className={f.listRow}
-              disabled={gcalBusy}
+              disabled={calBusy}
               onClick={() => {
                 void (async () => {
                   const token = googleToken();
@@ -639,13 +719,16 @@ export default function Settings() {
                     setGcalOn(false);
                     return;
                   }
-                  setGcalBusy(true);
+                  setCalBusy(true);
                   try {
-                    setGcalList(await listGoogleCalendars(token));
+                    setCalPicker({
+                      source: 'google',
+                      items: await listGoogleCalendars(token),
+                    });
                   } catch (err) {
                     toast(err instanceof Error ? err.message : 'Couldn’t list calendars');
                   } finally {
-                    setGcalBusy(false);
+                    setCalBusy(false);
                   }
                 })();
               }}
@@ -658,18 +741,108 @@ export default function Settings() {
             <button
               type="button"
               className={f.listRow}
-              disabled={gcalBusy}
+              disabled={calBusy}
               onClick={() => void refreshGoogleOverlay()}
             >
               <span className={f.rowLabel}>Refresh overlay</span>
-              <span className={f.hint}>{gcalBusy ? '…' : '›'}</span>
+              <span className={f.hint}>{calBusy ? '…' : '›'}</span>
+            </button>
+          )}
+          <div className={f.listRow}>
+            <span className={f.rowLabel}>{Copy.availability.outlookCalendar}</span>
+            <Switch
+              on={outlookOn}
+              disabled={calBusy}
+              label="Connect Outlook Calendar"
+              onChange={(on) => {
+                void (async () => {
+                  if (!on) {
+                    clearOutlookTokens();
+                    saveOutlookCalendar(null);
+                    setCalPicker(null);
+                    setOutlookName(null);
+                    setOutlookOn(false);
+                    void syncExternal([], 'outlook')
+                      .then(() => toast('Outlook Calendar disconnected'))
+                      .catch((err) =>
+                        toast(err instanceof Error ? err.message : 'Couldn’t clear overlay'),
+                      );
+                    return;
+                  }
+                  if (!msClientId()) {
+                    toast(
+                      'Outlook isn’t wired yet — paste a Microsoft client ID under Advanced, or set VITE_MS_CLIENT_ID and redeploy.',
+                    );
+                    return;
+                  }
+                  setCalBusy(true);
+                  try {
+                    const token = await connectOutlook();
+                    const calendars = await listOutlookCalendars(token);
+                    if (!calendars.length) {
+                      setOutlookOn(false);
+                      toast('No calendars found on that Outlook account');
+                      return;
+                    }
+                    setOutlookOn(true);
+                    setCalPicker({ source: 'outlook', items: calendars });
+                  } catch (err) {
+                    setOutlookOn(false);
+                    toast(err instanceof Error ? err.message : 'Outlook connect failed');
+                  } finally {
+                    setCalBusy(false);
+                  }
+                })();
+              }}
+            />
+          </div>
+          {outlookOn && (
+            <button
+              type="button"
+              className={f.listRow}
+              disabled={calBusy}
+              onClick={() => {
+                void (async () => {
+                  const token = await ensureOutlookToken();
+                  if (!token) {
+                    toast('Connect Outlook again');
+                    setOutlookOn(false);
+                    return;
+                  }
+                  setCalBusy(true);
+                  try {
+                    setCalPicker({
+                      source: 'outlook',
+                      items: await listOutlookCalendars(token),
+                    });
+                  } catch (err) {
+                    toast(err instanceof Error ? err.message : 'Couldn’t list calendars');
+                  } finally {
+                    setCalBusy(false);
+                  }
+                })();
+              }}
+            >
+              <span className={f.rowLabel}>{outlookName ?? 'Choose calendar'}</span>
+              <span className={f.hint}>{outlookName ? 'Change ›' : '›'}</span>
+            </button>
+          )}
+          {outlookOn && outlookName && (
+            <button
+              type="button"
+              className={f.listRow}
+              disabled={calBusy}
+              onClick={() => void refreshOutlookOverlay()}
+            >
+              <span className={f.rowLabel}>Refresh overlay</span>
+              <span className={f.hint}>{calBusy ? '…' : '›'}</span>
             </button>
           )}
         </div>
         <p className={f.rowNote}>
-          Overlay one calendar so your person can see what reshapes the week — trips, stays,
-          appointments. Skip daily routines and private clutter; still not plans. Best from
-          Safari/Chrome the first time you connect
+          Overlay one calendar per account so your person can see what reshapes the week — trips,
+          stays, appointments. Skip daily routines and private clutter; still not plans. Apple
+          Calendar is on the iPhone app, so those appointments don’t double here.
         </p>
 
         <span className={f.label}>Notifications</span>
@@ -699,7 +872,7 @@ export default function Settings() {
         </div>
         <p className={f.rowNote}>{bellBusy ? 'Working…' : pushCopy(bell, space?.partnerName)}</p>
 
-        {(!googleClientId() || !config.vapidPublicKey.trim()) && (
+        {(!googleClientId() || !msClientId() || !config.vapidPublicKey.trim()) && (
           <details className={f.advanced}>
             <summary className={f.advancedSum}>Advanced</summary>
             {!googleClientId() && (
@@ -716,7 +889,26 @@ export default function Settings() {
                   />
                 </div>
                 <p className={f.rowNote}>
-                  Usually set at deploy — only paste here if Calendar won’t connect
+                  Usually set at deploy — only paste here if Google Calendar won’t connect
+                </p>
+              </>
+            )}
+            {!msClientId() && (
+              <>
+                <span className={f.label}>Microsoft client ID</span>
+                <div className={f.group}>
+                  <input
+                    className={f.input}
+                    value={config.msClientId}
+                    onChange={(e) => updateConfig({ msClientId: e.target.value })}
+                    placeholder="Azure app (client) ID"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                  />
+                </div>
+                <p className={f.rowNote}>
+                  SPA app in Azure, redirect URI this origin (https://fordays.app/). Paste here
+                  until VITE_MS_CLIENT_ID is set at deploy.
                 </p>
               </>
             )}
@@ -883,12 +1075,16 @@ export default function Settings() {
       </Sheet>
 
       <GcalPicker
-        open={!!gcalList?.length}
-        calendars={gcalList ?? []}
-        selectedId={savedGoogleCalendar()?.id ?? null}
-        busy={gcalBusy}
-        onClose={closeGcalPicker}
-        onPick={(cal) => void pickGoogleCalendar(cal)}
+        open={!!calPicker?.items.length}
+        calendars={calPicker?.items ?? []}
+        selectedId={
+          calPicker?.source === 'outlook'
+            ? (savedOutlookCalendar()?.id ?? null)
+            : (savedGoogleCalendar()?.id ?? null)
+        }
+        busy={calBusy}
+        onClose={closeCalPicker}
+        onPick={(cal) => void pickImportedCalendar(cal)}
       />
     </>
   );

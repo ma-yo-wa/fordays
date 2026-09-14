@@ -1,4 +1,5 @@
 import type { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
+import type { CalendarSource } from '../calendars';
 import type {
   Backend,
   BackendHandlers,
@@ -283,7 +284,10 @@ export class SupabaseBackend implements Backend {
     await this.refresh();
   }
 
-  async replaceExternal(events: ExternalEventInput[]): Promise<void> {
+  async replaceExternal(
+    events: ExternalEventInput[],
+    source: CalendarSource,
+  ): Promise<void> {
     const { data: userData, error: userErr } = await this.client.auth.getUser();
     if (userErr || !userData.user) {
       throw new Error('Session expired — sign out and sign back in.');
@@ -293,13 +297,30 @@ export class SupabaseBackend implements Backend {
       throw new Error('No Orb yet — sign out and sign back in.');
     }
 
-    const { error: delErr } = await this.client
+    const { data: existing, error: readErr } = await this.client
       .from('external_events')
-      .delete()
+      .select('id, source_id')
       .eq('space_id', this.spaceId)
-      .eq('owner_id', this.uid);
-    if (delErr) {
-      throw mapExternalError(delErr);
+      .eq('owner_id', this.uid)
+      .eq('calendar_source', source);
+    if (readErr) {
+      throw mapExternalError(readErr);
+    }
+
+    const keep = new Set(events.map((e) => e.sourceId));
+    const staleIds = (existing ?? [])
+      .filter((r: { id: string; source_id: string }) => !keep.has(r.source_id))
+      .map((r: { id: string }) => r.id);
+
+    if (staleIds.length) {
+      const chunk = 80;
+      for (let i = 0; i < staleIds.length; i += chunk) {
+        const { error: delErr } = await this.client
+          .from('external_events')
+          .delete()
+          .in('id', staleIds.slice(i, i + chunk));
+        if (delErr) throw mapExternalError(delErr);
+      }
     }
 
     if (events.length) {
@@ -307,6 +328,7 @@ export class SupabaseBackend implements Backend {
         space_id: this.spaceId,
         owner_id: this.uid,
         source_id: e.sourceId,
+        calendar_source: source,
         title: e.title,
         location: e.location,
         starts_at: toTimestamptz(e.startsAt),
@@ -316,29 +338,30 @@ export class SupabaseBackend implements Backend {
         updated_at: new Date().toISOString(),
       }));
       const sentPlaces = rows.filter((r) => r.location).length;
-      // Chunk so one bad row doesn’t hide behind a giant payload failure.
       const chunk = 80;
       for (let i = 0; i < rows.length; i += chunk) {
         const slice = rows.slice(i, i + chunk);
-        const { data, error: insErr } = await this.client
+        const { data, error: upErr } = await this.client
           .from('external_events')
-          .insert(slice)
+          .upsert(slice, {
+            onConflict: 'space_id,owner_id,calendar_source,source_id',
+          })
           .select('id, location');
-        if (insErr) throw mapExternalError(insErr);
+        if (upErr) throw mapExternalError(upErr);
         if (!data?.length) {
           throw new Error(
-            'Calendar rows didn’t save — check you’re signed in and migration 003 grants are applied',
+            'Calendar rows didn’t save — check you’re signed in and migration 014 is applied',
           );
         }
       }
 
-      // Catch silent drops (stale schema cache / missing column privileges).
       if (sentPlaces > 0) {
         const { data: placed, error: checkErr } = await this.client
           .from('external_events')
           .select('id')
           .eq('space_id', this.spaceId)
           .eq('owner_id', this.uid)
+          .eq('calendar_source', source)
           .not('location', 'is', null)
           .limit(1);
         if (checkErr) throw mapExternalError(checkErr);
@@ -433,6 +456,11 @@ function mapExternalError(err: { message?: string; code?: string }): Error {
       'Location column missing — run migrations/005_external_event_details.sql in Supabase, then import again',
     );
   }
+  if (/calendar_source|external_events_source_uniq/i.test(msg)) {
+    return new Error(
+      'Calendar sources aren’t set up yet — run migrations/014_calendar_source.sql in Supabase',
+    );
+  }
   if (/external_events|schema cache|does not exist/i.test(msg)) {
     return new Error(
       'Calendar sharing isn’t set up yet — run migrations/003_external_events.sql in Supabase',
@@ -481,10 +509,15 @@ interface ExternalRow {
   ends_at: string;
   all_day: boolean;
   calendar_name: string;
+  calendar_source?: string | null;
   shared_with_space?: boolean | null;
 }
 
 function mapExternal(r: ExternalRow): ExternalEvent {
+  const source =
+    r.calendar_source === 'apple' || r.calendar_source === 'outlook'
+      ? r.calendar_source
+      : 'google';
   return {
     id: r.id,
     ownerId: r.owner_id,
@@ -494,6 +527,7 @@ function mapExternal(r: ExternalRow): ExternalEvent {
     endsAt: fromTimestamptz(r.ends_at, r.all_day) ?? r.ends_at,
     allDay: r.all_day,
     calendar: r.calendar_name,
+    source,
     sharedWithSpace: Boolean(r.shared_with_space),
   };
 }

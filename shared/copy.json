@@ -84,9 +84,12 @@
   },
   "availability": {
     "title": "From your calendar",
-    "googleCalendar": "Google Calendar",
     "google": "Google",
     "apple": "Apple",
+    "outlook": "Outlook",
+    "googleCalendar": "Google Calendar",
+    "outlookCalendar": "Outlook Calendar",
+    "appleCalendar": "Apple Calendar",
     "onlyYou": "Only you",
     "pickerLead": "Your main calendar is picked. That’s usually where appointments land. You can choose another.",
     "makePlan": "Make it a plan",

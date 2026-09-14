@@ -16,12 +16,17 @@ import BucketList from './screens/BucketList';
 import Calendar from './screens/Calendar';
 import Memories from './screens/Memories';
 import { peekInvite, watchPasswordRecovery } from './lib/auth';
+import { completeOutlookOAuthReturn, consumeOutlookRedirect } from './lib/outlook';
 import { isDesktopBrowser } from './lib/device';
 import { useApp } from './lib/store';
 import DesktopGate from './components/DesktopGate';
 import s from './App.module.css';
 
 export default function App() {
+  if (completeOutlookOAuthReturn()) {
+    return <div />;
+  }
+
   if (isDesktopBrowser()) {
     return <DesktopGate />;
   }
@@ -54,6 +59,24 @@ function AppShell() {
   useEffect(() => {
     void boot();
   }, [boot]);
+
+  useEffect(() => {
+    void consumeOutlookRedirect().then((token) => {
+      if (!token) return;
+      useApp.getState().setSettingsOpen(true);
+      useApp.getState().toast('Outlook connected — pick a calendar');
+    });
+  }, []);
+
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === 'visible') {
+        void useApp.getState().pullImportedCalendars();
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, []);
 
   useEffect(() => {
     const href = window.location.href;

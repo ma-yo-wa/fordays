@@ -29,6 +29,7 @@
 		D627591574F0838B119D01D7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D894045084BAC7ECF003D6DC /* SettingsView.swift */; };
 		D9176915A481EBD86A04B1E6 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0499C47B337DC05EAB80984C /* AuthView.swift */; };
 		FCF823D1FA959CF01E14B81B /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06275BDB4475A336F2D09A3 /* SupabaseService.swift */; };
+		E4F5A6B7C8D9E0F1A2B30406 /* CalendarSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F5A6B7C8D9E0F1A2B30405 /* CalendarSync.swift */; };
 		FFF2EC3B34025F324B2EFA3C /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E2CF128B98BD9C0207520F /* AppModel.swift */; };
 /* End PBXBuildFile section */
 
@@ -46,6 +47,7 @@
 		6CACA43F6A8F99C69247A794 /* Fordays.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fordays.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7CE7C6FDBE348B28A340B03E /* FordaysApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FordaysApp.swift; sourceTree = "<group>"; };
 		A06275BDB4475A336F2D09A3 /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
+		E4F5A6B7C8D9E0F1A2B30405 /* CalendarSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSync.swift; sourceTree = "<group>"; };
 		A4EBB535ABBFFC73548D5B4B /* AddActivitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddActivitySheet.swift; sourceTree = "<group>"; };
 		C92F1A0B2C3D4E5F6A7B8C91 /* ExternalDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalDetailView.swift; sourceTree = "<group>"; };
 		C92F1A0B2C3D4E5F6A7B8C90 /* CoverPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPickerView.swift; sourceTree = "<group>"; };
@@ -77,6 +79,7 @@
 				152F2260E49DE06874ECA5D3 /* Mapping.swift */,
 				C2B3C4D5E6F7A8B9C0D1E2F3 /* Copy.swift */,
 				A06275BDB4475A336F2D09A3 /* SupabaseService.swift */,
+				E4F5A6B7C8D9E0F1A2B30405 /* CalendarSync.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -295,6 +298,7 @@
 				E12A4B8C7D9E1F0A6C3D2110 /* JoinOrbView.swift in Sources */,
 				D627591574F0838B119D01D7 /* SettingsView.swift in Sources */,
 				FCF823D1FA959CF01E14B81B /* SupabaseService.swift in Sources */,
+				E4F5A6B7C8D9E0F1A2B30406 /* CalendarSync.swift in Sources */,
 				A81F3C2B9D4E7A6C5B0F1234 /* Art.swift in Sources */,
 				0651DB3C9829ACD683B0B49F /* TabIcons.swift in Sources */,
 				D47DCDE8DD8D9F6BE4186C97 /* Theme.swift in Sources */,

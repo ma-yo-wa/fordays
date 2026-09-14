@@ -1,3 +1,4 @@
+import EventKit
 import Foundation
 import Supabase
 
@@ -24,7 +25,115 @@ final class AppModel: ObservableObject {
     cursorMonth = Date()
   }
 
+  private var lastAppleSync: Date?
+  private var calendarObserver: NSObjectProtocol?
   private var sb: SupabaseClient { SupabaseService.shared.client }
+
+  func watchDeviceCalendars() {
+    guard calendarObserver == nil else { return }
+    calendarObserver = NotificationCenter.default.addObserver(
+      forName: .EKEventStoreChanged,
+      object: CalendarSync.store,
+      queue: .main
+    ) { [weak self] _ in
+      Task { @MainActor in
+        await self?.syncAppleIfNeeded(force: true)
+      }
+    }
+  }
+
+  func syncAppleIfNeeded(force: Bool = false) async {
+    guard space?.frozen != true else { return }
+    guard CalendarSync.isConnected, CalendarSync.selectedId != nil else { return }
+    if !force, let last = lastAppleSync, Date().timeIntervalSince(last) < 20 { return }
+    lastAppleSync = Date()
+    do {
+      try await replaceExternal(CalendarSync.fetchEvents(), source: "apple")
+    } catch {
+      toast = error.localizedDescription
+    }
+  }
+
+  func replaceExternal(_ events: [ImportedEventDraft], source: String) async throws {
+    guard let space else { return }
+    guard space.canCompose else { return }
+    let session = try await sb.auth.session
+    let uid = session.user.id.uuidString.lowercased()
+    let now = ISO8601DateFormatter().string(from: Date())
+
+    struct ExistingExt: Decodable {
+      let id: String
+      let source_id: String
+    }
+
+    let existing: [ExistingExt] = try await sb.from("external_events")
+      .select("id, source_id")
+      .eq("space_id", value: space.id)
+      .eq("owner_id", value: uid)
+      .eq("calendar_source", value: source)
+      .execute()
+      .value
+
+    let keep = Set(events.map(\.sourceId))
+    let stale = existing.filter { !keep.contains($0.source_id) }.map(\.id)
+    if !stale.isEmpty {
+      for chunk in stale.chunked(into: 80) {
+        try await sb.from("external_events")
+          .delete()
+          .in("id", values: chunk)
+          .execute()
+      }
+    }
+
+    if !events.isEmpty {
+      struct ExternalEventWrite: Encodable {
+        let space_id: String
+        let owner_id: String
+        let source_id: String
+        let calendar_source: String
+        let title: String?
+        let location: String?
+        let starts_at: String
+        let ends_at: String
+        let all_day: Bool
+        let calendar_name: String
+        let updated_at: String
+      }
+
+      let rows = events.map { e in
+        ExternalEventWrite(
+          space_id: space.id,
+          owner_id: uid,
+          source_id: e.sourceId,
+          calendar_source: source,
+          title: e.title,
+          location: e.location,
+          starts_at: DateLocal.toTimestamptz(e.startsAt),
+          ends_at: DateLocal.toTimestamptz(e.endsAt),
+          all_day: e.allDay,
+          calendar_name: e.calendar,
+          updated_at: now
+        )
+      }
+      for chunk in rows.chunked(into: 80) {
+        try await sb.from("external_events")
+          .upsert(chunk, onConflict: "space_id,owner_id,calendar_source,source_id")
+          .execute()
+      }
+    }
+
+    await refreshExternal()
+  }
+
+  func disconnectApple() async {
+    CalendarSync.setConnected(false)
+    do {
+      try await replaceExternal([], source: "apple")
+      toast = "Apple Calendar disconnected"
+    } catch {
+      toast = error.localizedDescription
+    }
+  }
 
   func boot() async {
     authPhase = .loading
@@ -544,6 +653,8 @@ final class AppModel: ObservableObject {
     if let space { storedSpaceId = space.id }
     if space != nil {
       await refreshActivities()
+      watchDeviceCalendars()
+      await syncAppleIfNeeded()
     } else {
       activities = []
     }

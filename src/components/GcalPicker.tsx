@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import Sheet from './Sheet';
-import type { GoogleCalendar } from '../lib/gcal';
+import type { ImportedCalendar } from '../lib/calendars';
 import { Copy } from '../lib/copy';
 import f from './Form.module.css';
 import s from './GcalPicker.module.css';
 
 interface Props {
   open: boolean;
-  calendars: GoogleCalendar[];
+  calendars: ImportedCalendar[];
   selectedId: string | null;
   busy?: boolean;
   onClose: () => void;
-  onPick: (cal: GoogleCalendar) => void;
+  onPick: (cal: ImportedCalendar) => void;
 }
 
 function CalIcon() {
@@ -49,7 +49,7 @@ export default function GcalPicker({
   const sections = useMemo(() => {
     const mine = calendars.filter((c) => c.accessRole === 'owner' || c.primary);
     const other = calendars.filter((c) => !(c.accessRole === 'owner' || c.primary));
-    const out: { label: string; items: GoogleCalendar[] }[] = [];
+    const out: { label: string; items: ImportedCalendar[] }[] = [];
     if (mine.length) out.push({ label: 'My calendars', items: mine });
     if (other.length) out.push({ label: 'Other', items: other });
     return out;

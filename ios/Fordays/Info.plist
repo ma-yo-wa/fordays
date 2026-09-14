@@ -39,6 +39,10 @@
 	<string>Light</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow Fordays to use photos for plan covers.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Fordays shows events from calendars on this iPhone on Plans — they stay only you until you share one.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Fordays shows events from calendars on this iPhone on Plans — they stay only you until you share one.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

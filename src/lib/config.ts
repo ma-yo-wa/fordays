@@ -10,6 +10,7 @@ export interface Config {
   supabaseKey: string;
   spaceId: string;
   googleClientId: string;
+  msClientId: string;
   vapidPublicKey: string;
 }
 
@@ -19,6 +20,7 @@ const FROM_ENV = {
   supabaseUrl: String(import.meta.env.VITE_SUPABASE_URL ?? ''),
   supabaseKey: String(import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''),
   googleClientId: String(import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''),
+  msClientId: String(import.meta.env.VITE_MS_CLIENT_ID ?? ''),
   vapidPublicKey: String(import.meta.env.VITE_VAPID_PUBLIC_KEY ?? ''),
 };
 
@@ -52,6 +54,7 @@ export function loadConfig(): Config {
       supabaseUrl: parsed.supabaseUrl || FROM_ENV.supabaseUrl,
       supabaseKey: parsed.supabaseKey || FROM_ENV.supabaseKey,
       googleClientId: parsed.googleClientId || FROM_ENV.googleClientId,
+      msClientId: parsed.msClientId || FROM_ENV.msClientId,
       vapidPublicKey: parsed.vapidPublicKey || FROM_ENV.vapidPublicKey,
     };
   } catch {

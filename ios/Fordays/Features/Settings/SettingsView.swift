@@ -9,6 +9,12 @@ struct SettingsView: View {
   @State private var removeId: String?
   @State private var deleteAskId: String?
   @State private var spaceBusy = false
+  @State private var appleOn = CalendarSync.isConnected
+  @State private var appleName = CalendarSync.selectedName
+  @State private var appleBusy = false
+  @State private var appleCals: [DeviceCalendar] = []
+  @State private var showApplePicker = false
+  @State private var pendingAppleId: String?
 
   private var allOrbs: [SpaceInfo] {
     if !app.spaces.isEmpty { return app.spaces }
@@ -70,6 +76,13 @@ struct SettingsView: View {
     }
     .sheet(isPresented: $showPastOrbs) {
       pastOrbsSheet
+    }
+    .sheet(isPresented: $showApplePicker) {
+      applePickerSheet
+    }
+    .onAppear {
+      appleOn = CalendarSync.isConnected
+      appleName = CalendarSync.selectedName
     }
   }
 
@@ -694,16 +707,224 @@ struct SettingsView: View {
   private var calendarsSection: some View {
     VStack(alignment: .leading, spacing: 8) {
       sectionLabel("External calendars")
-      VStack(alignment: .leading, spacing: 10) {
-        Text("Connect Google Calendar on the web for now.")
-          .font(.subheadline)
-          .foregroundStyle(Theme.inkSoft)
-        Link("Open web", destination: URL(string: "https://fordays.app/")!)
-          .font(.subheadline.weight(.semibold))
-          .foregroundStyle(Theme.roseInk)
+      VStack(spacing: 0) {
+        HStack {
+          Text(Copy.Availability.appleCalendar)
+            .font(.body)
+            .foregroundStyle(Theme.ink)
+          Spacer()
+          Toggle("Connect Apple Calendar", isOn: appleToggle)
+            .labelsHidden()
+            .tint(Theme.roseInk)
+            .disabled(appleBusy)
+        }
+        .padding(12)
+
+        if appleOn {
+          Button {
+            Task { await openApplePicker() }
+          } label: {
+            HStack {
+              Text(appleName ?? "Choose calendar")
+                .font(.subheadline)
+                .foregroundStyle(Theme.ink)
+              Spacer()
+              Text(appleName == nil ? "›" : "Change ›")
+                .font(.subheadline)
+                .foregroundStyle(Theme.inkFaint)
+            }
+            .padding(12)
+          }
+          .buttonStyle(.plain)
+          .disabled(appleBusy)
+
+          if appleName != nil {
+            Button {
+              Task { await importApple() }
+            } label: {
+              HStack {
+                Text("Refresh overlay")
+                  .font(.subheadline)
+                  .foregroundStyle(Theme.ink)
+                Spacer()
+                Text(appleBusy ? "…" : "›")
+                  .font(.subheadline)
+                  .foregroundStyle(Theme.inkFaint)
+              }
+              .padding(12)
+            }
+            .buttonStyle(.plain)
+            .disabled(appleBusy)
+          }
+        }
       }
-      .padding(12)
       .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+      Text("Phone calendars only here — Google and Outlook stay on the web so a Gmail calendar already on this iPhone doesn’t show twice.")
+        .font(.footnote)
+        .foregroundStyle(Theme.inkSoft)
+    }
+  }
+
+  private var appleToggle: Binding<Bool> {
+    Binding(
+      get: { appleOn },
+      set: { on in
+        appleOn = on
+        Task { await setAppleConnected(on) }
+      }
+    )
+  }
+
+  private func setAppleConnected(_ on: Bool) async {
+    if !on {
+      appleOn = false
+      appleName = nil
+      appleCals = []
+      await app.disconnectApple()
+      return
+    }
+    appleBusy = true
+    let ok: Bool
+    if CalendarSync.hasFullAccess {
+      ok = true
+    } else {
+      ok = await CalendarSync.requestAccess()
+    }
+    if !ok {
+      appleBusy = false
+      appleOn = false
+      app.toast = "Allow calendars in iPhone Settings → Fordays"
+      return
+    }
+    let list = CalendarSync.listCalendars()
+    appleBusy = false
+    if list.isEmpty {
+      appleOn = false
+      app.toast = "No calendars found on this iPhone"
+      return
+    }
+    appleOn = true
+    appleCals = list
+    showApplePicker = true
+  }
+
+  private func openApplePicker() async {
+    appleBusy = true
+    let ok: Bool
+    if CalendarSync.hasFullAccess {
+      ok = true
+    } else {
+      ok = await CalendarSync.requestAccess()
+    }
+    appleBusy = false
+    guard ok else {
+      app.toast = "Allow calendars in iPhone Settings → Fordays"
+      return
+    }
+    appleCals = CalendarSync.listCalendars()
+    showApplePicker = true
+  }
+
+  private func importApple(_ cal: DeviceCalendar? = nil) async {
+    let chosen = cal ?? appleCals.first(where: { $0.id == CalendarSync.selectedId })
+    guard let chosen else {
+      app.toast = "Choose a calendar first"
+      return
+    }
+    appleBusy = true
+    CalendarSync.saveCalendar(chosen)
+    appleName = chosen.summary
+    appleOn = true
+    showApplePicker = false
+    do {
+      try await app.replaceExternal(CalendarSync.fetchEvents(), source: "apple")
+      app.watchDeviceCalendars()
+      let n = CalendarSync.fetchEvents().count
+      app.toast = n == 0
+        ? "\(chosen.summary) — nothing in the next few months"
+        : "\(chosen.summary) — \(n) events"
+    } catch {
+      app.toast = error.localizedDescription
+    }
+    appleBusy = false
+  }
+
+  private var applePickerSheet: some View {
+    NavigationStack {
+      ScrollView {
+        VStack(alignment: .leading, spacing: 16) {
+          Text(Copy.Availability.pickerLead)
+            .font(.subheadline)
+            .foregroundStyle(Theme.inkSoft)
+          let mine = appleCals.filter(\.primary)
+          let other = appleCals.filter { !$0.primary }
+          if !mine.isEmpty {
+            applePickerSection(title: "My calendars", items: mine)
+          }
+          if !other.isEmpty {
+            applePickerSection(title: "Other", items: other)
+          }
+        }
+        .padding(20)
+      }
+      .background(Theme.paper.ignoresSafeArea())
+      .navigationTitle("Import calendars")
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+        ToolbarItem(placement: .cancellationAction) {
+          Button("Cancel") {
+            showApplePicker = false
+            if CalendarSync.selectedId == nil {
+              appleOn = false
+              CalendarSync.setConnected(false)
+            }
+          }
+        }
+        ToolbarItem(placement: .confirmationAction) {
+          Button("Import") {
+            let chosen = appleCals.first(where: { $0.id == pendingAppleId })
+              ?? appleCals.first(where: \.primary)
+              ?? appleCals.first
+            Task { await importApple(chosen) }
+          }
+          .fontWeight(.semibold)
+          .disabled(appleBusy || appleCals.isEmpty)
+        }
+      }
+    }
+    .onAppear {
+      pendingAppleId = CalendarSync.selectedId
+        ?? appleCals.first(where: \.primary)?.id
+        ?? appleCals.first?.id
+    }
+  }
+
+  private func applePickerSection(title: String, items: [DeviceCalendar]) -> some View {
+    VStack(alignment: .leading, spacing: 8) {
+      Text(title)
+        .font(.footnote.weight(.semibold))
+        .foregroundStyle(Theme.inkFaint)
+      VStack(spacing: 0) {
+        ForEach(items) { cal in
+          Button {
+            pendingAppleId = cal.id
+          } label: {
+            HStack(spacing: 12) {
+              Image(systemName: "calendar")
+                .foregroundStyle(Theme.inkSoft)
+              Text(cal.primary ? "\(cal.summary) · Primary" : cal.summary)
+                .font(.body)
+                .foregroundStyle(Theme.ink)
+              Spacer()
+              Image(systemName: pendingAppleId == cal.id ? "checkmark.circle.fill" : "circle")
+                .foregroundStyle(pendingAppleId == cal.id ? Theme.roseInk : Theme.inkFaint)
+            }
+            .padding(.vertical, 10)
+          }
+          .buttonStyle(.plain)
+        }
+      }
     }
   }
 

@@ -107,8 +107,11 @@ enum Copy {
   enum Availability {
     static let title = "From your calendar"
     static let googleCalendar = "Google Calendar"
+    static let outlookCalendar = "Outlook Calendar"
+    static let appleCalendar = "Apple Calendar"
     static let google = "Google"
     static let apple = "Apple"
+    static let outlook = "Outlook"
     static let onlyYou = "Only you"
     static let pickerLead = "Your main calendar is picked. That’s usually where appointments land. You can choose another."
     static let makePlan = "Make it a plan"

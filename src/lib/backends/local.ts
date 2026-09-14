@@ -1,3 +1,4 @@
+import type { CalendarSource } from '../calendars';
 import type {
   Backend,
   BackendHandlers,
@@ -205,11 +206,17 @@ export class LocalBackend implements Backend {
     this.commit();
   }
 
-  async replaceExternal(events: ExternalEventInput[]): Promise<void> {
+  async replaceExternal(events: ExternalEventInput[], source: CalendarSource): Promise<void> {
     const me = String(loadConfig().me);
-    const mine = events.map(
-      (e): ExternalEvent => ({
-        id: `gcal-${e.sourceId}`,
+    const prevShare = new Map(
+      this.data.external
+        .filter((e) => e.ownerId === me && (e.source ?? 'google') === source)
+        .map((e) => [e.id, e.sharedWithSpace]),
+    );
+    const mine = events.map((e): ExternalEvent => {
+      const id = `${e.source}-${e.sourceId}`;
+      return {
+        id,
         ownerId: me,
         title: e.title,
         location: e.location,
@@ -217,10 +224,14 @@ export class LocalBackend implements Backend {
         endsAt: e.endsAt,
         allDay: e.allDay,
         calendar: e.calendar,
-      }),
-    );
+        source: e.source,
+        sharedWithSpace: prevShare.get(id) ?? false,
+      };
+    });
     this.data.external = [
-      ...this.data.external.filter((e) => e.ownerId !== me),
+      ...this.data.external.filter(
+        (e) => e.ownerId !== me || (e.source ?? 'google') !== source,
+      ),
       ...mine,
     ];
     this.commit();

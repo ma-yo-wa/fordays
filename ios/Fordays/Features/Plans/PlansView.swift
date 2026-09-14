@@ -137,7 +137,7 @@ struct PlansView: View {
                       Text(ownerName)
                         .font(.footnote)
                         .foregroundStyle(Theme.inkSoft)
-                      Text(Copy.Availability.google)
+                      Text(e.sourceLabel)
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(Theme.inkSoft)
                         .padding(.horizontal, 6)
@@ -173,6 +173,9 @@ struct PlansView: View {
           .frame(height: 0.5)
       }
       .padding(.bottom, 88)
+    }
+    .onAppear {
+      Task { await app.syncAppleIfNeeded() }
     }
   }
 

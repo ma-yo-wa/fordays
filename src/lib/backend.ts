@@ -1,4 +1,5 @@
 import type { Activity, AuditLog, ExternalEvent, WhenSuggestion } from './types';
+import type { CalendarSource } from './calendars';
 
 export interface NewActivity {
   title: string;
@@ -19,6 +20,7 @@ export interface ExternalEventInput {
   endsAt: string;
   allDay: boolean;
   calendar: string;
+  source: CalendarSource;
 }
 
 /** What a backend pushes back up into the store. Both implementations
@@ -43,8 +45,8 @@ export interface Backend {
   acceptSuggestion(id: string): Promise<void>;
   /** Clear the pending suggestion (dismiss or cancel). */
   dismissSuggestion(id: string): Promise<void>;
-  /** Replace this user’s imported calendar overlay for the space. */
-  replaceExternal(events: ExternalEventInput[]): Promise<void>;
+  /** Replace this user’s imported overlay for one calendar source. */
+  replaceExternal(events: ExternalEventInput[], source: CalendarSource): Promise<void>;
   /** Toggle whether an imported row is visible to others in this Orb. */
   toggleExternalShare(id: string, shared: boolean): Promise<void>;
   dispose(): void;

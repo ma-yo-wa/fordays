@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Activity, AuditLog, ExternalEvent, PlanDraft } from './types';
 import type { Backend, ExternalEventInput, NewActivity, WhenSuggestion } from './backend';
+import type { CalendarSource } from './calendars';
 import { LocalBackend } from './backends/local';
 import { loadConfig, saveConfig, isSupabaseConfigured, type Config } from './config';
 import {
@@ -140,7 +141,8 @@ interface AppState {
   joinOrb: (code: string) => Promise<SpaceInfo>;
   updateConfig: (patch: Partial<Config>) => void;
   setExternal: (events: ExternalEvent[]) => void;
-  syncExternal: (events: ExternalEventInput[]) => Promise<void>;
+  syncExternal: (events: ExternalEventInput[], source: CalendarSource) => Promise<void>;
+  pullImportedCalendars: () => Promise<void>;
   toggleExternalShare: (id: string, shared: boolean) => Promise<void>;
   toast: (text: string) => void;
 }
@@ -224,6 +226,7 @@ export const useApp = create<AppState>()((set, get) => {
           if (space) {
             await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
             void import('./push').then((m) => m.syncPush());
+            void get().pullImportedCalendars();
           } else {
             set({ ready: true });
           }
@@ -282,6 +285,7 @@ export const useApp = create<AppState>()((set, get) => {
       set({ space, spaces, config: loadConfig(), authPhase: 'signedIn' });
       if (space) {
         await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
+        void get().pullImportedCalendars();
       }
     },
 
@@ -292,6 +296,7 @@ export const useApp = create<AppState>()((set, get) => {
       if (space?.frozen) get().toast('This is a copy from when you left');
       if (space) {
         await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
+        if (!space.frozen) void get().pullImportedCalendars();
       }
     },
 
@@ -301,6 +306,7 @@ export const useApp = create<AppState>()((set, get) => {
       set({ space, spaces, config: loadConfig() });
       if (space) {
         await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
+        void get().pullImportedCalendars();
       }
     },
 
@@ -534,14 +540,25 @@ export const useApp = create<AppState>()((set, get) => {
 
     setExternal: (external) => set({ external }),
 
-    async syncExternal(events) {
+    async syncExternal(events, source) {
       if (!backend) throw new Error('Not connected');
       if (backend.name !== 'supabase') {
         throw new Error(
           'Calendar sharing needs a signed-in cloud Orb — sign out and sign back in, then import again',
         );
       }
-      await backend.replaceExternal(events);
+      await backend.replaceExternal(events, source);
+    },
+
+    async pullImportedCalendars() {
+      if (!backend || backend.name !== 'supabase') return;
+      if (get().space?.frozen) return;
+      const { pullImportedCalendars } = await import('./calSync');
+      await pullImportedCalendars((events, source) => get().syncExternal(events, source)).catch(
+        () => {
+          /* overlay already in the database from last import */
+        },
+      );
     },
 
     async toggleExternalShare(id, shared) {

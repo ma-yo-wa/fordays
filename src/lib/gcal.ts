@@ -1,4 +1,5 @@
 import type { ExternalEventInput } from './backend';
+import type { ImportedCalendar } from './calendars';
 import { loadConfig } from './config';
 
 declare global {
@@ -27,15 +28,10 @@ const TOKEN_KEY = 'fordays.gcalToken';
 const LEGACY_TOKEN_KEY = 'someday.gcalToken';
 const CAL_KEY = 'fordays.gcalCalendar';
 const LEGACY_CAL_KEY = 'someday.gcalCalendar';
+const WANTED_KEY = 'fordays.gcalWanted';
 const SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
 
-export interface GoogleCalendar {
-  id: string;
-  summary: string;
-  primary: boolean;
-  /** owner | writer | reader — used to group “Mine” vs “Other”. */
-  accessRole: 'owner' | 'writer' | 'reader' | string;
-}
+export type GoogleCalendar = ImportedCalendar;
 
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -64,6 +60,19 @@ export function googleClientId(): string {
 }
 
 export async function connectGoogle(): Promise<string> {
+  return requestGoogleToken('consent');
+}
+
+/** Reuse a prior consent without a popup. Returns null if Google needs a click. */
+export async function connectGoogleSilent(): Promise<string | null> {
+  try {
+    return await requestGoogleToken('');
+  } catch {
+    return null;
+  }
+}
+
+async function requestGoogleToken(prompt: '' | 'consent'): Promise<string> {
   const clientId = googleClientId();
   if (!clientId) {
     throw new Error(
@@ -78,7 +87,7 @@ export async function connectGoogle(): Promise<string> {
     const tc = window.google!.accounts.oauth2.initTokenClient({
       client_id: clientId,
       scope: SCOPE,
-      prompt: 'consent',
+      prompt,
       callback: (resp) => {
         if (resp.error || !resp.access_token) {
           reject(
@@ -90,18 +99,15 @@ export async function connectGoogle(): Promise<string> {
           );
           return;
         }
-        try {
-          sessionStorage.setItem(TOKEN_KEY, resp.access_token);
-        } catch {
-          /* private mode */
-        }
+        persistGoogleToken(resp.access_token);
+        markGoogleWanted(true);
         resolve(resp.access_token);
       },
       error_callback: (err) => {
         reject(new Error(err.message || err.type || 'Google sign-in failed'));
       },
     });
-    tc.requestAccessToken();
+    tc.requestAccessToken({ prompt });
   });
 }
 
@@ -115,9 +121,46 @@ function takeItem(store: Storage, next: string, prev: string): string | null {
   return legacy;
 }
 
+function persistGoogleToken(token: string): void {
+  try {
+    localStorage.setItem(TOKEN_KEY, token);
+  } catch {
+    /* private mode */
+  }
+  try {
+    sessionStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* */
+  }
+}
+
+export function markGoogleWanted(on: boolean): void {
+  try {
+    if (on) localStorage.setItem(WANTED_KEY, '1');
+    else localStorage.removeItem(WANTED_KEY);
+  } catch {
+    /* */
+  }
+}
+
+export function googleWanted(): boolean {
+  try {
+    return localStorage.getItem(WANTED_KEY) === '1' || Boolean(savedGoogleCalendar());
+  } catch {
+    return Boolean(savedGoogleCalendar());
+  }
+}
+
 export function googleToken(): string | null {
   try {
-    return takeItem(sessionStorage, TOKEN_KEY, LEGACY_TOKEN_KEY);
+    const local = takeItem(localStorage, TOKEN_KEY, LEGACY_TOKEN_KEY);
+    if (local) return local;
+    const session = takeItem(sessionStorage, TOKEN_KEY, LEGACY_TOKEN_KEY);
+    if (session) {
+      persistGoogleToken(session);
+      return session;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -125,10 +168,20 @@ export function googleToken(): string | null {
 
 export function clearGoogleToken(): void {
   try {
+    localStorage.removeItem(TOKEN_KEY);
     sessionStorage.removeItem(TOKEN_KEY);
   } catch {
     /* */
   }
+  markGoogleWanted(false);
+}
+
+/** Access token if we already have one, or a silent GIS refresh. */
+export async function ensureGoogleToken(): Promise<string | null> {
+  const existing = googleToken();
+  if (existing) return existing;
+  if (!googleWanted() || !googleClientId()) return null;
+  return connectGoogleSilent();
 }
 
 export function savedGoogleCalendar(): GoogleCalendar | null {
@@ -193,8 +246,8 @@ export async function listGoogleCalendars(token: string): Promise<GoogleCalendar
    busy-only share later — Google's own events always carry a summary. */
 export async function fetchGoogleEvents(
   token: string,
-  _ownerId: string,
   calendarId: string,
+  calendarName?: string,
 ): Promise<ExternalEventInput[]> {
   const min = new Date();
   min.setMonth(min.getMonth() - 1);
@@ -242,7 +295,7 @@ export async function fetchGoogleEvents(
     pageToken = body.nextPageToken;
   }
 
-  const label = savedGoogleCalendar()?.summary || 'Google';
+  const label = calendarName?.trim() || savedGoogleCalendar()?.summary || 'Google';
 
   return items
     .filter((ev) => ev.id && (ev.start?.date || ev.start?.dateTime))
@@ -268,6 +321,7 @@ export async function fetchGoogleEvents(
         endsAt,
         allDay,
         calendar: label,
+        source: 'google',
       };
     });
 }

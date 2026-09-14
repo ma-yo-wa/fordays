@@ -1,3 +1,7 @@
+import type { CalendarSource } from './calendars';
+
+export type { CalendarSource };
+
 /* The whole model. One table serves both concepts: `date_time` being
    null is what makes an activity an Idea rather than a Plan. There is no
    type column and no status column, because there is no state to track
@@ -73,6 +77,8 @@ export interface ExternalEvent {
   endsAt: string;
   allDay: boolean;
   calendar: string;
+  /** google when missing — rows saved before migration 014. */
+  source?: CalendarSource;
   sharedWithSpace?: boolean;
 }
 

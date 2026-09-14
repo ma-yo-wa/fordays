@@ -172,6 +172,7 @@ struct ExternalEvent: Identifiable, Hashable, Codable {
   var endsAt: String
   var allDay: Bool
   var calendar: String
+  var source: String
   var sharedWithSpace: Bool
 
   enum CodingKeys: String, CodingKey {
@@ -186,6 +187,7 @@ struct ExternalEvent: Identifiable, Hashable, Codable {
     case allDay = "all_day"
     case calendarName = "calendar_name"
     case calendar
+    case calendarSource = "calendar_source"
     case sharedWithSpace = "shared_with_space"
   }
 
@@ -199,6 +201,7 @@ struct ExternalEvent: Identifiable, Hashable, Codable {
     endsAt: String,
     allDay: Bool,
     calendar: String,
+    source: String = "google",
     sharedWithSpace: Bool = false
   ) {
     self.id = id
@@ -210,6 +213,7 @@ struct ExternalEvent: Identifiable, Hashable, Codable {
     self.endsAt = endsAt
     self.allDay = allDay
     self.calendar = calendar
+    self.source = source
     self.sharedWithSpace = sharedWithSpace
   }
 
@@ -228,6 +232,7 @@ struct ExternalEvent: Identifiable, Hashable, Codable {
     calendar = try container.decodeIfPresent(String.self, forKey: .calendarName)
       ?? container.decodeIfPresent(String.self, forKey: .calendar)
       ?? "Google"
+    source = try container.decodeIfPresent(String.self, forKey: .calendarSource) ?? "google"
     sharedWithSpace = try container.decodeIfPresent(Bool.self, forKey: .sharedWithSpace) ?? false
   }
 
@@ -242,12 +247,21 @@ struct ExternalEvent: Identifiable, Hashable, Codable {
     try container.encode(endsAt, forKey: .endsAt)
     try container.encode(allDay, forKey: .allDay)
     try container.encode(calendar, forKey: .calendarName)
+    try container.encode(source, forKey: .calendarSource)
     try container.encode(sharedWithSpace, forKey: .sharedWithSpace)
   }
 
   func isFutureOrToday(today: String) -> Bool {
     let last = endsAt.isEmpty ? String(startsAt.prefix(10)) : String(endsAt.prefix(10))
     return last >= today
+  }
+
+  var sourceLabel: String {
+    switch source {
+    case "apple": return Copy.Availability.apple
+    case "outlook": return Copy.Availability.outlook
+    default: return Copy.Availability.google
+    }
   }
 }
 

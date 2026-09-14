@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion } from 'motion/react';
 import CoverArt from '../components/CoverArt';
 import { useApp, partnerName, isMatched } from '../lib/store';
@@ -16,6 +17,7 @@ import {
   todayISO,
 } from '../lib/date';
 import { Copy, formatCopy } from '../lib/copy';
+import type { CalendarSource } from '../lib/calendars';
 import s from './Calendar.module.css';
 
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -32,6 +34,12 @@ function pillWhen(e: ExternalEvent, day: string): string {
   return 'All day';
 }
 
+function sourceTag(source?: CalendarSource): string {
+  if (source === 'apple') return Copy.availability.apple;
+  if (source === 'outlook') return Copy.availability.outlook;
+  return Copy.availability.google;
+}
+
 export default function Calendar() {
   const activities = useApp((st) => st.activities);
   const external = useApp((st) => st.external);
@@ -42,6 +50,11 @@ export default function Calendar() {
   const openDetail = useApp((st) => st.openDetail);
   const openExternal = useApp((st) => st.openExternal);
   const space = useApp((st) => st.space);
+  const pullImportedCalendars = useApp((st) => st.pullImportedCalendars);
+
+  useEffect(() => {
+    void pullImportedCalendars();
+  }, [pullImportedCalendars]);
 
   const cursorDate = parseISO(cursor);
   const today = todayISO();
@@ -304,7 +317,7 @@ export default function Calendar() {
                         {(ownerName[0] ?? '?').toUpperCase()}
                       </span>
                       {ownerName}
-                      <span className={s.sourceTag}>{Copy.availability.google}</span>
+                      <span className={s.sourceTag}>{sourceTag(e.source)}</span>
                       {isMine && !e.sharedWithSpace && (
                         <span className={s.privateTag}>{Copy.availability.onlyYou}</span>
                       )}
