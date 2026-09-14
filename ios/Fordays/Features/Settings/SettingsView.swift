@@ -6,6 +6,7 @@ struct SettingsView: View {
   @State private var showInvite = false
   @State private var showPastOrbs = false
   @State private var showAnotherOrb = false
+  @State private var showOrbSetup = false
   @State private var leaveAsk = false
   @State private var removeId: String?
   @State private var deleteAskId: String?
@@ -82,6 +83,16 @@ struct SettingsView: View {
     }
     .sheet(isPresented: $showAnotherOrb) {
       anotherOrbSheet
+        .sheet(isPresented: $showOrbSetup) {
+          OrbSetupView(mode: .create) {
+            showOrbSetup = false
+            showAnotherOrb = false
+            dismiss()
+          }
+          .environmentObject(app)
+          .presentationDetents([.medium, .large])
+          .presentationDragIndicator(.visible)
+        }
     }
     .sheet(isPresented: $showApplePicker) {
       applePickerSheet
@@ -328,8 +339,7 @@ struct SettingsView: View {
         .padding(.bottom, 20)
 
       Button {
-        showAnotherOrb = false
-        createOrb()
+        showOrbSetup = true
       } label: {
         VStack(alignment: .leading, spacing: 2) {
           Text(Copy.Orbs.startNew)
@@ -1018,17 +1028,6 @@ struct SettingsView: View {
       await app.switchToSpace(id)
       spaceBusy = false
       if app.space?.id == id { dismiss() }
-    }
-  }
-
-  private func createOrb() {
-    guard !spaceBusy else { return }
-    let before = app.space?.id
-    spaceBusy = true
-    Task {
-      await app.addSpace()
-      spaceBusy = false
-      if app.space?.id != before { dismiss() }
     }
   }
 

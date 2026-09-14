@@ -601,17 +601,23 @@ final class AppModel: ObservableObject {
     }
   }
 
-  func addSpace() async {
+  @discardableResult
+  func addSpace(name: String = "", withPeople: Bool = false) async -> Bool {
+    let placeholder = withPeople ? Copy.Orbs.crewPlaceholder : Copy.Orbs.personalPlaceholder
+    let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    let finalName = trimmed.isEmpty ? placeholder : trimmed
     do {
       let created: SpaceRow = try await sb.rpc(
         "create_space",
-        params: CreateSpaceParams(p_name: Theme.brandName)
+        params: CreateSpaceParams(p_name: finalName)
       ).execute().value
       storedSpaceId = created.id
       try await refreshSpaceAndData()
-      toast = "New Orb — just you, until you invite"
+      pendingInviteShare = withPeople
+      return true
     } catch {
       toast = error.localizedDescription
+      return false
     }
   }
 

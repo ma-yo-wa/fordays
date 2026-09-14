@@ -40,6 +40,8 @@ import { Copy, formatCopy } from '../lib/copy';
 import f from './Form.module.css';
 import add from './AddSheet.module.css';
 import ui from './Settings.module.css';
+import auth from './Auth.module.css';
+import OrbKindForm from './OrbKindForm';
 
 function pushCopy(state: PushState, partnerName: string | null | undefined): string {
   const who = partnerName?.trim() || 'your person';
@@ -126,6 +128,7 @@ export default function Settings() {
   const [removeId, setRemoveId] = useState<string | null>(null);
   const [pastOrbsOpen, setPastOrbsOpen] = useState(false);
   const [orbAddOpen, setOrbAddOpen] = useState(false);
+  const [orbSetupOpen, setOrbSetupOpen] = useState(false);
   const [deleteAskId, setDeleteAskId] = useState<string | null>(null);
   const [gridDeleteId, setGridDeleteId] = useState<string | null>(null);
 
@@ -288,12 +291,12 @@ export default function Settings() {
     }
   }
 
-  async function handleCreateOrb() {
+  async function handleCreateOrb(name: string, withPeople: boolean) {
     if (spaceBusy) return;
     setSpaceBusy(true);
     try {
-      await addSpace();
-      toast('New Orb — just you, until you invite');
+      await addSpace(name, withPeople);
+      setOrbSetupOpen(false);
       setOrbAddOpen(false);
       setOpen(false);
     } catch (err) {
@@ -1005,14 +1008,17 @@ export default function Settings() {
           parent’s transform and never cover the screen. */}
       <Sheet
         open={orbAddOpen}
-        onClose={() => setOrbAddOpen(false)}
+        onClose={() => {
+          setOrbAddOpen(false);
+          setOrbSetupOpen(false);
+        }}
         heading={Copy.orbs.anotherOrb}
         stacked
       >
         <button
           type="button"
           className={add.option}
-          onClick={() => void handleCreateOrb()}
+          onClick={() => setOrbSetupOpen(true)}
         >
           <span className={add.glyph} aria-hidden>
             +
@@ -1039,6 +1045,19 @@ export default function Settings() {
             <span className={add.optionNote}>{Copy.orbs.joinWithCodeNote}</span>
           </span>
         </button>
+      </Sheet>
+
+      <Sheet
+        open={orbSetupOpen}
+        onClose={() => setOrbSetupOpen(false)}
+        heading={Copy.orbs.setupTitle}
+        stacked
+      >
+        <p className={auth.lead}>{Copy.orbs.setupLead}</p>
+        <OrbKindForm
+          knobId="orb-create-kind-knob"
+          onSubmit={handleCreateOrb}
+        />
       </Sheet>
 
       <Sheet

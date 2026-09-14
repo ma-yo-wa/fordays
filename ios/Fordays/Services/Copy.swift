@@ -8,7 +8,7 @@ enum Copy {
     static let onePerson = "1 person"
     static func peopleCount(_ count: Int) -> String { "\(count) people" }
     static let startNew = "Start a new one"
-    static let startNewNote = "Just you, until you invite"
+    static let startNewNote = "Just you, or with people."
     static let joinWithCode = "Join with a code"
     static let joinWithCodeNote = "Paste a link or type the code"
     static let anotherOrb = "Another Orb"

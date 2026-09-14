@@ -1,6 +1,14 @@
 import SwiftUI
 
+enum OrbSetupMode {
+  case firstRun
+  case create
+}
+
 struct OrbSetupView: View {
+  var mode: OrbSetupMode = .firstRun
+  var onFinished: (() -> Void)? = nil
+
   @EnvironmentObject private var app: AppModel
   @State private var withPeople = false
   @State private var name = ""
@@ -11,6 +19,14 @@ struct OrbSetupView: View {
   }
 
   var body: some View {
+    if mode == .create {
+      createBody
+    } else {
+      firstRunBody
+    }
+  }
+
+  private var firstRunBody: some View {
     ZStack {
       Theme.paper.ignoresSafeArea()
       ScrollView {
@@ -26,50 +42,83 @@ struct OrbSetupView: View {
             .foregroundStyle(Theme.inkSoft)
             .padding(.bottom, 20)
 
-          HStack(spacing: 8) {
-            kindTab(Copy.Orbs.justYou, selected: !withPeople) {
-              withPeople = false
-            }
-            kindTab(Copy.Orbs.withPeople, selected: withPeople) {
-              withPeople = true
-            }
-          }
-
-          Text(Copy.Orbs.orbName)
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(Theme.inkFaint)
-            .padding(.top, 20)
-            .padding(.bottom, 8)
-
-          TextField(placeholder, text: $name)
-            .padding(14)
-            .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-
-          Button {
-            Task {
-              busy = true
-              defer { busy = false }
-              await app.completeFirstOrb(name: name, withPeople: withPeople)
-            }
-          } label: {
-            HStack {
-              Spacer()
-              if busy { ProgressView().tint(.white) }
-              else {
-                Text(Copy.Orbs.continueAction)
-                  .font(.headline)
-                  .foregroundStyle(.white)
-              }
-              Spacer()
-            }
-            .padding(.vertical, 14)
-            .background(Theme.ink, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-          }
-          .disabled(busy)
-          .padding(.top, 20)
+          formFields
         }
         .padding(24)
       }
+    }
+  }
+
+  private var createBody: some View {
+    VStack(alignment: .leading, spacing: 0) {
+      Text(Copy.Orbs.setupTitle)
+        .font(.title2.weight(.semibold))
+        .foregroundStyle(Theme.ink)
+        .padding(.bottom, 8)
+
+      Text(Copy.Orbs.setupLead)
+        .font(.subheadline.weight(.medium))
+        .foregroundStyle(Theme.inkSoft)
+        .padding(.bottom, 20)
+
+      formFields
+      Spacer(minLength: 0)
+    }
+    .padding(20)
+    .padding(.bottom, 8)
+    .background(Theme.paper)
+  }
+
+  private var formFields: some View {
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(spacing: 8) {
+        kindTab(Copy.Orbs.justYou, selected: !withPeople) {
+          withPeople = false
+        }
+        kindTab(Copy.Orbs.withPeople, selected: withPeople) {
+          withPeople = true
+        }
+      }
+
+      Text(Copy.Orbs.orbName)
+        .font(.caption.weight(.semibold))
+        .foregroundStyle(Theme.inkFaint)
+        .padding(.top, 20)
+        .padding(.bottom, 8)
+
+      TextField(placeholder, text: $name)
+        .padding(14)
+        .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+      Button {
+        Task { await submit() }
+      } label: {
+        HStack {
+          Spacer()
+          if busy { ProgressView().tint(.white) }
+          else {
+            Text(Copy.Orbs.continueAction)
+              .font(.headline)
+              .foregroundStyle(.white)
+          }
+          Spacer()
+        }
+        .padding(.vertical, 14)
+        .background(Theme.ink, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+      }
+      .disabled(busy)
+      .padding(.top, 20)
+    }
+  }
+
+  private func submit() async {
+    busy = true
+    defer { busy = false }
+    if mode == .create {
+      let ok = await app.addSpace(name: name, withPeople: withPeople)
+      if ok { onFinished?() }
+    } else {
+      await app.completeFirstOrb(name: name, withPeople: withPeople)
     }
   }
 

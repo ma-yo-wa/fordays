@@ -109,7 +109,7 @@ interface AppState {
   boot: () => Promise<void>;
   refreshSpace: () => Promise<void>;
   switchToSpace: (id: string) => Promise<void>;
-  addSpace: (name?: string) => Promise<void>;
+  addSpace: (name?: string, withPeople?: boolean) => Promise<void>;
   completeFirstOrb: (name: string, withPeople: boolean) => Promise<void>;
   leaveCurrentSpace: () => Promise<void>;
   leaveSpace: (spaceId: string) => Promise<void>;
@@ -304,14 +304,18 @@ export const useApp = create<AppState>()((set, get) => {
       }
     },
 
-    async addSpace(name) {
-      const space = await createSpaceRemote(name);
+    async addSpace(name, withPeople) {
+      const placeholder = withPeople
+        ? Copy.orbs.crewPlaceholder
+        : Copy.orbs.personalPlaceholder;
+      const space = await createSpaceRemote((name ?? '').trim() || placeholder);
       const spaces = await loadSpaces().catch(() => (space ? [space] : []));
       set({ space, spaces, config: loadConfig() });
       if (space) {
         await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
         void get().pullImportedCalendars();
       }
+      if (withPeople) get().setInviteShareOpen(true);
     },
 
     async completeFirstOrb(name, withPeople) {
