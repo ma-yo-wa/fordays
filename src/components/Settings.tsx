@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import Sheet from './Sheet';
 import Switch from './Switch';
 import GcalPicker from './GcalPicker';
-import { useApp, spacePeopleLabel } from '../lib/store';
-import { updateDisplayName, type SpaceInfo } from '../lib/auth';
+import { useApp, spaceOrbName, spacePeopleLabel } from '../lib/store';
+import { isDefaultSpaceName, updateDisplayName, type SpaceInfo } from '../lib/auth';
 import {
   clearGoogleToken,
   connectGoogle,
@@ -108,12 +108,14 @@ export default function Settings() {
   const spaces = useApp((st) => st.spaces);
   const switchToSpace = useApp((st) => st.switchToSpace);
   const addSpace = useApp((st) => st.addSpace);
+  const renameCurrentSpace = useApp((st) => st.renameCurrentSpace);
   const leaveCurrentSpace = useApp((st) => st.leaveCurrentSpace);
   const deletePastOrb = useApp((st) => st.deletePastOrb);
   const removeMemberFromSpace = useApp((st) => st.removeMemberFromSpace);
 
   const signedIn = authPhase === 'signedIn';
   const [myName, setMyName] = useState(space?.myName ?? config.names[config.me]);
+  const [orbDraft, setOrbDraft] = useState('');
   const [gcalOn, setGcalOn] = useState(Boolean(savedGoogleCalendar() || googleToken()));
   const [gcalName, setGcalName] = useState(savedGoogleCalendar()?.summary ?? null);
   const [outlookOn, setOutlookOn] = useState(Boolean(savedOutlookCalendar()));
@@ -146,6 +148,7 @@ export default function Settings() {
   useEffect(() => {
     if (!open) return;
     setMyName(space?.myName ?? config.names[config.me]);
+    setOrbDraft(space && !isDefaultSpaceName(space.name) ? space.name : '');
     setConfirm(null);
     setGcalOn(Boolean(savedGoogleCalendar() || googleToken()));
     setGcalName(savedGoogleCalendar()?.summary ?? null);
@@ -169,7 +172,8 @@ export default function Settings() {
 
   useEffect(() => {
     setConfirm(null);
-  }, [space?.id]);
+    setOrbDraft(space && !isDefaultSpaceName(space.name) ? space.name : '');
+  }, [space?.id, space?.name]);
 
   async function importGoogleCalendar(cal: GoogleCalendar) {
     const token = googleToken();
@@ -274,10 +278,19 @@ export default function Settings() {
     }
   }
 
+  async function persistOrbName() {
+    if (!space || space.frozen) return;
+    const current = isDefaultSpaceName(space.name) ? '' : space.name.trim();
+    const next = orbDraft.trim();
+    if (next === current) return;
+    await renameCurrentSpace(next);
+  }
+
   async function handleSwitchOrb(next: SpaceInfo) {
     if (spaceBusy || next.id === space?.id) return;
     setSpaceBusy(true);
     try {
+      await persistOrbName();
       await switchToSpace(next.id);
       setOpen(false);
     } catch (err) {
@@ -428,7 +441,7 @@ export default function Settings() {
             </section>
 
             <section className={ui.section}>
-              <span className={ui.label}>Your Orbs</span>
+              <span className={ui.label}>{Copy.orbs.yourOrbs}</span>
               <div className={ui.orbGrid}>
                 <button
                   type="button"
@@ -473,16 +486,61 @@ export default function Settings() {
                           )}
                         </span>
                       </span>
-                      <span className={ui.orbTileName}>{spacePeopleLabel(orb)}</span>
+                      <span className={ui.orbTileName}>{spaceOrbName(orb)}</span>
                     </button>
                   );
                 })}
               </div>
+              {pastOrbs.length > 0 && (
+                <button
+                  type="button"
+                  className={ui.pastOrbsRow}
+                  onClick={() => setPastOrbsOpen(true)}
+                >
+                  <div className={ui.pastOrbsLeft}>
+                    <span className={ui.pastOrbsTitle}>{Copy.orbs.pastOrbs}</span>
+                    <span className={ui.pastOrbsSub}>{Copy.orbs.pastOrbsSub}</span>
+                  </div>
+                  <div className={ui.pastOrbsRight}>
+                    <span className={ui.pastOrbsCount}>{pastOrbs.length}</span>
+                    <span className={ui.pastOrbsChevron} aria-hidden>
+                      ›
+                    </span>
+                  </div>
+                </button>
+              )}
             </section>
 
             {space && (
               <section className={ui.section}>
-                <span className={ui.label}>People in this Orb</span>
+                <span className={ui.label}>
+                  {Copy.orbs.thisOrb} · {spaceOrbName(space)}
+                </span>
+                <div className={ui.profileCard}>
+                  <input
+                    className={ui.profileInput}
+                    value={orbDraft}
+                    disabled={space.frozen || spaceBusy}
+                    onChange={(e) => setOrbDraft(e.target.value)}
+                    onBlur={() => {
+                      void (async () => {
+                        try {
+                          await persistOrbName();
+                        } catch (err) {
+                          toast(err instanceof Error ? err.message : 'Couldn’t rename this Orb');
+                          setOrbDraft(isDefaultSpaceName(space.name) ? '' : space.name);
+                        }
+                      })();
+                    }}
+                    placeholder={
+                      soloOrb ? Copy.orbs.personalPlaceholder : Copy.orbs.crewPlaceholder
+                    }
+                    autoComplete="off"
+                    autoCapitalize="words"
+                  />
+                </div>
+
+                <span className={`${ui.label} ${ui.subLabel}`}>{Copy.orbs.people}</span>
                 <div className={ui.peopleCard}>
                   <div className={ui.peopleRail}>
                     {!space.frozen && (
@@ -533,49 +591,41 @@ export default function Settings() {
                     })}
                   </div>
                 </div>
-                <p className={ui.help}>
-                  {Copy.orbs.descriptor}
-                </p>
+                <p className={ui.help}>{Copy.orbs.descriptor}</p>
                 {space.frozen && (
                   <p className={ui.frozen}>{Copy.orbs.frozenNotice}</p>
                 )}
-              </section>
-            )}
-
-            {space && (
-              <section className={ui.section}>
-                <span className={ui.label}>Orb actions</span>
 
                 {removableMembers.map((member) => (
-                    <button
-                      key={`ask-${member.id}`}
-                      type="button"
-                      className={ui.textLink}
-                      disabled={spaceBusy}
-                      onClick={() => askRemove(member.id, member.name)}
-                    >
-                      Remove {member.name}
-                    </button>
+                  <button
+                    key={`ask-${member.id}`}
+                    type="button"
+                    className={ui.textLink}
+                    disabled={spaceBusy}
+                    onClick={() => askRemove(member.id, member.name)}
+                  >
+                    Remove {member.name}
+                  </button>
                 ))}
 
                 {!space.frozen && !(soloOrb && activeOrbs.length <= 1) ? (
-                    <button
-                      type="button"
-                      className={ui.textLink}
-                      disabled={spaceBusy}
-                      onClick={() => askLeave()}
-                    >
-                      {leaveLabel}
-                    </button>
+                  <button
+                    type="button"
+                    className={ui.textLink}
+                    disabled={spaceBusy}
+                    onClick={() => askLeave()}
+                  >
+                    {leaveLabel}
+                  </button>
                 ) : space.frozen ? (
-                      <button
-                        type="button"
-                        className={`${ui.textLink} ${ui.pastOrbBtnDanger}`}
-                        disabled={spaceBusy}
-                        onClick={() => askPurge(space.id)}
-                      >
-                        {Copy.orbs.deletePermanent}
-                      </button>
+                  <button
+                    type="button"
+                    className={`${ui.textLink} ${ui.pastOrbBtnDanger}`}
+                    disabled={spaceBusy}
+                    onClick={() => askPurge(space.id)}
+                  >
+                    {Copy.orbs.deletePermanent}
+                  </button>
                 ) : null}
               </section>
             )}
@@ -853,28 +903,6 @@ export default function Settings() {
           </details>
         )}
 
-        {pastOrbs.length > 0 && (
-          <section className={ui.section}>
-            <span className={ui.label}>{Copy.orbs.pastOrbs}</span>
-            <button
-              type="button"
-              className={ui.pastOrbsRow}
-              onClick={() => setPastOrbsOpen(true)}
-            >
-              <div className={ui.pastOrbsLeft}>
-                <span className={ui.pastOrbsTitle}>{Copy.orbs.pastOrbs}</span>
-                <span className={ui.pastOrbsSub}>{Copy.orbs.pastOrbsSub}</span>
-              </div>
-              <div className={ui.pastOrbsRight}>
-                <span className={ui.pastOrbsCount}>{pastOrbs.length}</span>
-                <span className={ui.pastOrbsChevron} aria-hidden>
-                  ›
-                </span>
-              </div>
-            </button>
-          </section>
-        )}
-
         {signedIn && (
           <div className={f.row}>
             <button
@@ -1015,9 +1043,8 @@ export default function Settings() {
                       className={ui.pastOrbBtn}
                       disabled={spaceBusy}
                       onClick={() => {
-                        void handleSwitchOrb(pOrb);
                         setPastOrbsOpen(false);
-                        setOpen(false);
+                        void handleSwitchOrb(pOrb);
                       }}
                     >
                       View

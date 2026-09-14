@@ -70,6 +70,25 @@ final class AppModel: ObservableObject {
     }
   }
 
+  func renameCurrentSpace(_ name: String) async {
+    guard let current = space, !current.frozen else { return }
+    let others = current.members.filter {
+      $0.id.compare(current.myId, options: .caseInsensitive) != .orderedSame
+    }
+    let fallback = others.isEmpty ? Copy.Orbs.personalPlaceholder : Copy.Orbs.crewPlaceholder
+    let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    let finalName = clean.isEmpty ? fallback : clean
+    do {
+      try await sb.from("spaces")
+        .update(SpaceNameUpdate(name: finalName))
+        .eq("id", value: current.id)
+        .execute()
+      try await refreshSpaceAndData()
+    } catch {
+      toast = error.localizedDescription
+    }
+  }
+
   private var lastAppleSync: Date?
   private var calendarObserver: NSObjectProtocol?
   private var sb: SupabaseClient { SupabaseService.shared.client }

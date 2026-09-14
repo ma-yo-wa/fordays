@@ -52,6 +52,14 @@
   color: var(--ink-faint);
 }
 
+.orbGrid + .pastOrbsRow {
+  margin-top: 10px;
+}
+
+.subLabel {
+  margin-top: 16px;
+}
+
 .orbGrid {
   display: flex;
   flex-wrap: wrap;

@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
-import { useApp, isMatched } from '../lib/store';
+import { useApp, isMatched, spaceOrbName } from '../lib/store';
+import { isDefaultSpaceName } from '../lib/auth';
 import { faceColor } from '../lib/tint';
 import { MONTHS, iso, parseISO, todayISO } from '../lib/date';
 import { Copy } from '../lib/copy';
@@ -75,9 +76,12 @@ export default function NavBar() {
       ];
   const visibleFaces = faceChips.slice(0, 2);
   const moreCount = Math.max(0, faceChips.length - 2);
-  const rawOrbName = space?.name?.trim() ?? '';
-  const genericOrbName = /^(fordays|someday)$/i.test(rawOrbName);
-  const customOrbName = rawOrbName && !genericOrbName ? rawOrbName : null;
+  const others = (space?.members ?? []).filter((m) => m.id !== space?.myId);
+  const titleName = space ? spaceOrbName(space) : null;
+  const customOrbName =
+    titleName && (others.length === 0 || !isDefaultSpaceName(space?.name ?? ''))
+      ? titleName
+      : null;
 
   const monthLabel = `${MONTHS[cursorDate.getMonth()]}${
     cursorDate.getFullYear() === new Date().getFullYear()

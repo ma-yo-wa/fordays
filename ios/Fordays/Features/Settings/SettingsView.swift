@@ -57,6 +57,8 @@ struct SettingsView: View {
   @State private var showAnotherOrb = false
   @State private var showOrbSetup = false
   @State private var confirm: SettingsConfirm?
+  @State private var orbDraft = ""
+  @State private var skipPersistOnDisappear = false
   @State private var spaceBusy = false
   @State private var appleOn = CalendarSync.isConnected
   @State private var appleName = CalendarSync.selectedName
@@ -89,15 +91,10 @@ struct SettingsView: View {
             }
             profileSection(space: space)
             orbsSection
-            peopleSection(space: space)
-            orbActionsSection(space: space)
+            thisOrbSection(space: space)
           }
 
           calendarsSection
-
-          if !pastOrbs.isEmpty {
-            pastOrbsSection
-          }
 
           if app.authPhase == .signedIn {
             signOutSection
@@ -110,11 +107,22 @@ struct SettingsView: View {
       .navigationTitle("Settings")
       .toolbar {
         ToolbarItem(placement: .topBarTrailing) {
-          Button("Done") { dismiss() }
+          Button("Done") {
+            Task {
+              await persistOrbName()
+              dismiss()
+            }
+          }
         }
       }
       .onChange(of: app.space?.id) { _, _ in
         confirm = nil
+        syncOrbDraft()
+      }
+      .onAppear { syncOrbDraft() }
+      .onDisappear {
+        if skipPersistOnDisappear { return }
+        Task { await persistOrbName() }
       }
     }
     .settingsConfirm($confirm) { item in
@@ -195,7 +203,7 @@ struct SettingsView: View {
 
   private var orbsSection: some View {
     VStack(alignment: .leading, spacing: 8) {
-      sectionLabel("Your Orbs")
+      sectionLabel(Copy.Orbs.yourOrbs)
       LazyVGrid(columns: [GridItem(.adaptive(minimum: 64), spacing: 12)], alignment: .leading, spacing: 14) {
         plusTile
         ForEach(activeOrbs, id: \.id) { orb in
@@ -204,6 +212,36 @@ struct SettingsView: View {
       }
       .padding(12)
       .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+      if !pastOrbs.isEmpty {
+        Button {
+          showPastOrbs = true
+        } label: {
+          HStack {
+            VStack(alignment: .leading, spacing: 2) {
+              Text(Copy.Orbs.pastOrbs)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Theme.ink)
+              Text(Copy.Orbs.pastOrbsSub)
+                .font(.caption)
+                .foregroundStyle(Theme.inkFaint)
+            }
+            Spacer()
+            Text("\(pastOrbs.count)")
+              .font(.footnote.weight(.semibold))
+              .foregroundStyle(Theme.inkSoft)
+              .padding(.horizontal, 8)
+              .padding(.vertical, 2)
+              .background(Theme.ink.opacity(0.06), in: Capsule())
+            Image(systemName: "chevron.right")
+              .font(.caption.weight(.semibold))
+              .foregroundStyle(Theme.inkFaint)
+          }
+          .padding(14)
+          .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(.plain)
+      }
     }
   }
 
@@ -391,9 +429,24 @@ struct SettingsView: View {
     .presentationDragIndicator(.visible)
   }
 
-  private func peopleSection(space: SpaceInfo) -> some View {
-    VStack(alignment: .leading, spacing: 8) {
-      sectionLabel("People in this Orb")
+  private func thisOrbSection(space: SpaceInfo) -> some View {
+    let soloOrb = space.members.count <= 1
+    let leaveLabel = soloOrb ? Copy.Orbs.deleteSoloAction : Copy.Orbs.leaveAction
+    let placeholder = soloOrb ? Copy.Orbs.personalPlaceholder : Copy.Orbs.crewPlaceholder
+    return VStack(alignment: .leading, spacing: 8) {
+      sectionLabel("\(Copy.Orbs.thisOrb) · \(space.peopleLabel)")
+
+      TextField(placeholder, text: $orbDraft)
+        .disabled(space.frozen || spaceBusy)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .onSubmit { Task { await persistOrbName() } }
+
+      Text(Copy.Orbs.people)
+        .font(.footnote.weight(.semibold))
+        .foregroundStyle(Theme.inkFaint)
+        .padding(.top, 8)
       VStack(alignment: .leading, spacing: 8) {
         ScrollView(.horizontal, showsIndicators: false) {
           HStack(spacing: 10) {
@@ -479,15 +532,6 @@ struct SettingsView: View {
           .foregroundStyle(Theme.inkFaint)
           .padding(.horizontal, 4)
       }
-    }
-  }
-
-  @ViewBuilder
-  private func orbActionsSection(space: SpaceInfo) -> some View {
-    let soloOrb = space.members.count <= 1
-    let leaveLabel = soloOrb ? Copy.Orbs.deleteSoloAction : Copy.Orbs.leaveAction
-    VStack(alignment: .leading, spacing: 8) {
-      sectionLabel("Orb actions")
 
       if !space.frozen, space.myRole == "admin", space.members.count >= 3 {
         ForEach(space.members.filter { $0.id != space.myId }, id: \.id) { member in
@@ -524,39 +568,6 @@ struct SettingsView: View {
         .padding(.top, 4)
         .disabled(spaceBusy)
       }
-    }
-  }
-
-  private var pastOrbsSection: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      sectionLabel(Copy.Orbs.pastOrbs)
-      Button {
-        showPastOrbs = true
-      } label: {
-        HStack {
-          VStack(alignment: .leading, spacing: 2) {
-            Text(Copy.Orbs.pastOrbs)
-              .font(.subheadline.weight(.semibold))
-              .foregroundStyle(Theme.ink)
-            Text(Copy.Orbs.pastOrbsSub)
-              .font(.caption)
-              .foregroundStyle(Theme.inkFaint)
-          }
-          Spacer()
-          Text("\(pastOrbs.count)")
-            .font(.footnote.weight(.semibold))
-            .foregroundStyle(Theme.inkSoft)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 2)
-            .background(Theme.ink.opacity(0.06), in: Capsule())
-          Image(systemName: "chevron.right")
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(Theme.inkFaint)
-        }
-        .padding(14)
-        .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-      }
-      .buttonStyle(.plain)
     }
   }
 
@@ -605,9 +616,8 @@ struct SettingsView: View {
                     .background(Theme.ink, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
                 } else {
                   Button("View") {
-                    switchOrb(pOrb.id)
                     showPastOrbs = false
-                    dismiss()
+                    switchOrb(pOrb.id)
                   }
                   .buttonStyle(.plain)
                   .font(.caption.weight(.semibold))
@@ -915,10 +925,32 @@ struct SettingsView: View {
     .fixedSize()
   }
 
+  private func isDefaultOrbName(_ name: String) -> Bool {
+    let raw = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    return raw.isEmpty
+      || raw.caseInsensitiveCompare("Fordays") == .orderedSame
+      || raw.caseInsensitiveCompare("Someday") == .orderedSame
+  }
+
+  private func syncOrbDraft() {
+    guard let space = app.space else { return }
+    orbDraft = isDefaultOrbName(space.name) ? "" : space.name
+  }
+
+  private func persistOrbName() async {
+    guard let space = app.space, !space.frozen else { return }
+    let current = isDefaultOrbName(space.name) ? "" : space.name.trimmingCharacters(in: .whitespacesAndNewlines)
+    let next = orbDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard next != current else { return }
+    await app.renameCurrentSpace(orbDraft)
+  }
+
   private func switchOrb(_ id: String) {
     guard !spaceBusy, id != app.space?.id else { return }
+    skipPersistOnDisappear = true
     spaceBusy = true
     Task {
+      await persistOrbName()
       await app.switchToSpace(id)
       spaceBusy = false
       if app.space?.id == id { dismiss() }

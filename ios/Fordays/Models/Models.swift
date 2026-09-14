@@ -63,17 +63,20 @@ struct SpaceInfo: Hashable {
   var canCompose: Bool { !frozen }
 
   var peopleLabel: String {
-    let others = members.filter { $0.id != myId }
-    if others.isEmpty {
-      let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-      if !trimmed.isEmpty && trimmed.caseInsensitiveCompare("Fordays") != .orderedSame && trimmed.caseInsensitiveCompare("Someday") != .orderedSame {
-        return trimmed
-      }
-      return "Just you"
-    }
+    let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    let generic = trimmed.isEmpty
+      || trimmed.caseInsensitiveCompare("Fordays") == .orderedSame
+      || trimmed.caseInsensitiveCompare("Someday") == .orderedSame
+    if !generic { return trimmed }
+    let others = members.filter { $0.id.compare(myId, options: .caseInsensitive) != .orderedSame }
+    if others.isEmpty && partner2Id == nil { return Copy.Orbs.personalPlaceholder }
     if others.count == 1 { return others[0].name }
     if others.count == 2 { return "\(others[0].name) and \(others[1].name)" }
-    return others.map(\.name).joined(separator: ", ")
+    if !others.isEmpty { return others.map(\.name).joined(separator: ", ") }
+    if let partner = partnerName?.trimmingCharacters(in: .whitespacesAndNewlines), !partner.isEmpty {
+      return partner
+    }
+    return Copy.Orbs.personalPlaceholder
   }
 
   func displayName(for userId: String) -> String {

@@ -16,6 +16,7 @@ import {
   loadSpaces,
   removeSpaceMember as removeSpaceMemberRemote,
   renameSpace as renameSpaceRemote,
+  isDefaultSpaceName,
   clearFirstOrbSetupPending,
   pendingInvite,
   signOut,
@@ -49,19 +50,21 @@ export function canCompose(space: SpaceInfo | null | undefined): boolean {
   return Boolean(space && !space.frozen);
 }
 
-/** Who this orb is with. */
-export function spacePeopleLabel(space: SpaceInfo): string {
+/** The notebook’s name. Legacy unnamed solos (Fordays) show Personal, not Just you. */
+export function spaceOrbName(space: SpaceInfo): string {
+  const raw = space.name?.trim() ?? '';
+  if (raw && !isDefaultSpaceName(raw)) return raw;
   const others = (space.members ?? []).filter((m) => m.id !== space.myId);
-  if (!others.length) {
-    const raw = space.name?.trim() ?? '';
-    if (raw && !/^(fordays|someday)$/i.test(raw)) {
-      return raw;
-    }
-    return 'Just you';
-  }
+  if (others.length === 0 && !space.partner2Id) return Copy.orbs.personalPlaceholder;
   if (others.length === 1) return others[0]!.name;
   if (others.length === 2) return `${others[0]!.name} and ${others[1]!.name}`;
-  return others.map((m) => m.name).join(', ');
+  if (others.length) return others.map((m) => m.name).join(', ');
+  return space.partnerName?.trim() || Copy.orbs.personalPlaceholder;
+}
+
+/** @deprecated use spaceOrbName — same value, kept for call sites. */
+export function spacePeopleLabel(space: SpaceInfo): string {
+  return spaceOrbName(space);
 }
 
 interface AppState {
@@ -111,6 +114,7 @@ interface AppState {
   switchToSpace: (id: string) => Promise<void>;
   addSpace: (name?: string, withPeople?: boolean) => Promise<void>;
   completeFirstOrb: (name: string, withPeople: boolean) => Promise<void>;
+  renameCurrentSpace: (name: string) => Promise<void>;
   leaveCurrentSpace: () => Promise<void>;
   leaveSpace: (spaceId: string) => Promise<void>;
   restorePastOrb: (spaceId: string) => Promise<void>;
@@ -326,6 +330,16 @@ export const useApp = create<AppState>()((set, get) => {
       clearFirstOrbSetupPending();
       await get().refreshSpace();
       if (withPeople) get().setInviteShareOpen(true);
+    },
+
+    async renameCurrentSpace(name) {
+      const current = get().space;
+      if (!current || current.frozen) return;
+      const others = (current.members ?? []).filter((m) => m.id !== current.myId);
+      const fallback =
+        others.length > 0 ? Copy.orbs.crewPlaceholder : Copy.orbs.personalPlaceholder;
+      await renameSpaceRemote(current.id, name.trim() || fallback);
+      await get().refreshSpace();
     },
 
     async leaveCurrentSpace() {

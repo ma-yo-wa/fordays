@@ -12,9 +12,9 @@ An Orb is **the notebook for a specific we** (including a we of one). Plans belo
 
 Someday / Plans / Memories **are** that notebook. Everyone has at least one **live** Orb.
 
-**Orb** = the notebook. **Faces** = people in *this* space (two: rose / sage; many: names + initials). Not a hue per person or per space.
+**Orb** = the notebook. **Faces** = people in *this* space (two: rose / sage; many: names + initials). Not a hue per person or per space. Tiles and **This Orb** show the notebook’s **name**. Just you is only the setup kind, never the title. Legacy unnamed solos (Fordays) display as **Personal**.
 
-Several Orbs are normal: Just you, Aline, siblings. Each is solo, two, or many.
+Several Orbs are normal: Personal, Aline, siblings. Each is solo, two, or many.
 
 Do **not** type Orbs as Work / Personal / Travel. Names are free (Personal, Portugal, Aline’s Crew). Categories are not.
 
@@ -27,13 +27,22 @@ Do **not** type Orbs as Work / Personal / Travel. Names are free (Personal, Port
 - With people → invite next.
 - Sign-in does not ask again once the name isn’t Fordays / Someday.
 
+### Settings
+
+One sheet, two bands — not two Settings screens.
+
+- **Your Orbs** — all notebooks. Grid, +, Past Orbs. Switch and create.
+- **This Orb · {name}** — the open notebook. Rename, people / invite / remove, Leave or Delete. No “Orb actions” heading.
+
+You / calendars / notifications / sign out are you, not a notebook.
+
 ### Start a new one
 
 Same questions as first signup, in a sheet. Cancel returns to Start / Join. Join with a code stays its own path (link or code for *this* Orb — no directory, no Contacts).
 
 ### Admin and members
 
-- **Admin** is whoever **started** that Orb (signup mint, or Start a new one). You are admin of your Just you notebook.
+- **Admin** is whoever **started** that Orb (signup mint, or Start a new one). You are admin of your Personal notebook.
 - People who **join** are **members**. They can leave. They cannot Remove anyone.
 - If the last admin leaves a we, the person who’s been in **longest** becomes admin so the group isn’t stuck.
 - No “make admin” control.
@@ -43,7 +52,7 @@ Same questions as first signup, in a sheet. Cancel returns to Start / Join. Join
 ### Leave, delete, Past Orbs
 
 - **Leave** — anyone in a we. You’re out. Others keep the **live** notebook. You keep a **frozen copy** of what was already there. New plans after you leave are not on your copy.
-- **Delete this Orb** — only when you’re **alone** in it (Just you, or last member). Soft-delete → Past Orbs. Lives under **Orb actions** while you’re in that notebook. Confirm before delete.
+- **Delete this Orb** — only when you’re **alone** in it (solo, or last member). Soft-delete → Past Orbs. Lives at the bottom of **This Orb**. Confirm before delete.
 - **No delete-for-everyone** while someone else is still in.
 - **Last live notebook** — cannot delete. Always keep at least one live Orb.
 - **Delete permanently** — Past Orbs only. That copy is gone for you. Does not un-delete their live we.
@@ -52,7 +61,7 @@ Same questions as first signup, in a sheet. Cancel returns to Start / Join. Join
 ### Decided, not built yet
 
 - Cap **5 live Orbs** (joins count). Past Orbs do not count. No paywall copy yet. Enforce on the server when we ship it.
-- Reuse an empty Just you instead of minting another blank one.
+- Reuse an empty Personal notebook instead of minting another blank one.
 
 ---
 
