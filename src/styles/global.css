@@ -42,6 +42,36 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Marketing landing stays paper-light and must scroll. */
+html.marketing {
+  overflow: auto;
+  color-scheme: light;
+}
+
+html.marketing,
+html.marketing body,
+html.marketing #root {
+  height: auto;
+  min-height: 100%;
+}
+
+html.marketing body {
+  overflow: auto;
+  overscroll-behavior: auto;
+  background:
+    radial-gradient(
+      88% 46% at 50% -10%,
+      rgba(253, 122, 154, 0.4) 0%,
+      rgba(253, 164, 146, 0.2) 44%,
+      transparent 74%
+    ),
+    radial-gradient(64% 40% at 104% 16%, rgba(205, 231, 179, 0.52) 0%, transparent 62%),
+    radial-gradient(64% 42% at -6% 30%, rgba(214, 222, 170, 0.44) 0%, transparent 64%),
+    radial-gradient(130% 56% at 50% 114%, rgba(240, 194, 150, 0.34) 0%, transparent 66%),
+    #f9f6f2;
+  color: #17140f;
+}
+
 body {
   margin: 0;
   font: var(--t-body);
@@ -90,7 +120,7 @@ body::after {
 @media (prefers-color-scheme: dark) {
   /* Same orb, held far back. At full strength these pastels glow against
      black and the text on top stops being readable. */
-  body {
+  html:not(.marketing) body {
     background:
       radial-gradient(
         88% 46% at 50% -10%,
@@ -106,7 +136,7 @@ body::after {
   }
 
   /* Multiply on a near-black ground just paints black on black. */
-  body::after {
+  html:not(.marketing) body::after {
     mix-blend-mode: overlay;
     opacity: 0.24;
   }

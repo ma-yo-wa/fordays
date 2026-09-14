@@ -1,12 +1,35 @@
 .page {
+  color-scheme: light;
+  --paper: #f9f6f2;
+  --paper-warm: #fffdfb;
+  --paper-sunk: #efeae3;
+  --ink: #17140f;
+  --ink-2: #3b352c;
+  --ink-soft: #7c7365;
+  --ink-faint: #a79e90;
+  --rule: #e4dcd0;
+  --rose: #f2648b;
+  --rose-ink: #c4285a;
+  --rose-wash: #ffeaee;
+  --sage: #a8ce85;
+  --sage-ink: #4f7735;
+  --sage-wash: #edf6e3;
+  --ext: #98917f;
+  --ext-wash: #ece7da;
+  --hairline: rgba(23, 20, 15, 0.12);
+  --separator: rgba(23, 20, 15, 0.09);
+  --fill-quaternary: rgba(23, 20, 15, 0.045);
+  --fill-tertiary: rgba(23, 20, 15, 0.07);
+  --fill-secondary: rgba(23, 20, 15, 0.11);
+
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
   background:
     radial-gradient(100% 70% at 15% -10%, #ffeaee 0%, transparent 60%),
     radial-gradient(80% 60% at 90% 10%, #edf6e3 0%, transparent 55%),
-    var(--paper);
-  color: var(--ink);
+    #f9f6f2;
+  color: #17140f;
   font-family: var(--font-sans);
   display: flex;
   flex-direction: column;

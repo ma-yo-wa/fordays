@@ -155,7 +155,7 @@
    glare; the -ink variants swap direction and become the light ones.
    ===================================================================== */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.marketing) {
     --paper: #0d0c0b;
     --paper-warm: #1a1815;
     --paper-sunk: #000000;
