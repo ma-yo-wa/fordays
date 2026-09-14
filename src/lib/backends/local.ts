@@ -94,7 +94,7 @@ export class LocalBackend implements Backend {
       'created',
       row.date_time
         ? `created the plan “${row.title}”`
-        : `added the idea “${row.title}”`,
+        : `added “${row.title}” to Someday`,
     );
     if (row.date_time) {
       this.log(row.id, 'scheduled', `set it for ${describeDT(row.date_time)}`);
@@ -112,7 +112,7 @@ export class LocalBackend implements Backend {
       if (!before && after) {
         this.log(id, 'scheduled', `set it for ${describeDT(after)}`);
       } else if (before && !after) {
-        this.log(id, 'unscheduled', 'moved it back to the ideas list');
+        this.log(id, 'unscheduled', 'moved it back to Someday');
       } else if (before && after) {
         this.log(id, 'rescheduled', `moved it to ${describeDT(after)}`);
       }
@@ -335,7 +335,7 @@ export class LocalBackend implements Backend {
       action_type: 'created' as const,
       details: a.date_time
         ? `created the plan “${a.title}”`
-        : `added the idea “${a.title}”`,
+        : `added “${a.title}” to Someday`,
       timestamp: a.created_at,
     }));
     this.commit();

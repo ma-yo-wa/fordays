@@ -1,5 +1,6 @@
 import Sheet from './Sheet';
 import { useApp } from '../lib/store';
+import { Copy } from '../lib/copy';
 import s from './AddSheet.module.css';
 
 function CloseIcon() {
@@ -68,10 +69,8 @@ export default function AddSheet() {
           <BucketGlyph />
         </span>
         <span>
-          <span className={s.optionTitle}>An idea</span>
-          <span className={s.optionNote}>
-            Something you want to do, with no date yet.
-          </span>
+          <span className={s.optionTitle}>{Copy.tabs.ideas}</span>
+          <span className={s.optionNote}>{Copy.ideas.addOptionNote}</span>
         </span>
       </button>
     </Sheet>

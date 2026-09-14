@@ -213,7 +213,7 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
       <p className={s.lead}>
         {inviterHint
           ? `${inviterHint} wants to share an Orb with you — sign in to join`
-          : 'A shared calendar and bucket list for two'}
+          : 'Someday, plans, and memories'}
       </p>
 
       <div className={`${f.segmented} ${s.modes}`} role="tablist" aria-label="Account">

@@ -41,8 +41,8 @@ struct AddSheetView: View {
         .frame(height: 0.5)
       option(
         kind: .bucket,
-        title: "An idea",
-        note: "Something you want to do, with no date yet.",
+        title: Copy.Tabs.ideas,
+        note: Copy.Ideas.addOptionNote,
         glyph: .bucket
       )
     }
@@ -124,7 +124,9 @@ struct ComposerView: View {
           .foregroundStyle(Theme.ink)
           .padding(.bottom, 14)
 
-        fieldLabel(isPlan ? "Plan" : "Idea")
+        if isPlan {
+          fieldLabel("Plan")
+        }
         textField(
           isPlan ? "Dinner at Alma" : "Kayak the Grand River",
           text: $title
@@ -219,7 +221,7 @@ struct ComposerView: View {
 
         HStack(spacing: 10) {
           ghost("Cancel", action: onClose)
-          accent(isPlan ? "Add plan" : "Add idea") {
+          accent(isPlan ? Copy.Composer.addPlan : Copy.Composer.addIdea) {
             await save()
           }
         }

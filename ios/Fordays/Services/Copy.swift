@@ -44,7 +44,7 @@ enum Copy {
   }
 
   enum Tabs {
-    static let ideas = "Ideas"
+    static let ideas = "Someday"
     static let plans = "Plans"
     static let memories = "Memories"
   }
@@ -54,6 +54,11 @@ enum Copy {
     static let emptyShared = "Things you want to do together, before they have a day"
     static let emptyFrozen = "A copy of this list from when you left"
     static let addFirst = "Add the first one"
+    static let inList = "In Someday"
+    static let backTo = "Back to Someday"
+    static let backIn = "Back in Someday"
+    static let added = "Added to Someday"
+    static let addOptionNote = "Something you want to do, with no date yet."
   }
 
   enum Invite {
@@ -89,9 +94,11 @@ enum Copy {
 
   enum Composer {
     static let newPlan = "New plan"
-    static let newIdea = "New idea"
+    static let newIdea = "Someday"
     static let editPlan = "Edit plan"
-    static let editIdea = "Edit idea"
+    static let editIdea = "Someday"
+    static let addPlan = "Add plan"
+    static let addIdea = "Add to Someday"
     static let multiDayPrompt = "Runs more than one day?"
     static let notesHint = "— optional"
     static let coverHint = "— optional"

@@ -32,7 +32,7 @@
     "emptyFrozen": "A copy from when you left"
   },
   "tabs": {
-    "ideas": "Ideas",
+    "ideas": "Someday",
     "plans": "Plans",
     "memories": "Memories"
   },
@@ -40,7 +40,12 @@
     "emptySolo": "Things you want to do, before they have a day",
     "emptyShared": "Things you want to do together, before they have a day",
     "emptyFrozen": "A copy of this list from when you left",
-    "addFirst": "Add the first one"
+    "addFirst": "Add the first one",
+    "inList": "In Someday",
+    "backTo": "Back to Someday",
+    "backIn": "Back in Someday",
+    "added": "Added to Someday",
+    "addOptionNote": "Something you want to do, with no date yet."
   },
   "invite": {
     "title": "Invite someone",
@@ -68,9 +73,11 @@
   },
   "composer": {
     "newPlan": "New plan",
-    "newIdea": "New idea",
+    "newIdea": "Someday",
     "editPlan": "Edit plan",
-    "editIdea": "Edit idea",
+    "editIdea": "Someday",
+    "addPlan": "Add plan",
+    "addIdea": "Add to Someday",
     "multiDayPrompt": "Runs more than one day?",
     "notesHint": "— optional",
     "coverHint": "— optional"

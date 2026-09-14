@@ -186,7 +186,7 @@ final class AppModel: ObservableObject {
       try await sb.from("activities").insert(insert).execute()
       await refreshActivities()
       tab = dateTime == nil ? .bucket : .plans
-      toast = dateTime == nil ? "Added an idea" : "Made it a plan"
+      toast = dateTime == nil ? Copy.Ideas.added : "Made it a plan"
     } catch {
       toast = error.localizedDescription
     }
@@ -265,7 +265,7 @@ final class AppModel: ObservableObject {
 
   func moveToBucket(_ id: String) async {
     await patchActivity(id, dateTime: .some(nil), endsAt: .some(nil))
-    toast = "Back in Ideas"
+    toast = Copy.Ideas.backIn
     tab = .bucket
   }
 

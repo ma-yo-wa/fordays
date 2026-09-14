@@ -120,7 +120,7 @@ export default function Composer() {
       } else {
         setScreen('bucket');
       }
-      toast(isPlan ? 'Made it a plan' : 'Added an idea');
+      toast(isPlan ? 'Made it a plan' : Copy.ideas.added);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Could not save');
     } finally {
@@ -134,10 +134,12 @@ export default function Composer() {
       onClose={close}
       heading={isPlan ? Copy.composer.newPlan : Copy.composer.newIdea}
     >
-      <span className={f.label} style={{ marginTop: 14 }}>
-        {isPlan ? 'Plan' : 'Idea'}
-      </span>
-      <div className={f.group}>
+      {isPlan && (
+        <span className={f.label} style={{ marginTop: 14 }}>
+          Plan
+        </span>
+      )}
+      <div className={f.group} style={isPlan ? undefined : { marginTop: 14 }}>
         <input
           className={f.input}
           value={title}
@@ -265,7 +267,7 @@ export default function Composer() {
           onClick={() => void save()}
           disabled={saving}
         >
-          {isPlan ? 'Add plan' : 'Add idea'}
+          {isPlan ? Copy.composer.addPlan : Copy.composer.addIdea}
         </button>
       </div>
     </Sheet>

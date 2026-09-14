@@ -278,7 +278,7 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
             Choose from library
           </button>
           <p className={s.photoNote}>
-            Picks a photo from this phone. It’s saved with the idea.
+            Picks a photo from this phone. It’s saved with this.
           </p>
           {value && !isEmojiCover(value) && value.startsWith('data:') ? (
             <CoverArt url={value} size="thumb" className={s.photoThumb} />

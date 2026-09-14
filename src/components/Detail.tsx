@@ -5,6 +5,7 @@ import CoverPicker from './CoverPicker';
 import CoverArt from './CoverArt';
 import WhenFields from './WhenFields';
 import { useApp, partnerName, isMatched } from '../lib/store';
+import { Copy } from '../lib/copy';
 import { isPlan } from '../lib/types';
 import { faceColor, faceIndexFor } from '../lib/tint';
 import {
@@ -258,7 +259,7 @@ export default function Detail() {
 
   async function toBucket() {
     await patch(item!.id, { date_time: null, ends_at: null });
-    toast('Back in Ideas');
+    toast(Copy.ideas.backIn);
     close();
   }
 
@@ -282,7 +283,7 @@ export default function Detail() {
           <div className={s.when}>
             {planned
               ? describePlan(item.date_time as string, item.ends_at)
-              : 'In Ideas'}
+              : Copy.ideas.inList}
           </div>
         </div>
         {mode === 'view' && !frozen && (
@@ -534,7 +535,7 @@ export default function Detail() {
           {planned && (
             <button type="button" className={s.action} onClick={() => void toBucket()}>
               <BucketIcon />
-              Back to Ideas
+              {Copy.ideas.backTo}
             </button>
           )}
 

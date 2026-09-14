@@ -131,9 +131,9 @@ export default function DesktopGate() {
 
         <div className={s.featureCard}>
           <div className={s.featureIcon}>📸</div>
-          <h3>Bucket list & memories</h3>
+          <h3>Someday, plans, memories</h3>
           <p>
-            Keep ideas you want to do someday. When you’re ready, lock them into
+            Keep things you want to do someday. When you’re ready, lock them into
             a day. Photos and memories stay together in your notebook.
           </p>
         </div>
