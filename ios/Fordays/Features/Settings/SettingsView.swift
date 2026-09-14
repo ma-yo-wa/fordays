@@ -50,6 +50,8 @@ private enum SettingsConfirm: Identifiable, Hashable {
 }
 
 struct SettingsView: View {
+  private static let orbSize: CGFloat = 72
+
   @EnvironmentObject private var app: AppModel
   @Environment(\.dismiss) private var dismiss
   @State private var showInvite = false
@@ -204,7 +206,7 @@ struct SettingsView: View {
   private var orbsSection: some View {
     VStack(alignment: .leading, spacing: 8) {
       sectionLabel(Copy.Orbs.yourOrbs)
-      LazyVGrid(columns: [GridItem(.adaptive(minimum: 64), spacing: 12)], alignment: .leading, spacing: 14) {
+      LazyVGrid(columns: [GridItem(.adaptive(minimum: Self.orbSize), spacing: 16)], alignment: .leading, spacing: 14) {
         plusTile
         ForEach(activeOrbs, id: \.id) { orb in
           orbTile(orb)
@@ -291,10 +293,10 @@ struct SettingsView: View {
     } label: {
       VStack(spacing: 6) {
         ZStack {
-          RoundedRectangle(cornerRadius: 16, style: .continuous)
+          Circle()
             .fill(Theme.ink.opacity(0.08))
           if active {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            Circle()
               .fill(
                 LinearGradient(
                   colors: [Theme.rose.opacity(0.55), Theme.sage.opacity(0.4)],
@@ -305,13 +307,14 @@ struct SettingsView: View {
           }
           orbFaceStack(faces)
         }
-        .frame(width: 56, height: 56)
+        .frame(width: Self.orbSize, height: Self.orbSize)
 
         Text(orb.peopleLabel)
           .font(.caption)
           .foregroundStyle(Theme.inkSoft)
           .lineLimit(1)
-          .frame(width: 64)
+          .truncationMode(.tail)
+          .frame(width: Self.orbSize)
       }
     }
     .buttonStyle(.plain)
@@ -324,17 +327,17 @@ struct SettingsView: View {
     } label: {
       VStack(spacing: 6) {
         ZStack {
-          RoundedRectangle(cornerRadius: 16, style: .continuous)
+          Circle()
             .fill(Theme.ink.opacity(0.08))
           Text("+")
             .font(.title2.weight(.medium))
             .foregroundStyle(Theme.ink)
             .offset(y: -0.5)
         }
-        .frame(width: 56, height: 56)
+        .frame(width: Self.orbSize, height: Self.orbSize)
         Text("\u{00a0}")
           .font(.caption)
-          .frame(width: 64)
+          .frame(width: Self.orbSize)
       }
     }
     .buttonStyle(.plain)
@@ -349,11 +352,11 @@ struct SettingsView: View {
           Circle()
             .fill(f.them ? Theme.faceRose : Theme.faceSage)
           Text(f.letter)
-            .font(.system(size: 11, weight: .bold))
+            .font(.system(size: 12, weight: .bold))
             .foregroundStyle(.white)
             .offset(y: -0.5)
         }
-        .frame(width: 22, height: 22)
+        .frame(width: 26, height: 26)
         .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
         .fixedSize()
       }
@@ -366,7 +369,7 @@ struct SettingsView: View {
             .foregroundStyle(.white)
             .offset(y: -0.5)
         }
-        .frame(width: 22, height: 22)
+        .frame(width: 26, height: 26)
         .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
         .fixedSize()
       }

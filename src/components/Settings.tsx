@@ -450,7 +450,7 @@ export default function Settings() {
                   aria-label="Another Orb"
                   onClick={() => setOrbAddOpen(true)}
                 >
-                  <span className={ui.orbSquircle}>
+                  <span className={ui.orbCircle}>
                     <span className={ui.orbAddMark} aria-hidden>
                       +
                     </span>
@@ -465,9 +465,10 @@ export default function Settings() {
                       type="button"
                       className={`${ui.orbTile} ${on ? ui.orbTileOn : ''}`}
                       disabled={spaceBusy}
+                      title={spaceOrbName(orb)}
                       onClick={() => void handleSwitchOrb(orb)}
                     >
-                      <span className={ui.orbSquircle}>
+                      <span className={ui.orbCircle}>
                         <span className={ui.orbFaceStack}>
                           {faces.slice(0, 3).map((f, idx) => (
                             <span
