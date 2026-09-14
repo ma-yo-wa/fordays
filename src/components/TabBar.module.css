@@ -21,9 +21,8 @@
   flex: none;
   display: flex;
   align-items: center;
-  gap: 2px;
-  height: 62px;
-  padding: 4px 6px;
+  gap: 0;
+  padding: 5px;
   border-radius: var(--r-capsule);
   background: var(--mat-regular-bg);
   -webkit-backdrop-filter: var(--mat-regular);
@@ -40,13 +39,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  width: 72px;
-  height: 54px;
+  gap: 4px;
+  width: 84px;
+  height: 56px;
+  padding: 6px 10px;
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--ink-faint);
+  color: var(--ink);
   transition: color 0.2s var(--ease-ios);
 }
 
@@ -64,22 +64,22 @@
 .icon {
   position: relative;
   display: block;
-  height: 20px;
+  height: 24px;
   z-index: 1;
 }
 
 .caption {
   position: relative;
   z-index: 1;
-  font: var(--t-caption2);
-  letter-spacing: var(--tr-caption2);
-  font-weight: 600;
-  line-height: 1;
+  font: var(--t-caption);
+  letter-spacing: var(--tr-caption);
+  font-weight: 400;
+  line-height: 1.15;
 }
 
 .tab svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: block;
 }
 
@@ -94,7 +94,7 @@
   pointer-events: auto;
   position: absolute;
   right: max(16px, var(--safe-r));
-  bottom: calc(8px + var(--safe-b) + 74px);
+  bottom: calc(8px + var(--safe-b) + 80px);
   width: 56px;
   height: 56px;
   border-radius: 50%;

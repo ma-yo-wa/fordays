@@ -3,9 +3,8 @@ import { useApp, canCompose, type Screen } from '../lib/store';
 import { Copy } from '../lib/copy';
 import s from './TabBar.module.css';
 
-/* Outlined when idle, solid when selected. Without labels the icon is
-   doing all the work, so the selected state has to be unmistakable —
-   hence a fill and a pill behind it, not just a colour change. */
+/* Outlined when idle, solid when selected. Labels stay Regular on every
+   tab — the pill and the fill say where you are, not extra weight. */
 function CalendarIcon({ on }: { on: boolean }) {
   return on ? (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>

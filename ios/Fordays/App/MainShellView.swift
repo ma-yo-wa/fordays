@@ -294,13 +294,12 @@ struct TabDock: View {
   @Binding var tab: HomeTab
 
   var body: some View {
-    HStack(spacing: 4) {
+    HStack(spacing: 0) {
       tabButton(.bucket, glyph: .bucket)
       tabButton(.plans, glyph: .calendar)
       tabButton(.memories, glyph: .memories)
     }
-    .padding(.horizontal, 6)
-    .padding(.vertical, 5)
+    .padding(5)
     .background(.ultraThinMaterial, in: Capsule())
     .overlay(Capsule().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
     .shadow(color: Theme.ink.opacity(0.18), radius: 16, y: 8)
@@ -313,14 +312,14 @@ struct TabDock: View {
         tab = value
       }
     } label: {
-      VStack(spacing: 2) {
+      VStack(spacing: 4) {
         TabIcon(glyph: glyph, on: on)
         Text(value.title)
-          .font(.system(size: 10, weight: .semibold))
+          .font(.system(size: 12, weight: .regular))
           .lineLimit(1)
       }
-      .foregroundStyle(on ? Theme.ink : Theme.inkFaint)
-      .frame(width: 72, height: 52)
+      .foregroundStyle(Theme.ink)
+      .frame(width: 84, height: 56)
       .background {
         if on {
           Capsule().fill(Theme.ink.opacity(0.07))
