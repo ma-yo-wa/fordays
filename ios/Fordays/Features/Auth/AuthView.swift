@@ -21,7 +21,7 @@ struct AuthView: View {
             .padding(.top, 48)
             .padding(.bottom, 8)
 
-          Text("Plans, bucket lists, and memories")
+          Text("Plans, Bucket lists and Memories")
             .font(.title3.weight(.medium))
             .foregroundStyle(Theme.inkSoft)
             .padding(.bottom, 20)

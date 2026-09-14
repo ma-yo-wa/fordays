@@ -212,7 +212,7 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
       <p className={s.lead}>
         {inviterHint
           ? `${inviterHint} invited you — sign in to join`
-          : 'Plans, bucket lists, and memories'}
+          : 'Plans, Bucket lists and Memories'}
       </p>
 
       {mode === 'signup' && (
