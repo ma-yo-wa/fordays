@@ -70,6 +70,14 @@ function orbIsSolo(orb: SpaceInfo): boolean {
   return others.length === 0 && !orb.partner2Id;
 }
 
+type SettingsConfirm = {
+  heading: string;
+  note: string;
+  action: string;
+  cancel: string;
+  run: () => Promise<void>;
+};
+
 function orbFaceChips(space: SpaceInfo): { key: string; letter: string; them: boolean }[] {
   if (space.members?.length) {
     const mine = space.members.find((m) => m.id === space.myId);
@@ -124,13 +132,10 @@ export default function Settings() {
   const [bell, setBell] = useState<PushState>('default');
   const [bellBusy, setBellBusy] = useState(false);
   const [spaceBusy, setSpaceBusy] = useState(false);
-  const [leaveAsk, setLeaveAsk] = useState(false);
-  const [removeId, setRemoveId] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState<SettingsConfirm | null>(null);
   const [pastOrbsOpen, setPastOrbsOpen] = useState(false);
   const [orbAddOpen, setOrbAddOpen] = useState(false);
   const [orbSetupOpen, setOrbSetupOpen] = useState(false);
-  const [deleteAskId, setDeleteAskId] = useState<string | null>(null);
-  const [gridDeleteId, setGridDeleteId] = useState<string | null>(null);
 
   const allOrbs = spaces.length ? spaces : space ? [space] : [];
   const activeOrbs = allOrbs.filter((s) => !s.frozen);
@@ -147,9 +152,7 @@ export default function Settings() {
   useEffect(() => {
     if (!open) return;
     setMyName(space?.myName ?? config.names[config.me]);
-    setLeaveAsk(false);
-    setGridDeleteId(null);
-    setRemoveId(null);
+    setConfirm(null);
     setGcalOn(Boolean(savedGoogleCalendar() || googleToken()));
     setGcalName(savedGoogleCalendar()?.summary ?? null);
     setOutlookOn(Boolean(savedOutlookCalendar()));
@@ -171,8 +174,7 @@ export default function Settings() {
   }, [open, space?.myName, config.names, config.me]);
 
   useEffect(() => {
-    setLeaveAsk(false);
-    setRemoveId(null);
+    setConfirm(null);
   }, [space?.id]);
 
   async function importGoogleCalendar(cal: GoogleCalendar) {
@@ -316,7 +318,7 @@ export default function Settings() {
     setSpaceBusy(true);
     try {
       await removeMemberFromSpace(memberId);
-      setRemoveId(null);
+      setConfirm(null);
       toast(`${memberName} is out — they have a copy`);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t remove');
@@ -329,8 +331,7 @@ export default function Settings() {
     setSpaceBusy(true);
     try {
       await leaveCurrentSpace();
-      setLeaveAsk(false);
-      setGridDeleteId(null);
+      setConfirm(null);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t leave');
     } finally {
@@ -344,14 +345,13 @@ export default function Settings() {
     const orb = visibleOrbs.find((s) => s.id === id);
     if (!orb || !orbIsSolo(orb) || live <= 1) {
       toast('Keep at least one Orb');
-      setGridDeleteId(null);
+      setConfirm(null);
       return;
     }
     setSpaceBusy(true);
     try {
       await leaveSpace(id);
-      setGridDeleteId(null);
-      setLeaveAsk(false);
+      setConfirm(null);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t delete Orb');
     } finally {
@@ -364,7 +364,7 @@ export default function Settings() {
     setSpaceBusy(true);
     try {
       await deletePastOrb(id);
-      setDeleteAskId(null);
+      setConfirm(null);
       if (pastOrbs.length <= 1) {
         setPastOrbsOpen(false);
       }
@@ -373,6 +373,46 @@ export default function Settings() {
     } finally {
       setSpaceBusy(false);
     }
+  }
+
+  function askDeleteLive(id: string) {
+    setConfirm({
+      heading: Copy.orbs.deleteSoloTitle,
+      note: Copy.orbs.deleteSoloBody,
+      action: Copy.orbs.deleteSoloAction,
+      cancel: Copy.orbs.stay,
+      run: () => handleDeleteGridOrb(id),
+    });
+  }
+
+  function askLeave() {
+    setConfirm({
+      heading: soloOrb ? Copy.orbs.deleteSoloTitle : Copy.orbs.leaveSharedTitle,
+      note: soloOrb ? Copy.orbs.deleteSoloBody : Copy.orbs.leaveSharedBody,
+      action: leaveLabel,
+      cancel: Copy.orbs.stay,
+      run: () => handleLeaveOrb(),
+    });
+  }
+
+  function askRemove(memberId: string, memberName: string) {
+    setConfirm({
+      heading: formatCopy(Copy.orbs.removeTitle, { name: memberName }),
+      note: Copy.orbs.removeBody,
+      action: `Remove ${memberName}`,
+      cancel: Copy.orbs.keepThem,
+      run: () => handleRemoveMember(memberId, memberName),
+    });
+  }
+
+  function askPurge(id: string) {
+    setConfirm({
+      heading: Copy.orbs.deletePermanentTitle,
+      note: Copy.orbs.deletePermanentBody,
+      action: Copy.orbs.deletePermanent,
+      cancel: Copy.orbs.keep,
+      run: () => handleDeletePastOrb(id),
+    });
   }
 
   return (
@@ -481,8 +521,7 @@ export default function Settings() {
                           disabled={spaceBusy}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setGridDeleteId(orb.id);
-                            setLeaveAsk(false);
+                            askDeleteLive(orb.id);
                           }}
                         >
                           –
@@ -492,29 +531,6 @@ export default function Settings() {
                   );
                 })}
               </div>
-              {gridDeleteId && (
-                <div className={ui.removePrompt}>
-                  <p className={f.rowNote}>{Copy.orbs.deleteSoloConfirm}</p>
-                  <div className={f.group}>
-                    <button
-                      type="button"
-                      className={f.listRow}
-                      disabled={spaceBusy}
-                      onClick={() => setGridDeleteId(null)}
-                    >
-                      <span className={f.rowLabel}>Stay</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={f.listRow}
-                      disabled={spaceBusy}
-                      onClick={() => void handleDeleteGridOrb(gridDeleteId)}
-                    >
-                      <span className={f.rowLabel}>{Copy.orbs.deleteSoloAction}</span>
-                    </button>
-                  </div>
-                </div>
-              )}
             </section>
 
             {space && (
@@ -556,7 +572,7 @@ export default function Settings() {
                                 aria-label={`Remove ${member.name}`}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setRemoveId(member.id);
+                                  askRemove(member.id, member.name);
                                 }}
                               >
                                 –
@@ -583,116 +599,37 @@ export default function Settings() {
               <section className={ui.section}>
                 <span className={ui.label}>Orb actions</span>
 
-                {removableMembers.map((member) =>
-                  removeId === member.id ? (
-                    <div key={`confirm-${member.id}`} className={ui.removePrompt}>
-                      <p className={f.rowNote}>
-                        {formatCopy(Copy.orbs.removeConfirm, { name: member.name })}
-                      </p>
-                      <div className={f.group}>
-                        <button
-                          type="button"
-                          className={f.listRow}
-                          disabled={spaceBusy}
-                          onClick={() => setRemoveId(null)}
-                        >
-                          <span className={f.rowLabel}>Keep them</span>
-                        </button>
-                        <button
-                          type="button"
-                          className={f.listRow}
-                          disabled={spaceBusy}
-                          onClick={() => void handleRemoveMember(member.id, member.name)}
-                        >
-                          <span className={f.rowLabel}>Remove {member.name}</span>
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
+                {removableMembers.map((member) => (
                     <button
                       key={`ask-${member.id}`}
                       type="button"
                       className={ui.textLink}
                       disabled={spaceBusy}
-                      onClick={() => setRemoveId(member.id)}
+                      onClick={() => askRemove(member.id, member.name)}
                     >
                       Remove {member.name}
                     </button>
-                  ),
-                )}
+                ))}
 
                 {!space.frozen && !(soloOrb && activeOrbs.length <= 1) ? (
-                  leaveAsk ? (
-                    <>
-                      <p className={f.rowNote}>
-                        {soloOrb
-                          ? Copy.orbs.deleteSoloConfirm
-                          : Copy.orbs.leaveSharedConfirm}
-                      </p>
-                      <div className={f.group}>
-                        <button
-                          type="button"
-                          className={f.listRow}
-                          disabled={spaceBusy}
-                          onClick={() => setLeaveAsk(false)}
-                        >
-                          <span className={f.rowLabel}>Stay</span>
-                        </button>
-                        <button
-                          type="button"
-                          className={f.listRow}
-                          disabled={spaceBusy}
-                          onClick={() => void handleLeaveOrb()}
-                        >
-                          <span className={f.rowLabel}>{leaveLabel}</span>
-                        </button>
-                      </div>
-                    </>
-                  ) : (
                     <button
                       type="button"
                       className={ui.textLink}
                       disabled={spaceBusy}
-                      onClick={() => setLeaveAsk(true)}
+                      onClick={() => askLeave()}
                     >
                       {leaveLabel}
                     </button>
-                  )
-                ) : (
-                  <>
-                    {deleteAskId === space.id ? (
-                      <div className={ui.dangerAskBox}>
-                        <p className={ui.dangerAskText}>{Copy.orbs.deletePermanentConfirm}</p>
-                        <div className={ui.dangerAskButtons}>
-                          <button
-                            type="button"
-                            className={ui.pastOrbBtn}
-                            onClick={() => setDeleteAskId(null)}
-                          >
-                            Keep
-                          </button>
-                          <button
-                            type="button"
-                            className={`${ui.pastOrbBtn} ${ui.pastOrbBtnDanger}`}
-                            disabled={spaceBusy}
-                            onClick={() => void handleDeletePastOrb(space.id)}
-                          >
-                            {Copy.orbs.deletePermanent}
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
+                ) : space.frozen ? (
                       <button
                         type="button"
                         className={`${ui.textLink} ${ui.pastOrbBtnDanger}`}
                         disabled={spaceBusy}
-                        onClick={() => setDeleteAskId(space.id)}
+                        onClick={() => askPurge(space.id)}
                       >
                         {Copy.orbs.deletePermanent}
                       </button>
-                    )}
-                  </>
-                )}
+                ) : null}
               </section>
             )}
           </>
@@ -1061,10 +998,38 @@ export default function Settings() {
       </Sheet>
 
       <Sheet
+        open={Boolean(confirm)}
+        onClose={() => setConfirm(null)}
+        heading={confirm?.heading}
+        stacked
+      >
+        {confirm && (
+          <>
+            <p className={ui.confirmNote}>{confirm.note}</p>
+            <button
+              type="button"
+              className={`${ui.confirmAction} ${ui.confirmDanger}`}
+              disabled={spaceBusy}
+              onClick={() => void confirm.run()}
+            >
+              {confirm.action}
+            </button>
+            <button
+              type="button"
+              className={ui.confirmAction}
+              disabled={spaceBusy}
+              onClick={() => setConfirm(null)}
+            >
+              {confirm.cancel}
+            </button>
+          </>
+        )}
+      </Sheet>
+
+      <Sheet
         open={pastOrbsOpen}
         onClose={() => {
           setPastOrbsOpen(false);
-          setDeleteAskId(null);
         }}
         heading={Copy.orbs.pastOrbs}
       >
@@ -1112,37 +1077,14 @@ export default function Settings() {
                     </button>
                   )}
 
-                  {deleteAskId === pOrb.id ? (
-                    <div className={ui.dangerAskBox} style={{ width: '100%' }}>
-                      <p className={ui.dangerAskText}>{Copy.orbs.deletePermanentConfirm}</p>
-                      <div className={ui.dangerAskButtons}>
-                        <button
-                          type="button"
-                          className={ui.pastOrbBtn}
-                          onClick={() => setDeleteAskId(null)}
-                        >
-                          Keep
-                        </button>
-                        <button
-                          type="button"
-                          className={`${ui.pastOrbBtn} ${ui.pastOrbBtnDanger}`}
-                          disabled={spaceBusy}
-                          onClick={() => void handleDeletePastOrb(pOrb.id)}
-                        >
-                          {Copy.orbs.deletePermanent}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
                     <button
                       type="button"
                       className={`${ui.pastOrbBtn} ${ui.pastOrbBtnDanger}`}
                       disabled={spaceBusy}
-                      onClick={() => setDeleteAskId(pOrb.id)}
+                      onClick={() => askPurge(pOrb.id)}
                     >
                       {Copy.orbs.deletePermanent}
                     </button>
-                  )}
                 </div>
               </div>
             );

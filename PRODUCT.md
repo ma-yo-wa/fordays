@@ -56,6 +56,14 @@ Same questions as first signup, in a sheet. Cancel returns to Start / Join. Join
 
 ---
 
+## Confirms
+
+Never expand Stay / Delete as grouped list rows in the page. That is not a confirm.
+
+Over a sheet, use a **stacked confirm sheet** (PWA) or iOS **confirmationDialog**: the question, one destructive action, Stay / Keep as cancel. Same pattern as Start a new one / Join — not a centered alert on a sheet, not a form group.
+
+---
+
 ## Someday
 
 The dock place **without a day**. Not ideas, bucket, wishlist, or todos.

@@ -1,5 +1,56 @@
 import SwiftUI
 
+private enum SettingsConfirm: Identifiable, Hashable {
+  case deleteLive(String)
+  case leave(solo: Bool)
+  case remove(id: String, name: String)
+  case purge(String)
+
+  var id: String {
+    switch self {
+    case .deleteLive(let id): return "live-\(id)"
+    case .leave: return "leave"
+    case .remove(let id, _): return "rm-\(id)"
+    case .purge(let id): return "purge-\(id)"
+    }
+  }
+
+  var title: String {
+    switch self {
+    case .deleteLive, .leave(true): return Copy.Orbs.deleteSoloTitle
+    case .leave(false): return Copy.Orbs.leaveSharedTitle
+    case .remove(_, let name): return Copy.Orbs.removeTitle(name: name)
+    case .purge: return Copy.Orbs.deletePermanentTitle
+    }
+  }
+
+  var message: String {
+    switch self {
+    case .deleteLive, .leave(true): return Copy.Orbs.deleteSoloBody
+    case .leave(false): return Copy.Orbs.leaveSharedBody
+    case .remove: return Copy.Orbs.removeBody
+    case .purge: return Copy.Orbs.deletePermanentBody
+    }
+  }
+
+  var action: String {
+    switch self {
+    case .deleteLive, .leave(true): return Copy.Orbs.deleteSoloAction
+    case .leave(false): return Copy.Orbs.leaveAction
+    case .remove(_, let name): return "Remove \(name)"
+    case .purge: return Copy.Orbs.deletePermanent
+    }
+  }
+
+  var cancel: String {
+    switch self {
+    case .deleteLive, .leave: return Copy.Orbs.stay
+    case .remove: return Copy.Orbs.keepThem
+    case .purge: return Copy.Orbs.keep
+    }
+  }
+}
+
 struct SettingsView: View {
   @EnvironmentObject private var app: AppModel
   @Environment(\.dismiss) private var dismiss
@@ -7,10 +58,7 @@ struct SettingsView: View {
   @State private var showPastOrbs = false
   @State private var showAnotherOrb = false
   @State private var showOrbSetup = false
-  @State private var leaveAsk = false
-  @State private var removeId: String?
-  @State private var deleteAskId: String?
-  @State private var gridDeleteId: String?
+  @State private var confirm: SettingsConfirm?
   @State private var spaceBusy = false
   @State private var appleOn = CalendarSync.isConnected
   @State private var appleName = CalendarSync.selectedName
@@ -68,11 +116,11 @@ struct SettingsView: View {
         }
       }
       .onChange(of: app.space?.id) { _, _ in
-        leaveAsk = false
-        removeId = nil
-        deleteAskId = nil
-        gridDeleteId = nil
+        confirm = nil
       }
+    }
+    .settingsConfirm($confirm) { item in
+      runConfirm(item)
     }
     .sheet(isPresented: $showInvite) {
       InviteShareView()
@@ -80,6 +128,9 @@ struct SettingsView: View {
     }
     .sheet(isPresented: $showPastOrbs) {
       pastOrbsSheet
+        .settingsConfirm($confirm) { item in
+          runConfirm(item)
+        }
     }
     .sheet(isPresented: $showAnotherOrb) {
       anotherOrbSheet
@@ -155,24 +206,6 @@ struct SettingsView: View {
       }
       .padding(12)
       .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-
-      if gridDeleteId != nil {
-        VStack(alignment: .leading, spacing: 10) {
-          Text(Copy.Orbs.deleteSoloConfirm)
-            .font(.footnote)
-            .foregroundStyle(Theme.inkFaint)
-          HStack(spacing: 10) {
-            quietButton("Stay") {
-              gridDeleteId = nil
-            }
-            dangerButton(Copy.Orbs.deleteSoloAction) {
-              if let id = gridDeleteId { deleteLiveOrb(id) }
-            }
-          }
-        }
-        .padding(12)
-        .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-      }
     }
   }
 
@@ -250,8 +283,7 @@ struct SettingsView: View {
 
         if canDelete {
           Button {
-            gridDeleteId = orb.id
-            leaveAsk = false
+            confirm = .deleteLive(orb.id)
           } label: {
             Image(systemName: "minus")
               .font(.system(size: 9, weight: .bold))
@@ -441,7 +473,7 @@ struct SettingsView: View {
 
                 if removable {
                   Button {
-                    removeId = member.id
+                    confirm = .remove(id: member.id, name: member.name)
                   } label: {
                     Image(systemName: "minus")
                       .font(.system(size: 9, weight: .bold))
@@ -487,99 +519,38 @@ struct SettingsView: View {
 
       if !space.frozen, space.myRole == "admin", space.members.count >= 3 {
         ForEach(space.members.filter { $0.id != space.myId }, id: \.id) { member in
-          if removeId == member.id {
-            VStack(alignment: .leading, spacing: 10) {
-              Text(Copy.Orbs.removeConfirm(name: member.name))
-                .font(.footnote)
-                .foregroundStyle(Theme.inkFaint)
-
-              HStack(spacing: 10) {
-                quietButton("Keep them") {
-                  removeId = nil
-                }
-                dangerButton("Remove \(member.name)") {
-                  removeMember(member.id)
-                }
-              }
-            }
-            .padding(12)
-            .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-          } else {
-            Button("Remove \(member.name)") {
-              removeId = member.id
-            }
-            .buttonStyle(.plain)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(Theme.roseInk)
-            .padding(.horizontal, 4)
-            .padding(.top, 2)
-            .disabled(spaceBusy)
+          Button("Remove \(member.name)") {
+            confirm = .remove(id: member.id, name: member.name)
           }
+          .buttonStyle(.plain)
+          .font(.subheadline.weight(.semibold))
+          .foregroundStyle(Theme.roseInk)
+          .padding(.horizontal, 4)
+          .padding(.top, 2)
+          .disabled(spaceBusy)
         }
       }
 
       if !space.frozen && !(soloOrb && activeOrbs.count <= 1) {
-        if leaveAsk {
-          VStack(alignment: .leading, spacing: 10) {
-            Text(
-              soloOrb
-                ? Copy.Orbs.deleteSoloConfirm
-                : Copy.Orbs.leaveSharedConfirm
-            )
-            .font(.footnote)
-            .foregroundStyle(Theme.inkFaint)
-
-            HStack(spacing: 10) {
-              quietButton("Stay") {
-                leaveAsk = false
-              }
-              dangerButton(leaveLabel) {
-                leaveOrb()
-              }
-            }
-          }
-          .padding(12)
-          .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        } else {
-          Button(leaveLabel) {
-            leaveAsk = true
-          }
-          .buttonStyle(.plain)
-          .font(.subheadline.weight(.semibold))
-          .foregroundStyle(Theme.roseInk)
-          .padding(.horizontal, 4)
-          .padding(.top, 4)
-          .disabled(spaceBusy)
+        Button(leaveLabel) {
+          confirm = .leave(solo: soloOrb)
         }
-      } else {
-        if deleteAskId == space.id {
-          VStack(alignment: .leading, spacing: 10) {
-            Text(Copy.Orbs.deletePermanentConfirm)
-              .font(.footnote)
-              .foregroundStyle(Theme.inkFaint)
-
-            HStack(spacing: 10) {
-              quietButton("Keep") {
-                deleteAskId = nil
-              }
-              dangerButton(Copy.Orbs.deletePermanent) {
-                deleteOrb(space.id)
-              }
-            }
-          }
-          .padding(12)
-          .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        } else {
-          Button(Copy.Orbs.deletePermanent) {
-            deleteAskId = space.id
-          }
-          .buttonStyle(.plain)
-          .font(.subheadline.weight(.semibold))
-          .foregroundStyle(Theme.roseInk)
-          .padding(.horizontal, 4)
-          .padding(.top, 4)
-          .disabled(spaceBusy)
+        .buttonStyle(.plain)
+        .font(.subheadline.weight(.semibold))
+        .foregroundStyle(Theme.roseInk)
+        .padding(.horizontal, 4)
+        .padding(.top, 4)
+        .disabled(spaceBusy)
+      } else if space.frozen {
+        Button(Copy.Orbs.deletePermanent) {
+          confirm = .purge(space.id)
         }
+        .buttonStyle(.plain)
+        .font(.subheadline.weight(.semibold))
+        .foregroundStyle(Theme.roseInk)
+        .padding(.horizontal, 4)
+        .padding(.top, 4)
+        .disabled(spaceBusy)
       }
     }
   }
@@ -677,47 +648,12 @@ struct SettingsView: View {
 
                 Spacer()
 
-                if deleteAskId != pOrb.id {
-                  Button(Copy.Orbs.deletePermanent) {
-                    deleteAskId = pOrb.id
-                  }
-                  .buttonStyle(.plain)
-                  .font(.caption.weight(.semibold))
-                  .foregroundStyle(Theme.roseInk)
+                Button(Copy.Orbs.deletePermanent) {
+                  confirm = .purge(pOrb.id)
                 }
-              }
-
-              if deleteAskId == pOrb.id {
-                VStack(alignment: .leading, spacing: 8) {
-                  Text(Copy.Orbs.deletePermanentConfirm)
-                    .font(.caption)
-                    .foregroundStyle(Theme.inkSoft)
-
-                  HStack(spacing: 8) {
-                    Button("Keep") {
-                      deleteAskId = nil
-                    }
-                    .buttonStyle(.plain)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Theme.ink)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
-
-                    Button(Copy.Orbs.deletePermanent) {
-                      deleteOrb(pOrb.id)
-                    }
-                    .buttonStyle(.plain)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Theme.roseInk, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                  }
-                }
-                .padding(10)
-                .background(Theme.ink.opacity(0.04), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .buttonStyle(.plain)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Theme.roseInk)
               }
             }
             .padding(14)
@@ -733,7 +669,6 @@ struct SettingsView: View {
         ToolbarItem(placement: .topBarTrailing) {
           Button("Done") {
             showPastOrbs = false
-            deleteAskId = nil
           }
         }
       }
@@ -982,19 +917,6 @@ struct SettingsView: View {
       .foregroundStyle(Theme.inkFaint)
   }
 
-  private func quietButton(_ label: String, action: @escaping () -> Void) -> some View {
-    Button(action: action) {
-      Text(label)
-        .font(.subheadline.weight(.semibold))
-        .foregroundStyle(Theme.ink)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
-        .background(Theme.ink.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-    }
-    .buttonStyle(.plain)
-    .disabled(spaceBusy)
-  }
-
   private func dangerButton(_ label: String, action: @escaping () -> Void) -> some View {
     Button(action: action) {
       Text(label)
@@ -1031,12 +953,25 @@ struct SettingsView: View {
     }
   }
 
+  private func runConfirm(_ item: SettingsConfirm) {
+    switch item {
+    case .deleteLive(let id):
+      deleteLiveOrb(id)
+    case .leave:
+      leaveOrb()
+    case .remove(let id, _):
+      removeMember(id)
+    case .purge(let id):
+      deleteOrb(id)
+    }
+  }
+
   private func removeMember(_ userId: String) {
     guard !spaceBusy else { return }
     spaceBusy = true
     Task {
       await app.removeMember(userId: userId)
-      removeId = nil
+      confirm = nil
       spaceBusy = false
     }
   }
@@ -1046,8 +981,7 @@ struct SettingsView: View {
     spaceBusy = true
     Task {
       await app.leaveCurrentSpace()
-      leaveAsk = false
-      gridDeleteId = nil
+      confirm = nil
       spaceBusy = false
     }
   }
@@ -1057,8 +991,7 @@ struct SettingsView: View {
     spaceBusy = true
     Task {
       await app.leaveSpace(id)
-      gridDeleteId = nil
-      leaveAsk = false
+      confirm = nil
       spaceBusy = false
     }
   }
@@ -1068,7 +1001,7 @@ struct SettingsView: View {
     spaceBusy = true
     Task {
       await app.deletePastOrb(id)
-      deleteAskId = nil
+      confirm = nil
       if pastOrbs.count <= 1 {
         showPastOrbs = false
       }
@@ -1079,5 +1012,27 @@ struct SettingsView: View {
   private func initial(_ name: String) -> String {
     let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
     return String(clean.prefix(1)).uppercased()
+  }
+}
+
+private extension View {
+  func settingsConfirm(
+    _ confirm: Binding<SettingsConfirm?>,
+    run: @escaping (SettingsConfirm) -> Void
+  ) -> some View {
+    confirmationDialog(
+      confirm.wrappedValue?.title ?? "",
+      isPresented: Binding(
+        get: { confirm.wrappedValue != nil },
+        set: { if !$0 { confirm.wrappedValue = nil } }
+      ),
+      titleVisibility: .visible,
+      presenting: confirm.wrappedValue
+    ) { item in
+      Button(item.action, role: .destructive) { run(item) }
+      Button(item.cancel, role: .cancel) { confirm.wrappedValue = nil }
+    } message: { item in
+      Text(item.message)
+    }
   }
 }

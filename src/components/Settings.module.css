@@ -469,23 +469,40 @@
   color: var(--rose-ink);
 }
 
-.dangerAskBox {
-  margin-top: 8px;
-  padding: 10px 12px;
-  background: var(--fill-quaternary);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.dangerAskText {
-  font: var(--t-caption);
+.confirmNote {
+  margin: 0 0 8px;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
   color: var(--ink-soft);
-  margin: 0;
 }
 
-.dangerAskButtons {
-  display: flex;
-  gap: 8px;
+.confirmAction {
+  display: block;
+  width: 100%;
+  padding: 16px 2px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: var(--t-headline);
+  letter-spacing: var(--tr-headline);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.confirmAction + .confirmAction {
+  border-top: var(--hairline-w) solid var(--separator);
+}
+
+.confirmAction:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.confirmAction:active:not(:disabled) {
+  opacity: 0.45;
+}
+
+.confirmDanger {
+  color: var(--rose-ink);
 }

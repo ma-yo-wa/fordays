@@ -24,17 +24,22 @@ enum Copy {
     static let frozenNotice = "This is a copy from when you left — you can look, not change"
     static let leaveAction = "Leave this Orb"
     static let deleteSoloAction = "Delete this Orb"
-    static let deleteSoloConfirm = "Delete this Orb? You’ll keep a frozen copy so nothing here is lost."
-    static let leaveSharedConfirm = "They keep the live Orb. You get a frozen copy of what’s already here."
-    static func removeConfirm(name: String) -> String {
-      "Remove \(name)? They get a copy of what was already here. This Orb stays live for everyone else."
-    }
+    static let deleteSoloTitle = "Delete this Orb?"
+    static let deleteSoloBody = "You’ll keep a frozen copy so nothing here is lost."
+    static let leaveSharedTitle = "Leave this Orb?"
+    static let leaveSharedBody = "They keep the live Orb. You get a frozen copy of what’s already here."
+    static func removeTitle(name: String) -> String { "Remove \(name)?" }
+    static let removeBody = "They get a copy of what was already here. This Orb stays live for everyone else."
+    static let stay = "Stay"
+    static let keepThem = "Keep them"
+    static let keep = "Keep"
     static let pastOrbs = "Past Orbs"
     static let pastOrbsSub = "Orbs you’ve left or set aside"
     static let viewingFrozenBanner = "Viewing a past Orb — you can look back, but plans are frozen"
     static let switchBackToActive = "Switch back to active Orb"
     static let deletePermanent = "Delete permanently"
-    static let deletePermanentConfirm = "Permanently delete this Orb? All past plans here will be purged forever."
+    static let deletePermanentTitle = "Delete permanently?"
+    static let deletePermanentBody = "All past plans here will be purged forever."
   }
 
   enum Plans {
