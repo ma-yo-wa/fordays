@@ -131,6 +131,20 @@ struct JoinCode: Encodable {
   let code: String
 }
 
+struct InvitePeek: Codable, Hashable {
+  var spaceId: String
+  var spaceName: String?
+  var inviterName: String
+  var isOpen: Bool
+
+  enum CodingKeys: String, CodingKey {
+    case spaceId = "space_id"
+    case spaceName = "space_name"
+    case inviterName = "inviter_name"
+    case isOpen = "is_open"
+  }
+}
+
 struct CreateSpaceParams: Encodable {
   let p_name: String
 }

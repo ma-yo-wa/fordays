@@ -9,6 +9,8 @@ enum Copy {
     static func peopleCount(_ count: Int) -> String { "\(count) people" }
     static let createOrb = "Create Orb"
     static let createOrbSub = "Start solo, or invite"
+    static let joinOrb = "Join an Orb"
+    static let joinOrbSub = "Enter code or link"
     static let descriptor = "An Orb is your personal or shared capsule to plan, dream, and look back."
     static let frozenNotice = "This is a copy from when you left — you can look, not change"
     static let leaveAction = "Leave this Orb"
@@ -52,6 +54,24 @@ enum Copy {
     static func shareWithIdea(idea: String, link: String) -> String {
       "I added “\(idea)” to an Orb for us — join here: \(link)"
     }
+    static let joinTitle = "Join an Orb"
+    static let joinSubtitle = "Enter an invite code or paste an invite link to join someone’s Orb."
+    static let codeOrLink = "Invite code or link"
+    static let codePlaceholder = "e.g. e4f9b2c1 or paste link"
+    static let paste = "Paste"
+    static let joinAction = "Join Orb"
+    static let joining = "Joining…"
+    static let lookingUp = "Looking up Orb…"
+    static let invalidCode = "No open Orb found for that code or link."
+    static func joinedSuccess(_ orb: String) -> String {
+      "Joined \(orb)"
+    }
+    static let orbCodeLabel = "Orb code"
+    static let copyCode = "Copy code"
+    static let codeCopied = "Code copied"
+    static let linkCopied = "Invite link copied"
+    static let shareInvite = "Share invite"
+    static let notNow = "Not now"
   }
 
   enum Composer {

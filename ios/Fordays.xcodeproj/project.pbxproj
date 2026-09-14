@@ -25,6 +25,7 @@
 		A81F3C2B9D4E7A6C5B0F1234 /* Art.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72E1D0A8C3F6B5D4A0E9876 /* Art.swift */; };
 		D47DCDE8DD8D9F6BE4186C97 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37BB6EA7FCB1CFE8069021D /* Theme.swift */; };
 		E12A4B8C7D9E1F0A6C3D2109 /* InviteShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23B5C9D8E0F2A1B7D4E3210 /* InviteShareView.swift */; };
+		E12A4B8C7D9E1F0A6C3D2110 /* JoinOrbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23B5C9D8E0F2A1B7D4E3211 /* JoinOrbView.swift */; };
 		D627591574F0838B119D01D7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D894045084BAC7ECF003D6DC /* SettingsView.swift */; };
 		D9176915A481EBD86A04B1E6 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0499C47B337DC05EAB80984C /* AuthView.swift */; };
 		FCF823D1FA959CF01E14B81B /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06275BDB4475A336F2D09A3 /* SupabaseService.swift */; };
@@ -53,6 +54,7 @@
 		D0E2CF128B98BD9C0207520F /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		D894045084BAC7ECF003D6DC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F23B5C9D8E0F2A1B7D4E3210 /* InviteShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteShareView.swift; sourceTree = "<group>"; };
+		F23B5C9D8E0F2A1B7D4E3211 /* JoinOrbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinOrbView.swift; sourceTree = "<group>"; };
 		E3C1DDC77D31F2E265BF0544 /* TabIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabIcons.swift; sourceTree = "<group>"; };
 		E459EA3C41279963E13A8BB8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -83,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				F23B5C9D8E0F2A1B7D4E3210 /* InviteShareView.swift */,
+				F23B5C9D8E0F2A1B7D4E3211 /* JoinOrbView.swift */,
 				D894045084BAC7ECF003D6DC /* SettingsView.swift */,
 			);
 			path = Settings;
@@ -289,6 +292,7 @@
 				79539FCCEA4A670404F82F7D /* PlansView.swift in Sources */,
 				9942713DF9F91BACE7A39699 /* RootView.swift in Sources */,
 				E12A4B8C7D9E1F0A6C3D2109 /* InviteShareView.swift in Sources */,
+				E12A4B8C7D9E1F0A6C3D2110 /* JoinOrbView.swift in Sources */,
 				D627591574F0838B119D01D7 /* SettingsView.swift in Sources */,
 				FCF823D1FA959CF01E14B81B /* SupabaseService.swift in Sources */,
 				A81F3C2B9D4E7A6C5B0F1234 /* Art.swift in Sources */,

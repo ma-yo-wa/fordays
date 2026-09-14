@@ -13,6 +13,7 @@ final class AppModel: ObservableObject {
   @Published var pickedDay: String = DateLocal.todayISO()
   @Published var errorMessage: String?
   @Published var toast: String?
+  @Published var showJoinOrb: Bool = false
 
   func shiftMonth(by delta: Int) {
     cursorMonth = Calendar.current.date(byAdding: .month, value: delta, to: cursorMonth) ?? cursorMonth
@@ -391,8 +392,35 @@ final class AppModel: ObservableObject {
     }
   }
 
+  func extractInviteCode(from string: String) -> String {
+    let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+    if let range = trimmed.range(of: #"[?&]invite=([a-zA-Z0-9]+)"#, options: .regularExpression) {
+      let matched = String(trimmed[range])
+      if let eqIdx = matched.firstIndex(of: "=") {
+        return String(matched[matched.index(after: eqIdx)...]).lowercased()
+      }
+    }
+    if let range = trimmed.range(of: #"/invite/([a-zA-Z0-9]+)"#, options: .regularExpression) {
+      let matched = String(trimmed[range])
+      if let slashIdx = matched.lastIndex(of: "/") {
+        return String(matched[matched.index(after: slashIdx)...]).lowercased()
+      }
+    }
+    return trimmed.filter { $0.isLetter || $0.isNumber }.lowercased()
+  }
+
+  func peekInvite(_ code: String) async throws -> InvitePeek? {
+    let cleaned = extractInviteCode(from: code)
+    guard !cleaned.isEmpty else { return nil }
+    let list: [InvitePeek] = try await sb.rpc("peek_invite", params: JoinCode(code: cleaned)).execute().value
+    return list.first
+  }
+
   func joinInvite(_ code: String) async throws {
-    let cleaned = code.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    let cleaned = extractInviteCode(from: code)
+    guard !cleaned.isEmpty else {
+      throw FordaysError.message("That invite link is missing a code")
+    }
     do {
       let joined: SpaceRow = try await sb.rpc("join_space", params: JoinCode(code: cleaned)).execute().value
       storedSpaceId = joined.id
@@ -401,6 +429,8 @@ final class AppModel: ObservableObject {
     }
     try await refreshSpaceAndData()
     authPhase = .signedIn
+    let name = space?.peopleLabel ?? "Orb"
+    toast = Copy.Invite.joinedSuccess(name)
   }
 
   func switchToSpace(_ id: String) async {
@@ -722,16 +752,8 @@ final class AppModel: ObservableObject {
   }
 
   private func inviteCode(from url: URL) -> String? {
-    if let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems,
-       let invite = items.first(where: { $0.name == "invite" })?.value
-    {
-      return invite
-    }
-    if url.host == "invite" {
-      let path = url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-      return path.isEmpty ? nil : path
-    }
-    return nil
+    let extracted = extractInviteCode(from: url.absoluteString)
+    return extracted.isEmpty ? nil : extracted
   }
 }
 

@@ -484,10 +484,24 @@ function throwSb(error: { message?: string; hint?: string; code?: string }): nev
   throw new Error(hint && hint !== msg ? `${msg} (${hint})` : msg);
 }
 
+export function extractInviteCode(input: string): string {
+  if (!input) return '';
+  const trimmed = input.trim();
+  const queryMatch = trimmed.match(/[?&]invite=([a-zA-Z0-9]+)/i);
+  if (queryMatch && queryMatch[1]) {
+    return queryMatch[1].toLowerCase();
+  }
+  const pathMatch = trimmed.match(/\/invite\/([a-zA-Z0-9]+)/i);
+  if (pathMatch && pathMatch[1]) {
+    return pathMatch[1].toLowerCase();
+  }
+  return trimmed.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+}
+
 export async function peekInvite(code: string): Promise<InvitePeek | null> {
   const sb = await getClient();
   if (!sb) throw new Error(MISSING_BACKEND);
-  const cleaned = code.trim().toLowerCase();
+  const cleaned = extractInviteCode(code);
   if (!cleaned) throw new Error('That invite link is missing a code');
   const { data, error } = await sb.rpc('peek_invite', { code: cleaned });
   if (error) throwSb(error);
@@ -501,19 +515,19 @@ export async function peekInvite(code: string): Promise<InvitePeek | null> {
   };
 }
 
-export async function joinInvite(code: string, bringItems = false): Promise<void> {
+export async function joinInvite(code: string, bringItems = false): Promise<string> {
   const sb = await getClient();
   if (!sb) throw new Error(MISSING_BACKEND);
-  const cleaned = code.trim().toLowerCase();
+  const cleaned = extractInviteCode(code);
   if (!cleaned) throw new Error('That invite link is missing a code');
   const fn = bringItems ? 'join_space_bringing_items' : 'join_space';
   const { data, error } = await sb.rpc(fn, { code: cleaned });
   if (error) throwSb(error);
   const row = (Array.isArray(data) ? data[0] : data) as { id?: string } | null;
-  if (row?.id) {
-    const config = loadConfig();
-    saveConfig({ ...config, spaceId: row.id });
-  }
+  if (!row?.id) throw new Error('Could not join space');
+  const config = loadConfig();
+  saveConfig({ ...config, spaceId: row.id });
+  return row.id;
 }
 
 /** Canonical production origin — invite links should never ship as localhost. */

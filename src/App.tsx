@@ -42,6 +42,8 @@ function AppShell() {
   const setNavScroll = useApp((st) => st.setNavScroll);
   const setInviteShareOpen = useApp((st) => st.setInviteShareOpen);
   const setInviteCode = useApp((st) => st.setInviteCode);
+  const joinOrbOpen = useApp((st) => st.joinOrbOpen);
+  const setJoinOrbOpen = useApp((st) => st.setJoinOrbOpen);
   const setPasswordRecovery = useApp((st) => st.setPasswordRecovery);
   const main = useRef<HTMLElement>(null);
   const [inviterHint, setInviterHint] = useState<string | null>(null);
@@ -157,12 +159,16 @@ function AppShell() {
       />
       <InviteAccept
         code={inviteCode ?? ''}
-        open={authPhase === 'signedIn' && !!inviteCode}
+        open={authPhase === 'signedIn' && (!!inviteCode || joinOrbOpen)}
         onJoined={() => {
           setInviteCode(null);
+          setJoinOrbOpen(false);
           void refreshSpace();
         }}
-        onDismiss={() => setInviteCode(null)}
+        onDismiss={() => {
+          setInviteCode(null);
+          setJoinOrbOpen(false);
+        }}
       />
       <UpdateBanner />
       <Toasts />

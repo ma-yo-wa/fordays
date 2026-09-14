@@ -120,6 +120,7 @@ struct SettingsView: View {
       ScrollView(.horizontal, showsIndicators: false) {
         HStack(spacing: 10) {
           createOrbCard
+          joinOrbCard
           ForEach(activeOrbs, id: \.id) { orb in
             orbCard(orb)
           }
@@ -259,6 +260,37 @@ struct SettingsView: View {
           .foregroundStyle(Theme.ink)
 
         Text(Copy.Orbs.createOrbSub)
+          .font(.footnote)
+          .foregroundStyle(Theme.inkSoft)
+      }
+      .frame(width: 168, height: 116)
+      .padding(12)
+      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+    .buttonStyle(.plain)
+    .disabled(spaceBusy)
+  }
+
+  private var joinOrbCard: some View {
+    Button {
+      app.showJoinOrb = true
+    } label: {
+      VStack(spacing: 7) {
+        ZStack {
+          Circle()
+            .fill(Theme.ink.opacity(0.08))
+          Image(systemName: "arrow.right")
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(Theme.ink)
+        }
+        .frame(width: 32, height: 32)
+        .fixedSize()
+
+        Text(Copy.Orbs.joinOrb)
+          .font(.headline)
+          .foregroundStyle(Theme.ink)
+
+        Text(Copy.Orbs.joinOrbSub)
           .font(.footnote)
           .foregroundStyle(Theme.inkSoft)
       }

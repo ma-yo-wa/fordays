@@ -8,6 +8,7 @@ import {
   currentSession,
   createSpace as createSpaceRemote,
   ensureSpace,
+  joinInvite,
   leaveSpace as leaveSpaceRemote,
   restoreSpace as restoreSpaceRemote,
   deleteFrozenSpace as deleteFrozenSpaceRemote,
@@ -19,6 +20,7 @@ import {
   type SpaceInfo,
 } from './auth';
 import { iso, todayISO } from './date';
+import { Copy, formatCopy } from './copy';
 
 export type Screen = 'bucket' | 'calendar' | 'memories';
 
@@ -133,6 +135,9 @@ interface AppState {
   setSettingsOpen: (v: boolean) => void;
   setInviteShareOpen: (v: boolean) => void;
   setInviteCode: (code: string | null) => void;
+  joinOrbOpen: boolean;
+  setJoinOrbOpen: (v: boolean) => void;
+  joinOrb: (code: string) => Promise<SpaceInfo>;
   updateConfig: (patch: Partial<Config>) => void;
   setExternal: (events: ExternalEvent[]) => void;
   syncExternal: (events: ExternalEventInput[]) => Promise<void>;
@@ -194,6 +199,7 @@ export const useApp = create<AppState>()((set, get) => {
     settingsOpen: false,
     inviteShareOpen: false,
     inviteCode: pendingInvite(),
+    joinOrbOpen: false,
     passwordRecovery: false,
     toasts: [],
 
@@ -509,6 +515,16 @@ export const useApp = create<AppState>()((set, get) => {
     setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
     setInviteShareOpen: (inviteShareOpen) => set({ inviteShareOpen }),
     setInviteCode: (inviteCode) => set({ inviteCode }),
+    setJoinOrbOpen: (joinOrbOpen) => set({ joinOrbOpen }),
+
+    async joinOrb(rawCode: string) {
+      const spaceId = await joinInvite(rawCode);
+      await get().switchToSpace(spaceId);
+      const space = get().space;
+      const name = space ? spacePeopleLabel(space) : 'Orb';
+      get().toast(formatCopy(Copy.invite.joinedSuccess, { orb: name || 'Orb' }));
+      return space!;
+    },
 
     updateConfig: (patch) => {
       const config = { ...get().config, ...patch };

@@ -386,3 +386,105 @@ textarea.input {
 .advanced[open] .advancedSum {
   margin-bottom: 4px;
 }
+
+.codeBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--paper-warm);
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  margin-top: 10px;
+}
+
+.codeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.codeLabel {
+  font: var(--t-caption2);
+  letter-spacing: var(--tr-caption2);
+  color: var(--ink-faint);
+  text-transform: uppercase;
+}
+
+.codeValue {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--ink);
+}
+
+.copyPill {
+  padding: 6px 12px;
+  font: var(--t-footnote);
+  font-weight: 600;
+  border-radius: 999px;
+  background: var(--fill-secondary);
+  color: var(--ink);
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.copyPill:active {
+  transform: scale(0.96);
+}
+
+.peekCard {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background:
+    radial-gradient(
+      100% 100% at 14% 12%,
+      rgba(242, 100, 139, 0.12) 0%,
+      rgba(168, 206, 133, 0.14) 85%
+    ),
+    var(--paper-warm);
+  border: 1px solid rgba(168, 206, 133, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.peekTitle {
+  font: var(--t-headline);
+  letter-spacing: var(--tr-headline);
+  color: var(--ink);
+}
+
+.peekSub {
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-2);
+}
+
+.inputRow {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.pasteBtn {
+  flex-shrink: 0;
+  padding: 0 14px;
+  font: var(--t-footnote);
+  font-weight: 600;
+  background: var(--fill-tertiary);
+  color: var(--ink);
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+}
+
+.pasteBtn:active {
+  transform: scale(0.97);
+}
+

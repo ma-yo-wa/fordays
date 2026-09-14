@@ -138,6 +138,10 @@ struct MainShellView: View {
       SettingsView()
         .environmentObject(app)
     }
+    .sheet(isPresented: $app.showJoinOrb) {
+      JoinOrbView()
+        .environmentObject(app)
+    }
   }
 
   private var topBar: some View {

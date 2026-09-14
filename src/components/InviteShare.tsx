@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Sheet from './Sheet';
 import { inviteUrl } from '../lib/auth';
 import { useApp } from '../lib/store';
+import { Copy, formatCopy } from '../lib/copy';
 import f from './Form.module.css';
 
 interface Props {
@@ -31,14 +32,14 @@ export default function InviteShare({ open, code, onClose }: Props) {
       }
 
       const text = idea
-        ? `I added “${idea}” to an Orb for us — join here: ${link}`
-        : `Join my Orb on Fordays: ${link}`;
+        ? formatCopy(Copy.invite.shareWithIdea, { idea, link }) + ` (code: ${code})`
+        : formatCopy(Copy.invite.shareSolo, { link }) + ` (code: ${code})`;
 
       if (navigator.share) {
         await navigator.share({ title: 'Fordays', text, url: link });
       } else {
         await navigator.clipboard.writeText(text);
-        toast('Invite link copied');
+        toast(Copy.invite.linkCopied);
       }
       onClose();
     } catch (err) {
@@ -50,16 +51,36 @@ export default function InviteShare({ open, code, onClose }: Props) {
     }
   }
 
+  async function copyCodeOnly() {
+    try {
+      await navigator.clipboard.writeText(code);
+      toast(Copy.invite.codeCopied);
+    } catch {
+      toast('Couldn’t copy code');
+    }
+  }
+
   return (
-    <Sheet open={open} onClose={onClose} heading="Invite someone">
+    <Sheet open={open} onClose={onClose} heading={Copy.invite.title}>
       <p className={f.rowNote} style={{ marginTop: 8 }}>
-        They get their own login, then land in this Orb with you. Send them the
-        invite link.
+        {Copy.invite.subtitle}
       </p>
 
-      <span className={f.label}>
-        One thing you want to do{' '}
-        <span className={f.hint}>— optional, but nicer than an empty Orb</span>
+      {code && (
+        <div className={f.codeBox}>
+          <div className={f.codeInfo}>
+            <span className={f.codeLabel}>{Copy.invite.orbCodeLabel}</span>
+            <span className={f.codeValue}>{code}</span>
+          </div>
+          <button type="button" className={f.copyPill} onClick={() => void copyCodeOnly()}>
+            {Copy.invite.copyCode}
+          </button>
+        </div>
+      )}
+
+      <span className={f.label} style={{ marginTop: 16 }}>
+        {Copy.invite.ideaLabel}{' '}
+        <span className={f.hint}>{Copy.invite.ideaHint}</span>
       </span>
       <div className={f.group}>
         <input
@@ -73,7 +94,7 @@ export default function InviteShare({ open, code, onClose }: Props) {
 
       <div className={f.row}>
         <button type="button" className={`${f.btn} ${f.ghost}`} onClick={onClose}>
-          Later
+          {Copy.invite.notNow}
         </button>
         <button
           type="button"
@@ -81,7 +102,7 @@ export default function InviteShare({ open, code, onClose }: Props) {
           disabled={busy}
           onClick={() => void share()}
         >
-          {busy ? '…' : 'Share invite'}
+          {busy ? '…' : Copy.invite.shareInvite}
         </button>
       </div>
     </Sheet>

@@ -84,6 +84,7 @@ export default function Settings() {
   const space = useApp((st) => st.space);
   const syncExternal = useApp((st) => st.syncExternal);
   const setInviteShareOpen = useApp((st) => st.setInviteShareOpen);
+  const setJoinOrbOpen = useApp((st) => st.setJoinOrbOpen);
   const refreshSpace = useApp((st) => st.refreshSpace);
   const toast = useApp((st) => st.toast);
   const spaces = useApp((st) => st.spaces);
@@ -339,6 +340,21 @@ export default function Settings() {
                   </span>
                   <span className={ui.orbTitle}>{Copy.orbs.createOrb}</span>
                   <span className={ui.orbMeta}>{Copy.orbs.createOrbSub}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`${ui.orbCard} ${ui.orbCreate}`}
+                  disabled={spaceBusy}
+                  onClick={() => {
+                    setOpen(false);
+                    setJoinOrbOpen(true);
+                  }}
+                >
+                  <span className={ui.orbPlus} aria-hidden>
+                    →
+                  </span>
+                  <span className={ui.orbTitle}>{Copy.orbs.joinOrb}</span>
+                  <span className={ui.orbMeta}>{Copy.orbs.joinOrbSub}</span>
                 </button>
                 {visibleOrbs.map((orb) => {
                   const faces = orbFaceChips(orb);

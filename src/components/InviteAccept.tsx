@@ -1,54 +1,105 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Sheet from './Sheet';
 import {
   clearInviteFromUrl,
-  joinInvite,
+  extractInviteCode,
   peekInvite,
   type InvitePeek,
 } from '../lib/auth';
+import { useApp } from '../lib/store';
+import { Copy } from '../lib/copy';
 import f from './Form.module.css';
 
 interface Props {
-  code: string;
+  code?: string;
   open: boolean;
   onJoined: () => void;
   onDismiss: () => void;
 }
 
-export default function InviteAccept({ code, open, onJoined, onDismiss }: Props) {
+export default function InviteAccept({ code = '', open, onJoined, onDismiss }: Props) {
+  const joinOrb = useApp((st) => st.joinOrb);
+  const [input, setInput] = useState(code);
   const [peek, setPeek] = useState<InvitePeek | null>(null);
+  const [lookingUp, setLookingUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!open || !code) return;
-    let cancelled = false;
-    setError(null);
-    setPeek(null);
-    void peekInvite(code)
-      .then((p) => {
-        if (cancelled) return;
-        if (!p) {
-          setError('That invite isn’t valid. Ask for a fresh link.');
-          return;
-        }
-        setPeek(p);
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Couldn’t look up that invite');
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
+    if (open) {
+      setInput(code);
+      setError(null);
+      setPeek(null);
+      setLookingUp(false);
+    }
   }, [open, code]);
 
+  useEffect(() => {
+    if (!open) return;
+    const cleaned = extractInviteCode(input);
+    if (!cleaned || cleaned.length < 4) {
+      setPeek(null);
+      setError(null);
+      setLookingUp(false);
+      return;
+    }
+
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+
+    setLookingUp(true);
+    setError(null);
+
+    timerRef.current = window.setTimeout(() => {
+      let cancelled = false;
+      void peekInvite(cleaned)
+        .then((p) => {
+          if (cancelled) return;
+          setLookingUp(false);
+          if (!p) {
+            setPeek(null);
+            setError(Copy.invite.invalidCode);
+            return;
+          }
+          setPeek(p);
+          if (!p.isOpen) {
+            setError('This Orb is no longer accepting new members.');
+          }
+        })
+        .catch((err) => {
+          if (!cancelled) {
+            setLookingUp(false);
+            setPeek(null);
+            setError(err instanceof Error ? err.message : Copy.invite.invalidCode);
+          }
+        });
+
+      return () => {
+        cancelled = true;
+      };
+    }, 250);
+
+    return () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+    };
+  }, [input, open]);
+
+  async function handlePaste() {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) setInput(text);
+    } catch {
+      // Clipboard permissions denied or unsupported
+    }
+  }
+
   async function accept() {
+    const cleaned = extractInviteCode(input);
+    if (!cleaned) return;
     setBusy(true);
     setError(null);
     try {
-      await joinInvite(code);
+      await joinOrb(cleaned);
       clearInviteFromUrl();
       onJoined();
     } catch (err) {
@@ -58,6 +109,9 @@ export default function InviteAccept({ code, open, onJoined, onDismiss }: Props)
     }
   }
 
+  const cleanedCode = extractInviteCode(input);
+  const canJoin = !busy && !lookingUp && peek != null && peek.isOpen && cleanedCode.length >= 4;
+
   return (
     <Sheet
       open={open}
@@ -65,16 +119,59 @@ export default function InviteAccept({ code, open, onJoined, onDismiss }: Props)
         clearInviteFromUrl();
         onDismiss();
       }}
-      heading={peek ? `${peek.inviterName} invited you` : 'Join an Orb'}
+      heading={peek ? `${peek.inviterName} invited you` : Copy.invite.joinTitle}
     >
       <p className={f.rowNote} style={{ marginTop: 8 }}>
-        {peek?.isOpen === false
-          ? 'This Orb is closed'
-          : peek
-            ? `You’ll share this Orb with ${peek.inviterName}`
-            : 'Looking up the invite…'}
+        {peek
+          ? `You’ll share this Orb with ${peek.inviterName}.`
+          : Copy.invite.joinSubtitle}
       </p>
-      <div className={f.row}>
+
+      <span className={f.label} style={{ marginTop: 16 }}>
+        {Copy.invite.codeOrLink}
+      </span>
+      <div className={f.inputRow}>
+        <input
+          className={f.input}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder={Copy.invite.codePlaceholder}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          enterKeyHint="done"
+        />
+        {typeof navigator !== 'undefined' && 'clipboard' in navigator && (
+          <button type="button" className={f.pasteBtn} onClick={() => void handlePaste()}>
+            {Copy.invite.paste}
+          </button>
+        )}
+      </div>
+
+      {lookingUp && (
+        <p className={f.rowNote} style={{ marginTop: 8 }}>
+          {Copy.invite.lookingUp}
+        </p>
+      )}
+
+      {peek && peek.isOpen && (
+        <div className={f.peekCard}>
+          <div className={f.peekTitle}>
+            {peek.inviterName} invited you to {peek.spaceName ? `“${peek.spaceName}”` : 'their Orb'}
+          </div>
+          <div className={f.peekSub}>
+            You’ll be added to this Orb and keep your existing Orbs.
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <p className={f.rowNote} style={{ color: 'var(--rose-ink)', marginTop: 10 }}>
+          {error}
+        </p>
+      )}
+
+      <div className={f.row} style={{ marginTop: 20 }}>
         <button
           type="button"
           className={`${f.btn} ${f.ghost}`}
@@ -83,23 +180,17 @@ export default function InviteAccept({ code, open, onJoined, onDismiss }: Props)
             onDismiss();
           }}
         >
-          Not now
+          {Copy.invite.notNow}
         </button>
         <button
           type="button"
           className={`${f.btn} ${f.accent}`}
-          disabled={busy || !peek?.isOpen}
+          disabled={!canJoin}
           onClick={() => void accept()}
         >
-          {busy ? 'Joining…' : 'Join'}
+          {busy ? Copy.invite.joining : Copy.invite.joinAction}
         </button>
       </div>
-
-      {error && (
-        <p className={f.rowNote} style={{ color: 'var(--rose-ink)', marginTop: 12 }}>
-          {error}
-        </p>
-      )}
     </Sheet>
   );
 }
