@@ -52,72 +52,72 @@
   color: var(--ink-faint);
 }
 
-.orbRail {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding: 2px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.orbRail::-webkit-scrollbar {
-  display: none;
-}
-
-.orbCard {
-  flex: 0 0 168px;
-  min-height: 118px;
-  border: none;
-  border-radius: 18px;
+.orbList {
+  border-radius: var(--r-control);
   background: var(--fill-quaternary);
-  color: var(--ink);
+  overflow: hidden;
+}
+
+.orbList > * + * {
+  border-top: var(--hairline-w) solid var(--separator);
+}
+
+.orbRow {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 7px;
-  padding: 12px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 12px;
+  border: none;
+  background: none;
+  color: var(--ink);
   text-align: left;
   cursor: pointer;
   transition:
     transform 0.14s var(--ease-ios),
-    opacity 0.14s var(--ease-ios),
-    box-shadow 0.18s var(--ease-ios);
+    opacity 0.14s var(--ease-ios);
 }
 
-.orbCard:active {
-  transform: scale(0.97);
+.orbRow:active {
+  transform: scale(0.99);
+  opacity: 0.88;
 }
 
-.orbCard:disabled {
+.orbRow:disabled {
   cursor: default;
+  opacity: 1;
 }
 
-.orbCardOn {
-  box-shadow: var(--shadow-card);
+.orbRow:disabled:active {
+  transform: none;
+}
+
+.orbRowOn {
   background:
     radial-gradient(
-      100% 100% at 14% 12%,
-      rgba(242, 100, 139, 0.18) 0%,
-      rgba(168, 206, 133, 0.16) 85%
-    ),
-    var(--fill-quaternary);
+      120% 140% at 8% 20%,
+      rgba(242, 100, 139, 0.46) 0%,
+      rgba(168, 206, 133, 0.34) 72%
+    );
 }
 
-.orbCreate {
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+.orbRowBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .orbPlus {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: grid;
   place-items: center;
   background: var(--fill-tertiary);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 1;
   flex-shrink: 0;
@@ -125,8 +125,9 @@
 
 .orbTitle {
   display: block;
-  font: var(--t-headline);
-  letter-spacing: var(--tr-headline);
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -136,7 +137,7 @@
 .orbFaceStack {
   display: flex;
   align-items: center;
-  margin: 3px 0 2px;
+  flex-shrink: 0;
 }
 
 .orbMiniFace {

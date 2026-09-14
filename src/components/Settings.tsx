@@ -277,6 +277,7 @@ export default function Settings() {
     setSpaceBusy(true);
     try {
       await switchToSpace(next.id);
+      setOpen(false);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t switch');
     } finally {
@@ -290,6 +291,7 @@ export default function Settings() {
     try {
       await addSpace();
       toast('New Orb — just you, until you invite');
+      setOpen(false);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t make an Orb');
     } finally {
@@ -408,45 +410,18 @@ export default function Settings() {
 
             <section className={ui.section}>
               <span className={ui.label}>Your Orbs</span>
-              <div className={ui.orbRail}>
-                <button
-                  type="button"
-                  className={`${ui.orbCard} ${ui.orbCreate}`}
-                  disabled={spaceBusy}
-                  onClick={() => void handleCreateOrb()}
-                >
-                  <span className={ui.orbPlus} aria-hidden>
-                    +
-                  </span>
-                  <span className={ui.orbTitle}>{Copy.orbs.createOrb}</span>
-                  <span className={ui.orbMeta}>{Copy.orbs.createOrbSub}</span>
-                </button>
-                <button
-                  type="button"
-                  className={`${ui.orbCard} ${ui.orbCreate}`}
-                  disabled={spaceBusy}
-                  onClick={() => {
-                    setOpen(false);
-                    setJoinOrbOpen(true);
-                  }}
-                >
-                  <span className={ui.orbPlus} aria-hidden>
-                    →
-                  </span>
-                  <span className={ui.orbTitle}>{Copy.orbs.joinOrb}</span>
-                  <span className={ui.orbMeta}>{Copy.orbs.joinOrbSub}</span>
-                </button>
+              <div className={ui.orbList}>
                 {visibleOrbs.map((orb) => {
                   const faces = orbFaceChips(orb);
+                  const on = orb.id === space?.id;
                   return (
                     <button
                       key={orb.id}
                       type="button"
-                      className={`${ui.orbCard} ${orb.id === space?.id ? ui.orbCardOn : ''}`}
-                      disabled={spaceBusy || orb.id === space?.id}
+                      className={`${ui.orbRow} ${on ? ui.orbRowOn : ''}`}
+                      disabled={spaceBusy || on}
                       onClick={() => void handleSwitchOrb(orb)}
                     >
-                      <span className={ui.orbTitle}>{spacePeopleLabel(orb)}</span>
                       <div className={ui.orbFaceStack}>
                         {faces.slice(0, 3).map((f, idx) => (
                           <span
@@ -464,10 +439,44 @@ export default function Settings() {
                           </span>
                         )}
                       </div>
-                      <span className={ui.orbMeta}>{orbSizeLabel(orb)}</span>
+                      <span className={ui.orbRowBody}>
+                        <span className={ui.orbTitle}>{spacePeopleLabel(orb)}</span>
+                        <span className={ui.orbMeta}>{orbSizeLabel(orb)}</span>
+                      </span>
                     </button>
                   );
                 })}
+                <button
+                  type="button"
+                  className={ui.orbRow}
+                  disabled={spaceBusy}
+                  onClick={() => void handleCreateOrb()}
+                >
+                  <span className={ui.orbPlus} aria-hidden>
+                    +
+                  </span>
+                  <span className={ui.orbRowBody}>
+                    <span className={ui.orbTitle}>{Copy.orbs.createOrb}</span>
+                    <span className={ui.orbMeta}>{Copy.orbs.createOrbSub}</span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={ui.orbRow}
+                  disabled={spaceBusy}
+                  onClick={() => {
+                    setOpen(false);
+                    setJoinOrbOpen(true);
+                  }}
+                >
+                  <span className={ui.orbPlus} aria-hidden>
+                    →
+                  </span>
+                  <span className={ui.orbRowBody}>
+                    <span className={ui.orbTitle}>{Copy.orbs.joinOrb}</span>
+                    <span className={ui.orbMeta}>{Copy.orbs.joinOrbSub}</span>
+                  </span>
+                </button>
               </div>
             </section>
 

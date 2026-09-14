@@ -130,18 +130,25 @@ struct SettingsView: View {
   private var orbsSection: some View {
     VStack(alignment: .leading, spacing: 8) {
       sectionLabel("Your Orbs")
-      ScrollView(.horizontal, showsIndicators: false) {
-        HStack(spacing: 10) {
-          createOrbCard
-          joinOrbCard
-          ForEach(activeOrbs, id: \.id) { orb in
-            orbCard(orb)
-          }
+      VStack(spacing: 0) {
+        ForEach(Array(activeOrbs.enumerated()), id: \.element.id) { index, orb in
+          if index > 0 { orbRowDivider }
+          orbRow(orb)
         }
-        .padding(.horizontal, 1)
-        .padding(.vertical, 2)
+        if !activeOrbs.isEmpty { orbRowDivider }
+        createOrbRow
+        orbRowDivider
+        joinOrbRow
       }
+      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+      .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
+  }
+
+  private var orbRowDivider: some View {
+    Rectangle()
+      .fill(Theme.ink.opacity(0.08))
+      .frame(height: 0.5)
   }
 
   private struct OrbFaceChip: Identifiable {
@@ -182,137 +189,120 @@ struct SettingsView: View {
     return list
   }
 
-  private func orbCard(_ orb: SpaceInfo) -> some View {
+  private func orbRow(_ orb: SpaceInfo) -> some View {
     let active = orb.id == app.space?.id
     let faces = orbFaceChips(for: orb)
     return Button {
       switchOrb(orb.id)
     } label: {
-      VStack(alignment: .leading, spacing: 5) {
-        Text(orb.peopleLabel)
-          .font(.headline)
-          .foregroundStyle(Theme.ink)
-          .lineLimit(1)
-          .multilineTextAlignment(.leading)
-
-        HStack(spacing: -6) {
-          ForEach(faces.prefix(3)) { f in
-            ZStack {
-              Circle()
-                .fill(f.them ? Theme.faceRose : Theme.faceSage)
-              Text(f.letter)
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(.white)
-                .offset(y: -0.5)
-            }
-            .frame(width: 22, height: 22)
-            .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
-            .fixedSize()
-          }
-          if faces.count > 3 {
-            ZStack {
-              Circle()
-                .fill(Theme.inkSoft)
-              Text("+\(faces.count - 3)")
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(.white)
-                .offset(y: -0.5)
-            }
-            .frame(width: 22, height: 22)
-            .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
-            .fixedSize()
-          }
+      HStack(spacing: 12) {
+        orbFaceStack(faces)
+        VStack(alignment: .leading, spacing: 1) {
+          Text(orb.peopleLabel)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(Theme.ink)
+            .lineLimit(1)
+          Text(orbSizeLabel(orb))
+            .font(.footnote)
+            .foregroundStyle(Theme.inkSoft)
         }
-        .padding(.vertical, 1)
-
-        Text(orbSizeLabel(orb))
-          .font(.footnote)
-          .foregroundStyle(Theme.inkSoft)
+        .frame(maxWidth: .infinity, alignment: .leading)
       }
-      .frame(width: 168, height: 116, alignment: .topLeading)
-      .padding(12)
+      .padding(.horizontal, 12)
+      .padding(.vertical, 10)
+      .frame(minHeight: 56)
       .background {
-        RoundedRectangle(cornerRadius: 18, style: .continuous)
-          .fill(Theme.ink.opacity(0.05))
-          .overlay {
-            if active {
-              RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(
-                  LinearGradient(
-                    colors: [Theme.rose.opacity(0.18), Theme.sage.opacity(0.16)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                  )
-                )
-            }
-          }
+        if active {
+          LinearGradient(
+            colors: [Theme.rose.opacity(0.46), Theme.sage.opacity(0.34)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+          )
+        }
       }
     }
     .buttonStyle(.plain)
-    .disabled(spaceBusy || active)
+    .disabled(spaceBusy)
   }
 
-  private var createOrbCard: some View {
+  private func orbFaceStack(_ faces: [OrbFaceChip]) -> some View {
+    HStack(spacing: -6) {
+      ForEach(faces.prefix(3)) { f in
+        ZStack {
+          Circle()
+            .fill(f.them ? Theme.faceRose : Theme.faceSage)
+          Text(f.letter)
+            .font(.system(size: 11, weight: .bold))
+            .foregroundStyle(.white)
+            .offset(y: -0.5)
+        }
+        .frame(width: 22, height: 22)
+        .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
+        .fixedSize()
+      }
+      if faces.count > 3 {
+        ZStack {
+          Circle()
+            .fill(Theme.inkSoft)
+          Text("+\(faces.count - 3)")
+            .font(.system(size: 10, weight: .semibold))
+            .foregroundStyle(.white)
+            .offset(y: -0.5)
+        }
+        .frame(width: 22, height: 22)
+        .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
+        .fixedSize()
+      }
+    }
+  }
+
+  private var createOrbRow: some View {
     Button {
       createOrb()
     } label: {
-      VStack(spacing: 7) {
-        ZStack {
-          Circle()
-            .fill(Theme.ink.opacity(0.08))
-          Text("+")
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundStyle(Theme.ink)
-            .offset(y: -0.5)
-        }
-        .frame(width: 32, height: 32)
-        .fixedSize()
-
-        Text(Copy.Orbs.createOrb)
-          .font(.headline)
-          .foregroundStyle(Theme.ink)
-
-        Text(Copy.Orbs.createOrbSub)
-          .font(.footnote)
-          .foregroundStyle(Theme.inkSoft)
-      }
-      .frame(width: 168, height: 116)
-      .padding(12)
-      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+      orbActionLabel(mark: "+", title: Copy.Orbs.createOrb, subtitle: Copy.Orbs.createOrbSub)
     }
     .buttonStyle(.plain)
     .disabled(spaceBusy)
   }
 
-  private var joinOrbCard: some View {
+  private var joinOrbRow: some View {
     Button {
-      app.showJoinOrb = true
-    } label: {
-      VStack(spacing: 7) {
-        ZStack {
-          Circle()
-            .fill(Theme.ink.opacity(0.08))
-          Image(systemName: "arrow.right")
-            .font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(Theme.ink)
-        }
-        .frame(width: 32, height: 32)
-        .fixedSize()
-
-        Text(Copy.Orbs.joinOrb)
-          .font(.headline)
-          .foregroundStyle(Theme.ink)
-
-        Text(Copy.Orbs.joinOrbSub)
-          .font(.footnote)
-          .foregroundStyle(Theme.inkSoft)
+      dismiss()
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+        app.showJoinOrb = true
       }
-      .frame(width: 168, height: 116)
-      .padding(12)
-      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    } label: {
+      orbActionLabel(mark: "→", title: Copy.Orbs.joinOrb, subtitle: Copy.Orbs.joinOrbSub)
     }
     .buttonStyle(.plain)
     .disabled(spaceBusy)
+  }
+
+  private func orbActionLabel(mark: String, title: String, subtitle: String) -> some View {
+    HStack(spacing: 12) {
+      ZStack {
+        Circle()
+          .fill(Theme.ink.opacity(0.08))
+        Text(mark)
+          .font(.system(size: 15, weight: .semibold))
+          .foregroundStyle(Theme.ink)
+          .offset(y: -0.5)
+      }
+      .frame(width: 28, height: 28)
+      VStack(alignment: .leading, spacing: 1) {
+        Text(title)
+          .font(.subheadline.weight(.semibold))
+          .foregroundStyle(Theme.ink)
+        Text(subtitle)
+          .font(.footnote)
+          .foregroundStyle(Theme.inkSoft)
+      }
+      .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    .padding(.horizontal, 12)
+    .padding(.vertical, 10)
+    .frame(minHeight: 56)
   }
 
   private func peopleSection(space: SpaceInfo) -> some View {
@@ -986,20 +976,23 @@ struct SettingsView: View {
   }
 
   private func switchOrb(_ id: String) {
-    guard !spaceBusy else { return }
+    guard !spaceBusy, id != app.space?.id else { return }
     spaceBusy = true
     Task {
       await app.switchToSpace(id)
       spaceBusy = false
+      if app.space?.id == id { dismiss() }
     }
   }
 
   private func createOrb() {
     guard !spaceBusy else { return }
+    let before = app.space?.id
     spaceBusy = true
     Task {
       await app.addSpace()
       spaceBusy = false
+      if app.space?.id != before { dismiss() }
     }
   }
 
@@ -1031,6 +1024,7 @@ struct SettingsView: View {
       deleteAskId = nil
       showPastOrbs = false
       spaceBusy = false
+      dismiss()
     }
   }
 
