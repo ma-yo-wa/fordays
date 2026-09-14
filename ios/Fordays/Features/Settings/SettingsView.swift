@@ -470,18 +470,6 @@ struct SettingsView: View {
           .disabled(spaceBusy)
         }
       } else {
-        if soloOrb {
-          Button(Copy.Orbs.restoreOrb) {
-            restoreOrb(space.id)
-          }
-          .buttonStyle(.plain)
-          .font(.subheadline.weight(.semibold))
-          .foregroundStyle(Theme.ink)
-          .padding(.horizontal, 4)
-          .padding(.top, 4)
-          .disabled(spaceBusy)
-        }
-
         if deleteAskId == space.id {
           VStack(alignment: .leading, spacing: 10) {
             Text(Copy.Orbs.deletePermanentConfirm)
@@ -551,26 +539,15 @@ struct SettingsView: View {
     NavigationStack {
       ScrollView {
         VStack(alignment: .leading, spacing: 16) {
-          Text("\(Copy.Orbs.pastOrbsSub) — kept as read-only keepsakes.")
-            .font(.footnote)
-            .foregroundStyle(Theme.inkSoft)
-            .padding(.top, 4)
-
           ForEach(pastOrbs, id: \.id) { pOrb in
             let isCurrent = pOrb.id == app.space?.id
-            let isSolo = pOrb.members.count <= 1
             let faces = orbFaceChips(for: pOrb)
 
             VStack(alignment: .leading, spacing: 12) {
-              HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                  Text(pOrb.peopleLabel)
-                    .font(.headline)
-                    .foregroundStyle(Theme.ink)
-                  Text(Copy.Orbs.frozenSnapshot)
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(Theme.inkFaint)
-                }
+              HStack(alignment: .center) {
+                Text(pOrb.peopleLabel)
+                  .font(.headline)
+                  .foregroundStyle(Theme.ink)
 
                 Spacer()
 
@@ -606,19 +583,6 @@ struct SettingsView: View {
                     switchOrb(pOrb.id)
                     showPastOrbs = false
                     dismiss()
-                  }
-                  .buttonStyle(.plain)
-                  .font(.caption.weight(.semibold))
-                  .foregroundStyle(Theme.ink)
-                  .padding(.horizontal, 12)
-                  .padding(.vertical, 6)
-                  .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                  .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
-                }
-
-                if isSolo {
-                  Button(Copy.Orbs.restoreOrb) {
-                    restoreOrb(pOrb.id)
                   }
                   .buttonStyle(.plain)
                   .font(.caption.weight(.semibold))
@@ -1013,18 +977,6 @@ struct SettingsView: View {
       await app.leaveCurrentSpace()
       leaveAsk = false
       spaceBusy = false
-    }
-  }
-
-  private func restoreOrb(_ id: String) {
-    guard !spaceBusy else { return }
-    spaceBusy = true
-    Task {
-      await app.restorePastOrb(id)
-      deleteAskId = nil
-      showPastOrbs = false
-      spaceBusy = false
-      dismiss()
     }
   }
 

@@ -104,7 +104,6 @@ export default function Settings() {
   const switchToSpace = useApp((st) => st.switchToSpace);
   const addSpace = useApp((st) => st.addSpace);
   const leaveCurrentSpace = useApp((st) => st.leaveCurrentSpace);
-  const restorePastOrb = useApp((st) => st.restorePastOrb);
   const deletePastOrb = useApp((st) => st.deletePastOrb);
   const removeMemberFromSpace = useApp((st) => st.removeMemberFromSpace);
 
@@ -325,20 +324,6 @@ export default function Settings() {
       setLeaveAsk(false);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t leave');
-    } finally {
-      setSpaceBusy(false);
-    }
-  }
-
-  async function handleRestorePastOrb(id: string) {
-    if (spaceBusy) return;
-    setSpaceBusy(true);
-    try {
-      await restorePastOrb(id);
-      setDeleteAskId(null);
-      setPastOrbsOpen(false);
-    } catch (err) {
-      toast(err instanceof Error ? err.message : 'Couldn’t restore Orb');
     } finally {
       setSpaceBusy(false);
     }
@@ -623,16 +608,6 @@ export default function Settings() {
                   )
                 ) : (
                   <>
-                    {soloOrb && (
-                      <button
-                        type="button"
-                        className={ui.textLink}
-                        disabled={spaceBusy}
-                        onClick={() => void handleRestorePastOrb(space.id)}
-                      >
-                        {Copy.orbs.restoreOrb}
-                      </button>
-                    )}
                     {deleteAskId === space.id ? (
                       <div className={ui.dangerAskBox}>
                         <p className={ui.dangerAskText}>{Copy.orbs.deletePermanentConfirm}</p>
@@ -987,18 +962,15 @@ export default function Settings() {
         }}
         heading={Copy.orbs.pastOrbs}
       >
-        <p className={f.rowNote}>{Copy.orbs.pastOrbsSub} — kept as read-only keepsakes.</p>
         <div className={ui.pastOrbList}>
           {pastOrbs.map((pOrb) => {
             const pFaces = orbFaceChips(pOrb);
             const isCurrent = pOrb.id === space?.id;
-            const isSolo = (pOrb.members?.length ?? 0) <= 1;
             return (
               <div key={pOrb.id} className={ui.pastOrbCard}>
                 <div className={ui.pastOrbTop}>
                   <div className={ui.pastOrbInfo}>
                     <span className={ui.pastOrbName}>{spacePeopleLabel(pOrb)}</span>
-                    <span className={ui.pastOrbBadge}>{Copy.orbs.frozenSnapshot}</span>
                   </div>
                   <div className={ui.orbFaceStack}>
                     {pFaces.slice(0, 3).map((fc, idx) => (
@@ -1031,17 +1003,6 @@ export default function Settings() {
                       }}
                     >
                       View
-                    </button>
-                  )}
-
-                  {isSolo && (
-                    <button
-                      type="button"
-                      className={ui.pastOrbBtn}
-                      disabled={spaceBusy}
-                      onClick={() => void handleRestorePastOrb(pOrb.id)}
-                    >
-                      {Copy.orbs.restoreOrb}
                     </button>
                   )}
 

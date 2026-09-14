@@ -16,10 +16,8 @@
     "removeConfirm": "Remove {name}? They get a copy of what was already here. This Orb stays live for everyone else.",
     "pastOrbs": "Past Orbs",
     "pastOrbsSub": "Orbs you’ve left or set aside",
-    "frozenSnapshot": "Frozen snapshot",
     "viewingFrozenBanner": "Viewing a past Orb — you can look back, but plans are frozen",
     "switchBackToActive": "Switch back to active Orb",
-    "restoreOrb": "Restore Orb",
     "deletePermanent": "Delete permanently",
     "deletePermanentConfirm": "Permanently delete this Orb? All past plans here will be purged forever."
   },

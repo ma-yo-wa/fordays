@@ -445,13 +445,6 @@
   color: var(--ink);
 }
 
-.pastOrbBadge {
-  font: var(--t-caption2);
-  letter-spacing: var(--tr-caption2);
-  color: var(--ink-faint);
-  font-weight: 500;
-}
-
 .pastOrbActions {
   display: flex;
   align-items: center;
