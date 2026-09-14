@@ -68,7 +68,6 @@ enum Copy {
     static let emptySolo = "Things you want to do, before they have a day"
     static let emptyShared = "Things you want to do together, before they have a day"
     static let emptyFrozen = "A copy of this list from when you left"
-    static let addFirst = "Add the first one"
     static let inList = "In Someday"
     static let backTo = "Back to Someday"
     static let backIn = "Back in Someday"

@@ -88,22 +88,3 @@
   letter-spacing: var(--tr-subhead);
   color: var(--ink-soft);
 }
-
-.blank button {
-  font: var(--t-headline);
-  letter-spacing: var(--tr-headline);
-  color: #17140f;
-  background: var(--rose);
-  border: none;
-  border-radius: var(--r-capsule);
-  padding: 12px 22px;
-  cursor: pointer;
-  transition:
-    transform 0.14s var(--ease-ios),
-    opacity 0.14s var(--ease-ios);
-}
-
-.blank button:active {
-  transform: scale(0.96);
-  opacity: 0.85;
-}

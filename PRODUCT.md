@@ -79,7 +79,9 @@ The dock place **without a day**. Not ideas, bucket, wishlist, or todos.
 
 You add *to* Someday. You don’t add “a someday.” Don’t name the card.
 
-Empty: things you want to do (together, if a we), before they have a day.
+Empty: the line only. Plus adds. No empty CTA.
+
+Plus is **one action everywhere**: add to this Orb, then plan or Someday. Same door on every tab. Do not make plus mean something else on Someday.
 
 ---
 

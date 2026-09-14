@@ -3,7 +3,6 @@ import SwiftUI
 struct BucketView: View {
   @EnvironmentObject private var app: AppModel
   var onSelect: (Activity) -> Void
-  var onAddIdea: () -> Void = {}
   var onInvite: () -> Void = {}
 
   private var items: [Activity] {
@@ -34,20 +33,13 @@ struct BucketView: View {
   }
 
   private var empty: some View {
-    VStack(spacing: 16) {
-      Text(
-        app.space?.frozen == true
-          ? Copy.Ideas.emptyFrozen
-          : app.space?.isMatched == true
-            ? Copy.Ideas.emptyShared
-            : Copy.Ideas.emptySolo
-      )
-      if app.space?.frozen != true {
-        Button(Copy.Ideas.addFirst, action: onAddIdea)
-          .font(.subheadline.weight(.semibold))
-          .foregroundStyle(Theme.roseInk)
-      }
-    }
+    Text(
+      app.space?.frozen == true
+        ? Copy.Ideas.emptyFrozen
+        : app.space?.isMatched == true
+          ? Copy.Ideas.emptyShared
+          : Copy.Ideas.emptySolo
+    )
     .font(.subheadline)
     .foregroundStyle(Theme.inkSoft)
     .multilineTextAlignment(.center)

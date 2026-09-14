@@ -21,7 +21,6 @@ struct MainShellView: View {
           case .bucket:
             BucketView(
               onSelect: { selected = $0 },
-              onAddIdea: { composer = .bucket },
               onInvite: { showInvite = true }
             )
           case .plans:

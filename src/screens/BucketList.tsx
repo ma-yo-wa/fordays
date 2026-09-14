@@ -10,7 +10,6 @@ export default function BucketList() {
   const activities = useApp((st) => st.activities);
   const config = useApp((st) => st.config);
   const openDetail = useApp((st) => st.openDetail);
-  const openComposer = useApp((st) => st.openComposer);
   const matched = useApp((st) => isMatched(st.space));
   const frozen = useApp((st) => Boolean(st.space?.frozen));
 
@@ -28,20 +27,13 @@ export default function BucketList() {
     return (
       <div className={s.board}>
         <div className={s.blank}>
-          <>
-            <p>
-              {frozen
-                ? Copy.ideas.emptyFrozen
-                : matched
-                  ? Copy.ideas.emptyShared
-                  : Copy.ideas.emptySolo}
-            </p>
-            {!frozen && (
-              <button type="button" onClick={() => openComposer('bucket')}>
-                {Copy.ideas.addFirst}
-              </button>
-            )}
-          </>
+          <p>
+            {frozen
+              ? Copy.ideas.emptyFrozen
+              : matched
+                ? Copy.ideas.emptyShared
+                : Copy.ideas.emptySolo}
+          </p>
         </div>
       </div>
     );
