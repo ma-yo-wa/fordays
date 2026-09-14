@@ -43,7 +43,7 @@ Same questions as first signup, in a sheet. Cancel returns to Start / Join. Join
 ### Leave, delete, Past Orbs
 
 - **Leave** — anyone in a we. You’re out. Others keep the **live** notebook. You keep a **frozen copy** of what was already there. New plans after you leave are not on your copy.
-- **Delete this Orb** — only when you’re **alone** in it (Just you, or last member). Soft-delete → Past Orbs. Apple minus on Just you tiles only, and only if you have another live Orb. Confirm before delete.
+- **Delete this Orb** — only when you’re **alone** in it (Just you, or last member). Soft-delete → Past Orbs. Lives under **Orb actions** while you’re in that notebook. Confirm before delete.
 - **No delete-for-everyone** while someone else is still in.
 - **Last live notebook** — cannot delete. Always keep at least one live Orb.
 - **Delete permanently** — Past Orbs only. That copy is gone for you. Does not un-delete their live we.

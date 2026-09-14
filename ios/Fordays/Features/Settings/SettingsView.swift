@@ -1,14 +1,12 @@
 import SwiftUI
 
 private enum SettingsConfirm: Identifiable, Hashable {
-  case deleteLive(String)
   case leave(solo: Bool)
   case remove(id: String, name: String)
   case purge(String)
 
   var id: String {
     switch self {
-    case .deleteLive(let id): return "live-\(id)"
     case .leave: return "leave"
     case .remove(let id, _): return "rm-\(id)"
     case .purge(let id): return "purge-\(id)"
@@ -17,7 +15,7 @@ private enum SettingsConfirm: Identifiable, Hashable {
 
   var title: String {
     switch self {
-    case .deleteLive, .leave(true): return Copy.Orbs.deleteSoloTitle
+    case .leave(true): return Copy.Orbs.deleteSoloTitle
     case .leave(false): return Copy.Orbs.leaveSharedTitle
     case .remove(_, let name): return Copy.Orbs.removeTitle(name: name)
     case .purge: return Copy.Orbs.deletePermanentTitle
@@ -26,7 +24,7 @@ private enum SettingsConfirm: Identifiable, Hashable {
 
   var message: String {
     switch self {
-    case .deleteLive, .leave(true): return Copy.Orbs.deleteSoloBody
+    case .leave(true): return Copy.Orbs.deleteSoloBody
     case .leave(false): return Copy.Orbs.leaveSharedBody
     case .remove: return Copy.Orbs.removeBody
     case .purge: return Copy.Orbs.deletePermanentBody
@@ -35,7 +33,7 @@ private enum SettingsConfirm: Identifiable, Hashable {
 
   var action: String {
     switch self {
-    case .deleteLive, .leave(true): return Copy.Orbs.deleteSoloAction
+    case .leave(true): return Copy.Orbs.deleteSoloAction
     case .leave(false): return Copy.Orbs.leaveAction
     case .remove(_, let name): return "Remove \(name)"
     case .purge: return Copy.Orbs.deletePermanent
@@ -44,7 +42,7 @@ private enum SettingsConfirm: Identifiable, Hashable {
 
   var cancel: String {
     switch self {
-    case .deleteLive, .leave: return Copy.Orbs.stay
+    case .leave: return Copy.Orbs.stay
     case .remove: return Copy.Orbs.keepThem
     case .purge: return Copy.Orbs.keep
     }
@@ -247,65 +245,39 @@ struct SettingsView: View {
     return list
   }
 
-  private func orbIsSolo(_ orb: SpaceInfo) -> Bool {
-    let others = orb.members.filter { $0.id.compare(orb.myId, options: .caseInsensitive) != .orderedSame }
-    return others.isEmpty && orb.partner2Id == nil
-  }
-
   private func orbTile(_ orb: SpaceInfo) -> some View {
     let active = orb.id == app.space?.id
     let faces = orbFaceChips(for: orb)
-    let canDelete = orbIsSolo(orb) && activeOrbs.count > 1
-    return VStack(spacing: 6) {
-      ZStack(alignment: .topLeading) {
-        Button {
-          switchOrb(orb.id)
-        } label: {
-          ZStack {
+    return Button {
+      switchOrb(orb.id)
+    } label: {
+      VStack(spacing: 6) {
+        ZStack {
+          RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .fill(Theme.ink.opacity(0.08))
+          if active {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-              .fill(Theme.ink.opacity(0.08))
-            if active {
-              RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(
-                  LinearGradient(
-                    colors: [Theme.rose.opacity(0.55), Theme.sage.opacity(0.4)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                  )
+              .fill(
+                LinearGradient(
+                  colors: [Theme.rose.opacity(0.55), Theme.sage.opacity(0.4)],
+                  startPoint: .topLeading,
+                  endPoint: .bottomTrailing
                 )
-            }
-            orbFaceStack(faces)
+              )
           }
-          .frame(width: 56, height: 56)
+          orbFaceStack(faces)
         }
-        .buttonStyle(.plain)
-        .disabled(spaceBusy)
+        .frame(width: 56, height: 56)
 
-        if canDelete {
-          Button {
-            confirm = .deleteLive(orb.id)
-          } label: {
-            Image(systemName: "minus")
-              .font(.system(size: 9, weight: .bold))
-              .foregroundStyle(Theme.inkSoft)
-              .frame(width: 16, height: 16)
-              .background(Theme.paperWarm, in: Circle())
-              .overlay(Circle().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
-              .shadow(color: Color.black.opacity(0.1), radius: 2, y: 1)
-          }
-          .buttonStyle(.plain)
-          .offset(x: -4, y: -4)
-          .disabled(spaceBusy)
-          .accessibilityLabel("Delete \(orb.peopleLabel)")
-        }
+        Text(orb.peopleLabel)
+          .font(.caption)
+          .foregroundStyle(Theme.inkSoft)
+          .lineLimit(1)
+          .frame(width: 64)
       }
-
-      Text(orb.peopleLabel)
-        .font(.caption)
-        .foregroundStyle(Theme.inkSoft)
-        .lineLimit(1)
-        .frame(width: 64)
     }
+    .buttonStyle(.plain)
+    .disabled(spaceBusy)
   }
 
   private var plusTile: some View {
@@ -955,8 +927,6 @@ struct SettingsView: View {
 
   private func runConfirm(_ item: SettingsConfirm) {
     switch item {
-    case .deleteLive(let id):
-      deleteLiveOrb(id)
     case .leave:
       leaveOrb()
     case .remove(let id, _):
@@ -981,16 +951,6 @@ struct SettingsView: View {
     spaceBusy = true
     Task {
       await app.leaveCurrentSpace()
-      confirm = nil
-      spaceBusy = false
-    }
-  }
-
-  private func deleteLiveOrb(_ id: String) {
-    guard !spaceBusy else { return }
-    spaceBusy = true
-    Task {
-      await app.leaveSpace(id)
       confirm = nil
       spaceBusy = false
     }

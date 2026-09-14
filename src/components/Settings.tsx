@@ -65,11 +65,6 @@ function firstLetter(name: string): string {
   return (name.trim()[0] ?? '?').toUpperCase();
 }
 
-function orbIsSolo(orb: SpaceInfo): boolean {
-  const others = (orb.members ?? []).filter((m) => m.id !== orb.myId);
-  return others.length === 0 && !orb.partner2Id;
-}
-
 type SettingsConfirm = {
   heading: string;
   note: string;
@@ -114,7 +109,6 @@ export default function Settings() {
   const switchToSpace = useApp((st) => st.switchToSpace);
   const addSpace = useApp((st) => st.addSpace);
   const leaveCurrentSpace = useApp((st) => st.leaveCurrentSpace);
-  const leaveSpace = useApp((st) => st.leaveSpace);
   const deletePastOrb = useApp((st) => st.deletePastOrb);
   const removeMemberFromSpace = useApp((st) => st.removeMemberFromSpace);
 
@@ -339,26 +333,6 @@ export default function Settings() {
     }
   }
 
-  async function handleDeleteGridOrb(id: string) {
-    if (spaceBusy) return;
-    const live = activeOrbs.length;
-    const orb = visibleOrbs.find((s) => s.id === id);
-    if (!orb || !orbIsSolo(orb) || live <= 1) {
-      toast('Keep at least one Orb');
-      setConfirm(null);
-      return;
-    }
-    setSpaceBusy(true);
-    try {
-      await leaveSpace(id);
-      setConfirm(null);
-    } catch (err) {
-      toast(err instanceof Error ? err.message : 'Couldn’t delete Orb');
-    } finally {
-      setSpaceBusy(false);
-    }
-  }
-
   async function handleDeletePastOrb(id: string) {
     if (spaceBusy) return;
     setSpaceBusy(true);
@@ -373,16 +347,6 @@ export default function Settings() {
     } finally {
       setSpaceBusy(false);
     }
-  }
-
-  function askDeleteLive(id: string) {
-    setConfirm({
-      heading: Copy.orbs.deleteSoloTitle,
-      note: Copy.orbs.deleteSoloBody,
-      action: Copy.orbs.deleteSoloAction,
-      cancel: Copy.orbs.stay,
-      run: () => handleDeleteGridOrb(id),
-    });
   }
 
   function askLeave() {
@@ -482,52 +446,35 @@ export default function Settings() {
                 {visibleOrbs.map((orb) => {
                   const faces = orbFaceChips(orb);
                   const on = orb.id === space?.id;
-                  const canDelete = orbIsSolo(orb) && activeOrbs.length > 1;
                   return (
-                    <div key={orb.id} className={ui.orbTileWrap}>
-                      <button
-                        type="button"
-                        className={`${ui.orbTile} ${on ? ui.orbTileOn : ''}`}
-                        disabled={spaceBusy}
-                        onClick={() => void handleSwitchOrb(orb)}
-                      >
-                        <span className={ui.orbSquircle}>
-                          <span className={ui.orbFaceStack}>
-                            {faces.slice(0, 3).map((f, idx) => (
-                              <span
-                                key={f.key}
-                                className={`${ui.orbMiniFace} ${f.them ? ui.orbMiniFaceThem : ui.orbMiniFaceMe}`}
-                                style={{ zIndex: 4 - idx }}
-                                aria-hidden
-                              >
-                                {f.letter}
-                              </span>
-                            ))}
-                            {faces.length > 3 && (
-                              <span className={`${ui.orbMiniFace} ${ui.orbMiniMore}`}>
-                                +{faces.length - 3}
-                              </span>
-                            )}
-                          </span>
+                    <button
+                      key={orb.id}
+                      type="button"
+                      className={`${ui.orbTile} ${on ? ui.orbTileOn : ''}`}
+                      disabled={spaceBusy}
+                      onClick={() => void handleSwitchOrb(orb)}
+                    >
+                      <span className={ui.orbSquircle}>
+                        <span className={ui.orbFaceStack}>
+                          {faces.slice(0, 3).map((f, idx) => (
+                            <span
+                              key={f.key}
+                              className={`${ui.orbMiniFace} ${f.them ? ui.orbMiniFaceThem : ui.orbMiniFaceMe}`}
+                              style={{ zIndex: 4 - idx }}
+                              aria-hidden
+                            >
+                              {f.letter}
+                            </span>
+                          ))}
+                          {faces.length > 3 && (
+                            <span className={`${ui.orbMiniFace} ${ui.orbMiniMore}`}>
+                              +{faces.length - 3}
+                            </span>
+                          )}
                         </span>
-                        <span className={ui.orbTileName}>{spacePeopleLabel(orb)}</span>
-                      </button>
-                      {canDelete && (
-                        <button
-                          type="button"
-                          className={ui.removeBadge}
-                          title={`Delete ${spacePeopleLabel(orb)}`}
-                          aria-label={`Delete ${spacePeopleLabel(orb)}`}
-                          disabled={spaceBusy}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            askDeleteLive(orb.id);
-                          }}
-                        >
-                          –
-                        </button>
-                      )}
-                    </div>
+                      </span>
+                      <span className={ui.orbTileName}>{spacePeopleLabel(orb)}</span>
+                    </button>
                   );
                 })}
               </div>
