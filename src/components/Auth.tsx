@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
 import {
   authConfigured,
   friendlyAuthError,
@@ -212,50 +211,9 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
       <h1 className={s.brand}>Fordays</h1>
       <p className={s.lead}>
         {inviterHint
-          ? `${inviterHint} wants to share an Orb with you — sign in to join`
-          : 'Someday, plans, and memories'}
+          ? `${inviterHint} invited you — sign in to join`
+          : 'Plans, bucket lists, and memories'}
       </p>
-
-      <div className={`${f.segmented} ${s.modes}`} role="tablist" aria-label="Account">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={mode === 'signin'}
-          className={`${f.segment} ${mode === 'signin' ? f.segmentOn : ''}`}
-          onClick={() => {
-            setMode('signin');
-            setError(null);
-          }}
-        >
-          {mode === 'signin' && (
-            <motion.span
-              layoutId="auth-mode-knob"
-              className={f.segmentKnob}
-              transition={{ type: 'spring', stiffness: 520, damping: 38 }}
-            />
-          )}
-          <span className={f.segmentLabel}>Sign in</span>
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={mode === 'signup'}
-          className={`${f.segment} ${mode === 'signup' ? f.segmentOn : ''}`}
-          onClick={() => {
-            setMode('signup');
-            setError(null);
-          }}
-        >
-          {mode === 'signup' && (
-            <motion.span
-              layoutId="auth-mode-knob"
-              className={f.segmentKnob}
-              transition={{ type: 'spring', stiffness: 520, damping: 38 }}
-            />
-          )}
-          <span className={f.segmentLabel}>Create account</span>
-        </button>
-      </div>
 
       {mode === 'signup' && (
         <>
@@ -266,7 +224,7 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
               type="text"
               autoComplete="name"
               autoCapitalize="words"
-              placeholder="Mayowa"
+              placeholder="Aline"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -304,19 +262,6 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
         />
       </div>
 
-      {mode === 'signin' && (
-        <button
-          type="button"
-          className={s.forgot}
-          onClick={() => {
-            setMode('forgot');
-            setError(null);
-          }}
-        >
-          Forgot password?
-        </button>
-      )}
-
       <div className={f.row}>
         <button
           type="button"
@@ -332,10 +277,47 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
         </button>
       </div>
 
-      <p className={s.note}>
-        {mode === 'signup'
-          ? 'Your name shows on the shared calendar.'
-          : 'Private Orb for two — sign in on each phone.'}
+      {mode === 'signin' && (
+        <button
+          type="button"
+          className={s.forgot}
+          onClick={() => {
+            setMode('forgot');
+            setError(null);
+          }}
+        >
+          Forgot password?
+        </button>
+      )}
+
+      <p className={s.alt}>
+        {mode === 'signup' ? (
+          <>
+            Already have an account?{' '}
+            <button
+              type="button"
+              onClick={() => {
+                setMode('signin');
+                setError(null);
+              }}
+            >
+              Sign in
+            </button>
+          </>
+        ) : (
+          <>
+            Don’t have an account?{' '}
+            <button
+              type="button"
+              onClick={() => {
+                setMode('signup');
+                setError(null);
+              }}
+            >
+              Sign up
+            </button>
+          </>
+        )}
       </p>
 
       {error && <p className={s.error}>{error}</p>}

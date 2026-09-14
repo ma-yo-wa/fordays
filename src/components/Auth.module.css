@@ -21,24 +21,6 @@
   margin-bottom: 28px;
 }
 
-.modes {
-  margin-bottom: 8px;
-}
-
-.fieldHint {
-  margin: 8px 4px 0;
-  font: var(--t-footnote);
-  letter-spacing: var(--tr-footnote);
-  color: var(--ink-faint);
-}
-
-.note {
-  margin-top: 14px;
-  font: var(--t-footnote);
-  letter-spacing: var(--tr-footnote);
-  color: var(--ink-faint);
-}
-
 .error {
   margin-top: 12px;
   font: var(--t-footnote);
@@ -70,4 +52,21 @@
   cursor: pointer;
   padding: 0;
   align-self: flex-start;
+}
+
+.alt {
+  margin-top: 18px;
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-faint);
+}
+
+.alt button {
+  border: none;
+  background: none;
+  color: var(--rose-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
 }

@@ -401,7 +401,7 @@ export default function Settings() {
                       }
                     })();
                   }}
-                  placeholder="Mayowa"
+                  placeholder="Aline"
                 />
               </div>
             </section>

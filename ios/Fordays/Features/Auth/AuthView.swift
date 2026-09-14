@@ -21,28 +21,14 @@ struct AuthView: View {
             .padding(.top, 48)
             .padding(.bottom, 8)
 
-          Text("Someday, plans, and memories")
+          Text("Plans, bucket lists, and memories")
             .font(.title3.weight(.medium))
             .foregroundStyle(Theme.inkSoft)
             .padding(.bottom, 20)
 
-          HStack(spacing: 2) {
-            modeTab("Sign in", selected: mode == .signIn) {
-              mode = .signIn
-              app.errorMessage = nil
-            }
-            modeTab("Create account", selected: mode == .signUp) {
-              mode = .signUp
-              app.errorMessage = nil
-            }
-          }
-          .padding(2)
-          .background(Theme.ink.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-          .padding(.bottom, 20)
-
           if mode == .signUp {
             fieldLabel("Your name")
-            field("Mayowa", text: $name)
+            field("Aline", text: $name)
           }
 
           fieldLabel("Email")
@@ -82,14 +68,19 @@ struct AuthView: View {
           .disabled(busy)
           .padding(.top, 20)
 
-          Text(
-            mode == .signUp
-              ? "Your name shows on the shared calendar."
-              : "Private Orb for two — sign in on each phone."
-          )
+          Button {
+            mode = mode == .signIn ? .signUp : .signIn
+            app.errorMessage = nil
+          } label: {
+            Text(mode == .signIn ? "Don’t have an account? " : "Already have an account? ")
+              .foregroundStyle(Theme.inkFaint)
+              + Text(mode == .signIn ? "Sign up" : "Sign in")
+              .foregroundStyle(Theme.roseInk)
+              .fontWeight(.semibold)
+          }
+          .buttonStyle(.plain)
           .font(.footnote)
-          .foregroundStyle(Theme.inkFaint)
-          .padding(.top, 12)
+          .padding(.top, 18)
 
           if let err = app.errorMessage {
             Text(err)
@@ -101,23 +92,6 @@ struct AuthView: View {
         .padding(24)
       }
     }
-  }
-
-  private func modeTab(_ title: String, selected: Bool, action: @escaping () -> Void) -> some View {
-    Button(action: action) {
-      Text(title)
-        .font(.subheadline.weight(selected ? .semibold : .medium))
-        .foregroundStyle(selected ? Theme.ink : Theme.inkSoft)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
-        .background {
-          if selected {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-              .fill(Theme.paper)
-          }
-        }
-    }
-    .buttonStyle(.plain)
   }
 
   private func fieldLabel(_ text: String) -> some View {
