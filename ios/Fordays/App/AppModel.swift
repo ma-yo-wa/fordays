@@ -617,18 +617,36 @@ final class AppModel: ObservableObject {
 
   func leaveCurrentSpace() async {
     guard let current = space else { return }
+    await leaveSpace(current.id)
+  }
+
+  func leaveSpace(_ spaceId: String) async {
+    let live = spaces.filter { !$0.frozen }
+    let leaving = spaces.first(where: { $0.id == spaceId }) ?? space
+    let others = (leaving?.members ?? []).filter {
+      $0.id.compare(leaving?.myId ?? "", options: .caseInsensitive) != .orderedSame
+    }
+    let solo = others.isEmpty && leaving?.partner2Id == nil
+    if solo && live.count <= 1 {
+      toast = "Keep at least one Orb"
+      return
+    }
     do {
-      _ = try await sb.rpc("leave_space", params: SpaceIdParams(sid: current.id)).execute()
+      _ = try await sb.rpc("leave_space", params: SpaceIdParams(sid: spaceId)).execute()
       let list = try await loadSpaces()
       spaces = list
       let active = list.filter { !$0.frozen }
-      if let next = active.first {
-        storedSpaceId = next.id
-        space = next
-        await refreshActivities()
-      } else {
-        try await ensureSpace()
-        try await refreshSpaceAndData()
+      if space?.id == spaceId {
+        if let next = active.first {
+          storedSpaceId = next.id
+          space = next
+          await refreshActivities()
+        } else {
+          try await ensureSpace()
+          try await refreshSpaceAndData()
+        }
+      } else if let current = space, let fresh = list.first(where: { $0.id == current.id }) {
+        space = fresh
       }
       toast = "Saved to Past Orbs"
     } catch {

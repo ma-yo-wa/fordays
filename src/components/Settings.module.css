@@ -61,6 +61,16 @@
   background: var(--fill-quaternary);
 }
 
+.orbTileWrap {
+  position: relative;
+  width: 64px;
+}
+
+.orbTileWrap .removeBadge {
+  top: -4px;
+  left: 0;
+}
+
 .orbTile {
   width: 64px;
   display: flex;

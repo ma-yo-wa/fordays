@@ -63,6 +63,11 @@ function firstLetter(name: string): string {
   return (name.trim()[0] ?? '?').toUpperCase();
 }
 
+function orbIsSolo(orb: SpaceInfo): boolean {
+  const others = (orb.members ?? []).filter((m) => m.id !== orb.myId);
+  return others.length === 0 && !orb.partner2Id;
+}
+
 function orbFaceChips(space: SpaceInfo): { key: string; letter: string; them: boolean }[] {
   if (space.members?.length) {
     const mine = space.members.find((m) => m.id === space.myId);
@@ -99,6 +104,7 @@ export default function Settings() {
   const switchToSpace = useApp((st) => st.switchToSpace);
   const addSpace = useApp((st) => st.addSpace);
   const leaveCurrentSpace = useApp((st) => st.leaveCurrentSpace);
+  const leaveSpace = useApp((st) => st.leaveSpace);
   const deletePastOrb = useApp((st) => st.deletePastOrb);
   const removeMemberFromSpace = useApp((st) => st.removeMemberFromSpace);
 
@@ -121,6 +127,7 @@ export default function Settings() {
   const [pastOrbsOpen, setPastOrbsOpen] = useState(false);
   const [orbAddOpen, setOrbAddOpen] = useState(false);
   const [deleteAskId, setDeleteAskId] = useState<string | null>(null);
+  const [gridDeleteId, setGridDeleteId] = useState<string | null>(null);
 
   const allOrbs = spaces.length ? spaces : space ? [space] : [];
   const activeOrbs = allOrbs.filter((s) => !s.frozen);
@@ -138,6 +145,7 @@ export default function Settings() {
     if (!open) return;
     setMyName(space?.myName ?? config.names[config.me]);
     setLeaveAsk(false);
+    setGridDeleteId(null);
     setRemoveId(null);
     setGcalOn(Boolean(savedGoogleCalendar() || googleToken()));
     setGcalName(savedGoogleCalendar()?.summary ?? null);
@@ -319,8 +327,30 @@ export default function Settings() {
     try {
       await leaveCurrentSpace();
       setLeaveAsk(false);
+      setGridDeleteId(null);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t leave');
+    } finally {
+      setSpaceBusy(false);
+    }
+  }
+
+  async function handleDeleteGridOrb(id: string) {
+    if (spaceBusy) return;
+    const live = activeOrbs.length;
+    const orb = visibleOrbs.find((s) => s.id === id);
+    if (!orb || !orbIsSolo(orb) || live <= 1) {
+      toast('Keep at least one Orb');
+      setGridDeleteId(null);
+      return;
+    }
+    setSpaceBusy(true);
+    try {
+      await leaveSpace(id);
+      setGridDeleteId(null);
+      setLeaveAsk(false);
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Couldn’t delete Orb');
     } finally {
       setSpaceBusy(false);
     }
@@ -409,38 +439,79 @@ export default function Settings() {
                 {visibleOrbs.map((orb) => {
                   const faces = orbFaceChips(orb);
                   const on = orb.id === space?.id;
+                  const canDelete = orbIsSolo(orb) && activeOrbs.length > 1;
                   return (
-                    <button
-                      key={orb.id}
-                      type="button"
-                      className={`${ui.orbTile} ${on ? ui.orbTileOn : ''}`}
-                      disabled={spaceBusy}
-                      onClick={() => void handleSwitchOrb(orb)}
-                    >
-                      <span className={ui.orbSquircle}>
-                        <span className={ui.orbFaceStack}>
-                          {faces.slice(0, 3).map((f, idx) => (
-                            <span
-                              key={f.key}
-                              className={`${ui.orbMiniFace} ${f.them ? ui.orbMiniFaceThem : ui.orbMiniFaceMe}`}
-                              style={{ zIndex: 4 - idx }}
-                              aria-hidden
-                            >
-                              {f.letter}
-                            </span>
-                          ))}
-                          {faces.length > 3 && (
-                            <span className={`${ui.orbMiniFace} ${ui.orbMiniMore}`}>
-                              +{faces.length - 3}
-                            </span>
-                          )}
+                    <div key={orb.id} className={ui.orbTileWrap}>
+                      <button
+                        type="button"
+                        className={`${ui.orbTile} ${on ? ui.orbTileOn : ''}`}
+                        disabled={spaceBusy}
+                        onClick={() => void handleSwitchOrb(orb)}
+                      >
+                        <span className={ui.orbSquircle}>
+                          <span className={ui.orbFaceStack}>
+                            {faces.slice(0, 3).map((f, idx) => (
+                              <span
+                                key={f.key}
+                                className={`${ui.orbMiniFace} ${f.them ? ui.orbMiniFaceThem : ui.orbMiniFaceMe}`}
+                                style={{ zIndex: 4 - idx }}
+                                aria-hidden
+                              >
+                                {f.letter}
+                              </span>
+                            ))}
+                            {faces.length > 3 && (
+                              <span className={`${ui.orbMiniFace} ${ui.orbMiniMore}`}>
+                                +{faces.length - 3}
+                              </span>
+                            )}
+                          </span>
                         </span>
-                      </span>
-                      <span className={ui.orbTileName}>{spacePeopleLabel(orb)}</span>
-                    </button>
+                        <span className={ui.orbTileName}>{spacePeopleLabel(orb)}</span>
+                      </button>
+                      {canDelete && (
+                        <button
+                          type="button"
+                          className={ui.removeBadge}
+                          title={`Delete ${spacePeopleLabel(orb)}`}
+                          aria-label={`Delete ${spacePeopleLabel(orb)}`}
+                          disabled={spaceBusy}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setGridDeleteId(orb.id);
+                            setLeaveAsk(false);
+                          }}
+                        >
+                          –
+                        </button>
+                      )}
+                    </div>
                   );
                 })}
               </div>
+              {gridDeleteId && (
+                <div className={ui.removePrompt}>
+                  <p className={f.rowNote}>{Copy.orbs.deleteSoloConfirm}</p>
+                  <div className={f.group}>
+                    <button
+                      type="button"
+                      className={f.listRow}
+                      disabled={spaceBusy}
+                      onClick={() => setGridDeleteId(null)}
+                    >
+                      <span className={f.rowLabel}>Stay</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={f.listRow}
+                      disabled={spaceBusy}
+                      onClick={() => void handleDeleteGridOrb(gridDeleteId)}
+                    >
+                      <span className={f.rowLabel}>{Copy.orbs.deleteSoloAction}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </section>
 
             {space && (
@@ -547,7 +618,7 @@ export default function Settings() {
                   ),
                 )}
 
-                {!space.frozen ? (
+                {!space.frozen && !(soloOrb && activeOrbs.length <= 1) ? (
                   leaveAsk ? (
                     <>
                       <p className={f.rowNote}>

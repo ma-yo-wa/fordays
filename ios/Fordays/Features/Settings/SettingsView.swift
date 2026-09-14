@@ -9,6 +9,7 @@ struct SettingsView: View {
   @State private var leaveAsk = false
   @State private var removeId: String?
   @State private var deleteAskId: String?
+  @State private var gridDeleteId: String?
   @State private var spaceBusy = false
   @State private var appleOn = CalendarSync.isConnected
   @State private var appleName = CalendarSync.selectedName
@@ -69,6 +70,7 @@ struct SettingsView: View {
         leaveAsk = false
         removeId = nil
         deleteAskId = nil
+        gridDeleteId = nil
       }
     }
     .sheet(isPresented: $showInvite) {
@@ -142,6 +144,24 @@ struct SettingsView: View {
       }
       .padding(12)
       .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+      if gridDeleteId != nil {
+        VStack(alignment: .leading, spacing: 10) {
+          Text(Copy.Orbs.deleteSoloConfirm)
+            .font(.footnote)
+            .foregroundStyle(Theme.inkFaint)
+          HStack(spacing: 10) {
+            quietButton("Stay") {
+              gridDeleteId = nil
+            }
+            dangerButton(Copy.Orbs.deleteSoloAction) {
+              if let id = gridDeleteId { deleteLiveOrb(id) }
+            }
+          }
+        }
+        .padding(12)
+        .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+      }
     }
   }
 
@@ -183,39 +203,66 @@ struct SettingsView: View {
     return list
   }
 
+  private func orbIsSolo(_ orb: SpaceInfo) -> Bool {
+    let others = orb.members.filter { $0.id.compare(orb.myId, options: .caseInsensitive) != .orderedSame }
+    return others.isEmpty && orb.partner2Id == nil
+  }
+
   private func orbTile(_ orb: SpaceInfo) -> some View {
     let active = orb.id == app.space?.id
     let faces = orbFaceChips(for: orb)
-    return Button {
-      switchOrb(orb.id)
-    } label: {
-      VStack(spacing: 6) {
-        ZStack {
-          RoundedRectangle(cornerRadius: 16, style: .continuous)
-            .fill(Theme.ink.opacity(0.08))
-          if active {
+    let canDelete = orbIsSolo(orb) && activeOrbs.count > 1
+    return VStack(spacing: 6) {
+      ZStack(alignment: .topLeading) {
+        Button {
+          switchOrb(orb.id)
+        } label: {
+          ZStack {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-              .fill(
-                LinearGradient(
-                  colors: [Theme.rose.opacity(0.55), Theme.sage.opacity(0.4)],
-                  startPoint: .topLeading,
-                  endPoint: .bottomTrailing
+              .fill(Theme.ink.opacity(0.08))
+            if active {
+              RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(
+                  LinearGradient(
+                    colors: [Theme.rose.opacity(0.55), Theme.sage.opacity(0.4)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                  )
                 )
-              )
+            }
+            orbFaceStack(faces)
           }
-          orbFaceStack(faces)
+          .frame(width: 56, height: 56)
         }
-        .frame(width: 56, height: 56)
+        .buttonStyle(.plain)
+        .disabled(spaceBusy)
 
-        Text(orb.peopleLabel)
-          .font(.caption)
-          .foregroundStyle(Theme.inkSoft)
-          .lineLimit(1)
-          .frame(width: 64)
+        if canDelete {
+          Button {
+            gridDeleteId = orb.id
+            leaveAsk = false
+          } label: {
+            Image(systemName: "minus")
+              .font(.system(size: 9, weight: .bold))
+              .foregroundStyle(Theme.inkSoft)
+              .frame(width: 16, height: 16)
+              .background(Theme.paperWarm, in: Circle())
+              .overlay(Circle().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
+              .shadow(color: Color.black.opacity(0.1), radius: 2, y: 1)
+          }
+          .buttonStyle(.plain)
+          .offset(x: -4, y: -4)
+          .disabled(spaceBusy)
+          .accessibilityLabel("Delete \(orb.peopleLabel)")
+        }
       }
+
+      Text(orb.peopleLabel)
+        .font(.caption)
+        .foregroundStyle(Theme.inkSoft)
+        .lineLimit(1)
+        .frame(width: 64)
     }
-    .buttonStyle(.plain)
-    .disabled(spaceBusy)
   }
 
   private var plusTile: some View {
@@ -461,7 +508,7 @@ struct SettingsView: View {
         }
       }
 
-      if !space.frozen {
+      if !space.frozen && !(soloOrb && activeOrbs.count <= 1) {
         if leaveAsk {
           VStack(alignment: .leading, spacing: 10) {
             Text(
@@ -1000,6 +1047,18 @@ struct SettingsView: View {
     spaceBusy = true
     Task {
       await app.leaveCurrentSpace()
+      leaveAsk = false
+      gridDeleteId = nil
+      spaceBusy = false
+    }
+  }
+
+  private func deleteLiveOrb(_ id: String) {
+    guard !spaceBusy else { return }
+    spaceBusy = true
+    Task {
+      await app.leaveSpace(id)
+      gridDeleteId = nil
       leaveAsk = false
       spaceBusy = false
     }

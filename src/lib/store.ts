@@ -112,6 +112,7 @@ interface AppState {
   addSpace: (name?: string) => Promise<void>;
   completeFirstOrb: (name: string, withPeople: boolean) => Promise<void>;
   leaveCurrentSpace: () => Promise<void>;
+  leaveSpace: (spaceId: string) => Promise<void>;
   restorePastOrb: (spaceId: string) => Promise<void>;
   deletePastOrb: (spaceId: string) => Promise<void>;
   removeMemberFromSpace: (userId: string) => Promise<void>;
@@ -326,10 +327,26 @@ export const useApp = create<AppState>()((set, get) => {
     async leaveCurrentSpace() {
       const current = get().space;
       if (!current) return;
-      await leaveSpaceRemote(current.id);
+      await get().leaveSpace(current.id);
+    },
+
+    async leaveSpace(spaceId) {
+      const before = get().spaces.length ? get().spaces : get().space ? [get().space] : [];
+      const live = before.filter((s) => !s.frozen);
+      const leaving = before.find((s) => s.id === spaceId);
+      const others = (leaving?.members ?? []).filter((m) => m.id !== leaving?.myId);
+      const solo = others.length === 0 && !leaving?.partner2Id;
+      if (solo && live.length <= 1) {
+        get().toast('Keep at least one Orb');
+        return;
+      }
+      await leaveSpaceRemote(spaceId);
       const spaces = await loadSpaces();
       const active = spaces.filter((s) => !s.frozen);
-      let target = active[0] ?? null;
+      let target = get().space;
+      if (!target || target.id === spaceId || target.frozen) {
+        target = active[0] ?? null;
+      }
       if (!target) {
         target = await ensureSpace();
       }
