@@ -335,7 +335,9 @@ export const useApp = create<AppState>()((set, get) => {
     },
 
     async leaveSpace(spaceId) {
-      const before = get().spaces.length ? get().spaces : get().space ? [get().space] : [];
+      const listed = get().spaces;
+      const current = get().space;
+      const before = listed.length ? listed : current ? [current] : [];
       const live = before.filter((s) => !s.frozen);
       const leaving = before.find((s) => s.id === spaceId);
       const others = (leaving?.members ?? []).filter((m) => m.id !== leaving?.myId);
