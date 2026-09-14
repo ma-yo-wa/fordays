@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'motion/react';
 import { useApp } from '../lib/store';
 import { Copy } from '../lib/copy';
 import f from './Form.module.css';
@@ -39,6 +40,13 @@ export default function OrbSetup() {
           className={`${f.segment} ${!withPeople ? f.segmentOn : ''}`}
           onClick={() => setWithPeople(false)}
         >
+          {!withPeople && (
+            <motion.span
+              layoutId="orb-setup-kind-knob"
+              className={f.segmentKnob}
+              transition={{ type: 'spring', stiffness: 520, damping: 38 }}
+            />
+          )}
           <span className={f.segmentLabel}>{Copy.orbs.justYou}</span>
         </button>
         <button
@@ -48,6 +56,13 @@ export default function OrbSetup() {
           className={`${f.segment} ${withPeople ? f.segmentOn : ''}`}
           onClick={() => setWithPeople(true)}
         >
+          {withPeople && (
+            <motion.span
+              layoutId="orb-setup-kind-knob"
+              className={f.segmentKnob}
+              transition={{ type: 'spring', stiffness: 520, damping: 38 }}
+            />
+          )}
           <span className={f.segmentLabel}>{Copy.orbs.withPeople}</span>
         </button>
       </div>

@@ -26,7 +26,7 @@ struct OrbSetupView: View {
             .foregroundStyle(Theme.inkSoft)
             .padding(.bottom, 20)
 
-          HStack(spacing: 2) {
+          HStack(spacing: 8) {
             kindTab(Copy.Orbs.justYou, selected: !withPeople) {
               withPeople = false
             }
@@ -34,8 +34,6 @@ struct OrbSetupView: View {
               withPeople = true
             }
           }
-          .padding(2)
-          .background(Theme.ink.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
           Text(Copy.Orbs.orbName)
             .font(.caption.weight(.semibold))
@@ -81,12 +79,11 @@ struct OrbSetupView: View {
         .font(.subheadline.weight(selected ? .semibold : .medium))
         .foregroundStyle(selected ? Theme.ink : Theme.inkSoft)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
+        .padding(.vertical, 10)
         .background {
-          if selected {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-              .fill(Theme.paper)
-          }
+          RoundedRectangle(cornerRadius: 10, style: .continuous)
+            .fill(selected ? Theme.paper : Theme.ink.opacity(0.08))
+            .shadow(color: selected ? Theme.ink.opacity(0.14) : .clear, radius: selected ? 2 : 0, y: 1)
         }
     }
     .buttonStyle(.plain)

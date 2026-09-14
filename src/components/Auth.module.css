@@ -22,7 +22,14 @@
 }
 
 .kinds {
-  margin-bottom: 4px;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 0;
+  background: none;
+}
+
+.kinds .segment {
+  background: var(--fill-tertiary);
 }
 
 .error {

@@ -29,12 +29,41 @@ export function isDefaultSpaceName(name: string): boolean {
   return !raw || /^(fordays|someday)$/i.test(raw);
 }
 
-/** First notebook still has the trigger’s default name — ask Just you / With people. */
+const FIRST_ORB_SETUP_KEY = 'fordays:first-orb-setup';
+
+/** Only the account that just signed up should see Your Orb. Sign-in never sets this. */
+export function markFirstOrbSetupPending(userId: string): void {
+  try {
+    localStorage.setItem(FIRST_ORB_SETUP_KEY, userId);
+  } catch {
+    /* private mode */
+  }
+}
+
+export function isFirstOrbSetupPending(userId: string | null | undefined): boolean {
+  if (!userId) return false;
+  try {
+    return localStorage.getItem(FIRST_ORB_SETUP_KEY) === userId;
+  } catch {
+    return false;
+  }
+}
+
+export function clearFirstOrbSetupPending(): void {
+  try {
+    localStorage.removeItem(FIRST_ORB_SETUP_KEY);
+  } catch {
+    /* private mode */
+  }
+}
+
+/** First notebook after signup — still the trigger’s default name. */
 export function spaceNeedsFirstSetup(
   space: SpaceInfo | null,
   pendingInvite = false,
 ): boolean {
   if (!space || space.frozen || pendingInvite) return false;
+  if (!isFirstOrbSetupPending(space.myId)) return false;
   const others = (space.members ?? []).filter((m) => m.id !== space.myId);
   if (others.length > 0 || space.partner2Id) return false;
   return isDefaultSpaceName(space.name);
@@ -187,6 +216,7 @@ export async function signUpWithPassword(
   // Belt-and-suspenders if the trigger used a stale default.
   // App reads public.profiles — Auth “Display name” in the dashboard is separate.
   if (data.user) {
+    markFirstOrbSetupPending(data.user.id);
     const { error: profErr } = await sb
       .from('profiles')
       .update({ display_name: name })

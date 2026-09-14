@@ -26,8 +26,24 @@ final class AppModel: ObservableObject {
     cursorMonth = Date()
   }
 
+  private static let firstOrbSetupKey = "fordays.firstOrbSetupUserId"
+
+  private var firstOrbSetupPending: Bool {
+    guard let space else { return false }
+    let saved = UserDefaults.standard.string(forKey: Self.firstOrbSetupKey)?.lowercased()
+    return saved == space.myId.lowercased()
+  }
+
+  func markFirstOrbSetupPending(userId: String) {
+    UserDefaults.standard.set(userId.lowercased(), forKey: Self.firstOrbSetupKey)
+  }
+
+  func clearFirstOrbSetupPending() {
+    UserDefaults.standard.removeObject(forKey: Self.firstOrbSetupKey)
+  }
+
   var needsFirstOrbSetup: Bool {
-    guard let space, !space.frozen, !showJoinOrb else { return false }
+    guard let space, !space.frozen, !showJoinOrb, firstOrbSetupPending else { return false }
     let others = space.members.filter { $0.id.compare(space.myId, options: .caseInsensitive) != .orderedSame }
     if !others.isEmpty || space.partner2Id != nil { return false }
     let trimmed = space.name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -47,6 +63,7 @@ final class AppModel: ObservableObject {
         .eq("id", value: id)
         .execute()
       try await refreshSpaceAndData()
+      clearFirstOrbSetupPending()
       pendingInviteShare = withPeople
     } catch {
       toast = error.localizedDescription
@@ -208,6 +225,7 @@ final class AppModel: ObservableObject {
         return
       }
       let uid = res.user.id.uuidString.lowercased()
+      markFirstOrbSetupPending(userId: uid)
       try await sb.from("profiles")
         .update(ProfileNameUpdate(display_name: name))
         .eq("id", value: uid)
@@ -566,6 +584,7 @@ final class AppModel: ObservableObject {
     }
     try await refreshSpaceAndData()
     authPhase = .signedIn
+    clearFirstOrbSetupPending()
     let name = space?.peopleLabel ?? "Orb"
     toast = Copy.Invite.joinedSuccess(name)
   }

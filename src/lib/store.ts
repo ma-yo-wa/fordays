@@ -16,6 +16,7 @@ import {
   loadSpaces,
   removeSpaceMember as removeSpaceMemberRemote,
   renameSpace as renameSpaceRemote,
+  clearFirstOrbSetupPending,
   pendingInvite,
   signOut,
   switchSpace as switchSpaceRemote,
@@ -317,6 +318,7 @@ export const useApp = create<AppState>()((set, get) => {
       if (!current) return;
       const placeholder = withPeople ? Copy.orbs.crewPlaceholder : Copy.orbs.personalPlaceholder;
       await renameSpaceRemote(current.id, name.trim() || placeholder);
+      clearFirstOrbSetupPending();
       await get().refreshSpace();
       if (withPeople) get().setInviteShareOpen(true);
     },
@@ -536,6 +538,7 @@ export const useApp = create<AppState>()((set, get) => {
 
     async joinOrb(rawCode: string) {
       const spaceId = await joinInvite(rawCode);
+      clearFirstOrbSetupPending();
       await get().switchToSpace(spaceId);
       const space = get().space;
       const name = space ? spacePeopleLabel(space) : 'Orb';
