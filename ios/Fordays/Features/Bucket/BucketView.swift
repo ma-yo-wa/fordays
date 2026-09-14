@@ -28,7 +28,7 @@ struct BucketView: View {
           }
         }
         .padding(.horizontal, 20)
-        .padding(.bottom, 120)
+        .padding(.bottom, 132)
       }
     }
   }
@@ -37,13 +37,13 @@ struct BucketView: View {
     VStack(spacing: 16) {
       Text(
         app.space?.frozen == true
-          ? "A copy of this list from when you left"
+          ? Copy.Ideas.emptyFrozen
           : app.space?.isMatched == true
-            ? "Things you both want to do, before they have a date"
-            : "Things you want to do, before they have a date"
+            ? Copy.Ideas.emptyShared
+            : Copy.Ideas.emptySolo
       )
       if app.space?.frozen != true {
-        Button("Add the first one", action: onAddIdea)
+        Button(Copy.Ideas.addFirst, action: onAddIdea)
           .font(.subheadline.weight(.semibold))
           .foregroundStyle(Theme.roseInk)
       }
@@ -116,7 +116,7 @@ struct MemoriesView: View {
           }
         }
         .padding(.horizontal, 20)
-        .padding(.bottom, 120)
+        .padding(.bottom, 132)
       }
     }
   }

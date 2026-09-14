@@ -46,7 +46,13 @@ export default function Calendar() {
   const cursorDate = parseISO(cursor);
   const today = todayISO();
   const matched = isMatched(space);
-  const other = matched ? space?.partnerName ?? null : null;
+  const others = (space?.members ?? []).filter((m) => m.id !== space?.myId);
+  const other =
+    others.length === 1 && others[0]?.name && others[0].name !== space?.myName
+      ? others[0].name
+      : matched && others.length === 0 && space?.partnerName && space.partnerName !== space.myName
+        ? space.partnerName
+        : null;
 
   const faceCtx = { me: space?.me ?? config.me, myId: space?.myId };
   const ownerIndex = (ownerId: string): 0 | 1 => faceIndexFor(ownerId, faceCtx);

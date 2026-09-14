@@ -174,7 +174,15 @@ struct PlansView: View {
     if !dayExternal.isEmpty {
       return Copy.Plans.emptyTogether
     }
-    let other = app.space?.isMatched == true ? app.space?.partnerName : nil
+    var other: String? = nil
+    if let space = app.space {
+      let others = space.members.filter { $0.id != space.myId }
+      if others.count == 1, let name = others.first?.name, name != space.myName {
+        other = name
+      } else if space.isMatched, others.isEmpty, let name = space.partnerName, name != space.myName {
+        other = name
+      }
+    }
     let today = app.pickedDay == DateLocal.todayISO()
     if let other {
       return today

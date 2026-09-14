@@ -41,7 +41,7 @@ struct AddSheetView: View {
         .frame(height: 0.5)
       option(
         kind: .bucket,
-        title: "A bucket-list idea",
+        title: "An idea",
         note: "Something you want to do, with no date yet.",
         glyph: .bucket
       )
@@ -119,7 +119,7 @@ struct ComposerView: View {
   var body: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 0) {
-        Text(isPlan ? "New plan" : "New bucket-list idea")
+        Text(isPlan ? Copy.Composer.newPlan : Copy.Composer.newIdea)
           .font(.title2.weight(.semibold))
           .foregroundStyle(Theme.ink)
           .padding(.bottom, 14)

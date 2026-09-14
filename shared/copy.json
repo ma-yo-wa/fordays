@@ -31,6 +31,17 @@
     "emptyTogether": "Nothing planned together",
     "emptyFrozen": "A copy from when you left"
   },
+  "tabs": {
+    "ideas": "Ideas",
+    "plans": "Plans",
+    "memories": "Memories"
+  },
+  "ideas": {
+    "emptySolo": "Things you want to do, before they have a day",
+    "emptyShared": "Things you want to do together, before they have a day",
+    "emptyFrozen": "A copy of this list from when you left",
+    "addFirst": "Add the first one"
+  },
   "invite": {
     "title": "Invite someone",
     "subtitle": "They get their own login, then land in this Orb with you. Send them the invite link.",
@@ -57,7 +68,7 @@
   },
   "composer": {
     "newPlan": "New plan",
-    "newIdea": "New bucket-list idea",
+    "newIdea": "New idea",
     "editPlan": "Edit plan",
     "editIdea": "Edit idea",
     "multiDayPrompt": "Runs more than one day?",

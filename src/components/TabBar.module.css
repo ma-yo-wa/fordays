@@ -21,9 +21,9 @@
   flex: none;
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: 52px;
-  padding: 0 6px;
+  gap: 2px;
+  height: 62px;
+  padding: 4px 6px;
   border-radius: var(--r-capsule);
   background: var(--mat-regular-bg);
   -webkit-backdrop-filter: var(--mat-regular);
@@ -36,10 +36,13 @@
 
 .tab {
   position: relative;
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 42px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 72px;
+  height: 54px;
   background: none;
   border: none;
   cursor: pointer;
@@ -61,12 +64,22 @@
 .icon {
   position: relative;
   display: block;
-  height: 23px;
+  height: 20px;
+  z-index: 1;
+}
+
+.caption {
+  position: relative;
+  z-index: 1;
+  font: var(--t-caption2);
+  letter-spacing: var(--tr-caption2);
+  font-weight: 600;
+  line-height: 1;
 }
 
 .tab svg {
-  width: 23px;
-  height: 23px;
+  width: 20px;
+  height: 20px;
   display: block;
 }
 
@@ -81,7 +94,7 @@
   pointer-events: auto;
   position: absolute;
   right: max(16px, var(--safe-r));
-  bottom: calc(8px + var(--safe-b) + 64px);
+  bottom: calc(8px + var(--safe-b) + 74px);
   width: 56px;
   height: 56px;
   border-radius: 50%;

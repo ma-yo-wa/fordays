@@ -144,7 +144,7 @@ struct DetailView: View {
     if let dt = item.dateTime {
       return DateLocal.describePlan(dt, endsAt: item.endsAt)
     }
-    return "On the bucket list"
+    return "In Ideas"
   }
 
   private func pending(_ item: Activity) -> Bool {
@@ -335,7 +335,7 @@ struct DetailView: View {
       }
 
       if item.isPlan {
-        actionRow(title: "Back to the bucket list", system: "checklist") {
+        actionRow(title: "Back to Ideas", system: "checklist") {
           Task {
             await app.moveToBucket(item.id)
             dismiss()

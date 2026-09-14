@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { useApp, canCompose, type Screen } from '../lib/store';
+import { Copy } from '../lib/copy';
 import s from './TabBar.module.css';
 
 /* Outlined when idle, solid when selected. Without labels the icon is
@@ -82,6 +83,7 @@ export default function TabBar() {
           />
         )}
         <span className={s.icon}>{icon(on)}</span>
+        <span className={s.caption}>{label}</span>
       </button>
     );
   };
@@ -89,9 +91,9 @@ export default function TabBar() {
   return (
     <nav className={s.dock}>
       <div className={s.inner}>
-        {tab('bucket', 'Bucket List', (on) => <BucketIcon on={on} />)}
-        {tab('calendar', 'Plans', (on) => <CalendarIcon on={on} />)}
-        {tab('memories', 'Memories', (on) => <MemoriesIcon on={on} />)}
+        {tab('bucket', Copy.tabs.ideas, (on) => <BucketIcon on={on} />)}
+        {tab('calendar', Copy.tabs.plans, (on) => <CalendarIcon on={on} />)}
+        {tab('memories', Copy.tabs.memories, (on) => <MemoriesIcon on={on} />)}
       </div>
 
       {compose && (

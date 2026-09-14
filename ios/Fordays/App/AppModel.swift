@@ -8,7 +8,7 @@ final class AppModel: ObservableObject {
   @Published var spaces: [SpaceInfo] = []
   @Published var activities: [Activity] = []
   @Published var externalEvents: [ExternalEvent] = []
-  @Published var tab: HomeTab = .plans
+  @Published var tab: HomeTab = .bucket
   @Published var cursorMonth: Date = Date()
   @Published var pickedDay: String = DateLocal.todayISO()
   @Published var errorMessage: String?
@@ -186,7 +186,7 @@ final class AppModel: ObservableObject {
       try await sb.from("activities").insert(insert).execute()
       await refreshActivities()
       tab = dateTime == nil ? .bucket : .plans
-      toast = dateTime == nil ? "Added to your bucket list" : "Made it a plan"
+      toast = dateTime == nil ? "Added an idea" : "Made it a plan"
     } catch {
       toast = error.localizedDescription
     }
@@ -265,7 +265,7 @@ final class AppModel: ObservableObject {
 
   func moveToBucket(_ id: String) async {
     await patchActivity(id, dateTime: .some(nil), endsAt: .some(nil))
-    toast = "Back on the bucket list"
+    toast = "Back in Ideas"
     tab = .bucket
   }
 

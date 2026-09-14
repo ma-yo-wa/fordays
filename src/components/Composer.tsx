@@ -6,6 +6,7 @@ import CoverPicker from './CoverPicker';
 import WhenFields from './WhenFields';
 import { useApp } from '../lib/store';
 import { addDays, composeWhen, describePlan, iso, mediumDate, nextSaturday, parseISO, prettyLower } from '../lib/date';
+import { Copy } from '../lib/copy';
 import f from './Form.module.css';
 
 /* Still one form and still one nullable column underneath, but which of
@@ -119,7 +120,7 @@ export default function Composer() {
       } else {
         setScreen('bucket');
       }
-      toast(isPlan ? 'Made it a plan' : 'Added to your bucket list');
+      toast(isPlan ? 'Made it a plan' : 'Added an idea');
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Could not save');
     } finally {
@@ -131,7 +132,7 @@ export default function Composer() {
     <Sheet
       open={mode !== null}
       onClose={close}
-      heading={isPlan ? 'New plan' : 'New bucket-list idea'}
+      heading={isPlan ? Copy.composer.newPlan : Copy.composer.newIdea}
     >
       <span className={f.label} style={{ marginTop: 14 }}>
         {isPlan ? 'Plan' : 'Idea'}

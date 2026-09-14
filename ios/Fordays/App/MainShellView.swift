@@ -247,7 +247,7 @@ struct MainShellView: View {
 
   private var title: String {
     switch app.tab {
-    case .bucket: return "Bucket List"
+    case .bucket: return Copy.Tabs.ideas
     case .plans: return DateLocal.monthTitle(for: app.cursorMonth)
     case .memories: return "Memories"
     }
@@ -313,14 +313,19 @@ struct TabDock: View {
         tab = value
       }
     } label: {
-      TabIcon(glyph: glyph, on: on)
-        .foregroundStyle(on ? Theme.ink : Theme.inkFaint)
-        .frame(width: 52, height: 42)
-        .background {
-          if on {
-            Capsule().fill(Theme.ink.opacity(0.07))
-          }
+      VStack(spacing: 2) {
+        TabIcon(glyph: glyph, on: on)
+        Text(value.title)
+          .font(.system(size: 10, weight: .semibold))
+          .lineLimit(1)
+      }
+      .foregroundStyle(on ? Theme.ink : Theme.inkFaint)
+      .frame(width: 72, height: 52)
+      .background {
+        if on {
+          Capsule().fill(Theme.ink.opacity(0.07))
         }
+      }
     }
     .accessibilityLabel(value.title)
   }

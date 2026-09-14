@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { useApp, isMatched } from '../lib/store';
 import { faceColor } from '../lib/tint';
 import { MONTHS, iso, parseISO, todayISO } from '../lib/date';
+import { Copy } from '../lib/copy';
 import s from './NavBar.module.css';
 
 function Chevron({ dir }: { dir: 'left' | 'right' }) {
@@ -86,8 +87,8 @@ export default function NavBar() {
   const title = isCalendar
     ? monthLabel
     : screen === 'memories'
-      ? 'Memories'
-      : 'Bucket List';
+      ? Copy.tabs.memories
+      : Copy.tabs.ideas;
 
   /* The large title hands off to the compact one over ~22px of travel,
      which is roughly where iOS makes the swap. A compact bar has no

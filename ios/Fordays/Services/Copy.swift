@@ -43,6 +43,19 @@ enum Copy {
     static let emptyFrozen = "A copy from when you left"
   }
 
+  enum Tabs {
+    static let ideas = "Ideas"
+    static let plans = "Plans"
+    static let memories = "Memories"
+  }
+
+  enum Ideas {
+    static let emptySolo = "Things you want to do, before they have a day"
+    static let emptyShared = "Things you want to do together, before they have a day"
+    static let emptyFrozen = "A copy of this list from when you left"
+    static let addFirst = "Add the first one"
+  }
+
   enum Invite {
     static let title = "Invite someone"
     static let subtitle = "They get their own login, then land in this Orb with you. Send them the invite link."
@@ -76,7 +89,7 @@ enum Copy {
 
   enum Composer {
     static let newPlan = "New plan"
-    static let newIdea = "New bucket-list idea"
+    static let newIdea = "New idea"
     static let editPlan = "Edit plan"
     static let editIdea = "Edit idea"
     static let multiDayPrompt = "Runs more than one day?"

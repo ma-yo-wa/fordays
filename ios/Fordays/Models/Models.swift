@@ -100,9 +100,9 @@ enum HomeTab: String, CaseIterable, Identifiable {
 
   var title: String {
     switch self {
-    case .bucket: return "Bucket List"
-    case .plans: return "Plans"
-    case .memories: return "Memories"
+    case .bucket: return Copy.Tabs.ideas
+    case .plans: return Copy.Tabs.plans
+    case .memories: return Copy.Tabs.memories
     }
   }
 }

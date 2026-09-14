@@ -68,7 +68,7 @@ export default function AddSheet() {
           <BucketGlyph />
         </span>
         <span>
-          <span className={s.optionTitle}>A bucket-list idea</span>
+          <span className={s.optionTitle}>An idea</span>
           <span className={s.optionNote}>
             Something you want to do, with no date yet.
           </span>

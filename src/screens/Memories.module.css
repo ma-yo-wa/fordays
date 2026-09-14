@@ -1,6 +1,6 @@
 .wrap {
   padding: 8px max(20px, var(--safe-l))
-    calc(var(--safe-b) + 116px)
+    calc(var(--safe-b) + 128px)
     max(20px, var(--safe-r));
   display: flex;
   flex-direction: column;

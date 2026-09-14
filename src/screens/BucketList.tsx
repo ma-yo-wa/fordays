@@ -3,6 +3,7 @@ import CoverArt from '../components/CoverArt';
 import { useApp, partnerName, isMatched } from '../lib/store';
 import { isBucketItem } from '../lib/types';
 import { tintsFor } from '../lib/tint';
+import { Copy } from '../lib/copy';
 import s from './BucketList.module.css';
 
 export default function BucketList() {
@@ -30,14 +31,14 @@ export default function BucketList() {
           <>
             <p>
               {frozen
-                ? 'A copy of this list from when you left'
+                ? Copy.ideas.emptyFrozen
                 : matched
-                  ? 'Things you both want to do, before they have a date'
-                  : 'Things you want to do, before they have a date'}
+                  ? Copy.ideas.emptyShared
+                  : Copy.ideas.emptySolo}
             </p>
             {!frozen && (
               <button type="button" onClick={() => openComposer('bucket')}>
-                Add the first one
+                {Copy.ideas.addFirst}
               </button>
             )}
           </>

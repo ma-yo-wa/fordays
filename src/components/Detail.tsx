@@ -258,7 +258,7 @@ export default function Detail() {
 
   async function toBucket() {
     await patch(item!.id, { date_time: null, ends_at: null });
-    toast('Back on the bucket list');
+    toast('Back in Ideas');
     close();
   }
 
@@ -282,7 +282,7 @@ export default function Detail() {
           <div className={s.when}>
             {planned
               ? describePlan(item.date_time as string, item.ends_at)
-              : 'On the bucket list'}
+              : 'In Ideas'}
           </div>
         </div>
         {mode === 'view' && !frozen && (
@@ -534,7 +534,7 @@ export default function Detail() {
           {planned && (
             <button type="button" className={s.action} onClick={() => void toBucket()}>
               <BucketIcon />
-              Back to the bucket list
+              Back to Ideas
             </button>
           )}
 
