@@ -77,7 +77,7 @@ struct AuthView: View {
               Spacer()
             }
             .padding(.vertical, 14)
-            .background(Theme.rose, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(Theme.ink, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
           }
           .disabled(busy)
           .padding(.top, 20)

@@ -117,7 +117,7 @@ struct JoinOrbView: View {
               .foregroundStyle(.white)
               .frame(maxWidth: .infinity)
               .padding(.vertical, 12)
-              .background(canJoin ? Theme.rose : Theme.ink.opacity(0.18), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+              .background(canJoin ? Theme.ink : Theme.ink.opacity(0.18), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
           }
           .disabled(!canJoin)
         }

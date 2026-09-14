@@ -375,8 +375,8 @@ textarea.input {
 }
 
 .accent {
-  background: var(--rose);
-  color: #17140f;
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .solid {

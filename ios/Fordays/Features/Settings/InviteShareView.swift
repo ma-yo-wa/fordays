@@ -85,7 +85,7 @@ struct InviteShareView: View {
               .foregroundStyle(.white)
               .frame(maxWidth: .infinity)
               .padding(.vertical, 12)
-              .background(Theme.rose, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+              .background(Theme.ink, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
           }
           .disabled(busy)
         }
