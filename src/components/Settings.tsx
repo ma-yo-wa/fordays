@@ -288,11 +288,11 @@ export default function Settings() {
 
   async function handleSwitchOrb(next: SpaceInfo) {
     if (spaceBusy || next.id === space?.id) return;
+    setOpen(false);
     setSpaceBusy(true);
     try {
       await persistOrbName();
       await switchToSpace(next.id);
-      setOpen(false);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t switch');
     } finally {

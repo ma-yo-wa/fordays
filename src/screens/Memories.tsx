@@ -1,4 +1,3 @@
-import { motion } from 'motion/react';
 import CoverArt from '../components/CoverArt';
 import { useApp, isMatched } from '../lib/store';
 import type { Activity } from '../lib/types';
@@ -66,41 +65,29 @@ export default function Memories() {
     );
   }
 
-  let cardIndex = 0;
-
   return (
     <div className={s.wrap}>
       {sections.map((section) => (
         <section key={section.key}>
           <h2 className={s.month}>{section.label}</h2>
           <div className={s.board}>
-            {section.items.map((a) => {
-              const i = cardIndex++;
-              return (
-                <motion.button
-                  key={a.id}
-                  type="button"
-                  className={s.card}
-                  style={{ background: tintById.get(a.id) }}
-                  onClick={() => openDetail(a.id)}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    delay: Math.min(i, 7) * 0.055,
-                    duration: 0.5,
-                    ease: [0.2, 0.8, 0.2, 1],
-                  }}
-                >
-                  {a.image_url && (
-                    <CoverArt url={a.image_url} size="card" className={s.art} />
-                  )}
-                  <div className={s.veil} />
-                  <div className={s.body}>
-                    <h3 className={s.title}>{a.title}</h3>
-                  </div>
-                </motion.button>
-              );
-            })}
+            {section.items.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                className={s.card}
+                style={{ background: tintById.get(a.id) }}
+                onClick={() => openDetail(a.id)}
+              >
+                {a.image_url && (
+                  <CoverArt url={a.image_url} size="card" className={s.art} />
+                )}
+                <div className={s.veil} />
+                <div className={s.body}>
+                  <h3 className={s.title}>{a.title}</h3>
+                </div>
+              </button>
+            ))}
           </div>
         </section>
       ))}

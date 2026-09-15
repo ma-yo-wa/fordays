@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import ImageIO
 
 enum CoverTab: String, CaseIterable, Identifiable {
   case gifs = "GIFs"
@@ -25,7 +26,7 @@ struct RemoteOrDataImage: View {
     if urlString.hasPrefix("data:image"),
        let base64Index = urlString.range(of: "base64,")?.upperBound,
        let data = Data(base64Encoded: String(urlString[base64Index...])),
-       let uiImage = UIImage(data: data) {
+       let uiImage = downsampledImage(from: data) {
       Image(uiImage: uiImage)
         .resizable()
         .aspectRatio(contentMode: contentMode)
@@ -46,6 +47,24 @@ struct RemoteOrDataImage: View {
       Color.clear
     }
   }
+}
+
+private func downsampledImage(from data: Data, maxPixel: CGFloat = 720) -> UIImage? {
+  let srcOptions: [CFString: Any] = [kCGImageSourceShouldCache: false]
+  guard let source = CGImageSourceCreateWithData(data as CFData, srcOptions as CFDictionary) else {
+    return UIImage(data: data)
+  }
+  let scale = UIScreen.main.scale
+  let downsample: [CFString: Any] = [
+    kCGImageSourceCreateThumbnailFromImageAlways: true,
+    kCGImageSourceShouldCacheImmediately: true,
+    kCGImageSourceCreateThumbnailWithTransform: true,
+    kCGImageSourceThumbnailMaxPixelSize: maxPixel * scale,
+  ]
+  guard let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, downsample as CFDictionary) else {
+    return UIImage(data: data)
+  }
+  return UIImage(cgImage: cg)
 }
 
 /// Visual cover picker matching PWA CoverPicker (GIFs, Stills, and Photos).

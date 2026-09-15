@@ -99,7 +99,9 @@ export class SupabaseBackend implements Backend {
     }
     this.uid = user.id;
 
-    await this.refresh();
+    await this.refreshActivities();
+    void this.refreshLogs();
+    void this.refreshExternal();
 
     this.channel = this.client
       .channel(`space:${this.spaceId}`)
@@ -389,11 +391,9 @@ export class SupabaseBackend implements Backend {
   /* ---------------- internals ---------------- */
 
   private async refresh(): Promise<void> {
-    await Promise.all([
-      this.refreshActivities(),
-      this.refreshLogs(),
-      this.refreshExternal(),
-    ]);
+    await this.refreshActivities();
+    void this.refreshLogs();
+    void this.refreshExternal();
   }
 
   private async fetchActivities(): Promise<Activity[]> {

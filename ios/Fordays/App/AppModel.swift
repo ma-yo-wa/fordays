@@ -283,7 +283,7 @@ final class AppModel: ObservableObject {
     } catch {
       toast = error.localizedDescription
     }
-    await refreshExternal()
+    Task { await refreshExternal() }
   }
 
   func refreshExternal() async {
@@ -744,7 +744,7 @@ final class AppModel: ObservableObject {
     if space != nil {
       await refreshActivities()
       watchDeviceCalendars()
-      await syncAppleIfNeeded()
+      Task { await syncAppleIfNeeded() }
     } else {
       activities = []
     }

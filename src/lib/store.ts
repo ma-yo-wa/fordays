@@ -157,12 +157,68 @@ interface AppState {
 
 let backend: Backend | null = null;
 let toastSeq = 0;
+let snapTimer = 0;
 
+const SNAP_LAST = 'fordays:snap:last';
 const firstOfMonth = (d: Date) => iso(new Date(d.getFullYear(), d.getMonth(), 1));
 
+type NotebookSnap = {
+  space: SpaceInfo;
+  spaces: SpaceInfo[];
+  activities: Activity[];
+};
+
+function snapKey(spaceId: string): string {
+  return `fordays:snap:v1:${spaceId}`;
+}
+
+function slimActivities(list: Activity[]): Activity[] {
+  return list.map((a) =>
+    a.image_url?.startsWith('data:') ? { ...a, image_url: null } : a,
+  );
+}
+
+function readSnap(spaceId?: string | null): NotebookSnap | null {
+  try {
+    const id = spaceId ?? localStorage.getItem(SNAP_LAST);
+    if (!id) return null;
+    const raw = localStorage.getItem(snapKey(id));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as NotebookSnap;
+    if (!parsed?.space?.id || !Array.isArray(parsed.activities)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeSnap(space: SpaceInfo, spaces: SpaceInfo[], activities: Activity[]): void {
+  try {
+    const snap: NotebookSnap = {
+      space,
+      spaces: spaces.length ? spaces : [space],
+      activities: slimActivities(activities),
+    };
+    localStorage.setItem(snapKey(space.id), JSON.stringify(snap));
+    localStorage.setItem(SNAP_LAST, space.id);
+  } catch {
+    /* quota / private mode */
+  }
+}
+
 export const useApp = create<AppState>()((set, get) => {
+  const scheduleSnap = () => {
+    const { space, spaces, activities } = get();
+    if (!space) return;
+    window.clearTimeout(snapTimer);
+    snapTimer = window.setTimeout(() => writeSnap(space, spaces, activities), 200);
+  };
+
   const handlers = {
-    onActivities: (list: Activity[]) => set({ activities: list }),
+    onActivities: (list: Activity[]) => {
+      set({ activities: list });
+      scheduleSnap();
+    },
     onLogs: (list: AuditLog[]) => set({ logs: list }),
     onExternal: (list: ExternalEvent[]) => set({ external: list }),
     onLive: (live: boolean, liveLabel: string) => set({ live, liveLabel }),
@@ -228,11 +284,26 @@ export const useApp = create<AppState>()((set, get) => {
             set({ authPhase: 'signedOut', ready: true, space: null });
             return;
           }
+          const backendMod = import('./backends/supabase');
+          const snap = readSnap();
+          if (snap) {
+            set({
+              space: snap.space,
+              spaces: snap.spaces.length ? snap.spaces : [snap.space],
+              activities: snap.activities,
+              authPhase: 'signedIn',
+              ready: true,
+              config: loadConfig(),
+            });
+          }
           const space = await ensureSpace();
-          const spaces = await loadSpaces().catch(() => (space ? [space] : []));
+          const [spaces, { SupabaseBackend }] = await Promise.all([
+            loadSpaces().catch(() => (space ? [space] : [])),
+            backendMod,
+          ]);
           set({ space, spaces, config: loadConfig(), authPhase: 'signedIn' });
           if (space) {
-            await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
+            await start(new SupabaseBackend({ ...loadConfig(), spaceId: space.id }));
             void import('./push').then((m) => m.syncPush());
             void get().pullImportedCalendars();
           } else {
@@ -298,6 +369,18 @@ export const useApp = create<AppState>()((set, get) => {
     },
 
     async switchToSpace(id) {
+      const snap = readSnap(id);
+      if (snap) {
+        set({
+          space: snap.space,
+          spaces: snap.spaces.length ? snap.spaces : [snap.space],
+          activities: snap.activities,
+          external: [],
+          detailId: null,
+        });
+      } else {
+        set({ activities: [], external: [], logs: [], detailId: null });
+      }
       const space = await switchSpaceRemote(id);
       const spaces = await loadSpaces().catch(() => (space ? [space] : []));
       set({ space, spaces, config: loadConfig(), detailId: null });

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
 import NavBar from './components/NavBar';
 import TabBar from './components/TabBar';
 import AddSheet from './components/AddSheet';
@@ -52,6 +51,8 @@ function AppShell() {
   const setJoinOrbOpen = useApp((st) => st.setJoinOrbOpen);
   const setPasswordRecovery = useApp((st) => st.setPasswordRecovery);
   const main = useRef<HTMLElement>(null);
+  const scrollY = useRef(0);
+  const scrollRaf = useRef(0);
   const [inviterHint, setInviterHint] = useState<string | null>(null);
   // After Auth unmounts, iOS often delivers the Sign-in tap to whatever is
   // now under the finger (usually the avatar → Settings). Eat that click.
@@ -159,27 +160,25 @@ function AppShell() {
       <main
         ref={main}
         className={`${s.main} ${screen !== 'calendar' ? s.largeTitleRoom : ''}`}
-        onScroll={(e) => setNavScroll(e.currentTarget.scrollTop)}
+        onScroll={(e) => {
+          scrollY.current = e.currentTarget.scrollTop;
+          if (scrollRaf.current) return;
+          scrollRaf.current = window.requestAnimationFrame(() => {
+            scrollRaf.current = 0;
+            setNavScroll(scrollY.current);
+          });
+        }}
       >
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={screen}
-            className={s.screen}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
-          >
-            {ready &&
-              (screen === 'bucket' ? (
-                <BucketList />
-              ) : screen === 'memories' ? (
-                <Memories />
-              ) : (
-                <Calendar />
-              ))}
-          </motion.div>
-        </AnimatePresence>
+        <div className={s.screen}>
+          {ready &&
+            (screen === 'bucket' ? (
+              <BucketList />
+            ) : screen === 'memories' ? (
+              <Memories />
+            ) : (
+              <Calendar />
+            ))}
+        </div>
       </main>
 
       <TabBar />

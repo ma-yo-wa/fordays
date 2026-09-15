@@ -954,9 +954,9 @@ struct SettingsView: View {
     spaceBusy = true
     Task {
       await persistOrbName()
+      dismiss()
       await app.switchToSpace(id)
       spaceBusy = false
-      if app.space?.id == id { dismiss() }
     }
   }
 

@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { motion } from 'motion/react';
 import CoverArt from '../components/CoverArt';
 import { useApp, partnerName, isMatched } from '../lib/store';
 import { isPlan, type ExternalEvent } from '../lib/types';
@@ -244,21 +243,18 @@ export default function Calendar() {
           </div>
         ) : (
           <div className={s.plansList}>
-            {dayItems.map((item, i) => {
+            {dayItems.map((item) => {
               if (item.kind === 'plan') {
                 const a = item.plan;
                 const when = relativeDay(dtDate(a.date_time) ?? picked);
                 const time = dtTime(a.date_time);
                 const timing = time ? `${when} · ${prettyLower(time)}` : `${when} · All day`;
                 return (
-                  <motion.button
+                  <button
                     key={a.id}
                     type="button"
                     className={s.entry}
                     onClick={() => openDetail(a.id)}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05, duration: 0.4 }}
                   >
                     <CoverArt
                       url={a.image_url}
@@ -283,7 +279,7 @@ export default function Calendar() {
                         {partnerName(config, a.created_by)}
                       </div>
                     </span>
-                  </motion.button>
+                  </button>
                 );
               }
 
@@ -297,14 +293,11 @@ export default function Calendar() {
               const when = relativeDay(dtDate(e.startsAt) ?? picked);
               const timing = `${when} · ${pillWhen(e, picked)}`;
               return (
-                <motion.button
+                <button
                   key={e.id}
                   type="button"
                   className={`${s.entry} ${s.entryCal}`}
                   onClick={() => openExternal(e.id)}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05, duration: 0.4 }}
                 >
                   <span className={s.calThumb} aria-hidden>
                     {artFor(e.title)}
@@ -323,7 +316,7 @@ export default function Calendar() {
                       )}
                     </div>
                   </span>
-                </motion.button>
+                </button>
               );
             })}
           </div>

@@ -49,6 +49,7 @@ export default function CoverArt({
         alt=""
         loading={size === 'hero' ? 'eager' : 'lazy'}
         decoding="async"
+        draggable={false}
       />
     </div>
   );

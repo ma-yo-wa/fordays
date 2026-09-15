@@ -56,10 +56,10 @@ export default function Sheet({
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
-            /* Slower and softer than a generic spring: iOS sheets arrive
-               with almost no overshoot, so any bounce reads as a web
-               animation library rather than as the system. */
-            transition={{ type: 'spring', stiffness: 320, damping: 34, mass: 0.9 }}
+            transition={{
+              y: { type: 'tween', duration: 0.38, ease: [0.32, 0.72, 0, 1] },
+              opacity: { duration: 0.22, ease: [0.25, 0.1, 0.25, 1] },
+            }}
             drag="y"
             dragControls={dragControls}
             dragListener={false}

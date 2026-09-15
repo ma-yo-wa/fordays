@@ -1,4 +1,3 @@
-import { motion } from 'motion/react';
 import CoverArt from '../components/CoverArt';
 import { useApp, partnerName, isMatched } from '../lib/store';
 import { isBucketItem } from '../lib/types';
@@ -42,21 +41,12 @@ export default function BucketList() {
   return (
     <div className={s.board}>
       {items.map((a, i) => (
-        <motion.button
+        <button
           key={a.id}
           type="button"
           className={s.card}
           style={{ background: tints[i] }}
           onClick={() => openDetail(a.id)}
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          /* Stagger only across the first screenful — past that it stops
-             reading as a flourish and starts reading as a slow app. */
-          transition={{
-            delay: Math.min(i, 7) * 0.055,
-            duration: 0.5,
-            ease: [0.2, 0.8, 0.2, 1],
-          }}
         >
           {a.image_url && <CoverArt url={a.image_url} size="card" className={s.art} />}
           <div className={s.veil} />
@@ -65,7 +55,7 @@ export default function BucketList() {
             <h3 className={s.title}>{a.title}</h3>
             <div className={s.foot}>{partnerName(config, a.created_by)}</div>
           </div>
-        </motion.button>
+        </button>
       ))}
     </div>
   );
