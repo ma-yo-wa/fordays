@@ -3,7 +3,7 @@ import CoverArt from '../components/CoverArt';
 import { useApp, partnerName, isMatched } from '../lib/store';
 import { isBucketItem } from '../lib/types';
 import { tintsFor } from '../lib/tint';
-import { prefetchCovers } from '../lib/coverCache';
+import { prefetchCovers, FIRST_SOMEDAY_COVERS } from '../lib/coverCache';
 import { Copy } from '../lib/copy';
 import s from './BucketList.module.css';
 
@@ -29,7 +29,7 @@ export default function BucketList() {
   );
 
   useEffect(() => {
-    prefetchCovers(items.map((a) => a.image_url));
+    prefetchCovers(items.slice(0, FIRST_SOMEDAY_COVERS).map((a) => a.image_url));
   }, [items]);
 
   if (!items.length) {
@@ -59,7 +59,7 @@ export default function BucketList() {
           onClick={() => openDetail(a.id)}
         >
           {a.image_url && (
-            <CoverArt url={a.image_url} size="card" className={s.art} eager={i < 8} />
+            <CoverArt url={a.image_url} size="card" className={s.art} eager={i < FIRST_SOMEDAY_COVERS} />
           )}
           <div className={s.veil} />
 

@@ -283,7 +283,9 @@ final class AppModel: ObservableObject {
         .value
       activities = rows.map { $0.asActivity() }
       persistNotebook()
-      CoverImageStore.shared.prefetch(activities.filter(\.isBucketItem).compactMap(\.imageUrl))
+      CoverImageStore.shared.prefetch(
+        activities.filter(\.isBucketItem).sorted { $0.createdAt > $1.createdAt }.prefix(6).compactMap(\.imageUrl)
+      )
     } catch {
       toast = error.localizedDescription
     }
@@ -758,7 +760,9 @@ final class AppModel: ObservableObject {
     space = snap.space
     spaces = snap.spaces.isEmpty ? [snap.space] : snap.spaces
     activities = snap.activities
-    CoverImageStore.shared.prefetch(snap.activities.filter(\.isBucketItem).compactMap(\.imageUrl))
+    CoverImageStore.shared.prefetch(
+      snap.activities.filter(\.isBucketItem).sorted { $0.createdAt > $1.createdAt }.prefix(6).compactMap(\.imageUrl)
+    )
   }
 
   private func persistNotebook() {
