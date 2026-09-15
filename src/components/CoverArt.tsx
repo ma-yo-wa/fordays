@@ -10,7 +10,7 @@ interface Props {
   className?: string;
   /** Larger emoji for detail / picker preview. */
   size?: 'card' | 'hero' | 'thumb';
-  /** First screenful of Someday should not wait on lazy-load. */
+  /** First screenful of Someday / Memories should not wait on lazy-load. */
   eager?: boolean;
 }
 
@@ -42,9 +42,9 @@ export default function CoverArt({
   }
 
   /* A real <img> rather than a background, so the browser can skip
-     everything below the fold. A long bucket list is otherwise a few
-     hundred simultaneous decodes. The detail sheet's hero is already on
-     screen by the time it renders, so it doesn't wait. */
+     everything below the fold. A long board is otherwise a few hundred
+     simultaneous decodes. The detail sheet's hero is already on screen
+     by the time it renders, so it doesn't wait. */
   const loadNow = eager || size === 'hero';
   return (
     <div className={`${s.photo} ${s[size]} ${className ?? ''}`} aria-hidden>

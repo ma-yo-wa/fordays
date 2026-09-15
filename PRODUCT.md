@@ -111,6 +111,20 @@ Plans whose day has passed. Look back, not a third kind of object.
 
 ---
 
+## Covers
+
+One picture on a plan. The person picks it. Never auto-assign from the title.
+
+- **GIFs** — a Giphy `https` URL in `image_url`
+- **Stills** — an Unsplash `https` URL
+- **Photos** — a compressed JPEG stored *in* `image_url` as a `data:` URL (the notebook row, not a files bucket)
+
+Fordays is not a photo host. Gallery photos live on the plan so the we can see them. Device cache of the first screen of Someday and Memories is a cache, not a library.
+
+No picture: art family → orb hue. No match → id-hash wash.
+
+---
+
 ## Invite
 
 Link or code for **this** Orb. Share sheet / copy URL. They get their own login, then land in this Orb.

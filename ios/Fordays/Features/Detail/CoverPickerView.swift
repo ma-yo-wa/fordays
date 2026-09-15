@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import PhotosUI
 import ImageIO
 
@@ -17,23 +18,28 @@ struct CoverItem: Identifiable, Hashable {
   let fullUrl: String
 }
 
-/// Renders either a base64 `data:image/...` URI or a remote `https://` URL.
+/// Renders a Giphy/Unsplash `https` URL or a gallery `data:image/...` JPEG.
 struct RemoteOrDataImage: View {
   let urlString: String
   var contentMode: ContentMode = .fill
+  @State private var image: UIImage?
 
   var body: some View {
-    if urlString.hasPrefix("data:image"),
-       let base64Index = urlString.range(of: "base64,")?.upperBound,
-       let data = Data(base64Encoded: String(urlString[base64Index...])),
-       let uiImage = downsampledImage(from: data) {
-      Image(uiImage: uiImage)
-        .resizable()
-        .aspectRatio(contentMode: contentMode)
-    } else if let url = URL(string: urlString) {
-      CachedRemoteImage(url: url, contentMode: contentMode)
-    } else {
-      Color.clear
+    Group {
+      if let image {
+        Image(uiImage: image)
+          .resizable()
+          .aspectRatio(contentMode: contentMode)
+      } else {
+        LinearGradient(
+          colors: [Theme.rose.opacity(0.3), Theme.sage.opacity(0.3)],
+          startPoint: .topLeading,
+          endPoint: .bottomTrailing
+        )
+      }
+    }
+    .task(id: urlString) {
+      image = await CoverImageStore.shared.load(urlString)
     }
   }
 }
@@ -51,9 +57,24 @@ final class CoverImageStore {
 
   func prefetch(_ urls: [String]) {
     for raw in urls {
-      guard let url = URL(string: raw), url.scheme?.hasPrefix("http") == true else { continue }
-      Task { _ = await image(for: url) }
+      Task { _ = await load(raw) }
     }
+  }
+
+  func load(_ raw: String) async -> UIImage? {
+    if raw.hasPrefix("emoji:") { return nil }
+    let key = cacheKey(raw)
+    if let hit = memory.object(forKey: key) { return hit }
+    if raw.hasPrefix("data:image") {
+      guard let range = raw.range(of: "base64,"),
+            let data = Data(base64Encoded: String(raw[range.upperBound...])),
+            let img = downsampledImage(from: data)
+      else { return nil }
+      memory.setObject(img, forKey: key)
+      return img
+    }
+    guard let url = URL(string: raw), url.scheme?.hasPrefix("http") == true else { return nil }
+    return await image(for: url)
   }
 
   func image(for url: URL) async -> UIImage? {
@@ -75,6 +96,13 @@ final class CoverImageStore {
     }
   }
 
+  private func cacheKey(_ raw: String) -> NSString {
+    if raw.hasPrefix("data:image") {
+      return "data:\(raw.hashValue)" as NSString
+    }
+    return raw as NSString
+  }
+
   private func fileURL(for url: URL) -> URL {
     let name = String(url.absoluteString.hashValue)
     return folder.appendingPathComponent(name)
@@ -84,25 +112,9 @@ final class CoverImageStore {
 struct CachedRemoteImage: View {
   let url: URL
   var contentMode: ContentMode = .fill
-  @State private var image: UIImage?
 
   var body: some View {
-    Group {
-      if let image {
-        Image(uiImage: image)
-          .resizable()
-          .aspectRatio(contentMode: contentMode)
-      } else {
-        LinearGradient(
-          colors: [Theme.rose.opacity(0.3), Theme.sage.opacity(0.3)],
-          startPoint: .topLeading,
-          endPoint: .bottomTrailing
-        )
-      }
-    }
-    .task(id: url) {
-      image = await CoverImageStore.shared.image(for: url)
-    }
+    RemoteOrDataImage(urlString: url.absoluteString, contentMode: contentMode)
   }
 }
 

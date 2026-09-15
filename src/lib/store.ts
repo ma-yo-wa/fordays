@@ -25,8 +25,7 @@ import {
 } from './auth';
 import { iso, todayISO } from './date';
 import { Copy, formatCopy } from './copy';
-import { prefetchSomedayCovers } from './coverCache';
-import { isBucketItem } from './types';
+import { prefetchBoardCovers } from './coverCache';
 
 export type Screen = 'bucket' | 'calendar' | 'memories';
 
@@ -220,7 +219,7 @@ export const useApp = create<AppState>()((set, get) => {
     onActivities: (list: Activity[]) => {
       set({ activities: list });
       scheduleSnap();
-      prefetchSomedayCovers(list.filter(isBucketItem));
+      prefetchBoardCovers(list);
     },
     onLogs: (list: AuditLog[]) => set({ logs: list }),
     onExternal: (list: ExternalEvent[]) => set({ external: list }),
@@ -298,7 +297,7 @@ export const useApp = create<AppState>()((set, get) => {
               ready: true,
               config: loadConfig(),
             });
-            prefetchSomedayCovers(snap.activities.filter(isBucketItem));
+            prefetchBoardCovers(snap.activities);
           }
           const space = await ensureSpace();
           const [spaces, { SupabaseBackend }] = await Promise.all([
@@ -382,7 +381,7 @@ export const useApp = create<AppState>()((set, get) => {
           external: [],
           detailId: null,
         });
-        prefetchSomedayCovers(snap.activities.filter(isBucketItem));
+        prefetchBoardCovers(snap.activities);
       } else {
         set({ activities: [], external: [], logs: [], detailId: null });
       }

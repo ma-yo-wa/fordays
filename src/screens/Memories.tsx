@@ -1,9 +1,11 @@
+import { useEffect, useMemo } from 'react';
 import CoverArt from '../components/CoverArt';
 import { useApp, isMatched } from '../lib/store';
 import type { Activity } from '../lib/types';
 import { isMemory } from '../lib/types';
 import { MON3, todayISO } from '../lib/date';
 import { tintsFor } from '../lib/tint';
+import { prefetchCovers, FIRST_BOARD_COVERS } from '../lib/coverCache';
 import s from './Memories.module.css';
 
 function monthKey(a: Activity): string {
@@ -35,14 +37,18 @@ export default function Memories() {
   const matched = useApp((st) => isMatched(st.space));
   const today = todayISO();
 
-  const items = activities
-    .filter((a) => isMemory(a, today))
-    .slice()
-    .sort((a, b) => {
-      const ae = (a.ends_at ?? a.date_time)!.slice(0, 10);
-      const be = (b.ends_at ?? b.date_time)!.slice(0, 10);
-      return be.localeCompare(ae);
-    });
+  const items = useMemo(
+    () =>
+      activities
+        .filter((a) => isMemory(a, today))
+        .slice()
+        .sort((a, b) => {
+          const ae = (a.ends_at ?? a.date_time)!.slice(0, 10);
+          const be = (b.ends_at ?? b.date_time)!.slice(0, 10);
+          return be.localeCompare(ae);
+        }),
+    [activities, today],
+  );
 
   const sections = groupByMonth(items);
   const tints = tintsFor(
@@ -50,6 +56,11 @@ export default function Memories() {
     items.map((a) => a.title),
   );
   const tintById = new Map(items.map((a, i) => [a.id, tints[i]!]));
+  const eagerIds = new Set(items.slice(0, FIRST_BOARD_COVERS).map((a) => a.id));
+
+  useEffect(() => {
+    prefetchCovers(items.slice(0, FIRST_BOARD_COVERS).map((a) => a.image_url));
+  }, [items]);
 
   if (!items.length) {
     return (
@@ -80,7 +91,12 @@ export default function Memories() {
                 onClick={() => openDetail(a.id)}
               >
                 {a.image_url && (
-                  <CoverArt url={a.image_url} size="card" className={s.art} />
+                  <CoverArt
+                    url={a.image_url}
+                    size="card"
+                    className={s.art}
+                    eager={eagerIds.has(a.id)}
+                  />
                 )}
                 <div className={s.veil} />
                 <div className={s.body}>

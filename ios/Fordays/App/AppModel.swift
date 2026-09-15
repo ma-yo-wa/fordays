@@ -283,9 +283,7 @@ final class AppModel: ObservableObject {
         .value
       activities = rows.map { $0.asActivity() }
       persistNotebook()
-      CoverImageStore.shared.prefetch(
-        activities.filter(\.isBucketItem).sorted { $0.createdAt > $1.createdAt }.prefix(6).compactMap(\.imageUrl)
-      )
+      prefetchFirstBoardCovers(activities)
     } catch {
       toast = error.localizedDescription
     }
@@ -752,6 +750,21 @@ final class AppModel: ObservableObject {
     return dir.appendingPathComponent("fordays-notebook-\(spaceId).json")
   }
 
+  private func prefetchFirstBoardCovers(_ rows: [Activity]) {
+    let someday = rows
+      .filter(\.isBucketItem)
+      .sorted { $0.createdAt > $1.createdAt }
+      .prefix(6)
+      .compactMap(\.imageUrl)
+    let today = DateLocal.todayISO()
+    let memories = rows
+      .filter { $0.isMemory(today: today) }
+      .sorted { ($0.endsAt ?? $0.dateTime ?? "") > ($1.endsAt ?? $1.dateTime ?? "") }
+      .prefix(6)
+      .compactMap(\.imageUrl)
+    CoverImageStore.shared.prefetch(Array(someday) + Array(memories))
+  }
+
   private func hydrateNotebook() {
     guard let id = storedSpaceId else { return }
     guard let data = try? Data(contentsOf: notebookCacheURL(spaceId: id)),
@@ -760,9 +773,7 @@ final class AppModel: ObservableObject {
     space = snap.space
     spaces = snap.spaces.isEmpty ? [snap.space] : snap.spaces
     activities = snap.activities
-    CoverImageStore.shared.prefetch(
-      snap.activities.filter(\.isBucketItem).sorted { $0.createdAt > $1.createdAt }.prefix(6).compactMap(\.imageUrl)
-    )
+    prefetchFirstBoardCovers(snap.activities)
   }
 
   private func persistNotebook() {
