@@ -10,6 +10,8 @@ interface Props {
   className?: string;
   /** Larger emoji for detail / picker preview. */
   size?: 'card' | 'hero' | 'thumb';
+  /** First screenful of Someday should not wait on lazy-load. */
+  eager?: boolean;
 }
 
 export default function CoverArt({
@@ -18,6 +20,7 @@ export default function CoverArt({
   washTitle,
   className,
   size = 'card',
+  eager = false,
 }: Props) {
   if (!url) {
     if (!washId) return null;
@@ -42,12 +45,13 @@ export default function CoverArt({
      everything below the fold. A long bucket list is otherwise a few
      hundred simultaneous decodes. The detail sheet's hero is already on
      screen by the time it renders, so it doesn't wait. */
+  const loadNow = eager || size === 'hero';
   return (
     <div className={`${s.photo} ${s[size]} ${className ?? ''}`} aria-hidden>
       <img
         src={url}
         alt=""
-        loading={size === 'hero' ? 'eager' : 'lazy'}
+        loading={loadNow ? 'eager' : 'lazy'}
         decoding="async"
         draggable={false}
       />

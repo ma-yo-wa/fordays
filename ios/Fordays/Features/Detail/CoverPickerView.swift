@@ -31,20 +31,77 @@ struct RemoteOrDataImage: View {
         .resizable()
         .aspectRatio(contentMode: contentMode)
     } else if let url = URL(string: urlString) {
-      AsyncImage(url: url) { phase in
-        switch phase {
-        case .success(let img):
-          img.resizable().aspectRatio(contentMode: contentMode)
-        default:
-          LinearGradient(
-            colors: [Theme.rose.opacity(0.3), Theme.sage.opacity(0.3)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-          )
-        }
-      }
+      CachedRemoteImage(url: url, contentMode: contentMode)
     } else {
       Color.clear
+    }
+  }
+}
+
+final class CoverImageStore {
+  static let shared = CoverImageStore()
+  private let memory = NSCache<NSString, UIImage>()
+  private let folder: URL
+
+  private init() {
+    let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+    folder = base.appendingPathComponent("fordays-covers", isDirectory: true)
+    try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+  }
+
+  func prefetch(_ urls: [String]) {
+    for raw in urls {
+      guard let url = URL(string: raw), url.scheme?.hasPrefix("http") == true else { continue }
+      Task { _ = await image(for: url) }
+    }
+  }
+
+  func image(for url: URL) async -> UIImage? {
+    let key = url.absoluteString as NSString
+    if let hit = memory.object(forKey: key) { return hit }
+    let file = fileURL(for: url)
+    if let data = try? Data(contentsOf: file), let img = downsampledImage(from: data) {
+      memory.setObject(img, forKey: key)
+      return img
+    }
+    do {
+      let (data, _) = try await URLSession.shared.data(from: url)
+      try? data.write(to: file, options: .atomic)
+      let img = downsampledImage(from: data)
+      if let img { memory.setObject(img, forKey: key) }
+      return img
+    } catch {
+      return nil
+    }
+  }
+
+  private func fileURL(for url: URL) -> URL {
+    let name = String(url.absoluteString.hashValue)
+    return folder.appendingPathComponent(name)
+  }
+}
+
+struct CachedRemoteImage: View {
+  let url: URL
+  var contentMode: ContentMode = .fill
+  @State private var image: UIImage?
+
+  var body: some View {
+    Group {
+      if let image {
+        Image(uiImage: image)
+          .resizable()
+          .aspectRatio(contentMode: contentMode)
+      } else {
+        LinearGradient(
+          colors: [Theme.rose.opacity(0.3), Theme.sage.opacity(0.3)],
+          startPoint: .topLeading,
+          endPoint: .bottomTrailing
+        )
+      }
+    }
+    .task(id: url) {
+      image = await CoverImageStore.shared.image(for: url)
     }
   }
 }

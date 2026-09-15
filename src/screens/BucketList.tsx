@@ -1,7 +1,9 @@
+import { useEffect, useMemo } from 'react';
 import CoverArt from '../components/CoverArt';
 import { useApp, partnerName, isMatched } from '../lib/store';
 import { isBucketItem } from '../lib/types';
 import { tintsFor } from '../lib/tint';
+import { prefetchCovers } from '../lib/coverCache';
 import { Copy } from '../lib/copy';
 import s from './BucketList.module.css';
 
@@ -12,15 +14,23 @@ export default function BucketList() {
   const matched = useApp((st) => isMatched(st.space));
   const frozen = useApp((st) => Boolean(st.space?.frozen));
 
-  const items = activities
-    .filter(isBucketItem)
-    .slice()
-    .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
+  const items = useMemo(
+    () =>
+      activities
+        .filter(isBucketItem)
+        .slice()
+        .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at)),
+    [activities],
+  );
 
   const tints = tintsFor(
     items.map((a) => a.id),
     items.map((a) => a.title),
   );
+
+  useEffect(() => {
+    prefetchCovers(items.map((a) => a.image_url));
+  }, [items]);
 
   if (!items.length) {
     return (
@@ -48,7 +58,9 @@ export default function BucketList() {
           style={{ background: tints[i] }}
           onClick={() => openDetail(a.id)}
         >
-          {a.image_url && <CoverArt url={a.image_url} size="card" className={s.art} />}
+          {a.image_url && (
+            <CoverArt url={a.image_url} size="card" className={s.art} eager={i < 8} />
+          )}
           <div className={s.veil} />
 
           <div className={s.body}>

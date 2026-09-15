@@ -34,13 +34,13 @@ struct Activity: Identifiable, Hashable, Codable {
   }
 }
 
-struct SpaceMember: Hashable {
+struct SpaceMember: Hashable, Codable {
   var id: String
   var name: String
   var role: String
 }
 
-struct SpaceInfo: Hashable {
+struct SpaceInfo: Hashable, Codable {
   var id: String
   var name: String
   var inviteCode: String

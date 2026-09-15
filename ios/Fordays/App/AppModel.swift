@@ -203,10 +203,12 @@ final class AppModel: ObservableObject {
     authPhase = .loading
     do {
       _ = try await sb.auth.session
+      hydrateNotebook()
+      if space != nil { authPhase = .signedIn }
       try await refreshSpaceAndData()
       authPhase = space == nil ? .signedOut : .signedIn
     } catch {
-      authPhase = .signedOut
+      authPhase = space != nil ? .signedIn : .signedOut
     }
   }
 
@@ -280,6 +282,8 @@ final class AppModel: ObservableObject {
         .execute()
         .value
       activities = rows.map { $0.asActivity() }
+      persistNotebook()
+      CoverImageStore.shared.prefetch(activities.filter(\.isBucketItem).compactMap(\.imageUrl))
     } catch {
       toast = error.localizedDescription
     }
@@ -733,6 +737,45 @@ final class AppModel: ObservableObject {
   private var storedSpaceId: String? {
     get { UserDefaults.standard.string(forKey: "fordays.spaceId") }
     set { UserDefaults.standard.set(newValue, forKey: "fordays.spaceId") }
+  }
+
+  private struct NotebookSnap: Codable {
+    var space: SpaceInfo
+    var spaces: [SpaceInfo]
+    var activities: [Activity]
+  }
+
+  private func notebookCacheURL(spaceId: String) -> URL {
+    let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+    return dir.appendingPathComponent("fordays-notebook-\(spaceId).json")
+  }
+
+  private func hydrateNotebook() {
+    guard let id = storedSpaceId else { return }
+    guard let data = try? Data(contentsOf: notebookCacheURL(spaceId: id)),
+          let snap = try? JSONDecoder().decode(NotebookSnap.self, from: data)
+    else { return }
+    space = snap.space
+    spaces = snap.spaces.isEmpty ? [snap.space] : snap.spaces
+    activities = snap.activities
+    CoverImageStore.shared.prefetch(snap.activities.filter(\.isBucketItem).compactMap(\.imageUrl))
+  }
+
+  private func persistNotebook() {
+    guard let space else { return }
+    var rows = activities
+    for i in rows.indices {
+      if rows[i].imageUrl?.hasPrefix("data:") == true {
+        rows[i].imageUrl = nil
+      }
+    }
+    let snap = NotebookSnap(
+      space: space,
+      spaces: spaces.isEmpty ? [space] : spaces,
+      activities: rows
+    )
+    guard let data = try? JSONEncoder().encode(snap) else { return }
+    try? data.write(to: notebookCacheURL(spaceId: space.id), options: .atomic)
   }
 
   private func refreshSpaceAndData() async throws {

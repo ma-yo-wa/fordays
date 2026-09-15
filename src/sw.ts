@@ -33,6 +33,38 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
+const COVER_CACHE = 'fordays-covers-v1';
+const COVER_MAX = 80;
+
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  if (req.method !== 'GET' || req.destination !== 'image') return;
+  const url = new URL(req.url);
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
+  event.respondWith(coverFromCache(req));
+});
+
+async function coverFromCache(req: Request): Promise<Response> {
+  const cache = await caches.open(COVER_CACHE);
+  const hit = await cache.match(req);
+  if (hit) return hit;
+  try {
+    const res = await fetch(req);
+    if (res.ok || res.type === 'opaque') {
+      await cache.put(req, res.clone());
+      const keys = await cache.keys();
+      if (keys.length > COVER_MAX) {
+        await Promise.all(
+          keys.slice(0, keys.length - COVER_MAX).map((key) => cache.delete(key)),
+        );
+      }
+    }
+    return res;
+  } catch {
+    return hit ?? Response.error();
+  }
+}
+
 interface PushPayload {
   title?: string;
   body?: string;
