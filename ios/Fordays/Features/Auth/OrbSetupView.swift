@@ -7,12 +7,20 @@ enum OrbSetupMode {
 
 struct OrbSetupView: View {
   var mode: OrbSetupMode = .firstRun
+  var initialWithPeople: Bool = false
   var onFinished: (() -> Void)? = nil
 
   @EnvironmentObject private var app: AppModel
-  @State private var withPeople = false
+  @State private var withPeople: Bool
   @State private var name = ""
   @State private var busy = false
+
+  init(mode: OrbSetupMode = .firstRun, initialWithPeople: Bool = false, onFinished: (() -> Void)? = nil) {
+    self.mode = mode
+    self.initialWithPeople = initialWithPeople
+    self.onFinished = onFinished
+    _withPeople = State(initialValue: initialWithPeople)
+  }
 
   private var placeholder: String {
     withPeople ? Copy.Orbs.crewPlaceholder : Copy.Orbs.personalPlaceholder

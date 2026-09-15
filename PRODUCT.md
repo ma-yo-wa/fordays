@@ -16,6 +16,12 @@ Someday / Plans / Memories **are** that notebook. Everyone has at least one **li
 
 **Enforced Personal Orb**: Every user always has a Personal Orb as their permanent anchor. You can rename it, but you cannot delete your Personal Orb. It is your home base.
 
+**Personal Orb is strictly solo**:
+- An Orb is the notebook for a specific we. Personal is a we of one.
+- You cannot invite anyone into your Personal Orb. It has no `+ Invite` button in Settings.
+- When you want to plan with someone, you create a shared Orb (`With someone`).
+- This guarantees private plans, doctor appointments, surprises, and personal bucket items never accidentally leak to a partner or group. Personal remains an untouchable private capsule.
+
 **Orb** = the notebook. **Faces** = people in *this* space (two: rose / sage; many: names + initials). Not a hue per person or per space.
 
 A name is **required** for Just you and With people. Placeholder in the field (`Personal` / `Aline’s Crew`) is only an example — never saved, never shown as the title. Unnamed legacy Orbs (Fordays / Someday / blank) stay untitled: empty field, no caption on the tile, faces already say who. When they name it, that word sits **under the circle** and **beside This Orb** (label semibold faint, name regular ink). Never title an Orb with a person’s name.
@@ -182,6 +188,7 @@ When composing a plan, ambient availability context appears quietly below the da
 
 Link or code for **this** Orb. Share sheet / copy URL.
 
+- **No invite on Personal Orb**: An invite link or code is generated only for shared Orbs. Personal Orb has no invite door; to plan with someone, create a shared Orb.
 - **New user via invite**: signs up and lands straight in the invited Orb. No setup interstitial. Their Personal Orb is minted in the background.
 - **Existing user via invite**: tapping an invite link or accepting a code joins the Orb immediately and switches to it with a clean confirmation toast (`Joined “Orb Name”`).
 - Manual join via code remains available in Settings (`Join with a code`).

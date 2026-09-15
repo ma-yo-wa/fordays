@@ -14,9 +14,23 @@ interface Props {
 export default function InviteShare({ open, code, onClose }: Props) {
   const create = useApp((st) => st.create);
   const toast = useApp((st) => st.toast);
+  const space = useApp((st) => st.space);
+  const spaces = useApp((st) => st.spaces);
   const [first, setFirst] = useState('');
   const [busy, setBusy] = useState(false);
   const link = inviteUrl(code);
+
+  const allOrbs = spaces.length ? spaces : space ? [space] : [];
+  const soloOrbs = allOrbs.filter((s) => !s.frozen && (s.members ?? []).length <= 1);
+  const isPersonal = Boolean(
+    space &&
+    (space.members ?? []).length <= 1 &&
+    (space.name.trim().toLowerCase() === 'personal' || soloOrbs.length <= 1)
+  );
+
+  if (isPersonal) {
+    return null;
+  }
 
   async function share() {
     setBusy(true);

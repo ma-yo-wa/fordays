@@ -58,6 +58,7 @@ struct SettingsView: View {
   @State private var showPastOrbs = false
   @State private var showAnotherOrb = false
   @State private var showOrbSetup = false
+  @State private var orbSetupWithPeople = false
   @State private var confirm: SettingsConfirm?
   @State private var orbDraft = ""
   @State private var skipPersistOnDisappear = false
@@ -82,6 +83,13 @@ struct SettingsView: View {
 
   private var pastOrbs: [SpaceInfo] {
     allOrbs.filter { $0.frozen }
+  }
+
+  private var isCurrentPersonalOrb: Bool {
+    guard let space = app.space else { return false }
+    let soloOrb = space.members.count <= 1
+    let soloOrbs = activeOrbs.filter { $0.members.count <= 1 }
+    return soloOrb && (space.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "personal" || soloOrbs.count <= 1)
   }
 
   var body: some View {
@@ -132,8 +140,10 @@ struct SettingsView: View {
       runConfirm(item)
     }
     .sheet(isPresented: $showInvite) {
-      InviteShareView()
-        .environmentObject(app)
+      if !isCurrentPersonalOrb {
+        InviteShareView()
+          .environmentObject(app)
+      }
     }
     .sheet(isPresented: $showPastOrbs) {
       pastOrbsSheet
@@ -143,16 +153,15 @@ struct SettingsView: View {
     }
     .sheet(isPresented: $showAnotherOrb) {
       anotherOrbSheet
-        .sheet(isPresented: $showOrbSetup) {
-          OrbSetupView(mode: .create) {
-            showOrbSetup = false
-            showAnotherOrb = false
-            dismiss()
-          }
-          .environmentObject(app)
-          .presentationDetents([.medium, .large])
-          .presentationDragIndicator(.visible)
-        }
+    }
+    .sheet(isPresented: $showOrbSetup) {
+      OrbSetupView(mode: .create, initialWithPeople: orbSetupWithPeople) {
+        showOrbSetup = false
+        dismiss()
+      }
+      .environmentObject(app)
+      .presentationDetents([.medium, .large])
+      .presentationDragIndicator(.visible)
     }
     .sheet(isPresented: $showApplePicker) {
       applePickerSheet
@@ -385,7 +394,11 @@ struct SettingsView: View {
         .padding(.bottom, 20)
 
       Button {
-        showOrbSetup = true
+        showAnotherOrb = false
+        orbSetupWithPeople = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+          showOrbSetup = true
+        }
       } label: {
         VStack(alignment: .leading, spacing: 2) {
           Text(Copy.Orbs.startNew)
@@ -464,7 +477,7 @@ struct SettingsView: View {
       VStack(alignment: .leading, spacing: 8) {
         ScrollView(.horizontal, showsIndicators: false) {
           HStack(spacing: 10) {
-            if !space.frozen {
+            if !space.frozen && !isPersonalOrb {
               Button {
                 showInvite = true
               } label: {
@@ -530,6 +543,32 @@ struct SettingsView: View {
           }
           .padding(.horizontal, 2)
           .padding(.bottom, 4)
+        }
+
+        if isPersonalOrb {
+          VStack(alignment: .leading, spacing: 8) {
+            Rectangle()
+              .fill(Theme.ink.opacity(0.08))
+              .frame(height: 0.5)
+
+            Text(Copy.Orbs.personalPrivateNote)
+              .font(.footnote)
+              .foregroundStyle(Theme.inkFaint)
+
+            Button {
+              orbSetupWithPeople = true
+              showOrbSetup = true
+            } label: {
+              Text("+ \(Copy.Orbs.startSharedOrb)")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Theme.ink)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+            .buttonStyle(.plain)
+          }
+          .padding(.top, 4)
         }
       }
       .padding(10)

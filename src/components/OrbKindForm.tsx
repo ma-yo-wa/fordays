@@ -6,11 +6,12 @@ import s from './Auth.module.css';
 
 interface Props {
   knobId: string;
+  initialWithPeople?: boolean;
   onSubmit: (name: string, withPeople: boolean) => Promise<void>;
 }
 
-export default function OrbKindForm({ knobId, onSubmit }: Props) {
-  const [withPeople, setWithPeople] = useState(false);
+export default function OrbKindForm({ knobId, initialWithPeople = false, onSubmit }: Props) {
+  const [withPeople, setWithPeople] = useState(initialWithPeople);
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
 

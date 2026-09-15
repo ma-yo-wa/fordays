@@ -10,8 +10,19 @@ struct InviteShareView: View {
   private var code: String { app.space?.inviteCode ?? "" }
   private var link: String { "https://fordays.app/?invite=\(code)" }
 
+  private var isPersonalOrb: Bool {
+    guard let space = app.space else { return false }
+    let soloOrb = space.members.count <= 1
+    let soloOrbs = app.spaces.filter { !$0.frozen && $0.members.count <= 1 }
+    return soloOrb && (space.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "personal" || soloOrbs.count <= 1)
+  }
+
   var body: some View {
-    ScrollView {
+    if isPersonalOrb {
+      Color.clear
+        .onAppear { dismiss() }
+    } else {
+      ScrollView {
       VStack(alignment: .leading, spacing: 0) {
         Text(Copy.Invite.title)
           .font(.title2.weight(.semibold))
@@ -93,9 +104,10 @@ struct InviteShareView: View {
       }
       .padding(20)
     }
-    .background(Theme.paper.ignoresSafeArea())
-    .presentationDetents([.medium])
-    .presentationDragIndicator(.visible)
+      .background(Theme.paper.ignoresSafeArea())
+      .presentationDetents([.medium])
+      .presentationDragIndicator(.visible)
+    }
   }
 
   private func share() async {

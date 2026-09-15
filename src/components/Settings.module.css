@@ -234,6 +234,41 @@
   display: none;
 }
 
+.personalNoteRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  margin-top: 6px;
+  border-top: var(--hairline-w) solid var(--separator);
+}
+
+.personalNoteText {
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-faint);
+  margin: 0;
+}
+
+.startSharedBtn {
+  align-self: flex-start;
+  border: none;
+  background: var(--paper-warm);
+  border-radius: 10px;
+  padding: 7px 12px;
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform 0.12s var(--ease-ios), opacity 0.12s var(--ease-ios);
+}
+
+.startSharedBtn:active {
+  transform: scale(0.97);
+  opacity: 0.8;
+}
+
 .person {
   flex: 0 0 64px;
   display: flex;

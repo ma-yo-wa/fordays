@@ -132,6 +132,8 @@ export default function Settings() {
   const [subview, setSubview] = useState<
     'main' | 'anotherOrb' | 'orbSetup' | 'pastOrbs' | 'calPicker'
   >('main');
+  const [createWithPeople, setCreateWithPeople] = useState(false);
+  const [orbSetupBackTo, setOrbSetupBackTo] = useState<'main' | 'anotherOrb'>('anotherOrb');
 
   const allOrbs = spaces.length ? spaces : space ? [space] : [];
   const activeOrbs = allOrbs.filter((s) => !s.frozen);
@@ -334,6 +336,13 @@ export default function Settings() {
 
   function openInviteSheet() {
     if (!space || space.frozen) return;
+    if (isPersonalOrb) {
+      toast(Copy.orbs.cannotInviteToPersonal);
+      setCreateWithPeople(true);
+      setOrbSetupBackTo('main');
+      setSubview('orbSetup');
+      return;
+    }
     setOpen(false);
     setInviteShareOpen(true);
   }
@@ -581,7 +590,7 @@ export default function Settings() {
                 <span className={`${ui.label} ${ui.subLabel}`}>{Copy.orbs.people}</span>
                 <div className={ui.peopleCard}>
                   <div className={ui.peopleRail}>
-                    {!space.frozen && (
+                    {!space.frozen && !isPersonalOrb && (
                       <button
                         type="button"
                         className={`${ui.person} ${ui.personButton}`}
@@ -628,6 +637,23 @@ export default function Settings() {
                       );
                     })}
                   </div>
+
+                  {isPersonalOrb && (
+                    <div className={ui.personalNoteRow}>
+                      <p className={ui.personalNoteText}>{Copy.orbs.personalPrivateNote}</p>
+                      <button
+                        type="button"
+                        className={ui.startSharedBtn}
+                        onClick={() => {
+                          setCreateWithPeople(true);
+                          setOrbSetupBackTo('main');
+                          setSubview('orbSetup');
+                        }}
+                      >
+                        + {Copy.orbs.startSharedOrb}
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <p className={ui.help}>{Copy.orbs.descriptor}</p>
                 {space.frozen && (
@@ -904,7 +930,11 @@ export default function Settings() {
         <button
           type="button"
           className={add.option}
-          onClick={() => setSubview('orbSetup')}
+          onClick={() => {
+            setCreateWithPeople(false);
+            setOrbSetupBackTo('anotherOrb');
+            setSubview('orbSetup');
+          }}
         >
           <span className={add.glyph} aria-hidden>
             +
@@ -939,13 +969,15 @@ export default function Settings() {
         <button
           type="button"
           className={ui.navBack}
-          onClick={() => setSubview('anotherOrb')}
+          onClick={() => setSubview(orbSetupBackTo)}
         >
-          ← Another Orb
+          ← {orbSetupBackTo === 'main' ? 'Settings' : 'Another Orb'}
         </button>
         <p className={auth.lead}>{Copy.orbs.setupLead}</p>
         <OrbKindForm
+          key={createWithPeople ? 'with-people' : 'just-you'}
           knobId="orb-create-kind-knob"
+          initialWithPeople={createWithPeople}
           onSubmit={handleCreateOrb}
         />
       </div>
