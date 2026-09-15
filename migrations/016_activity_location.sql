@@ -73,3 +73,5 @@ begin
   return new;
 end;
 $$;
+
+notify pgrst, 'reload schema';

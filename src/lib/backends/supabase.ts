@@ -175,21 +175,32 @@ export class SupabaseBackend implements Backend {
       space_id: this.spaceId,
       title: input.title,
       description: input.description || null,
-      location: input.location ? input.location.trim() : null,
       image_url: input.image_url || null,
       created_by: this.uid,
       date_time: input.date_time ? toTimestamptz(input.date_time) : null,
       all_day: !input.date_time || input.date_time.length <= 10,
     };
+    if (input.location?.trim()) row.location = input.location.trim();
     // Only send ends_at when set — older DBs without the column still work,
     // and null spans don't need the field.
     if (input.ends_at) row.ends_at = toTimestamptz(input.ends_at);
 
-    const { data, error } = await this.client
+    let { data, error } = await this.client
       .from('activities')
       .insert(row)
       .select('*')
       .single();
+
+    if (error && 'location' in row && /location/i.test(error.message || '')) {
+      delete row.location;
+      const retry = await this.client
+        .from('activities')
+        .insert(row)
+        .select('*')
+        .single();
+      data = retry.data;
+      error = retry.error;
+    }
 
     if (error) {
       const detail = [error.message, error.details, error.hint]
@@ -215,7 +226,10 @@ export class SupabaseBackend implements Backend {
     const patch: Record<string, unknown> = {};
     if ('title' in changes) patch.title = changes.title;
     if ('description' in changes) patch.description = changes.description;
-    if ('location' in changes) patch.location = changes.location ? changes.location.trim() : null;
+    if ('location' in changes) {
+      const loc = changes.location?.trim();
+      patch.location = loc || null;
+    }
     if ('image_url' in changes) patch.image_url = changes.image_url;
     if ('date_time' in changes) {
       patch.date_time = changes.date_time ? toTimestamptz(changes.date_time) : null;
@@ -228,7 +242,12 @@ export class SupabaseBackend implements Backend {
     if ('ends_at' in changes) {
       patch.ends_at = changes.ends_at ? toTimestamptz(changes.ends_at) : null;
     }
-    const { error } = await this.client.from('activities').update(patch).eq('id', id);
+    let { error } = await this.client.from('activities').update(patch).eq('id', id);
+    if (error && 'location' in patch && /location/i.test(error.message || '')) {
+      delete patch.location;
+      const retry = await this.client.from('activities').update(patch).eq('id', id);
+      error = retry.error;
+    }
     if (error) throw error;
     await this.refresh();
   }

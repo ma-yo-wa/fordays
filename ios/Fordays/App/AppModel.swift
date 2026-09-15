@@ -411,7 +411,26 @@ final class AppModel: ObservableObject {
         ends_at: endsAt.map(DateLocal.toTimestamptz),
         all_day: dateTime == nil || (dateTime?.count ?? 0) <= 10
       )
-      try await sb.from("activities").insert(insert).execute()
+      do {
+        try await sb.from("activities").insert(insert).execute()
+      } catch {
+        if insert.location != nil && error.localizedDescription.lowercased().contains("location") {
+          let fallback = NewActivityInsert(
+            space_id: space.id,
+            title: trimmed,
+            description: (desc?.isEmpty == false) ? desc : nil,
+            location: nil,
+            image_url: (cover?.isEmpty == false) ? cover : nil,
+            created_by: session.user.id.uuidString.lowercased(),
+            date_time: dateTime.map(DateLocal.toTimestamptz),
+            ends_at: endsAt.map(DateLocal.toTimestamptz),
+            all_day: dateTime == nil || (dateTime?.count ?? 0) <= 10
+          )
+          try await sb.from("activities").insert(fallback).execute()
+        } else {
+          throw error
+        }
+      }
       await refreshActivities()
       tab = dateTime == nil ? .bucket : .plans
       toast = dateTime == nil ? Copy.Ideas.added : "Made it a plan"
@@ -479,7 +498,18 @@ final class AppModel: ObservableObject {
         }
       }
       guard !patch.isEmpty else { return }
-      try await sb.from("activities").update(patch).eq("id", value: id).execute()
+      do {
+        try await sb.from("activities").update(patch).eq("id", value: id).execute()
+      } catch {
+        if patch.keys.contains("location") && error.localizedDescription.lowercased().contains("location") {
+          patch.removeValue(forKey: "location")
+          if !patch.isEmpty {
+            try await sb.from("activities").update(patch).eq("id", value: id).execute()
+          }
+        } else {
+          throw error
+        }
+      }
       await refreshActivities()
     } catch {
       toast = error.localizedDescription
