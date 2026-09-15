@@ -46,10 +46,13 @@ struct RemoteOrDataImage: View {
 
 final class CoverImageStore {
   static let shared = CoverImageStore()
+  /// One screen of the board — same as `FIRST_BOARD_COVERS`.
+  private static let maxCovers = 6
   private let memory = NSCache<NSString, UIImage>()
   private let folder: URL
 
   private init() {
+    memory.countLimit = Self.maxCovers
     let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
     folder = base.appendingPathComponent("fordays-covers", isDirectory: true)
     try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
@@ -82,17 +85,36 @@ final class CoverImageStore {
     if let hit = memory.object(forKey: key) { return hit }
     let file = fileURL(for: url)
     if let data = try? Data(contentsOf: file), let img = downsampledImage(from: data) {
+      try? FileManager.default.setAttributes([.modificationDate: Date()], ofItemAtPath: file.path)
       memory.setObject(img, forKey: key)
       return img
     }
     do {
       let (data, _) = try await URLSession.shared.data(from: url)
       try? data.write(to: file, options: .atomic)
+      trimDisk()
       let img = downsampledImage(from: data)
       if let img { memory.setObject(img, forKey: key) }
       return img
     } catch {
       return nil
+    }
+  }
+
+  private func trimDisk() {
+    let fm = FileManager.default
+    guard let files = try? fm.contentsOfDirectory(
+      at: folder,
+      includingPropertiesForKeys: [.contentModificationDateKey]
+    ), files.count > Self.maxCovers
+    else { return }
+    let ordered = files.sorted {
+      let a = (try? $0.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+      let b = (try? $1.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+      return a < b
+    }
+    for stale in ordered.prefix(files.count - Self.maxCovers) {
+      try? fm.removeItem(at: stale)
     }
   }
 

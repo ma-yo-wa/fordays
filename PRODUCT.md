@@ -119,7 +119,7 @@ One picture on a plan. The person picks it. Never auto-assign from the title.
 - **Stills** — an Unsplash `https` URL
 - **Photos** — a compressed JPEG stored *in* `image_url` as a `data:` URL (the notebook row, not a files bucket)
 
-Fordays is not a photo host. Gallery photos live on the plan so the we can see them. Device cache of the first screen of Someday and Memories is a cache, not a library.
+Fordays is not a photo host. Gallery photos live on the plan so the we can see them. Warm the first six covers (one screen). The rest lazy-load as you scroll. Device keeps at most those six — not a library of 80.
 
 No picture: art family → orb hue. No match → id-hash wash.
 
