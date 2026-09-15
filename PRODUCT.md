@@ -143,6 +143,19 @@ Keys for Giphy and Unsplash are deploy env. Never a key field in the app.
 
 ---
 
+## Location
+
+An optional place on a plan or idea.
+
+- **Placement**: Sits quietly before Notes (`Location — optional`).
+- **Free Autocomplete**:
+  - *Native iOS*: Apple MapKit (`MKLocalSearchCompleter`) provides POIs, addresses, and venues for free with zero API keys.
+  - *PWA*: Photon (OpenStreetMap) provides fast global address/venue autocomplete with zero API keys.
+  - *Free text is valid*: People can type custom place nicknames ("Aline's rooftop", "Picnic spot") without being forced to pick an address.
+- **Tappable to Maps**: When set, tapping the location in Detail view opens Apple Maps (`https://maps.apple.com/?q=...`) directly on iOS and falls back cleanly to maps on web/other platforms.
+
+---
+
 ## Calendars
 
 **External calendars** lists the overlays: **Google** and **Outlook** on the web; **Apple Calendar** (and Outlook under it) on iPhone. Outlook is always in that list — not hidden until a key exists.

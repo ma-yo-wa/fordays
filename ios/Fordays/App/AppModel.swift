@@ -380,6 +380,7 @@ final class AppModel: ObservableObject {
   func createActivity(
     title: String,
     description: String? = nil,
+    location: String? = nil,
     imageUrl: String? = nil,
     dateTime: String? = nil,
     endsAt: String? = nil
@@ -397,11 +398,13 @@ final class AppModel: ObservableObject {
     do {
       let session = try await sb.auth.session
       let desc = description?.trimmingCharacters(in: .whitespacesAndNewlines)
+      let loc = location?.trimmingCharacters(in: .whitespacesAndNewlines)
       let cover = imageUrl?.trimmingCharacters(in: .whitespacesAndNewlines)
       let insert = NewActivityInsert(
         space_id: space.id,
         title: trimmed,
         description: (desc?.isEmpty == false) ? desc : nil,
+        location: (loc?.isEmpty == false) ? loc : nil,
         image_url: (cover?.isEmpty == false) ? cover : nil,
         created_by: session.user.id.uuidString.lowercased(),
         date_time: dateTime.map(DateLocal.toTimestamptz),
@@ -436,6 +439,7 @@ final class AppModel: ObservableObject {
     _ id: String,
     title: String? = nil,
     description: String? = nil,
+    location: String? = nil,
     imageUrl: String? = nil,
     dateTime: String?? = nil,
     endsAt: String?? = nil
@@ -449,6 +453,9 @@ final class AppModel: ObservableObject {
       if let title { patch["title"] = .string(title) }
       if let description {
         patch["description"] = description.isEmpty ? .null : .string(description)
+      }
+      if let location {
+        patch["location"] = location.isEmpty ? .null : .string(location)
       }
       if let imageUrl {
         patch["image_url"] = imageUrl.isEmpty ? .null : .string(imageUrl)

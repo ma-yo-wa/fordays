@@ -3,6 +3,7 @@ import Sheet from './Sheet';
 import CoverPicker from './CoverPicker';
 import CoverArt from './CoverArt';
 import WhenFields from './WhenFields';
+import { LocationInput } from './LocationInput';
 import { useApp, partnerName, isMatched } from '../lib/store';
 import { Copy } from '../lib/copy';
 import { isPlan, isMemory } from '../lib/types';
@@ -104,6 +105,7 @@ export default function Detail() {
 
   const [mode, setMode] = useState<Mode>('view');
   const [title, setTitle] = useState('');
+  const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
   const [cover, setCover] = useState<string | null>(null);
   const [date, setDate] = useState(todayISO());
@@ -119,6 +121,7 @@ export default function Detail() {
     if (!item) return;
     setMode('view');
     setTitle(item.title);
+    setLocation(item.location ?? '');
     setNotes(item.description ?? '');
     setCover(item.image_url);
     setDate(dtDate(item.date_time) ?? todayISO());
@@ -170,6 +173,7 @@ export default function Detail() {
     await patch(item!.id, {
       title: clean,
       description: notes.trim() || null,
+      location: location.trim() || null,
       image_url: cover,
     });
     setMode('view');
@@ -286,6 +290,19 @@ export default function Detail() {
               ? describePlan(item.date_time as string, item.ends_at)
               : Copy.ideas.inList}
           </div>
+          {item.location && (
+            <a
+              href={`https://maps.apple.com/?q=${encodeURIComponent(item.location)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={s.locationLink}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className={s.locationPin} aria-hidden>📍</span>
+              <span>{item.location}</span>
+              <span className={s.locationArrow} aria-hidden>↗</span>
+            </a>
+          )}
         </div>
         {mode === 'view' && !frozen && (
           <button
@@ -387,6 +404,14 @@ export default function Detail() {
               enterKeyHint="done"
             />
           </div>
+          <span className={f.label}>
+            Location <span className={f.hint}>— optional</span>
+          </span>
+          <LocationInput
+            value={location}
+            onChange={setLocation}
+            placeholder="Where is this?"
+          />
           <span className={f.label}>
             Notes <span className={f.hint}>— optional</span>
           </span>

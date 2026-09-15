@@ -21,6 +21,7 @@
 		B81E2F3A4B5C6D7E8F9A0B1C /* CoverPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92F1A0B2C3D4E5F6A7B8C90 /* CoverPickerView.swift */; };
 		B81E2F3A4B5C6D7E8F9A0B1D /* ExternalDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92F1A0B2C3D4E5F6A7B8C91 /* ExternalDetailView.swift */; };
 		B81E2F3A4B5C6D7E8F9A0B1E /* CompactTimePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92F1A0B2C3D4E5F6A7B8C92 /* CompactTimePicker.swift */; };
+		B81E2F3A4B5C6D7E8F9A0B1F /* LocationInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92F1A0B2C3D4E5F6A7B8C93 /* LocationInputView.swift */; };
 		B9E187BA6DACC670E5DA5CC3 /* FordaysApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CE7C6FDBE348B28A340B03E /* FordaysApp.swift */; };
 		C1A2B3C4D5E6F7A8B9C0D1E2 /* Copy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B3C4D5E6F7A8B9C0D1E2F3 /* Copy.swift */; };
 		C808786345D1F366BD4FE8C0 /* MainShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C6534D4843BB76DDC865AC /* MainShellView.swift */; };
@@ -56,6 +57,7 @@
 		C92F1A0B2C3D4E5F6A7B8C90 /* CoverPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPickerView.swift; sourceTree = "<group>"; };
 		C92F1A0B2C3D4E5F6A7B8C91 /* ExternalDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalDetailView.swift; sourceTree = "<group>"; };
 		C92F1A0B2C3D4E5F6A7B8C92 /* CompactTimePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactTimePicker.swift; sourceTree = "<group>"; };
+		C92F1A0B2C3D4E5F6A7B8C93 /* LocationInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationInputView.swift; sourceTree = "<group>"; };
 		D0E2CF128B98BD9C0207520F /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		D894045084BAC7ECF003D6DC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		E3C1DDC77D31F2E265BF0544 /* TabIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabIcons.swift; sourceTree = "<group>"; };
@@ -103,6 +105,7 @@
 			children = (
 				A4EBB535ABBFFC73548D5B4B /* AddActivitySheet.swift */,
 				C92F1A0B2C3D4E5F6A7B8C92 /* CompactTimePicker.swift */,
+				C92F1A0B2C3D4E5F6A7B8C93 /* LocationInputView.swift */,
 				C92F1A0B2C3D4E5F6A7B8C90 /* CoverPickerView.swift */,
 				C92F1A0B2C3D4E5F6A7B8C91 /* ExternalDetailView.swift */,
 				5FB0FFC2A4D225F12EDC9838 /* DetailView.swift */,
@@ -286,6 +289,7 @@
 			files = (
 				1091443FA7F64C8FD71F0298 /* AddActivitySheet.swift in Sources */,
 				B81E2F3A4B5C6D7E8F9A0B1E /* CompactTimePicker.swift in Sources */,
+				B81E2F3A4B5C6D7E8F9A0B1F /* LocationInputView.swift in Sources */,
 				B81E2F3A4B5C6D7E8F9A0B1C /* CoverPickerView.swift in Sources */,
 				B81E2F3A4B5C6D7E8F9A0B1D /* ExternalDetailView.swift in Sources */,
 				FFF2EC3B34025F324B2EFA3C /* AppModel.swift in Sources */,

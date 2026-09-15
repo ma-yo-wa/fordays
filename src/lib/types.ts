@@ -13,6 +13,7 @@ export interface Activity {
   space_id?: string;
   title: string;
   description: string | null;
+  location?: string | null;
   image_url: string | null;
   created_by: string;
   /** null => bucket-list item. Set => plan on the calendar. */
@@ -92,6 +93,7 @@ export interface Partner {
 export interface PlanDraft {
   title?: string;
   notes?: string;
+  location?: string;
   date?: string;
   from?: string;
   until?: string;
@@ -108,7 +110,8 @@ export function planDraftFromExternal(e: ExternalEvent): PlanDraft {
 
   return {
     title: e.title ?? '',
-    notes: e.location ? `Location: ${e.location}` : '',
+    location: e.location ?? '',
+    notes: '',
     date: startDate,
     from: startTime,
     until: endTime,

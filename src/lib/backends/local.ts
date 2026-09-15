@@ -76,6 +76,7 @@ export class LocalBackend implements Backend {
       id: uid(),
       title: input.title,
       description: input.description ?? null,
+      location: input.location ?? null,
       image_url: input.image_url ?? null,
       date_time: input.date_time ?? null,
       ends_at: input.ends_at ?? null,
@@ -120,6 +121,13 @@ export class LocalBackend implements Backend {
     }
     if ('title' in changes && changes.title !== a.title) {
       this.log(id, 'edited', `renamed it to “${changes.title}”`);
+    }
+    if ('location' in changes && changes.location !== a.location) {
+      this.log(
+        id,
+        'edited',
+        changes.location ? `set location to “${changes.location}”` : 'removed the location',
+      );
     }
     if ('description' in changes && changes.description !== a.description) {
       this.log(id, 'edited', 'updated the notes');

@@ -12,6 +12,7 @@ struct DetailView: View {
 
   @State private var mode: Mode = .view
   @State private var title = ""
+  @State private var location = ""
   @State private var notes = ""
   @State private var cover = ""
   @State private var day = Date()
@@ -120,6 +121,23 @@ struct DetailView: View {
         Text(whenLabel(item))
           .font(.subheadline)
           .foregroundStyle(Theme.inkSoft)
+        if let loc = item.location, !loc.isEmpty {
+          if let url = URL(string: "https://maps.apple.com/?q=\(loc.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? loc)") {
+            Link(destination: url) {
+              HStack(spacing: 4) {
+                Text("📍")
+                  .font(.caption)
+                Text(loc)
+                  .font(.subheadline)
+                  .foregroundStyle(Theme.inkSoft)
+                  .underline()
+                Text("↗")
+                  .font(.caption2)
+                  .foregroundStyle(Theme.inkFaint)
+              }
+            }
+          }
+        }
       }
       Spacer(minLength: 8)
       if mode == .view, app.space?.frozen != true {
@@ -207,6 +225,9 @@ struct DetailView: View {
       fieldLabel("Name")
       TextField("Name", text: $title)
         .textFieldStyle(.roundedBorder)
+
+      fieldLabel("Location", hint: "— optional")
+      LocationInputView(text: $location)
 
       fieldLabel("Notes", hint: "— optional")
       TextField("Anything worth remembering", text: $notes, axis: .vertical)
@@ -618,6 +639,7 @@ struct DetailView: View {
     seededFor = item.id
     mode = .view
     title = item.title
+    location = item.location ?? ""
     notes = item.description ?? ""
     cover = item.imageUrl ?? ""
     suggestNote = ""
@@ -669,6 +691,7 @@ struct DetailView: View {
       activityId,
       title: clean,
       description: notes.trimmingCharacters(in: .whitespacesAndNewlines),
+      location: location.trimmingCharacters(in: .whitespacesAndNewlines),
       imageUrl: coverTrim
     )
     mode = .view

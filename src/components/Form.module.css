@@ -1002,3 +1002,89 @@ textarea.input {
   transform: scale(0.97);
 }
 
+/* Location Autocomplete & Field */
+.locationWrap {
+  position: relative;
+  width: 100%;
+}
+
+.locationRow {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.locationPinIcon {
+  flex: none;
+  padding-left: 14px;
+  font-size: 14px;
+  color: var(--ink-faint);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.locationInputWithPin {
+  padding-left: 8px !important;
+}
+
+.locationDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--paper-warm);
+  border: 1px solid rgba(120, 120, 128, 0.15);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.04);
+  z-index: 100;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.locationItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  width: 100%;
+}
+
+.locationItem:hover,
+.locationItemActive {
+  background: rgba(120, 120, 128, 0.08);
+}
+
+.locationItemTitle {
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.locationItemSubtitle {
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  margin-top: 2px;
+}
+
+

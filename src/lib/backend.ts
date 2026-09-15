@@ -4,6 +4,7 @@ import type { CalendarSource } from './calendars';
 export interface NewActivity {
   title: string;
   description?: string | null;
+  location?: string | null;
   image_url?: string | null;
   date_time?: string | null;
   ends_at?: string | null;

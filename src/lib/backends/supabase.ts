@@ -41,6 +41,7 @@ interface ActivityRow {
   space_id: string;
   title: string;
   description: string | null;
+  location?: string | null;
   image_url: string | null;
   created_by: string;
   date_time: string | null;
@@ -174,6 +175,7 @@ export class SupabaseBackend implements Backend {
       space_id: this.spaceId,
       title: input.title,
       description: input.description || null,
+      location: input.location ? input.location.trim() : null,
       image_url: input.image_url || null,
       created_by: this.uid,
       date_time: input.date_time ? toTimestamptz(input.date_time) : null,
@@ -213,6 +215,7 @@ export class SupabaseBackend implements Backend {
     const patch: Record<string, unknown> = {};
     if ('title' in changes) patch.title = changes.title;
     if ('description' in changes) patch.description = changes.description;
+    if ('location' in changes) patch.location = changes.location ? changes.location.trim() : null;
     if ('image_url' in changes) patch.image_url = changes.image_url;
     if ('date_time' in changes) {
       patch.date_time = changes.date_time ? toTimestamptz(changes.date_time) : null;
@@ -488,6 +491,7 @@ function mapActivity(r: ActivityRow): Activity {
     space_id: r.space_id,
     title: r.title,
     description: r.description,
+    location: r.location ?? null,
     image_url: r.image_url,
     created_by: r.created_by,
     date_time: fromTimestamptz(r.date_time, r.all_day),

@@ -91,6 +91,7 @@ struct ComposerView: View {
   var onClose: () -> Void
 
   @State private var title: String
+  @State private var location: String
   @State private var notes: String
   @State private var cover: String = ""
   @State private var date: String
@@ -105,6 +106,7 @@ struct ComposerView: View {
     self.draft = draft
     self.onClose = onClose
     _title = State(initialValue: draft?.title ?? "")
+    _location = State(initialValue: draft?.location ?? "")
     _notes = State(initialValue: draft?.notes ?? "")
     _date = State(initialValue: draft?.date ?? DateLocal.todayISO())
     _from = State(initialValue: draft?.from ?? "")
@@ -130,6 +132,9 @@ struct ComposerView: View {
           isPlan ? "Dinner at Alma" : "Kayak the Grand River",
           text: $title
         )
+
+        fieldLabel("Location", hint: "— optional")
+        LocationInputView(text: $location)
 
         fieldLabel("Notes", hint: "— optional")
         textField("Anything worth remembering", text: $notes, lines: 3...6)
@@ -430,6 +435,7 @@ struct ComposerView: View {
     await app.createActivity(
       title: clean,
       description: notes.trimmingCharacters(in: .whitespacesAndNewlines),
+      location: location.trimmingCharacters(in: .whitespacesAndNewlines),
       imageUrl: coverTrim,
       dateTime: when?.dateTime,
       endsAt: when?.endsAt

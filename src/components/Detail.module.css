@@ -29,6 +29,34 @@
   color: var(--ink-soft);
 }
 
+.locationLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  color: var(--ink-soft);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.locationLink:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.locationPin {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.locationArrow {
+  font-size: 11px;
+  opacity: 0.6;
+}
+
 .round {
   flex: none;
   width: 34px;

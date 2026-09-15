@@ -5,6 +5,7 @@ struct Activity: Identifiable, Hashable, Codable {
   var spaceId: String?
   var title: String
   var description: String?
+  var location: String?
   var imageUrl: String?
   var createdBy: String
   /// Local `YYYY-MM-DD` or `YYYY-MM-DDTHH:MM`. Nil = bucket item.
@@ -106,6 +107,7 @@ struct NewActivityInsert: Encodable {
   let space_id: String
   let title: String
   let description: String?
+  let location: String?
   let image_url: String?
   let created_by: String
   let date_time: String?
@@ -267,6 +269,7 @@ struct ExternalEvent: Identifiable, Hashable, Codable {
 struct PlanDraft: Hashable {
   var title: String?
   var notes: String?
+  var location: String?
   var date: String?
   var from: String?
   var until: String?
@@ -279,11 +282,11 @@ struct PlanDraft: Hashable {
     let isMulti = rawEnd != nil && (rawEnd ?? "") > startDate
     let startTime = external.allDay ? "" : (external.startsAt.count > 10 ? String(external.startsAt.dropFirst(11).prefix(5)) : "")
     let endTime = external.allDay ? "" : (external.endsAt.count > 10 ? String(external.endsAt.dropFirst(11).prefix(5)) : "")
-    let notes = (external.location?.isEmpty == false) ? "Location: \(external.location!)" : nil
 
     return PlanDraft(
       title: external.title,
-      notes: notes,
+      notes: nil,
+      location: external.location,
       date: startDate,
       from: startTime,
       until: endTime,

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Sheet from './Sheet';
 import CoverPicker from './CoverPicker';
 import WhenFields from './WhenFields';
+import { LocationInput } from './LocationInput';
 import { partnerName, useApp } from '../lib/store';
 import { composeWhen, describePlan, iso, parseISO, prettyLower, shortDate } from '../lib/date';
 import { Copy } from '../lib/copy';
@@ -28,6 +29,7 @@ export default function Composer() {
   const isPlan = mode === 'plan';
 
   const [title, setTitle] = useState('');
+  const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
   const [cover, setCover] = useState<string | null>(null);
   const [date, setDate] = useState<string>(picked);
@@ -40,6 +42,7 @@ export default function Composer() {
   useEffect(() => {
     if (!mode) return;
     setTitle(draft?.title ?? '');
+    setLocation(draft?.location ?? '');
     setNotes(draft?.notes ?? '');
     setCover(null);
     // A plan opens on the draft date if provided, or the day you were already looking at.
@@ -140,6 +143,7 @@ export default function Composer() {
       await create({
         title: clean,
         description: notes.trim() || null,
+        location: location.trim() || null,
         image_url: cover,
         date_time: when?.date_time ?? null,
         ends_at: when?.ends_at ?? null,
@@ -185,6 +189,15 @@ export default function Composer() {
           }}
         />
       </div>
+
+      <span className={f.label}>
+        Location <span className={f.hint}>— optional</span>
+      </span>
+      <LocationInput
+        value={location}
+        onChange={setLocation}
+        placeholder="Where is this?"
+      />
 
       <span className={f.label}>
         Notes <span className={f.hint}>— optional</span>

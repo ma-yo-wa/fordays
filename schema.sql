@@ -66,6 +66,7 @@ create table if not exists public.activities (
   space_id    uuid not null references public.spaces(id) on delete cascade,
   title       text not null check (length(btrim(title)) > 0),
   description text,
+  location    text,
   image_url   text,
   created_by  uuid not null references public.profiles(id),
   date_time   timestamptz,            -- NULL  => Idea (bucket list)
