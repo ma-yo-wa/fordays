@@ -437,7 +437,7 @@ struct SettingsView: View {
     let leaveLabel = soloOrb ? Copy.Orbs.deleteSoloAction : Copy.Orbs.leaveAction
     let placeholder = soloOrb ? Copy.Orbs.personalPlaceholder : Copy.Orbs.crewPlaceholder
     return VStack(alignment: .leading, spacing: 8) {
-      sectionLabel("\(Copy.Orbs.thisOrb) · \(space.peopleLabel)")
+      sectionLabel(Copy.Orbs.thisOrb)
 
       TextField(placeholder, text: $orbDraft)
         .disabled(space.frozen || spaceBusy)

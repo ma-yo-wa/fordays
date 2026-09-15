@@ -514,9 +514,7 @@ export default function Settings() {
 
             {space && (
               <section className={ui.section}>
-                <span className={ui.label}>
-                  {Copy.orbs.thisOrb} · {spaceOrbName(space)}
-                </span>
+                <span className={ui.label}>{Copy.orbs.thisOrb}</span>
                 <div className={ui.profileCard}>
                   <input
                     className={ui.profileInput}

@@ -12,9 +12,9 @@ An Orb is **the notebook for a specific we** (including a we of one). Plans belo
 
 Someday / Plans / Memories **are** that notebook. Everyone has at least one **live** Orb.
 
-**Orb** = the notebook. **Faces** = people in *this* space (two: rose / sage; many: names + initials). Not a hue per person or per space. Tiles and **This Orb** show the notebook’s **name**. Just you is only the setup kind, never the title. Legacy unnamed solos (Fordays) display as **Personal**.
+**Orb** = the notebook. **Faces** = people in *this* space (two: rose / sage; many: names + initials). Not a hue per person or per space. Tiles show the notebook’s **name**. **This Orb** is only that label — the field underneath is the name. Just you is only the setup kind, never the title. Unnamed solo → **Personal**. Unnamed we → **Aline’s Crew** (the signup placeholder, a homage — not the other member). Never title an Orb with a person’s name.
 
-Several Orbs are normal: Personal, Aline, siblings. Each is solo, two, or many.
+Several Orbs are normal: Personal, Aline’s Crew, siblings. Each is solo, two, or many.
 
 Do **not** type Orbs as Work / Personal / Travel. Names are free (Personal, Portugal, Aline’s Crew). Categories are not.
 
@@ -32,7 +32,7 @@ Do **not** type Orbs as Work / Personal / Travel. Names are free (Personal, Port
 One sheet, two bands — not two Settings screens.
 
 - **Your Orbs** — all notebooks. Grid, +, Past Orbs. Switch and create.
-- **This Orb · {name}** — the open notebook. Rename, people / invite / remove, Leave or Delete. No “Orb actions” heading.
+- **This Orb** — the open notebook. The field is the name (placeholder Personal or Aline’s Crew). People / invite / remove, Leave or Delete. No “Orb actions” heading. No · person or · name in the label.
 
 You / calendars / notifications / sign out are you, not a notebook.
 

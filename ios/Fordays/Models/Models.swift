@@ -62,6 +62,8 @@ struct SpaceInfo: Hashable, Codable {
 
   var canCompose: Bool { !frozen }
 
+  /// Notebook name. Unnamed solo → Personal. Unnamed we → Aline’s Crew.
+  /// Never the other person’s name — that’s a face, not the Orb.
   var peopleLabel: String {
     let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
     let generic = trimmed.isEmpty
@@ -70,13 +72,7 @@ struct SpaceInfo: Hashable, Codable {
     if !generic { return trimmed }
     let others = members.filter { $0.id.compare(myId, options: .caseInsensitive) != .orderedSame }
     if others.isEmpty && partner2Id == nil { return Copy.Orbs.personalPlaceholder }
-    if others.count == 1 { return others[0].name }
-    if others.count == 2 { return "\(others[0].name) and \(others[1].name)" }
-    if !others.isEmpty { return others.map(\.name).joined(separator: ", ") }
-    if let partner = partnerName?.trimmingCharacters(in: .whitespacesAndNewlines), !partner.isEmpty {
-      return partner
-    }
-    return Copy.Orbs.personalPlaceholder
+    return Copy.Orbs.crewPlaceholder
   }
 
   func displayName(for userId: String) -> String {

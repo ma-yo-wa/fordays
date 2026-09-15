@@ -51,16 +51,14 @@ export function canCompose(space: SpaceInfo | null | undefined): boolean {
   return Boolean(space && !space.frozen);
 }
 
-/** The notebook’s name. Legacy unnamed solos (Fordays) show Personal, not Just you. */
+/** The notebook’s name. Unnamed solo → Personal. Unnamed we → Aline’s Crew.
+ *  Never the other person’s name — that’s a face, not the Orb. */
 export function spaceOrbName(space: SpaceInfo): string {
   const raw = space.name?.trim() ?? '';
   if (raw && !isDefaultSpaceName(raw)) return raw;
   const others = (space.members ?? []).filter((m) => m.id !== space.myId);
   if (others.length === 0 && !space.partner2Id) return Copy.orbs.personalPlaceholder;
-  if (others.length === 1) return others[0]!.name;
-  if (others.length === 2) return `${others[0]!.name} and ${others[1]!.name}`;
-  if (others.length) return others.map((m) => m.name).join(', ');
-  return space.partnerName?.trim() || Copy.orbs.personalPlaceholder;
+  return Copy.orbs.crewPlaceholder;
 }
 
 /** @deprecated use spaceOrbName — same value, kept for call sites. */
