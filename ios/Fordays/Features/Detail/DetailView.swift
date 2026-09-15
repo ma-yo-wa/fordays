@@ -518,13 +518,13 @@ struct DetailView: View {
         mode = .when
       }
 
-      if app.space?.isMatched == true {
+      if app.space?.isMatched == true && !item.isMemory() {
         actionRow(title: "Suggest a date", system: "bubble.left.and.bubble.right") {
           openSuggest(item)
         }
       }
 
-      if item.isPlan {
+      if item.isPlan && !item.isMemory() {
         actionRow(title: Copy.Ideas.backTo, system: "checklist") {
           Task {
             await app.moveToBucket(item.id)

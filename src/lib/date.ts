@@ -221,6 +221,40 @@ export function describeDT(v: string): string {
   return t ? `${day} at ${pretty(t)}` : day;
 }
 
+/** Localizes UTC timestamp strings that Postgres triggers bake into audit log details
+ *  (e.g. "set it for Sep 07, 2026 at 01:00 AM" -> "set it for Sep 6, 2026 at 9:00 pm"). */
+export function localizeAuditDetails(details: string): string {
+  if (!details) return details;
+  return details.replace(
+    /\b([A-Z][a-z]{2})\s+(\d{1,2}),\s+(\d{4})\s+at\s+(\d{1,2}):(\d{2})\s+(AM|PM)\b/g,
+    (match, mon, day, year, hourStr, minStr, ampm) => {
+      let hour = parseInt(hourStr, 10);
+      if (ampm === 'PM' && hour < 12) hour += 12;
+      if (ampm === 'AM' && hour === 12) hour = 0;
+      const monthIdx = MON3.indexOf(mon);
+      if (monthIdx === -1) return match;
+      const utcDate = new Date(
+        Date.UTC(parseInt(year, 10), monthIdx, parseInt(day, 10), hour, parseInt(minStr, 10))
+      );
+      if (isNaN(utcDate.getTime())) return match;
+      const localYear = utcDate.getFullYear();
+      const localMon = MON3[utcDate.getMonth()];
+      const localDay = utcDate.getDate();
+      const localH = utcDate.getHours();
+      const localM = utcDate.getMinutes();
+
+      if (localH === 0 && localM === 0) {
+        return `${localMon} ${localDay}, ${localYear}`;
+      }
+
+      const localHH = String(localH).padStart(2, '0');
+      const localMM = String(localM).padStart(2, '0');
+      const timeStr = prettyLower(`${localHH}:${localMM}`);
+      return `${localMon} ${localDay}, ${localYear} at ${timeStr}`;
+    }
+  );
+}
+
 /** Cells for a month grid, padded to whole weeks. */
 export interface DayCell {
   label: number | '';

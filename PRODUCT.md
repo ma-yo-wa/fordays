@@ -117,6 +117,10 @@ Say plan / day — not event, schedule, or calendar.
 
 Plans whose day has passed. Look back, not a third kind of object.
 
+- **Permanent lived history**: Memories cannot be moved back to Someday / bucket list. You cannot unlive an experience.
+- **Actions on a Memory**: Only **Change the day** (to fix typos) and **Delete** (if an event never happened) are allowed. Never show **Back to Someday** or **Suggest a date** on a memory.
+- **Audit history localization**: History entries stored in the database by server triggers must be localized to the user's device timezone so times like 9:00 PM EST never display as 01:00 AM UTC.
+
 ---
 
 ## Covers

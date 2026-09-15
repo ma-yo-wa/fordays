@@ -22,7 +22,7 @@ struct Activity: Identifiable, Hashable, Codable {
   var isPlan: Bool { dateTime != nil }
   var isBucketItem: Bool { dateTime == nil }
 
-  func isMemory(today: String) -> Bool {
+  func isMemory(today: String = DateLocal.todayISO()) -> Bool {
     guard let dateTime else { return false }
     let last = (endsAt ?? dateTime).prefix(10)
     return String(last) < today

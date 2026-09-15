@@ -5,7 +5,7 @@ import CoverArt from './CoverArt';
 import WhenFields from './WhenFields';
 import { useApp, partnerName, isMatched } from '../lib/store';
 import { Copy } from '../lib/copy';
-import { isPlan } from '../lib/types';
+import { isPlan, isMemory } from '../lib/types';
 import { faceColor, faceIndexFor } from '../lib/tint';
 import {
   composeWhen,
@@ -13,6 +13,7 @@ import {
   dtDate,
   dtTime,
   iso,
+  localizeAuditDetails,
   parseISO,
   timeAgo,
   todayISO,
@@ -134,6 +135,7 @@ export default function Detail() {
   if (!item) return <Sheet open={false} onClose={() => openDetail(null)} children={null} />;
 
   const planned = isPlan(item);
+  const memory = isMemory(item);
   const matched = isMatched(space);
   const frozen = Boolean(space?.frozen);
   const pending = Boolean(item.suggested_date_time && item.suggested_by);
@@ -511,14 +513,14 @@ export default function Detail() {
             {planned ? 'Change the day' : 'Make it a plan'}
           </button>
 
-          {matched && (
+          {matched && !memory && (
             <button type="button" className={s.action} onClick={openSuggest}>
               <SuggestIcon />
               Suggest a date
             </button>
           )}
 
-          {planned && (
+          {planned && !memory && (
             <button type="button" className={s.action} onClick={() => void toBucket()}>
               <BucketIcon />
               {Copy.ideas.backTo}
@@ -549,7 +551,7 @@ export default function Detail() {
                 {(partnerName(config, l.user_id)[0] ?? '?').toUpperCase()}
               </span>
               <span className={s.what}>
-                {partnerName(config, l.user_id)} {l.details}{' '}
+                {partnerName(config, l.user_id)} {localizeAuditDetails(l.details)}{' '}
                 <span className={s.ago}>· {timeAgo(l.timestamp)}</span>
               </span>
             </div>
