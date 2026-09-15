@@ -317,22 +317,57 @@ textarea.input {
 .appleTimeWrapper {
   background: rgba(120, 120, 128, 0.12);
   border-radius: 8px;
-  padding: 4px 6px 4px 10px;
+  padding: 3px 6px 3px 8px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  transition: background 0.14s ease, box-shadow 0.14s ease;
 }
 
-.appleTimePill {
+.appleTimeWrapperActive {
+  background: rgba(120, 120, 128, 0.18);
+  box-shadow: 0 0 0 1.5px var(--rose);
+}
+
+.appleTimeInput {
+  width: 48px;
   background: transparent;
   border: none;
+  outline: none;
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   font-weight: 500;
   color: var(--ink);
-  cursor: pointer;
+  font-family: inherit;
   padding: 2px 0;
+  text-align: center;
   -webkit-tap-highlight-color: transparent;
+}
+
+.appleAmPmBtn {
+  border: none;
+  background: rgba(120, 120, 128, 0.1);
+  border-radius: 6px;
+  padding: 2px 5px;
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  font-weight: 600;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  transition: background 0.12s ease, color 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.appleAmPmBtn:active {
+  background: rgba(120, 120, 128, 0.22);
+}
+
+.ampmChevron {
+  font-size: 11px;
+  opacity: 0.6;
 }
 
 .appleTimeClear {
@@ -565,29 +600,6 @@ textarea.input {
   font-size: 13px;
   color: var(--ink-faint);
   font-weight: 400;
-}
-
-.timeDropdownCustomToggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  border: none;
-  background: transparent;
-  color: var(--ink-2);
-  font: var(--t-footnote);
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.timeDropdownCustomBox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 6px 0;
-  background: var(--fill-tertiary);
-  border-radius: 10px;
 }
 
 .appleSubRow {
