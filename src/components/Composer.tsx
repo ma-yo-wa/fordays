@@ -93,12 +93,7 @@ export default function Composer() {
       : (e.endsAt?.length > 10 ? e.endsAt.slice(11, 16) : (eStartTime || '23:59'));
 
     const pStartTime = from;
-    let pEndTime = until;
-    if (!pEndTime) {
-      const [h, m] = pStartTime.split(':').map(Number);
-      const endH = Math.min((h ?? 0) + 2, 23);
-      pEndTime = `${String(endH).padStart(2, '0')}:${String(m ?? 0).padStart(2, '0')}`;
-    }
+    const pEndTime = until || '23:59';
 
     const safeEnd = eEndTime <= eStartTime
       ? (eStartTime >= '23:00' ? '23:59' : `${String(Number(eStartTime.slice(0, 2)) + 1).padStart(2, '0')}:${eStartTime.slice(3, 5)}`)

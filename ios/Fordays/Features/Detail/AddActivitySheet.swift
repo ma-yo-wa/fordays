@@ -373,14 +373,7 @@ struct ComposerView: View {
 
       let pStartTime = fromT
       let untilT = until.trimmingCharacters(in: .whitespacesAndNewlines)
-      var pEndTime = untilT
-      if pEndTime.isEmpty {
-        let parts = pStartTime.split(separator: ":").compactMap { Int($0) }
-        let h = parts.count > 0 ? parts[0] : 0
-        let m = parts.count > 1 ? parts[1] : 0
-        let endH = min(h + 2, 23)
-        pEndTime = String(format: "%02d:%02d", endH, m)
-      }
+      let pEndTime = untilT.isEmpty ? "23:59" : untilT
 
       let safeEnd: String
       if eEndTime <= eStartTime {

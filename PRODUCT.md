@@ -153,7 +153,7 @@ When composing a plan, ambient availability context appears quietly below the da
 - **Transparent time ranges**: Show concrete ranges (`6:00 – 8:30 pm` or `All day`) rather than ambiguous statements like "busy until 8:30 pm".
 - **Intelligent time-aware filtering**:
   - *Date-only plan (no From/Until)*: Whispers events scheduled across that day so members see open pockets before picking a time.
-  - *Plan with From time*: Automatically filters out earlier, non-conflicting events (e.g. a lunch meeting is hidden when planning a 7:30 pm dinner). Only events that intersect the planned window (or all-day events) are whispered.
+  - *Plan with From time*: Filters out events that ended before the plan starts. Never assume an artificial meeting duration: when `Until` is blank, active and later events from `From` onward are surfaced directly so people can process the information and judge for themselves. If `Until` is explicitly specified, events beyond that window are excluded.
   - *Multiple overlaps*: If up to 2 events overlap, both are shown concisely (`Aline · 6:00 – 8:30 pm · Remi · All day`). If 3 or more overlap, it provides a quiet summary count (`3 overlapping events at this time` or `3 shared events on this day`).
 
 ---
