@@ -140,14 +140,27 @@ select {
   font-size: 16px;
 }
 
-/* iOS shows focus rings only for keyboard users, never for touch. */
-:focus:not(:focus-visible) {
+/* iOS shows focus rings only for keyboard users, never for touch.
+   Calm native iOS feel: no loud focus rings or outlines on inputs/controls. */
+:focus,
+:focus-visible {
   outline: none;
 }
 
-:focus-visible {
-  outline: 2px solid var(--rose);
-  outline-offset: 2px;
+input,
+textarea,
+select,
+button {
+  outline: none;
+}
+
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+button:focus,
+button:focus-visible {
+  outline: none;
 }
 
 /* Momentum scrolling, and a scroller that doesn't hand its overscroll

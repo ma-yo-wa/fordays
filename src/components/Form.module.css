@@ -45,6 +45,12 @@
   letter-spacing: var(--tr-subhead);
   font-weight: 600;
   color: var(--ink-faint);
+  outline: none;
+}
+
+.fieldClear:focus,
+.fieldClear:focus-visible {
+  outline: none;
 }
 
 .fieldClear:active {
@@ -60,6 +66,13 @@
   letter-spacing: var(--tr-body);
   color: var(--ink);
   outline: none;
+}
+
+.input:focus,
+.input:focus-visible {
+  outline: none;
+  border: none;
+  box-shadow: none;
 }
 
 .input::placeholder {
@@ -1025,7 +1038,19 @@ textarea.input {
 }
 
 .locationInputWithPin {
+  flex: 1;
+  min-width: 0;
   padding-left: 8px !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.locationInputWithPin:focus,
+.locationInputWithPin:focus-visible {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .locationDropdown {
@@ -1035,10 +1060,10 @@ textarea.input {
   right: 0;
   max-height: 220px;
   overflow-y: auto;
-  background: var(--paper-warm);
-  border: 1px solid rgba(120, 120, 128, 0.15);
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: var(--paper);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
   z-index: 100;
   padding: 6px;
   display: flex;
@@ -1054,10 +1079,16 @@ textarea.input {
   padding: 8px 10px;
   border-radius: 8px;
   border: none;
+  outline: none;
   background: transparent;
   cursor: pointer;
   transition: background 0.12s ease;
   width: 100%;
+}
+
+.locationItem:focus,
+.locationItem:focus-visible {
+  outline: none;
 }
 
 .locationItem:hover,
