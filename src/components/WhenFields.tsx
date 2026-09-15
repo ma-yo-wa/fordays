@@ -207,7 +207,14 @@ function TimeDropdownList({
   const popoverRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<HTMLButtonElement>(null);
-  const [customText, setCustomText] = useState('');
+
+  const baseTime = value || (baseFrom ? defaultAppleEndTime(baseFrom) : defaultAppleStartTime());
+  const [h24Str, mStr] = baseTime.split(':');
+  const initH24 = parseInt(h24Str || '12', 10);
+  const initM = parseInt(mStr || '0', 10);
+  const [isPM, setIsPM] = useState(initH24 >= 12);
+  const h12 = initH24 % 12 === 0 ? 12 : initH24 % 12;
+  const [minuteText, setMinuteText] = useState(pad(initM));
 
   const slots = isUntil
     ? generateEndSlots(value, baseFrom || '')
@@ -231,27 +238,44 @@ function TimeDropdownList({
     };
   }, [onClose]);
 
-  function handleCustomSubmit() {
-    const parsed = parseUserTypedTime(customText, value);
-    if (parsed) {
-      onChange(parsed);
-      onClose();
+  function handleDone() {
+    if (minuteText.includes(':')) {
+      const parsed = parseUserTypedTime(minuteText, value);
+      if (parsed) {
+        onChange(parsed);
+        onClose();
+        return;
+      }
     }
+    let mNum = parseInt(minuteText || '0', 10);
+    if (isNaN(mNum)) mNum = 0;
+    mNum = Math.max(0, Math.min(59, mNum));
+    let finalH24 = h12 % 12;
+    if (isPM) finalH24 += 12;
+    onChange(`${pad(finalH24)}:${pad(mNum)}`);
+    onClose();
+  }
+
+  function toggleAmPm(e: React.MouseEvent) {
+    e.stopPropagation();
+    setIsPM((prev) => !prev);
   }
 
   return (
     <div className={f.timeDropdown} ref={popoverRef}>
       {onReset && (
-        <button
-          type="button"
-          className={f.timeDropdownResetItem}
-          onClick={() => {
-            onReset();
-            onClose();
-          }}
-        >
-          Reset time
-        </button>
+        <div className={f.timeDropdownTopRow}>
+          <button
+            type="button"
+            className={f.timeDropdownClearBtn}
+            onClick={() => {
+              onReset();
+              onClose();
+            }}
+          >
+            Clear
+          </button>
+        </div>
       )}
 
       <div className={f.timeDropdownList} ref={listRef}>
@@ -278,26 +302,40 @@ function TimeDropdownList({
       </div>
 
       <form
-        className={f.timeDropdownCustomRow}
+        className={f.timeDropdownFooterRow}
         onSubmit={(e) => {
           e.preventDefault();
-          handleCustomSubmit();
+          handleDone();
         }}
       >
-        <input
-          type="text"
-          className={f.timeDropdownCustomInput}
-          placeholder="Custom minute e.g. 2:15"
-          value={customText}
-          onChange={(e) => setCustomText(e.target.value)}
-          aria-label="Custom time"
-        />
-        <button
-          type="submit"
-          className={f.timeDropdownCustomBtn}
-          disabled={!customText.trim()}
-        >
-          Set
+        <div className={f.timeDropdownMinuteGroup}>
+          <span className={f.timeDropdownHourDisplay}>{h12} :</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={2}
+            className={f.timeDropdownMinuteInput}
+            value={minuteText}
+            onFocus={(e) => e.target.select()}
+            onChange={(e) => {
+              const cleaned = e.target.value.replace(/\D/g, '');
+              setMinuteText(cleaned);
+            }}
+            aria-label="Minute"
+          />
+          <button
+            type="button"
+            className={f.timeDropdownAmPmToggle}
+            onClick={toggleAmPm}
+            title="Toggle AM/PM"
+          >
+            {isPM ? 'PM' : 'AM'}
+          </button>
+        </div>
+
+        <button type="submit" className={f.timeDropdownDoneBtn}>
+          Done
         </button>
       </form>
     </div>
