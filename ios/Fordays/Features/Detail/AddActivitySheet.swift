@@ -344,28 +344,96 @@ struct ComposerView: View {
   private var contextWhisper: String? {
     guard isPlan else { return nil }
     let myId = app.space?.myId
-    let day = date
+    let planDate = date
+
     let matching = app.externalEvents.filter { e in
       let isMine = myId == e.userId || e.userId == "0"
       if !isMine && !e.sharedWithSpace { return false }
-      let start = String(e.startsAt.prefix(10))
-      let end = e.endsAt.isEmpty ? start : String(e.endsAt.prefix(10))
-      return day >= start && day <= end
-    }
-    guard !matching.isEmpty else { return nil }
-    if matching.count == 1, let first = matching.first {
-      let isMine = myId == first.userId || first.userId == "0"
-      let name = isMine ? "You" : (app.space?.displayName(for: first.userId) ?? "Partner")
-      let eventTitle = first.title ?? Copy.Availability.busy
-      if first.allDay {
-        return "\(name) · \(eventTitle) (All day)"
+
+      let eStartDay = String(e.startsAt.prefix(10))
+      let eEndDay = e.endsAt.isEmpty ? eStartDay : String(e.endsAt.prefix(10))
+
+      if multiDay, let planEndDate = end, planEndDate > planDate {
+        return planDate <= eEndDay && planEndDate >= eStartDay
       }
-      let tStart = first.startsAt.count > 10 ? DateLocal.prettyLower(String(first.startsAt.dropFirst(11).prefix(5))) : ""
-      let tEnd = first.endsAt.count > 10 ? DateLocal.prettyLower(String(first.endsAt.dropFirst(11).prefix(5))) : ""
-      let timeStr = (!tStart.isEmpty && !tEnd.isEmpty) ? "\(tStart) – \(tEnd)" : (tStart.isEmpty ? tEnd : tStart)
-      return "\(name) · \(eventTitle)\(timeStr.isEmpty ? "" : " (\(timeStr))")"
+
+      if planDate < eStartDay || planDate > eEndDay { return false }
+      if e.allDay { return true }
+      let fromT = from.trimmingCharacters(in: .whitespacesAndNewlines)
+      if fromT.isEmpty { return true }
+
+      if eStartDay < planDate && eEndDay > planDate { return true }
+
+      let eStartTime = eStartDay < planDate
+        ? "00:00"
+        : (e.startsAt.count > 10 ? String(e.startsAt.dropFirst(11).prefix(5)) : "00:00")
+      let eEndTime = eEndDay > planDate
+        ? "23:59"
+        : (!e.endsAt.isEmpty && e.endsAt.count > 10 ? String(e.endsAt.dropFirst(11).prefix(5)) : (eStartTime.isEmpty ? "23:59" : eStartTime))
+
+      let pStartTime = fromT
+      let untilT = until.trimmingCharacters(in: .whitespacesAndNewlines)
+      var pEndTime = untilT
+      if pEndTime.isEmpty {
+        let parts = pStartTime.split(separator: ":").compactMap { Int($0) }
+        let h = parts.count > 0 ? parts[0] : 0
+        let m = parts.count > 1 ? parts[1] : 0
+        let endH = min(h + 2, 23)
+        pEndTime = String(format: "%02d:%02d", endH, m)
+      }
+
+      let safeEnd: String
+      if eEndTime <= eStartTime {
+        if eStartTime >= "23:00" {
+          safeEnd = "23:59"
+        } else {
+          let h = Int(eStartTime.prefix(2)) ?? 0
+          safeEnd = String(format: "%02d:%@", h + 1, String(eStartTime.suffix(2)))
+        }
+      } else {
+        safeEnd = eEndTime
+      }
+
+      return eStartTime < pEndTime && safeEnd > pStartTime
     }
-    return "\(matching.count) shared events or plans on this day"
+
+    guard !matching.isEmpty else { return nil }
+
+    func formatEvent(_ ev: ExternalEvent) -> String {
+      let isMine = myId == ev.userId || ev.userId == "0"
+      let name = isMine ? "You" : (app.space?.displayName(for: ev.userId) ?? "Partner")
+      let eventTitle = ev.title ?? Copy.Availability.busy
+
+      var timeStr = "All day"
+      if !ev.allDay {
+        let tStart = ev.startsAt.count > 10 ? DateLocal.prettyLower(String(ev.startsAt.dropFirst(11).prefix(5))) : ""
+        let tEnd = ev.endsAt.count > 10 ? DateLocal.prettyLower(String(ev.endsAt.dropFirst(11).prefix(5))) : ""
+        if !tStart.isEmpty && !tEnd.isEmpty && tStart != tEnd {
+          timeStr = "\(tStart) – \(tEnd)"
+        } else if !tStart.isEmpty {
+          timeStr = "from \(tStart)"
+        }
+      } else {
+        let sDate = String(ev.startsAt.prefix(10))
+        let eDate = ev.endsAt.isEmpty ? sDate : String(ev.endsAt.prefix(10))
+        if sDate != eDate && eDate > sDate {
+          timeStr = "\(DateLocal.shortDate(sDate)) – \(DateLocal.shortDate(eDate))"
+        }
+      }
+
+      return "\(name) · \(eventTitle) (\(timeStr))"
+    }
+
+    if matching.count == 1, let first = matching.first {
+      return formatEvent(first)
+    }
+    if matching.count == 2 {
+      return "\(formatEvent(matching[0])) · \(formatEvent(matching[1]))"
+    }
+    let fromT = from.trimmingCharacters(in: .whitespacesAndNewlines)
+    return !fromT.isEmpty
+      ? "\(matching.count) overlapping events at this time"
+      : "\(matching.count) shared events on this day"
   }
 
   private func fieldLabel(_ text: String, hint: String? = nil) -> some View {

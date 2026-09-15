@@ -4,8 +4,8 @@ import 'react-day-picker/style.css';
 import Sheet from './Sheet';
 import CoverPicker from './CoverPicker';
 import WhenFields from './WhenFields';
-import { useApp } from '../lib/store';
-import { addDays, composeWhen, describePlan, iso, mediumDate, nextSaturday, parseISO, prettyLower } from '../lib/date';
+import { partnerName, useApp } from '../lib/store';
+import { addDays, composeWhen, describePlan, iso, mediumDate, nextSaturday, parseISO, prettyLower, shortDate } from '../lib/date';
 import { Copy } from '../lib/copy';
 import f from './Form.module.css';
 
@@ -71,26 +71,81 @@ export default function Composer() {
   const dayContext = external.filter((e) => {
     const isMine = e.ownerId === (space?.myId ?? String(space?.me ?? config.me));
     if (!isMine && !e.sharedWithSpace) return false;
-    const start = e.startsAt.slice(0, 10);
-    const last = e.endsAt ? e.endsAt.slice(0, 10) : start;
-    return date >= start && date <= last;
+
+    const eStartDay = e.startsAt.slice(0, 10);
+    const eEndDay = e.endsAt ? e.endsAt.slice(0, 10) : eStartDay;
+
+    if (multiDay && end) {
+      return date <= eEndDay && end >= eStartDay;
+    }
+
+    if (date < eStartDay || date > eEndDay) return false;
+    if (e.allDay) return true;
+    if (!from) return true;
+
+    if (eStartDay < date && eEndDay > date) return true;
+
+    const eStartTime = eStartDay < date
+      ? '00:00'
+      : (e.startsAt.length > 10 ? e.startsAt.slice(11, 16) : '00:00');
+    const eEndTime = eEndDay > date
+      ? '23:59'
+      : (e.endsAt?.length > 10 ? e.endsAt.slice(11, 16) : (eStartTime || '23:59'));
+
+    const pStartTime = from;
+    let pEndTime = until;
+    if (!pEndTime) {
+      const [h, m] = pStartTime.split(':').map(Number);
+      const endH = Math.min((h ?? 0) + 2, 23);
+      pEndTime = `${String(endH).padStart(2, '0')}:${String(m ?? 0).padStart(2, '0')}`;
+    }
+
+    const safeEnd = eEndTime <= eStartTime
+      ? (eStartTime >= '23:00' ? '23:59' : `${String(Number(eStartTime.slice(0, 2)) + 1).padStart(2, '0')}:${eStartTime.slice(3, 5)}`)
+      : eEndTime;
+
+    return eStartTime < pEndTime && safeEnd > pStartTime;
   });
 
   const whisper = (() => {
     if (!isPlan || !dayContext.length) return null;
-    if (dayContext.length === 1) {
-      const first = dayContext[0];
-      if (!first) return null;
-      const isMine = first.ownerId === (space?.myId ?? String(space?.me ?? config.me));
-      const name = isMine ? 'You' : (space?.partnerName ?? config.names[first.ownerId === '1' ? 1 : 0] ?? 'Partner');
-      const eventTitle = first.title || 'Busy';
-      if (first.allDay) return `${name} · ${eventTitle} (All day)`;
-      const tStart = first.startsAt.length > 10 ? prettyLower(first.startsAt.slice(11, 16)) : '';
-      const tEnd = first.endsAt?.length > 10 ? prettyLower(first.endsAt.slice(11, 16)) : '';
-      const timeStr = tStart && tEnd ? `${tStart} – ${tEnd}` : tStart || tEnd;
-      return `${name} · ${eventTitle}${timeStr ? ` (${timeStr})` : ''}`;
+
+    const formatEvent = (ev: (typeof dayContext)[0]) => {
+      const isMine = ev.ownerId === (space?.myId ?? String(space?.me ?? config.me));
+      const who = isMine ? 'You' : partnerName(config, ev.ownerId);
+      const eventTitle = ev.title?.trim() || Copy.availability.busy;
+
+      let timeStr = 'All day';
+      if (!ev.allDay) {
+        const tStart = ev.startsAt.length > 10 ? prettyLower(ev.startsAt.slice(11, 16)) : '';
+        const tEnd = ev.endsAt?.length > 10 ? prettyLower(ev.endsAt.slice(11, 16)) : '';
+        if (tStart && tEnd && tEnd !== tStart) {
+          timeStr = `${tStart} – ${tEnd}`;
+        } else if (tStart) {
+          timeStr = `from ${tStart}`;
+        }
+      } else {
+        const sDate = ev.startsAt.slice(0, 10);
+        const eDate = ev.endsAt ? ev.endsAt.slice(0, 10) : sDate;
+        if (sDate !== eDate && eDate > sDate) {
+          timeStr = `${shortDate(sDate)} – ${shortDate(eDate)}`;
+        }
+      }
+
+      return `${who} · ${eventTitle} (${timeStr})`;
+    };
+
+    const first = dayContext[0];
+    const second = dayContext[1];
+    if (dayContext.length === 1 && first) {
+      return formatEvent(first);
     }
-    return `${dayContext.length} shared events or plans on this day`;
+    if (dayContext.length === 2 && first && second) {
+      return `${formatEvent(first)} · ${formatEvent(second)}`;
+    }
+    return from
+      ? `${dayContext.length} overlapping events at this time`
+      : `${dayContext.length} shared events on this day`;
   })();
 
   async function save() {

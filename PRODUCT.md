@@ -144,6 +144,20 @@ Google / Microsoft / Unsplash / Giphy / VAPID keys are deploy env. Never a key f
 
 ---
 
+## The Whisper (Availability Context)
+
+When composing a plan, ambient availability context appears quietly below the date and time fields.
+
+- **Calm ambient context, never a gatekeeper**: The Whisper never blocks saving. The action button is always active and one tap ("Make it a plan"). There are zero warning dialogs, confirmation prompts, or "Proceed anyway?" modals. Overlaps are informative, not blockers (e.g. joining a Netflix party while traveling in France, skipping a workout for drinks, or joining dinner 30 minutes late).
+- **Privacy respect**: Only events explicitly shared with the Orb appear. If shared with title, the title is shown (`Aline · Dinner (6:00 – 8:30 pm)`). If shared as busy only (null title), it displays as `Busy` (`Aline · Busy (6:00 – 8:30 pm)`). If not shared to this Orb, it remains completely private and silent.
+- **Transparent time ranges**: Show concrete ranges (`6:00 – 8:30 pm` or `All day`) rather than ambiguous statements like "busy until 8:30 pm".
+- **Intelligent time-aware filtering**:
+  - *Date-only plan (no From/Until)*: Whispers events scheduled across that day so members see open pockets before picking a time.
+  - *Plan with From time*: Automatically filters out earlier, non-conflicting events (e.g. a lunch meeting is hidden when planning a 7:30 pm dinner). Only events that intersect the planned window (or all-day events) are whispered.
+  - *Multiple overlaps*: If up to 2 events overlap, both are shown concisely (`Aline · 6:00 – 8:30 pm · Remi · All day`). If 3 or more overlap, it provides a quiet summary count (`3 overlapping events at this time` or `3 shared events on this day`).
+
+---
+
 ## Invite
 
 Link or code for **this** Orb. Share sheet / copy URL.

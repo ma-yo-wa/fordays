@@ -84,6 +84,16 @@ enum DateLocal {
     return f.string(from: date)
   }
 
+  static func shortDate(_ dateISO: String) -> String {
+    let names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    let parts = dateISO.split(separator: "-").compactMap { Int($0) }
+    guard parts.count >= 3 else { return String(dateISO.prefix(10)) }
+    let m = parts[1]
+    let d = parts[2]
+    guard (1...12).contains(m) else { return String(dateISO.prefix(10)) }
+    return "\(names[m - 1]) \(d)"
+  }
+
   static func prettyLower(_ hhmm: String) -> String {
     prettyTime(hhmm).replacingOccurrences(of: "AM", with: "am").replacingOccurrences(of: "PM", with: "pm")
   }
