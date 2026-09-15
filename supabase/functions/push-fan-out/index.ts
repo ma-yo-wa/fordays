@@ -249,6 +249,7 @@ Deno.serve(async (req) => {
   }
 
   const activityId = job.activity_id ?? null;
+  const spaceId = job.space_id;
   const payload = {
     title: job.title,
     body: job.body,
@@ -256,7 +257,10 @@ Deno.serve(async (req) => {
     tag: activityId ? `activity-${activityId}` : `space-${job.kind}-${job.space_id}`,
     kind: job.kind,
     activityId,
-    url: activityId ? `/?a=${activityId}` : "/",
+    spaceId,
+    url: activityId
+      ? `/?a=${encodeURIComponent(activityId)}&s=${encodeURIComponent(spaceId)}`
+      : `/?s=${encodeURIComponent(spaceId)}`,
   };
 
   const results = await Promise.all(subs.map(async (s) => {

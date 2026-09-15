@@ -18,6 +18,9 @@ final class AppModel: ObservableObject {
   @Published var pendingInviteShare = false
   @Published var pendingInviteCode: String?
   @Published var pendingInvitePeek: InvitePeek?
+  @Published var detailActivityId: String?
+  @Published var pendingActivityId: String?
+  @Published var pendingActivitySpaceId: String?
 
   func shiftMonth(by delta: Int) {
     cursorMonth = Calendar.current.date(byAdding: .month, value: delta, to: cursorMonth) ?? cursorMonth
@@ -214,6 +217,12 @@ final class AppModel: ObservableObject {
       if space != nil { authPhase = .signedIn }
       try await refreshSpaceAndData()
       authPhase = space == nil ? .signedOut : .signedIn
+      if authPhase == .signedIn, let actId = pendingActivityId {
+        let spId = pendingActivitySpaceId
+        pendingActivityId = nil
+        pendingActivitySpaceId = nil
+        await navigateToActivity(activityId: actId, spaceId: spId)
+      }
     } catch {
       authPhase = space != nil ? .signedIn : .signedOut
     }
@@ -237,6 +246,12 @@ final class AppModel: ObservableObject {
         } catch {
           toast = error.localizedDescription
         }
+      }
+      if authPhase == .signedIn, let actId = pendingActivityId {
+        let spId = pendingActivitySpaceId
+        pendingActivityId = nil
+        pendingActivitySpaceId = nil
+        await navigateToActivity(activityId: actId, spaceId: spId)
       }
     } catch {
       errorMessage = FordaysError.fromAuth(error).errorDescription
@@ -279,6 +294,12 @@ final class AppModel: ObservableObject {
         } catch {
           toast = error.localizedDescription
         }
+      }
+      if authPhase == .signedIn, let actId = pendingActivityId {
+        let spId = pendingActivitySpaceId
+        pendingActivityId = nil
+        pendingActivitySpaceId = nil
+        await navigateToActivity(activityId: actId, spaceId: spId)
       }
     } catch {
       errorMessage = FordaysError.fromAuth(error).errorDescription
@@ -572,6 +593,41 @@ final class AppModel: ObservableObject {
     activities.first { $0.id == id }
   }
 
+  func navigateToActivity(activityId: String, spaceId: String? = nil) async {
+    guard !activityId.isEmpty else { return }
+
+    if let spaceId, !spaceId.isEmpty, space?.id != spaceId {
+      await switchToSpace(spaceId)
+    }
+
+    var act = activity(id: activityId)
+    if act == nil {
+      for _ in 0..<5 {
+        try? await Task.sleep(nanoseconds: 200_000_000)
+        act = activity(id: activityId)
+        if act != nil { break }
+      }
+    }
+
+    guard let target = act else {
+      toast = "That plan is no longer here"
+      return
+    }
+
+    if target.isPlan, let dt = target.dateTime {
+      let dayISO = String(dt.prefix(10))
+      pickedDay = dayISO
+      if let d = DateLocal.parseLocalDay(dayISO) {
+        cursorMonth = d
+      }
+      tab = .plans
+    } else {
+      tab = .bucket
+    }
+
+    detailActivityId = target.id
+  }
+
   func handleOpenURL(_ url: URL) async {
     if url.absoluteString.contains("auth/callback")
       || url.absoluteString.contains("access_token")
@@ -586,6 +642,20 @@ final class AppModel: ObservableObject {
       }
       return
     }
+
+    let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
+    let actId = components?.queryItems?.first(where: { $0.name == "a" })?.value
+    let spId = components?.queryItems?.first(where: { $0.name == "s" })?.value
+    if let actId, !actId.isEmpty {
+      if authPhase == .signedIn {
+        await navigateToActivity(activityId: actId, spaceId: spId)
+      } else {
+        pendingActivityId = actId
+        pendingActivitySpaceId = spId
+      }
+      return
+    }
+
     if let code = inviteCode(from: url) {
       if authPhase == .signedIn {
         do {

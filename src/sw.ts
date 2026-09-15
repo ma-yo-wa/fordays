@@ -46,6 +46,7 @@ interface PushPayload {
   tag?: string;
   url?: string;
   activityId?: string | null;
+  spaceId?: string | null;
   kind?: string | null;
   icon?: string;
   badge?: string;
@@ -77,6 +78,7 @@ self.addEventListener('push', (event) => {
       data: {
         url: data.url || '/',
         activityId: data.activityId ?? null,
+        spaceId: data.spaceId ?? null,
         kind: data.kind ?? null,
       },
     }),
@@ -85,7 +87,11 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const info = (event.notification.data ?? {}) as { url?: string; activityId?: string | null };
+  const info = (event.notification.data ?? {}) as {
+    url?: string;
+    activityId?: string | null;
+    spaceId?: string | null;
+  };
   const target = new URL(info.url || '/', self.location.origin).href;
 
   event.waitUntil(
@@ -96,10 +102,11 @@ self.addEventListener('notificationclick', (event) => {
       });
       for (const client of clientList) {
         if ('focus' in client) {
-          // Hand the open tab the activity id so it can pop the sheet.
+          // Hand the open tab the activity id & space id so it can switch spaces and pop the sheet.
           client.postMessage({
             type: 'notification-click',
             activityId: info.activityId ?? null,
+            spaceId: info.spaceId ?? null,
           });
           return client.focus();
         }

@@ -178,6 +178,18 @@ Sign in first. Sign up is a link. Name placeholder **Aline**. No Mayowa in app c
 
 ---
 
+## Notifications & Deep Linking
+
+- **Direct card destination**: Tapping a notification on lock screen or banner slides up that exact plan or bucket card immediately. It never just dumps the user on the home screen.
+- **Orb-aware context**: If the plan belongs to another Orb (e.g. you're looking at Personal, but a notification arrives from your shared Orb with Aline), the app switches directly into that Orb before presenting the card.
+- **Context underneath**: The screen behind the sheet aligns with the card:
+  - *Plan on the calendar*: Switches to the Calendar tab and focuses on the plan’s date and month so dismissing the sheet leaves you looking at it in context.
+  - *Someday / Bucket item*: Switches to the Someday tab.
+- **Deleted/missing fallback**: If a plan was deleted or modified prior to tapping, a calm toast (`That plan is no longer here`) appears instead of crashing or showing a blank card.
+- **Parity**: Works identically on PWA (via Service Worker `notificationclick` message passing and URL query params `?a=&s=`) and native iOS (via `UNUserNotificationCenterDelegate` and `onOpenURL`).
+
+---
+
 ## Sheets & Confirmations
 
 - **Never stack sheets.** A Sheet (`<Sheet>` in PWA, `.sheet` in SwiftUI) is a draggable drawer with a grabber bar for primary destinations (Settings, Composer, Detail, Add). Stacking a sheet on top of another sheet creates double grabber bars, conflicting gestures, and visual clutter.

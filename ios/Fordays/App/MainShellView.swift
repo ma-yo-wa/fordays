@@ -134,6 +134,9 @@ struct MainShellView: View {
         app.pendingInviteShare = false
         showInvite = true
       }
+      if let id = app.detailActivityId, let act = app.activity(id: id) {
+        selected = act
+      }
     }
     .onChange(of: app.pendingInviteShare) { _, pending in
       if pending {
@@ -141,7 +144,18 @@ struct MainShellView: View {
         showInvite = true
       }
     }
-    .sheet(item: $selected) { activity in
+    .onChange(of: app.detailActivityId) { _, id in
+      if let id {
+        showSettings = false
+        showAddChooser = false
+        composer = nil
+        selectedExternal = nil
+        selected = app.activity(id: id)
+      } else {
+        selected = nil
+      }
+    }
+    .sheet(item: $selected, onDismiss: { app.detailActivityId = nil }) { activity in
       DetailView(activityId: activity.id)
         .environmentObject(app)
     }

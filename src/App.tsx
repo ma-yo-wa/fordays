@@ -107,6 +107,38 @@ function AppShell() {
   }, []);
 
   useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+    const handler = (event: MessageEvent) => {
+      const data = event.data as {
+        type?: string;
+        activityId?: string | null;
+        spaceId?: string | null;
+      } | null;
+      if (data?.type === 'notification-click' && data.activityId) {
+        void useApp.getState().navigateToActivity(data.activityId, data.spaceId);
+      }
+    };
+    navigator.serviceWorker.addEventListener('message', handler);
+    return () => {
+      navigator.serviceWorker.removeEventListener('message', handler);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (authPhase !== 'signedIn') return;
+    const params = new URLSearchParams(window.location.search);
+    const actId = params.get('a');
+    const spId = params.get('s');
+    if (actId) {
+      void useApp.getState().navigateToActivity(actId, spId);
+      params.delete('a');
+      params.delete('s');
+      const q = params.toString();
+      window.history.replaceState(null, '', window.location.pathname + (q ? `?${q}` : ''));
+    }
+  }, [authPhase]);
+
+  useEffect(() => {
     if (!inviteCode) {
       setInvitePeek(null);
       return;

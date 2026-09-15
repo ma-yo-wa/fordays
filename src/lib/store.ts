@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Activity, AuditLog, ExternalEvent, PlanDraft } from './types';
+import { isPlan, type Activity, type AuditLog, type ExternalEvent, type PlanDraft } from './types';
 import type { Backend, ExternalEventInput, NewActivity, WhenSuggestion } from './backend';
 import type { CalendarSource } from './calendars';
 import { LocalBackend } from './backends/local';
@@ -23,7 +23,7 @@ import {
   switchSpace as switchSpaceRemote,
   type SpaceInfo,
 } from './auth';
-import { iso, todayISO } from './date';
+import { dtDate, iso, parseISO, todayISO } from './date';
 import { Copy, formatCopy } from './copy';
 import { prefetchBoardCovers } from './coverCache';
 
@@ -134,6 +134,7 @@ interface AppState {
   setCursor: (d: string) => void;
   setNavScroll: (y: number) => void;
   openDetail: (id: string | null) => void;
+  navigateToActivity: (activityId: string, spaceId?: string | null) => Promise<void>;
   openExternal: (id: string | null) => void;
   setAddOpen: (v: boolean) => void;
   openComposer: (mode: Kind, draft?: PlanDraft | null) => void;
@@ -656,6 +657,49 @@ export const useApp = create<AppState>()((set, get) => {
       if (Math.abs(get().navScroll - navScroll) > 0.5) set({ navScroll });
     },
     openDetail: (detailId) => set({ detailId }),
+    navigateToActivity: async (activityId, spaceId) => {
+      if (!activityId) return;
+
+      const currentSpace = get().space;
+      if (spaceId && currentSpace && currentSpace.id !== spaceId) {
+        try {
+          await get().switchToSpace(spaceId);
+        } catch {
+          /* fallback to current space */
+        }
+      }
+
+      let act = get().activities.find((a) => a.id === activityId);
+      if (!act) {
+        for (let i = 0; i < 5; i++) {
+          await new Promise((r) => setTimeout(r, 200));
+          act = get().activities.find((a) => a.id === activityId);
+          if (act) break;
+        }
+      }
+
+      if (!act) {
+        get().toast('That plan is no longer here');
+        return;
+      }
+
+      if (isPlan(act) && act.date_time) {
+        const planDate = dtDate(act.date_time);
+        if (planDate) {
+          set({
+            screen: 'calendar',
+            picked: planDate,
+            cursor: firstOfMonth(parseISO(planDate)),
+          });
+        } else {
+          set({ screen: 'calendar' });
+        }
+      } else {
+        set({ screen: 'bucket' });
+      }
+
+      get().openDetail(act.id);
+    },
     openExternal: (externalId) => set({ externalId }),
     setAddOpen: (addOpen) => {
       if (addOpen && !canCompose(get().space)) {
