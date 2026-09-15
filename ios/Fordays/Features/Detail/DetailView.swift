@@ -241,18 +241,7 @@ struct DetailView: View {
   }
 
   private func addDefaultTime() {
-    let now = Date()
-    let c = Calendar.current
-    var comps = c.dateComponents([.hour, .minute], from: now)
-    let m = comps.minute ?? 0
-    let nextM = (m / 5 + 1) * 5
-    if nextM >= 60 {
-      comps.hour = (comps.hour ?? 0) + 1
-      comps.minute = 0
-    } else {
-      comps.minute = nextM
-    }
-    fromTime = String(format: "%02d:%02d", comps.hour ?? 19, comps.minute ?? 0)
+    fromTime = DateLocal.defaultAppleStartTime()
   }
 
   private func addDefaultEndTime() {
@@ -260,9 +249,7 @@ struct DetailView: View {
       addDefaultTime()
       return
     }
-    let start = parseTime(fromTime)
-    let endT = Calendar.current.date(byAdding: .hour, value: 2, to: start) ?? start
-    untilTime = formatTime(endT)
+    untilTime = DateLocal.defaultAppleEndTime(from: fromTime)
   }
 
   private func whenForm(suggest: Bool) -> some View {
@@ -296,17 +283,13 @@ struct DetailView: View {
               .buttonStyle(.plain)
             } else {
               HStack(spacing: 6) {
-                DatePicker(
-                  "",
+                CompactTimePicker(
                   selection: Binding(
                     get: { parseTime(fromTime) },
                     set: { next in fromTime = formatTime(next) }
                   ),
-                  displayedComponents: .hourAndMinute
+                  minuteInterval: 5
                 )
-                .datePickerStyle(.compact)
-                .labelsHidden()
-                .tint(Theme.rose)
 
                 Button {
                   fromTime = ""
@@ -363,17 +346,13 @@ struct DetailView: View {
                   .buttonStyle(.plain)
                 } else {
                   HStack(spacing: 6) {
-                    DatePicker(
-                      "",
+                    CompactTimePicker(
                       selection: Binding(
                         get: { parseTime(untilTime) },
                         set: { next in untilTime = formatTime(next) }
                       ),
-                      displayedComponents: .hourAndMinute
+                      minuteInterval: 5
                     )
-                    .datePickerStyle(.compact)
-                    .labelsHidden()
-                    .tint(Theme.rose)
 
                     Button {
                       untilTime = ""
@@ -402,28 +381,24 @@ struct DetailView: View {
 
             Spacer()
 
-            HStack(spacing: 6) {
-              DatePicker(
-                "",
-                selection: Binding(
-                  get: { parseTime(untilTime) },
-                  set: { next in untilTime = formatTime(next) }
-                ),
-                displayedComponents: .hourAndMinute
-              )
-              .datePickerStyle(.compact)
-              .labelsHidden()
-              .tint(Theme.rose)
+          HStack(spacing: 6) {
+            CompactTimePicker(
+              selection: Binding(
+                get: { parseTime(untilTime) },
+                set: { next in untilTime = formatTime(next) }
+              ),
+              minuteInterval: 5
+            )
 
-              Button {
-                untilTime = ""
-              } label: {
-                Image(systemName: "xmark.circle.fill")
-                  .font(.subheadline)
-                  .foregroundStyle(Theme.inkFaint)
-              }
-              .buttonStyle(.plain)
+            Button {
+              untilTime = ""
+            } label: {
+              Image(systemName: "xmark.circle.fill")
+                .font(.subheadline)
+                .foregroundStyle(Theme.inkFaint)
             }
+            .buttonStyle(.plain)
+          }
           }
           .padding(.horizontal, 14)
           .padding(.vertical, 10)

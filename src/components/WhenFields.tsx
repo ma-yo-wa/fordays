@@ -1,7 +1,15 @@
 import { useState } from 'react';
-import { DayPicker } from 'react-day-picker';
-import 'react-day-picker/style.css';
-import { addDays, iso, mediumDate, parseISO } from '../lib/date';
+import {
+  MONTHS,
+  addDays,
+  defaultAppleEndTime,
+  defaultAppleStartTime,
+  mediumDate,
+  monthGrid,
+  parseISO,
+  pretty,
+  todayISO,
+} from '../lib/date';
 import f from './Form.module.css';
 
 type Props = {
@@ -17,12 +25,250 @@ type Props = {
   onMultiDay: (open: boolean) => void;
 };
 
+const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const MINUTES_5 = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+const HOURS_12 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+function parseHHMM(time: string): { h12: number; m: number; isPM: boolean } {
+  if (!time) {
+    const def = defaultAppleStartTime();
+    const [defH, defM] = def.split(':').map(Number);
+    return {
+      h12: (defH ?? 11) % 12 === 0 ? 12 : (defH ?? 11) % 12,
+      m: defM ?? 0,
+      isPM: (defH ?? 11) >= 12,
+    };
+  }
+  const [hRaw, mRaw] = time.split(':').map(Number);
+  const h = hRaw ?? 0;
+  const m = mRaw ?? 0;
+  const isPM = h >= 12;
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return { h12, m, isPM };
+}
+
+function formatHHMM(h12: number, m: number, isPM: boolean): string {
+  let h24 = h12 % 12;
+  if (isPM) h24 += 12;
+  return `${String(h24).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function TimeDrawer({
+  title,
+  value,
+  onChange,
+  onClose,
+}: {
+  title: string;
+  value: string;
+  onChange: (v: string) => void;
+  onClose: () => void;
+}) {
+  const { h12, m, isPM } = parseHHMM(value);
+
+  function setHour(newH12: number) {
+    const clamped = Math.max(1, Math.min(12, newH12));
+    onChange(formatHHMM(clamped, m, isPM));
+  }
+
+  function setMinute(newM: number) {
+    const clamped = Math.max(0, Math.min(59, newM));
+    onChange(formatHHMM(h12, clamped, isPM));
+  }
+
+  function setPM(pm: boolean) {
+    onChange(formatHHMM(h12, m, pm));
+  }
+
+  return (
+    <div className={f.appleTimeDrawer}>
+      <div className={f.timeDrawerHeader}>
+        <span className={f.timeDrawerTitle}>{title}</span>
+        <button type="button" className={f.timeDoneBtn} onClick={onClose}>
+          Done
+        </button>
+      </div>
+
+      {/* Tap-to-type Direct Row */}
+      <div className={f.timeDirectRow}>
+        <div className={f.timeDigitBox}>
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            className={f.timeDigitInput}
+            value={h12}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              if (!isNaN(val)) setHour(val);
+            }}
+            aria-label="Hour"
+          />
+          <span className={f.timeColon}>:</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            className={f.timeDigitInput}
+            value={String(m).padStart(2, '0')}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              if (!isNaN(val)) setMinute(val);
+            }}
+            aria-label="Minute"
+          />
+        </div>
+
+        <div className={f.timeAmPmToggle}>
+          <button
+            type="button"
+            className={`${f.timeAmPmBtn} ${!isPM ? f.timeAmPmActive : ''}`}
+            onClick={() => setPM(false)}
+          >
+            AM
+          </button>
+          <button
+            type="button"
+            className={`${f.timeAmPmBtn} ${isPM ? f.timeAmPmActive : ''}`}
+            onClick={() => setPM(true)}
+          >
+            PM
+          </button>
+        </div>
+      </div>
+
+      {/* 5-minute ticks */}
+      <span className={f.timeSectionLabel}>Minutes</span>
+      <div className={f.timeChipsGrid}>
+        {MINUTES_5.map((minVal) => {
+          const active = m === minVal;
+          const label = `:${String(minVal).padStart(2, '0')}`;
+          return (
+            <button
+              key={minVal}
+              type="button"
+              className={`${f.timeChip} ${active ? f.timeChipActive : ''}`}
+              onClick={() => setMinute(minVal)}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Quick Hours */}
+      <span className={f.timeSectionLabel}>Hours</span>
+      <div className={f.timeHoursGrid}>
+        {HOURS_12.map((hVal) => {
+          const active = h12 === hVal;
+          return (
+            <button
+              key={hVal}
+              type="button"
+              className={`${f.timeHourChip} ${active ? f.timeHourChipActive : ''}`}
+              onClick={() => setHour(hVal)}
+            >
+              {hVal}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function InlineMonthCalendar({
+  selectedDate,
+  onSelect,
+}: {
+  selectedDate: string;
+  onSelect: (date: string) => void;
+}) {
+  const [cursorMonth, setCursorMonth] = useState<Date>(() => parseISO(selectedDate));
+  const today = todayISO();
+
+  function shiftMonth(delta: number) {
+    setCursorMonth(
+      new Date(cursorMonth.getFullYear(), cursorMonth.getMonth() + delta, 1),
+    );
+  }
+
+  const cells = monthGrid(cursorMonth);
+  const monthTitle = `${MONTHS[cursorMonth.getMonth()]} ${cursorMonth.getFullYear()}`;
+
+  return (
+    <div className={f.appleCalendarBox}>
+      <div className={f.calHeader}>
+        <span className={f.calMonthTitle}>{monthTitle}</span>
+        <div className={f.calNavGroup}>
+          <button
+            type="button"
+            className={f.calNavBtn}
+            onClick={() => shiftMonth(-1)}
+            aria-label="Previous month"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            className={f.calNavBtn}
+            onClick={() => shiftMonth(1)}
+            aria-label="Next month"
+          >
+            ›
+          </button>
+        </div>
+      </div>
+
+      <div className={f.calDow}>
+        {DOW.map((d, i) => (
+          <span key={i}>{d}</span>
+        ))}
+      </div>
+
+      <div className={f.calGrid}>
+        {cells.map((cell, i) => {
+          if (cell.outside || !cell.date) {
+            return (
+              <div key={i} className={`${f.calDay} ${f.calOutside}`}>
+                <span className={f.calNum}>{cell.label}</span>
+              </div>
+            );
+          }
+          const isToday = cell.date === today;
+          const isPicked = cell.date === selectedDate;
+          const classNames = [
+            f.calDay,
+            isToday ? f.calToday : '',
+            isPicked ? f.calPicked : '',
+          ]
+            .filter(Boolean)
+            .join(' ');
+
+          return (
+            <button
+              key={i}
+              type="button"
+              className={classNames}
+              onClick={() => onSelect(cell.date as string)}
+            >
+              <span className={f.calNum}>{cell.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /**
  * WhenFields: Apple Calendar style unified When card.
  *
  * - Starts row: Date capsule + Time capsule side-by-side.
- * - Tap date capsule to expand inline Apple-style month grid.
- * - 5-minute interval stepping with step="300".
+ * - Tap date capsule to expand inline month grid (exact match to Plans page).
+ * - Segmented 5-minute time popover with tap-to-type direct numeric input.
+ * - Apple Next Half-Hour Rule on default start time.
+ * - Apple 1-Hour Duration Rule on default end time.
  * - Ends row: revealed conditionally for Until or Multi-day.
  * - Soft blanks are valid: never force Until or Ends on.
  */
@@ -39,6 +285,7 @@ export default function WhenFields({
   onMultiDay,
 }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [activeTimePicker, setActiveTimePicker] = useState<'from' | 'until' | null>(null);
 
   function openMultiDay() {
     onMultiDay(true);
@@ -50,15 +297,12 @@ export default function WhenFields({
   function closeMultiDay() {
     onMultiDay(false);
     onEnd(null);
+    if (activeTimePicker === 'until') setActiveTimePicker(null);
   }
 
   function addDefaultTime() {
-    const now = new Date();
-    const rem = now.getMinutes() % 5;
-    const rounded = new Date(now.getTime() + (5 - rem) * 60 * 1000);
-    const h = String(rounded.getHours()).padStart(2, '0');
-    const m = String(rounded.getMinutes()).padStart(2, '0');
-    onFrom(`${h}:${m}`);
+    const def = defaultAppleStartTime();
+    onFrom(def);
   }
 
   function addDefaultEndTime() {
@@ -66,9 +310,7 @@ export default function WhenFields({
       addDefaultTime();
       return;
     }
-    const [h, m] = from.split(':').map(Number);
-    const endH = Math.min((h ?? 0) + 2, 23);
-    onUntil(`${String(endH).padStart(2, '0')}:${String(m ?? 0).padStart(2, '0')}`);
+    onUntil(defaultAppleEndTime(from));
   }
 
   return (
@@ -85,7 +327,10 @@ export default function WhenFields({
             <button
               type="button"
               className={`${f.applePill} ${pickerOpen ? f.applePillActive : ''}`}
-              onClick={() => setPickerOpen((v) => !v)}
+              onClick={() => {
+                setPickerOpen((v) => !v);
+                setActiveTimePicker(null);
+              }}
               aria-label="Pick date"
             >
               {mediumDate(date)} {pickerOpen ? '⌃' : '⌵'}
@@ -93,20 +338,24 @@ export default function WhenFields({
 
             {from ? (
               <div className={f.appleTimeWrapper}>
-                <input
-                  type="time"
-                  step="300"
-                  className={f.appleTimeInput}
-                  value={from}
-                  onChange={(e) => onFrom(e.target.value)}
-                  onInput={(e) => onFrom((e.target as HTMLInputElement).value)}
-                />
+                <button
+                  type="button"
+                  className={`${f.appleTimePill} ${activeTimePicker === 'from' ? f.applePillActive : ''}`}
+                  onClick={() => {
+                    setActiveTimePicker((cur) => (cur === 'from' ? null : 'from'));
+                    setPickerOpen(false);
+                  }}
+                  aria-label="Pick start time"
+                >
+                  {pretty(from)}
+                </button>
                 <button
                   type="button"
                   className={f.appleTimeClear}
                   onClick={() => {
                     onFrom('');
                     onUntil('');
+                    if (activeTimePicker === 'from') setActiveTimePicker(null);
                   }}
                   aria-label="Clear time"
                   title="Clear time"
@@ -118,7 +367,11 @@ export default function WhenFields({
               <button
                 type="button"
                 className={f.applePill}
-                onClick={addDefaultTime}
+                onClick={() => {
+                  addDefaultTime();
+                  setActiveTimePicker('from');
+                  setPickerOpen(false);
+                }}
               >
                 + Add time
               </button>
@@ -126,24 +379,26 @@ export default function WhenFields({
           </div>
         </div>
 
-        {/* Inline Apple Calendar Grid */}
+        {/* Inline Month Calendar (Matches Plans page) */}
         {pickerOpen && (
-          <div className={f.appleCalendarBox}>
-            <DayPicker
-              className={f.picker}
-              mode="single"
-              required
-              selected={parseISO(date)}
-              defaultMonth={parseISO(date)}
-              onSelect={(d) => {
-                if (!d) return;
-                const next = iso(d);
-                onDate(next);
-                if (end && end <= next) onEnd(null);
-                setPickerOpen(false);
-              }}
-            />
-          </div>
+          <InlineMonthCalendar
+            selectedDate={date}
+            onSelect={(next) => {
+              onDate(next);
+              if (end && end <= next) onEnd(null);
+              setPickerOpen(false);
+            }}
+          />
+        )}
+
+        {/* Start Time Drawer */}
+        {activeTimePicker === 'from' && (
+          <TimeDrawer
+            title={multiDay ? 'Starts time' : 'Time'}
+            value={from || defaultAppleStartTime()}
+            onChange={onFrom}
+            onClose={() => setActiveTimePicker(null)}
+          />
         )}
 
         {/* Multi-day Ends Row */}
@@ -164,18 +419,24 @@ export default function WhenFields({
               {from && (
                 until ? (
                   <div className={f.appleTimeWrapper}>
-                    <input
-                      type="time"
-                      step="300"
-                      className={f.appleTimeInput}
-                      value={until}
-                      onChange={(e) => onUntil(e.target.value)}
-                      onInput={(e) => onUntil((e.target as HTMLInputElement).value)}
-                    />
+                    <button
+                      type="button"
+                      className={`${f.appleTimePill} ${activeTimePicker === 'until' ? f.applePillActive : ''}`}
+                      onClick={() => {
+                        setActiveTimePicker((cur) => (cur === 'until' ? null : 'until'));
+                        setPickerOpen(false);
+                      }}
+                      aria-label="Pick end time"
+                    >
+                      {pretty(until)}
+                    </button>
                     <button
                       type="button"
                       className={f.appleTimeClear}
-                      onClick={() => onUntil('')}
+                      onClick={() => {
+                        onUntil('');
+                        if (activeTimePicker === 'until') setActiveTimePicker(null);
+                      }}
                       aria-label="Clear end time"
                     >
                       ×
@@ -185,7 +446,11 @@ export default function WhenFields({
                   <button
                     type="button"
                     className={f.applePill}
-                    onClick={addDefaultEndTime}
+                    onClick={() => {
+                      addDefaultEndTime();
+                      setActiveTimePicker('until');
+                      setPickerOpen(false);
+                    }}
                   >
                     + End time
                   </button>
@@ -193,6 +458,16 @@ export default function WhenFields({
               )}
             </div>
           </div>
+        )}
+
+        {/* Multi-day End Time Drawer */}
+        {multiDay && activeTimePicker === 'until' && (
+          <TimeDrawer
+            title="Ends time"
+            value={until || (from ? defaultAppleEndTime(from) : defaultAppleStartTime())}
+            onChange={onUntil}
+            onClose={() => setActiveTimePicker(null)}
+          />
         )}
 
         {/* Single-day Until Row (if set) */}
@@ -204,18 +479,24 @@ export default function WhenFields({
             <span className={f.appleWhenLabel}>Until</span>
             <div className={f.applePillGroup}>
               <div className={f.appleTimeWrapper}>
-                <input
-                  type="time"
-                  step="300"
-                  className={f.appleTimeInput}
-                  value={until}
-                  onChange={(e) => onUntil(e.target.value)}
-                  onInput={(e) => onUntil((e.target as HTMLInputElement).value)}
-                />
+                <button
+                  type="button"
+                  className={`${f.appleTimePill} ${activeTimePicker === 'until' ? f.applePillActive : ''}`}
+                  onClick={() => {
+                    setActiveTimePicker((cur) => (cur === 'until' ? null : 'until'));
+                    setPickerOpen(false);
+                  }}
+                  aria-label="Pick end time"
+                >
+                  {pretty(until)}
+                </button>
                 <button
                   type="button"
                   className={f.appleTimeClear}
-                  onClick={() => onUntil('')}
+                  onClick={() => {
+                    onUntil('');
+                    if (activeTimePicker === 'until') setActiveTimePicker(null);
+                  }}
                   aria-label="Clear end time"
                 >
                   ×
@@ -223,6 +504,16 @@ export default function WhenFields({
               </div>
             </div>
           </div>
+        )}
+
+        {/* Single-day Until Time Drawer */}
+        {!multiDay && activeTimePicker === 'until' && (
+          <TimeDrawer
+            title="Until"
+            value={until || (from ? defaultAppleEndTime(from) : defaultAppleStartTime())}
+            onChange={onUntil}
+            onClose={() => setActiveTimePicker(null)}
+          />
         )}
       </div>
 
@@ -234,7 +525,11 @@ export default function WhenFields({
               <button
                 type="button"
                 className={f.textLink}
-                onClick={addDefaultEndTime}
+                onClick={() => {
+                  addDefaultEndTime();
+                  setActiveTimePicker('until');
+                  setPickerOpen(false);
+                }}
               >
                 + Add end time
               </button>

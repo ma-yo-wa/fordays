@@ -197,18 +197,7 @@ struct ComposerView: View {
   }
 
   private func addDefaultTime() {
-    let now = Date()
-    let c = Calendar.current
-    var comps = c.dateComponents([.hour, .minute], from: now)
-    let m = comps.minute ?? 0
-    let nextM = (m / 5 + 1) * 5
-    if nextM >= 60 {
-      comps.hour = (comps.hour ?? 0) + 1
-      comps.minute = 0
-    } else {
-      comps.minute = nextM
-    }
-    from = String(format: "%02d:%02d", comps.hour ?? 19, comps.minute ?? 0)
+    from = DateLocal.defaultAppleStartTime()
   }
 
   private func addDefaultEndTime() {
@@ -216,9 +205,7 @@ struct ComposerView: View {
       addDefaultTime()
       return
     }
-    let start = parseTime(from)
-    let endT = Calendar.current.date(byAdding: .hour, value: 2, to: start) ?? start
-    until = formatTime(endT)
+    until = DateLocal.defaultAppleEndTime(from: from)
   }
 
   private var appleWhenCard: some View {
@@ -260,17 +247,13 @@ struct ComposerView: View {
             .buttonStyle(.plain)
           } else {
             HStack(spacing: 6) {
-              DatePicker(
-                "",
+              CompactTimePicker(
                 selection: Binding(
                   get: { parseTime(from) },
                   set: { next in from = formatTime(next) }
                 ),
-                displayedComponents: .hourAndMinute
+                minuteInterval: 5
               )
-              .datePickerStyle(.compact)
-              .labelsHidden()
-              .tint(Theme.rose)
 
               Button {
                 from = ""
@@ -327,17 +310,13 @@ struct ComposerView: View {
                 .buttonStyle(.plain)
               } else {
                 HStack(spacing: 6) {
-                  DatePicker(
-                    "",
+                  CompactTimePicker(
                     selection: Binding(
                       get: { parseTime(until) },
                       set: { next in until = formatTime(next) }
                     ),
-                    displayedComponents: .hourAndMinute
+                    minuteInterval: 5
                   )
-                  .datePickerStyle(.compact)
-                  .labelsHidden()
-                  .tint(Theme.rose)
 
                   Button {
                     until = ""
@@ -367,17 +346,13 @@ struct ComposerView: View {
           Spacer()
 
           HStack(spacing: 6) {
-            DatePicker(
-              "",
+            CompactTimePicker(
               selection: Binding(
                 get: { parseTime(until) },
                 set: { next in until = formatTime(next) }
               ),
-              displayedComponents: .hourAndMinute
+              minuteInterval: 5
             )
-            .datePickerStyle(.compact)
-            .labelsHidden()
-            .tint(Theme.rose)
 
             Button {
               until = ""

@@ -72,6 +72,42 @@ export function prettyLower(time: string): string {
   return pretty(time).replace('AM', 'am').replace('PM', 'pm');
 }
 
+/**
+ * Apple Calendar's Next Half-Hour Rule for default start time:
+ * - Never schedules in the past or mid-minute.
+ * - Always rounds up to the next clean half-hour block (:00 or :30).
+ * - Cutoff buffer: if the current minute is exactly on a half-hour mark
+ *   (e.g. 10:00 or 10:30), it assumes a typing buffer is needed and pushes
+ *   forward by 30 minutes (e.g. 10:00 -> 10:30, 10:30 -> 11:00).
+ * - Returns 24h "HH:MM".
+ */
+export function defaultAppleStartTime(now = new Date()): string {
+  const currentH = now.getHours();
+  const currentM = now.getMinutes();
+  let h = currentH;
+  let m = 0;
+  if (currentM < 30) {
+    m = 30;
+  } else {
+    h = (h + 1) % 24;
+    m = 0;
+  }
+  return `${pad(h)}:${pad(m)}`;
+}
+
+/**
+ * Apple Calendar's standard 1-hour duration rule:
+ * Defaults end time to 1 hour after the start time.
+ */
+export function defaultAppleEndTime(fromTime: string): string {
+  if (!fromTime) return defaultAppleStartTime();
+  const [hStr, mStr] = fromTime.split(':');
+  const h = parseInt(hStr || '0', 10);
+  const m = parseInt(mStr || '0', 10);
+  const endH = (h + 1) % 24;
+  return `${pad(endH)}:${pad(m)}`;
+}
+
 /** Every date an event touches, so a multi-day booking appears on each
  *  day it actually covers rather than only the one it starts on. */
 export function spanDays(startsAt: string, endsAt: string): string[] {

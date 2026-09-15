@@ -254,6 +254,40 @@ enum DateLocal {
     return String(format: "%d:%02d %@", h, m, ampm)
   }
 
+  /// Apple Calendar's Next Half-Hour Rule for default start time:
+  /// - Never schedules in the past or mid-minute.
+  /// - Always rounds up to the next clean half-hour block (:00 or :30).
+  /// - Cutoff buffer: if the current minute is exactly on a half-hour mark
+  ///   (e.g. 10:00 or 10:30), it assumes a typing buffer is needed and pushes
+  ///   forward by 30 minutes (e.g. 10:00 -> 10:30, 10:30 -> 11:00).
+  /// - Returns 24h "HH:MM".
+  static func defaultAppleStartTime(now: Date = Date()) -> String {
+    let c = Calendar.current
+    let h = c.component(.hour, from: now)
+    let m = c.component(.minute, from: now)
+    var targetH = h
+    var targetM = 0
+    if m < 30 {
+      targetM = 30
+    } else {
+      targetH = (targetH + 1) % 24
+      targetM = 0
+    }
+    return String(format: "%02d:%02d", targetH, targetM)
+  }
+
+  /// Apple Calendar's standard 1-hour duration rule:
+  /// Defaults end time to 1 hour after the start time.
+  static func defaultAppleEndTime(from: String) -> String {
+    guard !from.isEmpty else { return defaultAppleStartTime() }
+    let parts = from.split(separator: ":").compactMap { Int($0) }
+    guard parts.count >= 2 else { return from }
+    let h = parts[0]
+    let m = parts[1]
+    let endH = (h + 1) % 24
+    return String(format: "%02d:%02d", endH, m)
+  }
+
   static func parseLocalDay(_ value: String) -> Date? {
     let day = String(value.prefix(10))
     let dp = day.split(separator: "-").compactMap { Int($0) }
