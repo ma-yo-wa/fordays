@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { DayPicker } from 'react-day-picker';
 import Sheet from './Sheet';
 import CoverPicker from './CoverPicker';
 import CoverArt from './CoverArt';
@@ -421,26 +420,13 @@ export default function Detail() {
 
       {(mode === 'when' || mode === 'suggest') && (
         <>
-          <DayPicker
-            className={f.picker}
-            mode="single"
-            required
-            selected={parseISO(date)}
-            defaultMonth={parseISO(date)}
-            onSelect={(d) => {
-              if (!d) return;
-              const next = iso(d);
-              setDate(next);
-              if (end && end <= next) setEnd(null);
-            }}
-          />
-
           <WhenFields
             date={date}
             from={from}
             until={until}
             end={end}
             multiDay={multiDay}
+            onDate={setDate}
             onFrom={setFrom}
             onUntil={setUntil}
             onEnd={setEnd}

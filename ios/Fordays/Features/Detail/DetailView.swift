@@ -223,52 +223,242 @@ struct DetailView: View {
     }
   }
 
+  private func parseTime(_ hhmm: String) -> Date {
+    guard !hhmm.isEmpty else { return Date() }
+    let parts = hhmm.split(separator: ":").compactMap { Int($0) }
+    guard parts.count >= 2 else { return Date() }
+    var comps = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+    comps.hour = parts[0]
+    comps.minute = parts[1]
+    return Calendar.current.date(from: comps) ?? Date()
+  }
+
+  private func formatTime(_ d: Date) -> String {
+    let c = Calendar.current
+    let h = c.component(.hour, from: d)
+    let m = c.component(.minute, from: d)
+    return String(format: "%02d:%02d", h, m)
+  }
+
+  private func addDefaultTime() {
+    let now = Date()
+    let c = Calendar.current
+    var comps = c.dateComponents([.hour, .minute], from: now)
+    let m = comps.minute ?? 0
+    let nextM = (m / 5 + 1) * 5
+    if nextM >= 60 {
+      comps.hour = (comps.hour ?? 0) + 1
+      comps.minute = 0
+    } else {
+      comps.minute = nextM
+    }
+    fromTime = String(format: "%02d:%02d", comps.hour ?? 19, comps.minute ?? 0)
+  }
+
+  private func addDefaultEndTime() {
+    if fromTime.isEmpty {
+      addDefaultTime()
+      return
+    }
+    let start = parseTime(fromTime)
+    let endT = Calendar.current.date(byAdding: .hour, value: 2, to: start) ?? start
+    untilTime = formatTime(endT)
+  }
+
   private func whenForm(suggest: Bool) -> some View {
     VStack(alignment: .leading, spacing: 12) {
-      DatePicker("Date", selection: $day, displayedComponents: .date)
-        .datePickerStyle(.graphical)
-        .labelsHidden()
-        .frame(maxWidth: .infinity)
-        .tint(Theme.rose)
+      fieldLabel("When")
 
-      if multiDay {
-        fieldLabel("Ends on", hint: "— last day")
-        DatePicker(
-          "End date",
-          selection: Binding(
-            get: { endDay ?? Calendar.current.date(byAdding: .day, value: 1, to: day) ?? day },
-            set: { endDay = $0 }
-          ),
-          in: day...,
-          displayedComponents: .date
-        )
-        Button("Just one day") {
-          multiDay = false
-          endDay = nil
-        }
-        .font(.subheadline.weight(.semibold))
-        .foregroundStyle(Theme.roseInk)
-        .padding(.top, 10)
-        .padding(.bottom, 4)
-      }
+      VStack(spacing: 0) {
+        // Starts / When row
+        HStack {
+          Text(multiDay ? "Starts" : "When")
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(Theme.ink)
 
-      fieldLabel("Time", hint: "— optional")
-      HStack(spacing: 8) {
-        timeBox(label: multiDay ? "Starts at" : "From", text: $fromTime)
-        timeBox(label: multiDay ? "Ends at" : "Until", text: $untilTime)
-      }
+          Spacer()
 
-      if !multiDay {
-        Button("Runs more than one day?") {
-          multiDay = true
-          if endDay == nil || (endDay.map { DateLocal.todayISO($0) } ?? "") <= DateLocal.todayISO(day) {
-            endDay = Calendar.current.date(byAdding: .day, value: 1, to: day)
+          HStack(spacing: 8) {
+            DatePicker("", selection: $day, displayedComponents: .date)
+              .datePickerStyle(.compact)
+              .labelsHidden()
+              .tint(Theme.rose)
+
+            if fromTime.isEmpty {
+              Button(action: addDefaultTime) {
+                Text("+ Add time")
+                  .font(.subheadline.weight(.medium))
+                  .foregroundStyle(Theme.inkSoft)
+                  .padding(.horizontal, 10)
+                  .padding(.vertical, 6)
+                  .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+              }
+              .buttonStyle(.plain)
+            } else {
+              HStack(spacing: 6) {
+                DatePicker(
+                  "",
+                  selection: Binding(
+                    get: { parseTime(fromTime) },
+                    set: { next in fromTime = formatTime(next) }
+                  ),
+                  displayedComponents: .hourAndMinute
+                )
+                .datePickerStyle(.compact)
+                .labelsHidden()
+                .tint(Theme.rose)
+
+                Button {
+                  fromTime = ""
+                  untilTime = ""
+                } label: {
+                  Image(systemName: "xmark.circle.fill")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.inkFaint)
+                }
+                .buttonStyle(.plain)
+              }
+            }
           }
         }
-        .font(.subheadline.weight(.semibold))
-        .foregroundStyle(Theme.roseInk)
-        .padding(.top, 10)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+
+        // Multi-day Ends row
+        if multiDay {
+          Divider()
+            .padding(.leading, 14)
+
+          HStack {
+            Text("Ends")
+              .font(.subheadline.weight(.medium))
+              .foregroundStyle(Theme.ink)
+
+            Spacer()
+
+            HStack(spacing: 8) {
+              DatePicker(
+                "",
+                selection: Binding(
+                  get: { endDay ?? Calendar.current.date(byAdding: .day, value: 1, to: day) ?? day },
+                  set: { endDay = $0 }
+                ),
+                in: day...,
+                displayedComponents: .date
+              )
+              .datePickerStyle(.compact)
+              .labelsHidden()
+              .tint(Theme.rose)
+
+              if !fromTime.isEmpty {
+                if untilTime.isEmpty {
+                  Button(action: addDefaultEndTime) {
+                    Text("+ End time")
+                      .font(.subheadline.weight(.medium))
+                      .foregroundStyle(Theme.inkSoft)
+                      .padding(.horizontal, 10)
+                      .padding(.vertical, 6)
+                      .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                  }
+                  .buttonStyle(.plain)
+                } else {
+                  HStack(spacing: 6) {
+                    DatePicker(
+                      "",
+                      selection: Binding(
+                        get: { parseTime(untilTime) },
+                        set: { next in untilTime = formatTime(next) }
+                      ),
+                      displayedComponents: .hourAndMinute
+                    )
+                    .datePickerStyle(.compact)
+                    .labelsHidden()
+                    .tint(Theme.rose)
+
+                    Button {
+                      untilTime = ""
+                    } label: {
+                      Image(systemName: "xmark.circle.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.inkFaint)
+                    }
+                    .buttonStyle(.plain)
+                  }
+                }
+              }
+            }
+          }
+          .padding(.horizontal, 14)
+          .padding(.vertical, 10)
+        } else if !fromTime.isEmpty && !untilTime.isEmpty {
+          // Single-day Until row
+          Divider()
+            .padding(.leading, 14)
+
+          HStack {
+            Text("Until")
+              .font(.subheadline.weight(.medium))
+              .foregroundStyle(Theme.ink)
+
+            Spacer()
+
+            HStack(spacing: 6) {
+              DatePicker(
+                "",
+                selection: Binding(
+                  get: { parseTime(untilTime) },
+                  set: { next in untilTime = formatTime(next) }
+                ),
+                displayedComponents: .hourAndMinute
+              )
+              .datePickerStyle(.compact)
+              .labelsHidden()
+              .tint(Theme.rose)
+
+              Button {
+                untilTime = ""
+              } label: {
+                Image(systemName: "xmark.circle.fill")
+                  .font(.subheadline)
+                  .foregroundStyle(Theme.inkFaint)
+              }
+              .buttonStyle(.plain)
+            }
+          }
+          .padding(.horizontal, 14)
+          .padding(.vertical, 10)
+        }
       }
+      .background(Theme.ink.opacity(0.04), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+      // Sub-row
+      HStack {
+        if !multiDay {
+          if !fromTime.isEmpty && untilTime.isEmpty {
+            Button("+ Add end time", action: addDefaultEndTime)
+              .font(.footnote.weight(.semibold))
+              .foregroundStyle(Theme.roseInk)
+          }
+          Spacer()
+          Button("Runs more than one day?") {
+            multiDay = true
+            if endDay == nil || (endDay.map { DateLocal.todayISO($0) } ?? "") <= DateLocal.todayISO(day) {
+              endDay = Calendar.current.date(byAdding: .day, value: 1, to: day)
+            }
+          }
+          .font(.footnote.weight(.semibold))
+          .foregroundStyle(Theme.roseInk)
+        } else {
+          Button("Just one day") {
+            multiDay = false
+            endDay = nil
+          }
+          .font(.footnote.weight(.semibold))
+          .foregroundStyle(Theme.roseInk)
+          Spacer()
+        }
+      }
+      .padding(.top, 4)
 
       if suggest {
         fieldLabel("Why", hint: "— optional, but helpful")
@@ -369,40 +559,6 @@ struct DetailView: View {
       .padding(.vertical, 14)
       .padding(.horizontal, 4)
     }
-  }
-
-  private func timeBox(label: String, text: Binding<String>) -> some View {
-    VStack(alignment: .leading, spacing: 4) {
-      Text(label)
-        .font(.caption2.weight(.medium))
-        .foregroundStyle(Theme.inkFaint)
-        .textCase(.uppercase)
-        .padding(.leading, 4)
-
-      HStack(spacing: 4) {
-        TextField("e.g. 7:00 PM", text: text)
-          .keyboardType(.numbersAndPunctuation)
-          .font(.subheadline)
-          .padding(.vertical, 12)
-          .padding(.leading, 12)
-
-        if !text.wrappedValue.isEmpty {
-          Button {
-            text.wrappedValue = ""
-          } label: {
-            Image(systemName: "xmark")
-              .font(.system(size: 10, weight: .bold))
-              .foregroundStyle(Theme.paperWarm)
-              .frame(width: 20, height: 20)
-              .background(Theme.inkFaint, in: Circle())
-              .padding(.trailing, 8)
-          }
-          .buttonStyle(.plain)
-        }
-      }
-      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-    .frame(maxWidth: .infinity)
   }
 
   private func fieldLabel(_ text: String, hint: String? = nil) -> some View {

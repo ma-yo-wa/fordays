@@ -104,11 +104,10 @@ Empty: the line only. Plus adds. No empty CTA.
 
 Default when-flow:
 
-1. **Day** — required once it’s a plan
-2. **From** — optional
-3. **Until** — optional
-
-Multi-day only after **Runs more than one day?** Then **Ends on**. Until is the time on that last day (still optional). Never block save because Until or Ends on is empty.
+1. **Starts** — unified date pill + optional time pill. No bloated quick chips (`Today / Tomorrow / This weekend`). Opens on the focused date; tapping the date capsule reveals the clean month grid.
+2. **5-minute intervals + tap-to-type**: Native iOS compact `DatePicker` (5-minute wheel + numeric keypad for exact minutes) on iOS; `step="300"` on PWA `<input type="time">`.
+3. **From & Until** — soft blanks are valid. `Until` is revealed on demand via `+ Add end time` without forcing a duration.
+4. **Multi-day** — only after **Runs more than one day?** Then **Ends** row appears with end date and optional until time. Never block save because Until or Ends is empty.
 
 Say plan / day — not event, schedule, or calendar.
 

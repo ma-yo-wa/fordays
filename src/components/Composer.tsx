@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
-import { DayPicker } from 'react-day-picker';
-import 'react-day-picker/style.css';
 import Sheet from './Sheet';
 import CoverPicker from './CoverPicker';
 import WhenFields from './WhenFields';
 import { partnerName, useApp } from '../lib/store';
-import { addDays, composeWhen, describePlan, iso, mediumDate, nextSaturday, parseISO, prettyLower, shortDate } from '../lib/date';
+import { composeWhen, describePlan, iso, parseISO, prettyLower, shortDate } from '../lib/date';
 import { Copy } from '../lib/copy';
 import f from './Form.module.css';
 
@@ -37,7 +35,6 @@ export default function Composer() {
   const [until, setUntil] = useState('');
   const [end, setEnd] = useState<string | null>(null);
   const [multiDay, setMultiDay] = useState(false);
-  const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -51,22 +48,8 @@ export default function Composer() {
     setUntil(draft?.until ?? '');
     setEnd(draft?.endDate ?? null);
     setMultiDay(draft?.multiDay ?? Boolean(draft?.endDate));
-    setPickerOpen(false);
     setSaving(false);
   }, [mode, picked, draft]);
-
-  const quick: Array<[string, string]> = [
-    ['Today', addDays(0)],
-    ['Tomorrow', addDays(1)],
-    ['This weekend', nextSaturday()],
-  ];
-
-  const isQuick = quick.some(([, val]) => val === date);
-  const customDateLabel = isQuick
-    ? pickerOpen
-      ? 'Pick date ⌃'
-      : 'Pick date ⌵'
-    : `${mediumDate(date)} ${pickerOpen ? '⌃' : '⌵'}`;
 
   const dayContext = external.filter((e) => {
     const isMine = e.ownerId === (space?.myId ?? String(space?.me ?? config.me));
@@ -218,58 +201,13 @@ export default function Composer() {
 
       {isPlan && (
         <>
-          <span className={f.label}>When</span>
-          <div className={f.chipsGrid}>
-            {quick.map(([label, value]) => {
-              const on = date === value && !pickerOpen;
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  className={`${f.chipGridBtn} ${on ? f.chipGridBtnOn : ''}`}
-                  onClick={() => {
-                    setDate(value);
-                    setPickerOpen(false);
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-            <button
-              type="button"
-              className={`${f.chipGridBtn} ${
-                !isQuick ? f.chipGridBtnOn : pickerOpen ? f.chipGridBtnOpen : ''
-              }`}
-              onClick={() => setPickerOpen((v) => !v)}
-              aria-label="Pick date"
-            >
-              📅 {customDateLabel}
-            </button>
-          </div>
-
-          {pickerOpen && (
-            <DayPicker
-              className={f.picker}
-              mode="single"
-              required
-              selected={parseISO(date)}
-              defaultMonth={parseISO(date)}
-              onSelect={(d) => {
-                if (!d) return;
-                const next = iso(d);
-                setDate(next);
-                if (end && end <= next) setEnd(null);
-              }}
-            />
-          )}
-
           <WhenFields
             date={date}
             from={from}
             until={until}
             end={end}
             multiDay={multiDay}
+            onDate={setDate}
             onFrom={setFrom}
             onUntil={setUntil}
             onEnd={setEnd}

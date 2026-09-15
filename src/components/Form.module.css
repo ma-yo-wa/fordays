@@ -252,6 +252,139 @@ textarea.input {
   gap: 8px;
 }
 
+/* Apple Calendar style When Card */
+.appleWhenCard {
+  margin-top: 8px;
+  background: var(--paper-warm);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.appleWhenRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  min-height: 48px;
+  gap: 12px;
+}
+
+.appleWhenLabel {
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 500;
+  color: var(--ink);
+  flex: none;
+}
+
+.applePillGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.applePill {
+  border: none;
+  background: rgba(120, 120, 128, 0.12);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 11px;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.12s ease, transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.applePill:active {
+  transform: scale(0.97);
+}
+
+.applePillActive {
+  background: var(--rose);
+  color: #17140f;
+  font-weight: 600;
+}
+
+.appleTimeWrapper {
+  background: rgba(120, 120, 128, 0.12);
+  border-radius: 8px;
+  padding: 4px 6px 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.appleTimeInput {
+  background: transparent;
+  border: none;
+  outline: none;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 500;
+  color: var(--ink);
+  font-family: inherit;
+  cursor: pointer;
+  padding: 2px 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.appleTimeClear {
+  border: none;
+  background: transparent;
+  color: var(--ink-faint);
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.12s ease;
+}
+
+.appleTimeClear:hover {
+  color: var(--ink);
+}
+
+.appleDateInput {
+  background: rgba(120, 120, 128, 0.12);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 500;
+  color: var(--ink);
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+
+.appleCalendarBox {
+  padding: 6px 14px 14px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background: var(--paper-warm);
+}
+
+.appleSubRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 0 4px;
+  gap: 12px;
+}
+
 .timeCol {
   flex: 1;
   min-width: 0;

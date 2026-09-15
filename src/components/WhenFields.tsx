@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { addDays, parseISO } from '../lib/date';
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/style.css';
+import { addDays, iso, mediumDate, parseISO } from '../lib/date';
 import f from './Form.module.css';
 
 type Props = {
@@ -8,56 +10,21 @@ type Props = {
   until: string;
   end: string | null;
   multiDay: boolean;
+  onDate: (v: string) => void;
   onFrom: (v: string) => void;
   onUntil: (v: string) => void;
   onEnd: (v: string | null) => void;
   onMultiDay: (open: boolean) => void;
 };
 
-function TimeField({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const [tick, setTick] = useState(0);
-
-  function clear(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    onChange('');
-    setTick((n) => n + 1);
-  }
-
-  return (
-    <div className={f.timeBox}>
-      <input
-        key={tick}
-        className={f.timeInput}
-        type="time"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onInput={(e) => onChange((e.target as HTMLInputElement).value)}
-      />
-      {value ? (
-        <button
-          type="button"
-          className={f.timeClear}
-          onClick={clear}
-          aria-label="Clear time"
-          title="Clear time"
-        >
-          ×
-        </button>
-      ) : null}
-    </div>
-  );
-}
-
 /**
- * WhenFields: Multi-day end date sits right next to the date flow,
- * followed by a compact side-by-side time row (From & Until) with in-app clear buttons.
+ * WhenFields: Apple Calendar style unified When card.
+ *
+ * - Starts row: Date capsule + Time capsule side-by-side.
+ * - Tap date capsule to expand inline Apple-style month grid.
+ * - 5-minute interval stepping with step="300".
+ * - Ends row: revealed conditionally for Until or Multi-day.
+ * - Soft blanks are valid: never force Until or Ends on.
  */
 export default function WhenFields({
   date,
@@ -65,11 +32,14 @@ export default function WhenFields({
   until,
   end,
   multiDay,
+  onDate,
   onFrom,
   onUntil,
   onEnd,
   onMultiDay,
 }: Props) {
+  const [pickerOpen, setPickerOpen] = useState(false);
+
   function openMultiDay() {
     onMultiDay(true);
     if (!end || end <= date) {
@@ -82,57 +52,213 @@ export default function WhenFields({
     onEnd(null);
   }
 
+  function addDefaultTime() {
+    const now = new Date();
+    const rem = now.getMinutes() % 5;
+    const rounded = new Date(now.getTime() + (5 - rem) * 60 * 1000);
+    const h = String(rounded.getHours()).padStart(2, '0');
+    const m = String(rounded.getMinutes()).padStart(2, '0');
+    onFrom(`${h}:${m}`);
+  }
+
+  function addDefaultEndTime() {
+    if (!from) {
+      addDefaultTime();
+      return;
+    }
+    const [h, m] = from.split(':').map(Number);
+    const endH = Math.min((h ?? 0) + 2, 23);
+    onUntil(`${String(endH).padStart(2, '0')}:${String(m ?? 0).padStart(2, '0')}`);
+  }
+
   return (
     <>
-      {multiDay && (
-        <div style={{ marginTop: 14 }}>
-          <span className={f.label}>
-            Ends on <span className={f.hint}>— last day</span>
-          </span>
-          <div className={f.group}>
-            <input
-              className={f.input}
-              type="date"
-              value={end ?? ''}
-              min={date}
-              onChange={(e) => onEnd(e.target.value || null)}
+      <span className={f.label} style={{ marginTop: 14 }}>
+        When
+      </span>
+
+      <div className={f.appleWhenCard}>
+        {/* Starts / When Row */}
+        <div className={f.appleWhenRow}>
+          <span className={f.appleWhenLabel}>{multiDay ? 'Starts' : 'When'}</span>
+          <div className={f.applePillGroup}>
+            <button
+              type="button"
+              className={`${f.applePill} ${pickerOpen ? f.applePillActive : ''}`}
+              onClick={() => setPickerOpen((v) => !v)}
+              aria-label="Pick date"
+            >
+              {mediumDate(date)} {pickerOpen ? '⌃' : '⌵'}
+            </button>
+
+            {from ? (
+              <div className={f.appleTimeWrapper}>
+                <input
+                  type="time"
+                  step="300"
+                  className={f.appleTimeInput}
+                  value={from}
+                  onChange={(e) => onFrom(e.target.value)}
+                  onInput={(e) => onFrom((e.target as HTMLInputElement).value)}
+                />
+                <button
+                  type="button"
+                  className={f.appleTimeClear}
+                  onClick={() => {
+                    onFrom('');
+                    onUntil('');
+                  }}
+                  aria-label="Clear time"
+                  title="Clear time"
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className={f.applePill}
+                onClick={addDefaultTime}
+              >
+                + Add time
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Inline Apple Calendar Grid */}
+        {pickerOpen && (
+          <div className={f.appleCalendarBox}>
+            <DayPicker
+              className={f.picker}
+              mode="single"
+              required
+              selected={parseISO(date)}
+              defaultMonth={parseISO(date)}
+              onSelect={(d) => {
+                if (!d) return;
+                const next = iso(d);
+                onDate(next);
+                if (end && end <= next) onEnd(null);
+                setPickerOpen(false);
+              }}
             />
           </div>
+        )}
+
+        {/* Multi-day Ends Row */}
+        {multiDay && (
+          <div
+            className={f.appleWhenRow}
+            style={{ borderTop: '1px solid rgba(0, 0, 0, 0.06)' }}
+          >
+            <span className={f.appleWhenLabel}>Ends</span>
+            <div className={f.applePillGroup}>
+              <input
+                type="date"
+                className={f.appleDateInput}
+                min={date}
+                value={end ?? ''}
+                onChange={(e) => onEnd(e.target.value || null)}
+              />
+              {from && (
+                until ? (
+                  <div className={f.appleTimeWrapper}>
+                    <input
+                      type="time"
+                      step="300"
+                      className={f.appleTimeInput}
+                      value={until}
+                      onChange={(e) => onUntil(e.target.value)}
+                      onInput={(e) => onUntil((e.target as HTMLInputElement).value)}
+                    />
+                    <button
+                      type="button"
+                      className={f.appleTimeClear}
+                      onClick={() => onUntil('')}
+                      aria-label="Clear end time"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className={f.applePill}
+                    onClick={addDefaultEndTime}
+                  >
+                    + End time
+                  </button>
+                )
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Single-day Until Row (if set) */}
+        {!multiDay && from && until && (
+          <div
+            className={f.appleWhenRow}
+            style={{ borderTop: '1px solid rgba(0, 0, 0, 0.06)' }}
+          >
+            <span className={f.appleWhenLabel}>Until</span>
+            <div className={f.applePillGroup}>
+              <div className={f.appleTimeWrapper}>
+                <input
+                  type="time"
+                  step="300"
+                  className={f.appleTimeInput}
+                  value={until}
+                  onChange={(e) => onUntil(e.target.value)}
+                  onInput={(e) => onUntil((e.target as HTMLInputElement).value)}
+                />
+                <button
+                  type="button"
+                  className={f.appleTimeClear}
+                  onClick={() => onUntil('')}
+                  aria-label="Clear end time"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Sub-row links */}
+      <div className={f.appleSubRow}>
+        {!multiDay ? (
+          <>
+            {from && !until ? (
+              <button
+                type="button"
+                className={f.textLink}
+                onClick={addDefaultEndTime}
+              >
+                + Add end time
+              </button>
+            ) : (
+              <span />
+            )}
+            <button
+              type="button"
+              className={f.textLink}
+              onClick={openMultiDay}
+            >
+              Runs more than one day?
+            </button>
+          </>
+        ) : (
           <button
             type="button"
             className={f.textLink}
             onClick={closeMultiDay}
-            style={{ marginTop: 6, marginBottom: 12 }}
           >
             Just one day
           </button>
-        </div>
-      )}
-
-      <span className={f.label} style={{ marginTop: multiDay ? 0 : 14 }}>
-        Time <span className={f.hint}>— optional</span>
-      </span>
-      <div className={f.timeRow}>
-        <div className={f.timeCol}>
-          <span className={f.timeColLabel}>{multiDay ? 'Starts at' : 'From'}</span>
-          <TimeField value={from} onChange={onFrom} />
-        </div>
-        <div className={f.timeCol}>
-          <span className={f.timeColLabel}>{multiDay ? 'Ends at' : 'Until'}</span>
-          <TimeField value={until} onChange={onUntil} />
-        </div>
+        )}
       </div>
-
-      {!multiDay && (
-        <button
-          type="button"
-          className={f.textLink}
-          onClick={openMultiDay}
-          style={{ marginTop: 14 }}
-        >
-          Runs more than one day?
-        </button>
-      )}
     </>
   );
 }
