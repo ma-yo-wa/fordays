@@ -112,19 +112,22 @@ function generateEndSlots(currentValue: string, baseFrom: string): TimeSlot[] {
 }
 
 /**
- * Forgiving human parser for user-typed times into the field:
+ * Forgiving human parser for typed times:
  * - "01", "1" -> 1:00
  * - "02", "2" -> 2:00
  * - "1:15", "01:15" -> 1:15
  * - "130" -> 1:30
  * - "14" or "14:00" -> 2:00 PM
- * - "9am" -> 9:00 AM
+ * - "9am", "9:30pm"
  */
-function parseUserTypedTime(raw: string, currentIsPM: boolean): { time: string; isPM: boolean } | null {
+function parseUserTypedTime(raw: string, currentValue: string): string | null {
   const trimmed = raw.trim().toLowerCase();
   if (!trimmed) return null;
 
-  let pm = currentIsPM;
+  const currentH24 = currentValue ? parseInt(currentValue.split(':')[0] || '12', 10) : 12;
+  const currentIsPM = currentH24 >= 12;
+
+  let pm: boolean | null = null;
   let cleaned = trimmed;
   if (trimmed.includes('am')) {
     pm = false;
@@ -159,118 +162,23 @@ function parseUserTypedTime(raw: string, currentIsPM: boolean): { time: string; 
   if (isNaN(h) || isNaN(m) || m < 0 || m > 59) return null;
 
   if (h >= 12 && h < 24) {
-    pm = true;
+    if (pm === null) pm = true;
     h = h % 12 === 0 ? 12 : h % 12;
   } else if (h === 0) {
-    pm = false;
+    if (pm === null) pm = false;
     h = 12;
   } else if (h > 24) {
     return null;
   }
 
+  if (pm === null) {
+    pm = currentIsPM;
+  }
+
   let h24 = h % 12;
   if (pm) h24 += 12;
 
-  return {
-    time: `${pad(h24)}:${pad(m)}`,
-    isPM: pm,
-  };
-}
-
-function TimeField({
-  value,
-  onChange,
-  onClear,
-  isActive,
-  onOpen,
-  ariaLabel,
-}: {
-  value: string;
-  onChange: (val: string) => void;
-  onClear: () => void;
-  isActive: boolean;
-  onOpen: () => void;
-  ariaLabel: string;
-}) {
-  const [h24Str, mStr] = value.split(':');
-  const h24 = parseInt(h24Str || '0', 10);
-  const m = parseInt(mStr || '0', 10);
-  const isPM = h24 >= 12;
-  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
-  const formattedDisplay = `${pad(h12)}:${pad(m)}`;
-
-  const [text, setText] = useState(formattedDisplay);
-
-  useEffect(() => {
-    setText(formattedDisplay);
-  }, [formattedDisplay]);
-
-  function commitText(raw: string) {
-    const parsed = parseUserTypedTime(raw, isPM);
-    if (parsed) {
-      onChange(parsed.time);
-      const [newH24Str, newMStr] = parsed.time.split(':');
-      const newH24 = parseInt(newH24Str || '0', 10);
-      const newH12 = newH24 % 12 === 0 ? 12 : newH24 % 12;
-      setText(`${pad(newH12)}:${pad(parseInt(newMStr || '0', 10))}`);
-    } else {
-      setText(formattedDisplay);
-    }
-  }
-
-  function toggleAmPm(e: React.MouseEvent) {
-    e.stopPropagation();
-    let newH24 = h12 % 12;
-    if (!isPM) newH24 += 12;
-    onChange(`${pad(newH24)}:${pad(m)}`);
-  }
-
-  return (
-    <div className={`${f.appleTimeWrapper} ${isActive ? f.appleTimeWrapperActive : ''}`}>
-      <input
-        type="text"
-        inputMode="numeric"
-        className={f.appleTimeInput}
-        value={text}
-        aria-label={ariaLabel}
-        onFocus={onOpen}
-        onClick={onOpen}
-        onChange={(e) => {
-          setText(e.target.value);
-          if (/^\d{2}:\d{2}$/.test(e.target.value)) {
-            commitText(e.target.value);
-          }
-        }}
-        onBlur={() => commitText(text)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            (e.target as HTMLInputElement).blur();
-          }
-        }}
-      />
-      <button
-        type="button"
-        className={f.appleAmPmBtn}
-        onClick={toggleAmPm}
-        title="Toggle AM/PM"
-        aria-label="Toggle AM/PM"
-      >
-        {isPM ? 'PM' : 'AM'} <span className={f.ampmChevron}>↕</span>
-      </button>
-      <button
-        type="button"
-        className={f.appleTimeClear}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClear();
-        }}
-        aria-label="Clear time"
-        title="Clear time"
-      >
-        ×
-      </button>
-    </div>
-  );
+  return `${pad(h24)}:${pad(m)}`;
 }
 
 function TimeDropdownList({
@@ -279,6 +187,7 @@ function TimeDropdownList({
   baseFrom,
   isUntil = false,
   onChange,
+  onClear,
   onClose,
 }: {
   title: string;
@@ -286,10 +195,12 @@ function TimeDropdownList({
   baseFrom?: string;
   isUntil?: boolean;
   onChange: (time: string) => void;
+  onClear?: () => void;
   onClose: () => void;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<HTMLButtonElement>(null);
+  const [typeVal, setTypeVal] = useState('');
 
   const slots = isUntil
     ? generateEndSlots(value, baseFrom || '')
@@ -301,14 +212,60 @@ function TimeDropdownList({
     }
   }, []);
 
+  function handleApplyTyped() {
+    const parsed = parseUserTypedTime(typeVal, value);
+    if (parsed) {
+      onChange(parsed);
+      onClose();
+    }
+  }
+
   return (
     <div className={f.timeDropdown}>
       <div className={f.timeDropdownHeader}>
         <span className={f.timeDropdownTitle}>{title}</span>
-        <button type="button" className={f.calNavBtn} onClick={onClose} aria-label="Close">
-          ×
-        </button>
+        <div className={f.timeDropdownActions}>
+          {onClear && (
+            <button
+              type="button"
+              className={f.timeDropdownClearBtn}
+              onClick={() => {
+                onClear();
+                onClose();
+              }}
+            >
+              Remove
+            </button>
+          )}
+          <button type="button" className={f.calNavBtn} onClick={onClose} aria-label="Close">
+            ×
+          </button>
+        </div>
       </div>
+
+      <form
+        className={f.timeDropdownInputRow}
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleApplyTyped();
+        }}
+      >
+        <input
+          type="text"
+          className={f.timeDropdownInput}
+          value={typeVal}
+          placeholder={value ? pretty(value) : 'Type exact time (e.g. 2:15 PM)'}
+          onChange={(e) => setTypeVal(e.target.value)}
+          aria-label="Type exact time"
+        />
+        <button
+          type="submit"
+          className={f.timeDropdownApplyBtn}
+          disabled={!typeVal.trim()}
+        >
+          Apply
+        </button>
+      </form>
 
       <div className={f.timeDropdownList} ref={listRef}>
         {slots.map((slot) => {
@@ -427,10 +384,10 @@ function InlineMonthCalendar({
 /**
  * WhenFields: Apple Calendar / Notion style unified When card.
  *
- * - Starts row: Date capsule + Typeable Time field side-by-side.
+ * - Starts row: Date capsule + Time capsule side-by-side as twin clean pills.
  * - Tap date capsule to expand inline month grid (exact match to Plans page).
- * - Tap/focus time field to open clean scrollable half-hour dropdown with relative durations.
- * - Directly typeable time field ("01", "02", "1:15", etc.) + AM/PM toggle button.
+ * - Tap time capsule to open clean scrollable dropdown list with relative durations.
+ * - Inside dropdown: subtle typing bar at top for exact custom minutes, plus half-hour slot list.
  * - Apple Next Half-Hour Rule on default start time.
  * - Apple 1-Hour Duration Rule on default end time.
  * - Ends row: revealed conditionally for Until or Multi-day.
@@ -501,21 +458,17 @@ export default function WhenFields({
             </button>
 
             {from ? (
-              <TimeField
-                value={from}
-                onChange={onFrom}
-                onClear={() => {
-                  onFrom('');
-                  onUntil('');
-                  if (activeTimePicker === 'from') setActiveTimePicker(null);
-                }}
-                isActive={activeTimePicker === 'from'}
-                onOpen={() => {
-                  setActiveTimePicker('from');
+              <button
+                type="button"
+                className={`${f.applePill} ${activeTimePicker === 'from' ? f.applePillActive : ''}`}
+                onClick={() => {
+                  setActiveTimePicker((cur) => (cur === 'from' ? null : 'from'));
                   setPickerOpen(false);
                 }}
-                ariaLabel="Start time"
-              />
+                aria-label="Pick start time"
+              >
+                {pretty(from)} {activeTimePicker === 'from' ? '⌃' : '⌵'}
+              </button>
             ) : (
               <button
                 type="button"
@@ -550,6 +503,11 @@ export default function WhenFields({
             title={multiDay ? 'Starts' : 'When'}
             value={from || defaultAppleStartTime()}
             onChange={onFrom}
+            onClear={() => {
+              onFrom('');
+              onUntil('');
+              setActiveTimePicker(null);
+            }}
             onClose={() => setActiveTimePicker(null)}
           />
         )}
@@ -571,20 +529,17 @@ export default function WhenFields({
               />
               {from && (
                 until ? (
-                  <TimeField
-                    value={until}
-                    onChange={onUntil}
-                    onClear={() => {
-                      onUntil('');
-                      if (activeTimePicker === 'until') setActiveTimePicker(null);
-                    }}
-                    isActive={activeTimePicker === 'until'}
-                    onOpen={() => {
-                      setActiveTimePicker('until');
+                  <button
+                    type="button"
+                    className={`${f.applePill} ${activeTimePicker === 'until' ? f.applePillActive : ''}`}
+                    onClick={() => {
+                      setActiveTimePicker((cur) => (cur === 'until' ? null : 'until'));
                       setPickerOpen(false);
                     }}
-                    ariaLabel="End time"
-                  />
+                    aria-label="Pick end time"
+                  >
+                    {pretty(until)} {activeTimePicker === 'until' ? '⌃' : '⌵'}
+                  </button>
                 ) : (
                   <button
                     type="button"
@@ -611,6 +566,10 @@ export default function WhenFields({
             baseFrom={from}
             isUntil
             onChange={onUntil}
+            onClear={() => {
+              onUntil('');
+              setActiveTimePicker(null);
+            }}
             onClose={() => setActiveTimePicker(null)}
           />
         )}
@@ -623,20 +582,17 @@ export default function WhenFields({
           >
             <span className={f.appleWhenLabel}>Until</span>
             <div className={f.applePillGroup}>
-              <TimeField
-                value={until}
-                onChange={onUntil}
-                onClear={() => {
-                  onUntil('');
-                  if (activeTimePicker === 'until') setActiveTimePicker(null);
-                }}
-                isActive={activeTimePicker === 'until'}
-                onOpen={() => {
-                  setActiveTimePicker('until');
+              <button
+                type="button"
+                className={`${f.applePill} ${activeTimePicker === 'until' ? f.applePillActive : ''}`}
+                onClick={() => {
+                  setActiveTimePicker((cur) => (cur === 'until' ? null : 'until'));
                   setPickerOpen(false);
                 }}
-                ariaLabel="Until time"
-              />
+                aria-label="Pick until time"
+              >
+                {pretty(until)} {activeTimePicker === 'until' ? '⌃' : '⌵'}
+              </button>
             </div>
           </div>
         )}
@@ -649,6 +605,10 @@ export default function WhenFields({
             baseFrom={from}
             isUntil
             onChange={onUntil}
+            onClear={() => {
+              onUntil('');
+              setActiveTimePicker(null);
+            }}
             onClose={() => setActiveTimePicker(null)}
           />
         )}
