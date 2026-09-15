@@ -75,9 +75,7 @@ export async function connectGoogleSilent(): Promise<string | null> {
 async function requestGoogleToken(prompt: '' | 'consent'): Promise<string> {
   const clientId = googleClientId();
   if (!clientId) {
-    throw new Error(
-      'Missing Google client ID. Set VITE_GOOGLE_CLIENT_ID in Cloudflare (or paste it in Settings), then redeploy.',
-    );
+    throw new Error('Google Calendar isn’t available yet');
   }
 
   await loadScript('https://accounts.google.com/gsi/client');

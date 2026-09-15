@@ -68,6 +68,7 @@ struct SettingsView: View {
   @State private var appleCals: [DeviceCalendar] = []
   @State private var showApplePicker = false
   @State private var pendingAppleId: String?
+  @State private var outlookOn = false
 
   private var allOrbs: [SpaceInfo] {
     if !app.spaces.isEmpty { return app.spaces }
@@ -713,6 +714,19 @@ struct SettingsView: View {
             .disabled(appleBusy)
           }
         }
+
+        Divider().opacity(0.12)
+
+        HStack {
+          Text(Copy.Availability.outlookCalendar)
+            .font(.body)
+            .foregroundStyle(Theme.ink)
+          Spacer()
+          Toggle("Connect Outlook Calendar", isOn: outlookToggle)
+            .labelsHidden()
+            .tint(Theme.roseInk)
+        }
+        .padding(12)
       }
       .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
@@ -720,6 +734,18 @@ struct SettingsView: View {
         .font(.footnote)
         .foregroundStyle(Theme.inkSoft)
     }
+  }
+
+  private var outlookToggle: Binding<Bool> {
+    Binding(
+      get: { outlookOn },
+      set: { on in
+        if on {
+          app.toast = "Outlook isn’t available yet"
+        }
+        outlookOn = false
+      }
+    )
   }
 
   private var appleToggle: Binding<Bool> {

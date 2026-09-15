@@ -58,12 +58,12 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
         source === 'gifs'
           ? {
               rate: "Giphy's rate limit is hit. Give it a minute.",
-              cfg: 'Add VITE_GIPHY_API_KEY in Cloudflare (free key from developers.giphy.com), then redeploy.',
+              cfg: 'GIFs aren’t available right now.',
               http: 'Giphy returned an error.',
             }[kind ?? ''] ?? "Couldn't reach Giphy."
           : {
               rate: "Unsplash's rate limit is hit. Give it a minute.",
-              cfg: 'Add VITE_UNSPLASH_ACCESS_KEY (free key from unsplash.com/developers), then redeploy.',
+              cfg: 'Stills aren’t available right now.',
               http: 'Unsplash returned an error.',
             }[kind ?? ''] ?? "Couldn't reach Unsplash.",
       );

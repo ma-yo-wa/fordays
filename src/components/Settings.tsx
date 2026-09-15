@@ -8,7 +8,6 @@ import {
   clearGoogleToken,
   connectGoogle,
   fetchGoogleEvents,
-  googleClientId,
   googleToken,
   listGoogleCalendars,
   saveGoogleCalendar,
@@ -717,8 +716,6 @@ export default function Settings() {
               <span className={f.hint}>{calBusy ? '…' : '›'}</span>
             </button>
           )}
-          {Boolean(msClientId()) && (
-            <>
           <div className={f.listRow}>
             <span className={f.rowLabel}>{Copy.availability.outlookCalendar}</span>
             <Switch
@@ -741,9 +738,7 @@ export default function Settings() {
                     return;
                   }
                   if (!msClientId()) {
-                    toast(
-                      'Outlook isn’t wired yet — paste a Microsoft client ID under Advanced, or set VITE_MS_CLIENT_ID and redeploy.',
-                    );
+                    toast('Outlook isn’t available yet');
                     return;
                   }
                   setCalBusy(true);
@@ -809,8 +804,6 @@ export default function Settings() {
               <span className={f.hint}>{calBusy ? '…' : '›'}</span>
             </button>
           )}
-            </>
-          )}
         </div>
         <p className={f.rowNote}>{Copy.availability.settingsNoteWeb}</p>
 
@@ -840,67 +833,6 @@ export default function Settings() {
           </div>
         </div>
         <p className={f.rowNote}>{bellBusy ? 'Working…' : pushCopy(bell, space?.partnerName)}</p>
-
-        {(!googleClientId() || !msClientId() || !config.vapidPublicKey.trim()) && (
-          <details className={f.advanced}>
-            <summary className={f.advancedSum}>Advanced</summary>
-            {!googleClientId() && (
-              <>
-                <span className={f.label}>Google client ID</span>
-                <div className={f.group}>
-                  <input
-                    className={f.input}
-                    value={config.googleClientId}
-                    onChange={(e) => updateConfig({ googleClientId: e.target.value })}
-                    placeholder="xxxx.apps.googleusercontent.com"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                  />
-                </div>
-                <p className={f.rowNote}>
-                  Usually set at deploy — only paste here if Google Calendar won’t connect
-                </p>
-              </>
-            )}
-            {!msClientId() && (
-              <>
-                <span className={f.label}>Microsoft client ID</span>
-                <div className={f.group}>
-                  <input
-                    className={f.input}
-                    value={config.msClientId}
-                    onChange={(e) => updateConfig({ msClientId: e.target.value })}
-                    placeholder="Azure app (client) ID"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                  />
-                </div>
-                <p className={f.rowNote}>
-                  SPA app in Azure, redirect URI this origin (https://fordays.app/). Paste here
-                  until VITE_MS_CLIENT_ID is set at deploy.
-                </p>
-              </>
-            )}
-            {!config.vapidPublicKey.trim() && (
-              <>
-                <span className={f.label}>VAPID public key</span>
-                <div className={f.group}>
-                  <input
-                    className={f.input}
-                    value={config.vapidPublicKey}
-                    onChange={(e) => updateConfig({ vapidPublicKey: e.target.value })}
-                    placeholder="BNxxx…"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                  />
-                </div>
-                <p className={f.rowNote}>
-                  Usually set at deploy — only paste here if push won’t subscribe
-                </p>
-              </>
-            )}
-          </details>
-        )}
 
         {signedIn && (
           <div className={f.row}>

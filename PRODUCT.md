@@ -123,6 +123,16 @@ Fordays is not a photo host. Gallery photos live on the plan so the we can see t
 
 No picture: art family → orb hue. No match → id-hash wash.
 
+Keys for Giphy and Unsplash are deploy env. Never a key field in the app.
+
+---
+
+## Calendars
+
+**External calendars** lists the overlays: **Google** and **Outlook** on the web; **Apple Calendar** (and Outlook under it) on iPhone. Outlook is always in that list — not hidden until a key exists.
+
+Google / Microsoft / Unsplash / Giphy / VAPID keys are deploy env. Never a key field in Settings.
+
 ---
 
 ## Invite

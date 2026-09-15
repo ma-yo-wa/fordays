@@ -136,9 +136,7 @@ export async function consumeOutlookRedirect(): Promise<string | null> {
 export async function connectOutlook(): Promise<string> {
   const clientId = msClientId();
   if (!clientId) {
-    throw new Error(
-      'Missing Microsoft client ID. Set VITE_MS_CLIENT_ID (or paste it in Settings), then redeploy.',
-    );
+    throw new Error('Outlook isn’t available yet');
   }
 
   const { verifier, challenge } = await makePkce();
@@ -346,7 +344,7 @@ async function exchangeOutlookCode(code: string, state: string): Promise<string>
 
 async function refreshOutlook(refresh: string): Promise<string> {
   const clientId = msClientId();
-  if (!clientId) throw new Error('Missing Microsoft client ID');
+  if (!clientId) throw new Error('Outlook isn’t available yet');
   const body = new URLSearchParams({
     client_id: clientId,
     grant_type: 'refresh_token',
