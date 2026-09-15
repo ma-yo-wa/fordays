@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   MONTHS,
   addDays,
@@ -6,6 +6,7 @@ import {
   defaultAppleStartTime,
   mediumDate,
   monthGrid,
+  pad,
   parseISO,
   pretty,
   todayISO,
@@ -26,153 +27,226 @@ type Props = {
 };
 
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-const MINUTES_5 = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-const HOURS_12 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-function parseHHMM(time: string): { h12: number; m: number; isPM: boolean } {
-  if (!time) {
-    const def = defaultAppleStartTime();
-    const [defH, defM] = def.split(':').map(Number);
-    return {
-      h12: (defH ?? 11) % 12 === 0 ? 12 : (defH ?? 11) % 12,
-      m: defM ?? 0,
-      isPM: (defH ?? 11) >= 12,
-    };
+function Chevron({ dir }: { dir: 'left' | 'right' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden>
+      <path
+        d={dir === 'left' ? 'M15 5 8 12l7 7' : 'M9 5l7 7-7 7'}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+interface TimeSlot {
+  time: string;
+  label: string;
+  duration?: string;
+}
+
+function parseMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(':').map(Number);
+  return (h ?? 0) * 60 + (m ?? 0);
+}
+
+function formatMinutes(totalMins: number): string {
+  const normalized = ((totalMins % 1440) + 1440) % 1440;
+  const h = Math.floor(normalized / 60);
+  const m = normalized % 60;
+  return `${pad(h)}:${pad(m)}`;
+}
+
+function formatDuration(diffMins: number): string {
+  if (diffMins <= 0) return '';
+  if (diffMins === 30) return '30 minutes';
+  if (diffMins === 60) return '1 hour';
+  if (diffMins % 60 === 0) return `${diffMins / 60} hours`;
+  return `${(diffMins / 60).toFixed(1)} hours`;
+}
+
+function generateStartSlots(currentValue: string): TimeSlot[] {
+  const slots: TimeSlot[] = [];
+  for (let m = 0; m < 1440; m += 30) {
+    const t = formatMinutes(m);
+    slots.push({ time: t, label: pretty(t) });
   }
-  const [hRaw, mRaw] = time.split(':').map(Number);
-  const h = hRaw ?? 0;
-  const m = mRaw ?? 0;
-  const isPM = h >= 12;
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return { h12, m, isPM };
+  if (currentValue && !slots.some((s) => s.time === currentValue)) {
+    slots.push({ time: currentValue, label: `${pretty(currentValue)} (custom)` });
+    slots.sort((a, b) => parseMinutes(a.time) - parseMinutes(b.time));
+  }
+  return slots;
 }
 
-function formatHHMM(h12: number, m: number, isPM: boolean): string {
-  let h24 = h12 % 12;
-  if (isPM) h24 += 12;
-  return `${String(h24).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+function generateEndSlots(currentValue: string, baseFrom: string): TimeSlot[] {
+  const startMins = parseMinutes(baseFrom || defaultAppleStartTime());
+  const slots: TimeSlot[] = [];
+
+  // Generate 24 clean half-hour steps (up to 12 hours duration)
+  for (let step = 1; step <= 24; step++) {
+    const dur = step * 30;
+    const endT = formatMinutes(startMins + dur);
+    slots.push({
+      time: endT,
+      label: pretty(endT),
+      duration: formatDuration(dur),
+    });
+  }
+
+  if (currentValue && !slots.some((s) => s.time === currentValue)) {
+    const curMins = parseMinutes(currentValue);
+    const diff = curMins >= startMins ? curMins - startMins : curMins + 1440 - startMins;
+    slots.push({
+      time: currentValue,
+      label: `${pretty(currentValue)} (custom)`,
+      duration: formatDuration(diff),
+    });
+    slots.sort((a, b) => {
+      const diffA = (parseMinutes(a.time) - startMins + 1440) % 1440 || 1440;
+      const diffB = (parseMinutes(b.time) - startMins + 1440) % 1440 || 1440;
+      return diffA - diffB;
+    });
+  }
+
+  return slots;
 }
 
-function TimeDrawer({
+function TimeDropdownList({
   title,
   value,
+  baseFrom,
+  isUntil = false,
   onChange,
   onClose,
 }: {
   title: string;
   value: string;
-  onChange: (v: string) => void;
+  baseFrom?: string;
+  isUntil?: boolean;
+  onChange: (time: string) => void;
   onClose: () => void;
 }) {
-  const { h12, m, isPM } = parseHHMM(value);
+  const listRef = useRef<HTMLDivElement>(null);
+  const selectedRef = useRef<HTMLButtonElement>(null);
+  const [showCustom, setShowCustom] = useState(false);
+  const [customH, setCustomH] = useState(() => {
+    if (!value) return 12;
+    const h = parseInt(value.split(':')[0] || '12', 10);
+    return h % 12 === 0 ? 12 : h % 12;
+  });
+  const [customM, setCustomM] = useState(() => {
+    if (!value) return 0;
+    return parseInt(value.split(':')[1] || '0', 10);
+  });
+  const [customPM, setCustomPM] = useState(() => {
+    if (!value) return false;
+    const h = parseInt(value.split(':')[0] || '12', 10);
+    return h >= 12;
+  });
 
-  function setHour(newH12: number) {
-    const clamped = Math.max(1, Math.min(12, newH12));
-    onChange(formatHHMM(clamped, m, isPM));
-  }
+  const slots = isUntil
+    ? generateEndSlots(value, baseFrom || '')
+    : generateStartSlots(value);
 
-  function setMinute(newM: number) {
-    const clamped = Math.max(0, Math.min(59, newM));
-    onChange(formatHHMM(h12, clamped, isPM));
-  }
+  // Auto-scroll to selected slot on mount
+  useEffect(() => {
+    if (selectedRef.current) {
+      selectedRef.current.scrollIntoView({ block: 'center', behavior: 'instant' });
+    }
+  }, []);
 
-  function setPM(pm: boolean) {
-    onChange(formatHHMM(h12, m, pm));
+  function applyCustom() {
+    let h24 = customH % 12;
+    if (customPM) h24 += 12;
+    onChange(`${pad(h24)}:${pad(customM)}`);
+    onClose();
   }
 
   return (
-    <div className={f.appleTimeDrawer}>
-      <div className={f.timeDrawerHeader}>
-        <span className={f.timeDrawerTitle}>{title}</span>
-        <button type="button" className={f.timeDoneBtn} onClick={onClose}>
-          Done
+    <div className={f.timeDropdown}>
+      <div className={f.timeDropdownHeader}>
+        <span className={f.timeDropdownTitle}>{title}</span>
+        <button type="button" className={f.calNavBtn} onClick={onClose} aria-label="Close">
+          ×
         </button>
       </div>
 
-      {/* Tap-to-type Direct Row */}
-      <div className={f.timeDirectRow}>
-        <div className={f.timeDigitBox}>
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            className={f.timeDigitInput}
-            value={h12}
-            onChange={(e) => {
-              const val = parseInt(e.target.value, 10);
-              if (!isNaN(val)) setHour(val);
-            }}
-            aria-label="Hour"
-          />
-          <span className={f.timeColon}>:</span>
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            className={f.timeDigitInput}
-            value={String(m).padStart(2, '0')}
-            onChange={(e) => {
-              const val = parseInt(e.target.value, 10);
-              if (!isNaN(val)) setMinute(val);
-            }}
-            aria-label="Minute"
-          />
-        </div>
-
-        <div className={f.timeAmPmToggle}>
-          <button
-            type="button"
-            className={`${f.timeAmPmBtn} ${!isPM ? f.timeAmPmActive : ''}`}
-            onClick={() => setPM(false)}
-          >
-            AM
-          </button>
-          <button
-            type="button"
-            className={`${f.timeAmPmBtn} ${isPM ? f.timeAmPmActive : ''}`}
-            onClick={() => setPM(true)}
-          >
-            PM
-          </button>
-        </div>
-      </div>
-
-      {/* 5-minute ticks */}
-      <span className={f.timeSectionLabel}>Minutes</span>
-      <div className={f.timeChipsGrid}>
-        {MINUTES_5.map((minVal) => {
-          const active = m === minVal;
-          const label = `:${String(minVal).padStart(2, '0')}`;
+      <div className={f.timeDropdownList} ref={listRef}>
+        {slots.map((slot) => {
+          const isSelected = slot.time === value;
           return (
             <button
-              key={minVal}
+              key={slot.time}
+              ref={isSelected ? selectedRef : null}
               type="button"
-              className={`${f.timeChip} ${active ? f.timeChipActive : ''}`}
-              onClick={() => setMinute(minVal)}
+              className={`${f.timeDropdownItem} ${isSelected ? f.timeDropdownItemActive : ''}`}
+              onClick={() => {
+                onChange(slot.time);
+                onClose();
+              }}
             >
-              {label}
+              <span className={f.timeDropdownTime}>{slot.label}</span>
+              {slot.duration && (
+                <span className={f.timeDropdownDuration}>{slot.duration}</span>
+              )}
             </button>
           );
         })}
       </div>
 
-      {/* Quick Hours */}
-      <span className={f.timeSectionLabel}>Hours</span>
-      <div className={f.timeHoursGrid}>
-        {HOURS_12.map((hVal) => {
-          const active = h12 === hVal;
-          return (
+      {showCustom ? (
+        <div className={f.timeDropdownCustomBox}>
+          <div className={f.timeDigitBox}>
+            <input
+              type="number"
+              min="1"
+              max="12"
+              className={f.timeDigitInput}
+              value={customH}
+              onChange={(e) => setCustomH(Math.max(1, Math.min(12, parseInt(e.target.value, 10) || 1)))}
+              aria-label="Hour"
+            />
+            <span className={f.timeColon}>:</span>
+            <input
+              type="number"
+              min="0"
+              max="59"
+              className={f.timeDigitInput}
+              value={pad(customM)}
+              onChange={(e) => setCustomM(Math.max(0, Math.min(59, parseInt(e.target.value, 10) || 0)))}
+              aria-label="Minute"
+            />
+          </div>
+          <div className={f.timeAmPmToggle}>
             <button
-              key={hVal}
               type="button"
-              className={`${f.timeHourChip} ${active ? f.timeHourChipActive : ''}`}
-              onClick={() => setHour(hVal)}
+              className={`${f.timeAmPmBtn} ${!customPM ? f.timeAmPmActive : ''}`}
+              onClick={() => setCustomPM(false)}
             >
-              {hVal}
+              AM
             </button>
-          );
-        })}
-      </div>
+            <button
+              type="button"
+              className={`${f.timeAmPmBtn} ${customPM ? f.timeAmPmActive : ''}`}
+              onClick={() => setCustomPM(true)}
+            >
+              PM
+            </button>
+          </div>
+          <button type="button" className={f.timeDoneBtn} onClick={applyCustom}>
+            Set
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className={f.timeDropdownCustomToggle}
+          onClick={() => setShowCustom(true)}
+        >
+          Type specific minute...
+        </button>
+      )}
     </div>
   );
 }
@@ -194,7 +268,11 @@ function InlineMonthCalendar({
   }
 
   const cells = monthGrid(cursorMonth);
-  const monthTitle = `${MONTHS[cursorMonth.getMonth()]} ${cursorMonth.getFullYear()}`;
+  const currentYear = new Date().getFullYear();
+  const monthTitle =
+    cursorMonth.getFullYear() === currentYear
+      ? MONTHS[cursorMonth.getMonth()]
+      : `${MONTHS[cursorMonth.getMonth()]} ${cursorMonth.getFullYear()}`;
 
   return (
     <div className={f.appleCalendarBox}>
@@ -207,7 +285,7 @@ function InlineMonthCalendar({
             onClick={() => shiftMonth(-1)}
             aria-label="Previous month"
           >
-            ‹
+            <Chevron dir="left" />
           </button>
           <button
             type="button"
@@ -215,7 +293,7 @@ function InlineMonthCalendar({
             onClick={() => shiftMonth(1)}
             aria-label="Next month"
           >
-            ›
+            <Chevron dir="right" />
           </button>
         </div>
       </div>
@@ -262,11 +340,11 @@ function InlineMonthCalendar({
 }
 
 /**
- * WhenFields: Apple Calendar style unified When card.
+ * WhenFields: Apple Calendar / Notion style unified When card.
  *
  * - Starts row: Date capsule + Time capsule side-by-side.
  * - Tap date capsule to expand inline month grid (exact match to Plans page).
- * - Segmented 5-minute time popover with tap-to-type direct numeric input.
+ * - Tap time capsule to open clean scrollable half-hour dropdown with relative durations.
  * - Apple Next Half-Hour Rule on default start time.
  * - Apple 1-Hour Duration Rule on default end time.
  * - Ends row: revealed conditionally for Until or Multi-day.
@@ -391,10 +469,10 @@ export default function WhenFields({
           />
         )}
 
-        {/* Start Time Drawer */}
+        {/* Start Time Clean List */}
         {activeTimePicker === 'from' && (
-          <TimeDrawer
-            title={multiDay ? 'Starts time' : 'Time'}
+          <TimeDropdownList
+            title={multiDay ? 'Starts' : 'When'}
             value={from || defaultAppleStartTime()}
             onChange={onFrom}
             onClose={() => setActiveTimePicker(null)}
@@ -460,11 +538,13 @@ export default function WhenFields({
           </div>
         )}
 
-        {/* Multi-day End Time Drawer */}
+        {/* Multi-day End Time Clean List */}
         {multiDay && activeTimePicker === 'until' && (
-          <TimeDrawer
-            title="Ends time"
+          <TimeDropdownList
+            title="Ends"
             value={until || (from ? defaultAppleEndTime(from) : defaultAppleStartTime())}
+            baseFrom={from}
+            isUntil
             onChange={onUntil}
             onClose={() => setActiveTimePicker(null)}
           />
@@ -506,11 +586,13 @@ export default function WhenFields({
           </div>
         )}
 
-        {/* Single-day Until Time Drawer */}
+        {/* Single-day Until Time Clean List */}
         {!multiDay && activeTimePicker === 'until' && (
-          <TimeDrawer
+          <TimeDropdownList
             title="Until"
             value={until || (from ? defaultAppleEndTime(from) : defaultAppleStartTime())}
+            baseFrom={from}
+            isUntil
             onChange={onUntil}
             onClose={() => setActiveTimePicker(null)}
           />

@@ -16,7 +16,7 @@ export function mediumDate(dateISO: string): string {
   return `${DAYS3[d.getDay()]}, ${MON3[d.getMonth()]} ${d.getDate()}`;
 }
 
-const pad = (n: number) => String(n).padStart(2, '0');
+export const pad = (n: number) => String(n).padStart(2, '0');
 
 /** Local-date ISO (YYYY-MM-DD). Deliberately not toISOString(), which
  *  converts to UTC and can hand back yesterday. */

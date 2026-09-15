@@ -106,9 +106,10 @@ Default when-flow:
 
 1. **Starts** — unified date pill + optional time pill. No bloated quick chips (`Today / Tomorrow / This weekend`). Opens on the focused date; tapping the date capsule reveals the clean month grid matching the Plans page calendar (exact same DOW header, circular date cells, and rose today highlight).
 2. **Next Half-Hour Rule**: Default start times never schedule in the past or mid-minute. Always rounds up to the next clean half-hour block (:00 or :30). If opened on a half-hour mark (e.g. 10:00 or 10:30), it assumes a typing buffer is needed and pushes forward by 30 minutes (e.g. 10:00 -> 10:30, 10:30 -> 11:00). Default end time follows Apple's standard 1-hour duration rule (e.g. 11:00 AM -> 12:00 PM).
-3. **5-minute intervals + tap-to-type**:
+3. **Clean time selection + tap-to-type**:
    - *Native iOS*: `CompactTimePicker` (`UIDatePicker` in `.compact` style with `minuteInterval = 5`), giving the authentic 5-minute rolling wheel and numeric keypad for exact minutes.
-   - *PWA*: Segmented Popover with 5-minute interval chips (`:00`, `:05`, `:10`...), quick 12-hour pills, AM/PM toggle, and direct tap-to-type numeric inputs.
+   - *PWA*: Notion / Apple Web style clean scrollable list in 30-minute steps. Starts shows times; Ends shows times paired with human relative durations (`30 minutes`, `1 hour`, `1.5 hours`...). Auto-scrolls directly to the selected time on open. Custom minute input available on demand without visual noise.
+   - *Calendar Grid*: Clean month grid matching the Plans page (borderless rose chevrons, no gray button circles, solid rose circle for selected day with zero border rings).
 4. **From & Until** — soft blanks are valid. `Until` is revealed on demand via `+ Add end time` without forcing a duration.
 5. **Multi-day** — only after **Runs more than one day?** Then **Ends** row appears with end date and optional until time. Never block save because Until or Ends is empty.
 

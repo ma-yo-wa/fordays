@@ -379,7 +379,7 @@ textarea.input {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 2px 8px;
+  padding: 4px 6px 8px;
 }
 
 .calMonthTitle {
@@ -392,25 +392,29 @@ textarea.input {
 .calNavGroup {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
 }
 
 .calNavBtn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-capsule);
   border: none;
-  background: rgba(120, 120, 128, 0.12);
-  color: var(--ink);
-  font-size: 13px;
+  background: none;
+  color: var(--rose-ink);
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: transform 0.1s ease, background 0.12s ease;
+  transition: opacity 0.15s var(--ease-ios);
 }
 
 .calNavBtn:active {
-  transform: scale(0.92);
+  opacity: 0.4;
+}
+
+.calNavBtn svg {
+  width: 18px;
+  height: 18px;
 }
 
 .calDow {
@@ -447,8 +451,8 @@ textarea.input {
 }
 
 .calNum {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -467,41 +471,46 @@ textarea.input {
   pointer-events: none;
 }
 
+/* Today when NOT selected: rose text to keep it distinct */
 .calToday .calNum {
+  color: var(--rose-ink);
+  font-weight: 700;
+}
+
+/* Any selected date: clean, solid rose circle with NO black ring/border */
+.calPicked .calNum {
   background: var(--rose);
   color: #17140f;
   font-weight: 600;
 }
 
-.calPicked .calNum {
-  background: var(--ink);
-  color: var(--paper);
-  font-weight: 600;
-}
-
+/* When selected date is today: clean rose circle with NO ring */
 .calToday.calPicked .calNum {
   background: var(--rose);
   color: #17140f;
-  box-shadow: 0 0 0 2px var(--ink);
+  font-weight: 600;
+  box-shadow: none;
 }
 
-/* Time Drawer Popover */
-.appleTimeDrawer {
-  padding: 12px 14px 14px;
+/* Notion / Apple Web clean time dropdown list */
+.timeDropdown {
+  margin-top: 8px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   background: var(--paper-warm);
+  padding: 8px 10px 10px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
 }
 
-.timeDrawerHeader {
+.timeDropdownHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 2px 4px;
 }
 
-.timeDrawerTitle {
+.timeDropdownTitle {
   font: var(--t-caption2);
   letter-spacing: var(--tr-caption2);
   font-weight: 600;
@@ -509,156 +518,76 @@ textarea.input {
   text-transform: uppercase;
 }
 
-.timeDirectRow {
+.timeDropdownList {
+  max-height: 220px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 4px 0;
-}
-
-.timeDigitBox {
-  display: flex;
-  align-items: center;
-  background: rgba(120, 120, 128, 0.12);
-  border-radius: 10px;
-  padding: 4px 8px;
-}
-
-.timeDigitInput {
-  width: 44px;
-  border: none;
-  background: transparent;
-  font-size: 22px;
-  font-weight: 600;
-  font-family: inherit;
-  color: var(--ink);
-  text-align: center;
-  outline: none;
-  -moz-appearance: textfield;
-}
-
-.timeDigitInput::-webkit-outer-spin-button,
-.timeDigitInput::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.timeColon {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--ink-faint);
-  margin: 0 2px;
-}
-
-.timeAmPmToggle {
-  display: flex;
-  background: rgba(120, 120, 128, 0.12);
-  border-radius: 10px;
-  padding: 3px;
+  flex-direction: column;
   gap: 2px;
-  margin-left: 8px;
+  border-radius: 10px;
+  padding: 2px;
+  background: var(--fill-tertiary);
 }
 
-.timeAmPmBtn {
+.timeDropdownItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
   border: none;
   background: transparent;
-  padding: 6px 10px;
   border-radius: 8px;
-  font: var(--t-footnote);
-  font-weight: 600;
-  color: var(--ink-2);
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  color: var(--ink);
+  transition: background 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.timeAmPmActive {
+.timeDropdownItem:active {
+  background: rgba(120, 120, 128, 0.16);
+}
+
+.timeDropdownItemActive {
   background: var(--paper);
   color: var(--ink);
+  font-weight: 600;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.timeSectionLabel {
-  font: var(--t-caption2);
-  letter-spacing: var(--tr-caption2);
-  font-weight: 600;
+.timeDropdownTime {
+  font-size: 15px;
+}
+
+.timeDropdownDuration {
+  font-size: 13px;
   color: var(--ink-faint);
-  text-transform: uppercase;
-  margin-bottom: -4px;
+  font-weight: 400;
 }
 
-.timeChipsGrid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
-}
-
-.timeChip {
-  border: none;
-  background: rgba(120, 120, 128, 0.08);
-  border-radius: 8px;
-  padding: 8px 0;
-  font: var(--t-subhead);
-  letter-spacing: var(--tr-subhead);
-  font-weight: 500;
-  color: var(--ink);
-  cursor: pointer;
-  text-align: center;
-  transition: background 0.12s ease, color 0.12s ease, transform 0.1s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.timeChip:active {
-  transform: scale(0.95);
-}
-
-.timeChipActive {
-  background: var(--rose);
-  color: #17140f;
-  font-weight: 600;
-}
-
-.timeHoursGrid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
-}
-
-.timeHourChip {
-  border: none;
-  background: rgba(120, 120, 128, 0.08);
-  border-radius: 8px;
-  padding: 8px 0;
-  font: var(--t-subhead);
-  letter-spacing: var(--tr-subhead);
-  font-weight: 500;
-  color: var(--ink);
-  cursor: pointer;
-  text-align: center;
-  transition: background 0.12s ease, color 0.12s ease, transform 0.1s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.timeHourChip:active {
-  transform: scale(0.95);
-}
-
-.timeHourChipActive {
-  background: var(--ink);
-  color: var(--paper);
-  font-weight: 600;
-}
-
-.timeDoneBtn {
-  align-self: flex-end;
+.timeDropdownCustomToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
   border: none;
   background: transparent;
-  color: var(--ink);
-  font: var(--t-subhead);
-  font-weight: 600;
+  color: var(--ink-2);
+  font: var(--t-footnote);
+  font-weight: 500;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
+}
+
+.timeDropdownCustomBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 0;
+  background: var(--fill-tertiary);
+  border-radius: 10px;
 }
 
 .appleSubRow {
