@@ -7,36 +7,37 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B81E2F3A4B5C6D7E8F9A0B1D /* ExternalDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92F1A0B2C3D4E5F6A7B8C91 /* ExternalDetailView.swift */; };
-		B81E2F3A4B5C6D7E8F9A0B1C /* CoverPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92F1A0B2C3D4E5F6A7B8C90 /* CoverPickerView.swift */; };
 		03A0CE056B9983A5EF71CC29 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FB0FFC2A4D225F12EDC9838 /* DetailView.swift */; };
 		0651DB3C9829ACD683B0B49F /* TabIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C1DDC77D31F2E265BF0544 /* TabIcons.swift */; };
 		1091443FA7F64C8FD71F0298 /* AddActivitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4EBB535ABBFFC73548D5B4B /* AddActivitySheet.swift */; };
 		1C7CC0C7BE7875ED37D216FA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 472B49EF886BAF4F0DE4D928 /* Assets.xcassets */; };
 		4A9C299BE6211B6044D28565 /* Mapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 152F2260E49DE06874ECA5D3 /* Mapping.swift */; };
-		C1A2B3C4D5E6F7A8B9C0D1E2 /* Copy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B3C4D5E6F7A8B9C0D1E2F3 /* Copy.swift */; };
 		64EB2E148A845A64870915CF /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = C91C40C7F774368CDFEBEDFA /* Supabase */; };
 		67CD068CE6A816FE8F1C9C7F /* BucketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412FB2B7E55638A2B182DA85 /* BucketView.swift */; };
 		79539FCCEA4A670404F82F7D /* PlansView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3351142946F30E708F5A9F47 /* PlansView.swift */; };
 		7C48673361A091E5A6DD44F7 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2220F5B5358CFDCA0323FF88 /* Models.swift */; };
 		9942713DF9F91BACE7A39699 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230281E6660476AB193B9044 /* RootView.swift */; };
-		B9E187BA6DACC670E5DA5CC3 /* FordaysApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CE7C6FDBE348B28A340B03E /* FordaysApp.swift */; };
-		C808786345D1F366BD4FE8C0 /* MainShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C6534D4843BB76DDC865AC /* MainShellView.swift */; };
 		A81F3C2B9D4E7A6C5B0F1234 /* Art.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72E1D0A8C3F6B5D4A0E9876 /* Art.swift */; };
+		B81E2F3A4B5C6D7E8F9A0B1C /* CoverPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92F1A0B2C3D4E5F6A7B8C90 /* CoverPickerView.swift */; };
+		B81E2F3A4B5C6D7E8F9A0B1D /* ExternalDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92F1A0B2C3D4E5F6A7B8C91 /* ExternalDetailView.swift */; };
+		B9E187BA6DACC670E5DA5CC3 /* FordaysApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CE7C6FDBE348B28A340B03E /* FordaysApp.swift */; };
+		C1A2B3C4D5E6F7A8B9C0D1E2 /* Copy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B3C4D5E6F7A8B9C0D1E2F3 /* Copy.swift */; };
+		C808786345D1F366BD4FE8C0 /* MainShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C6534D4843BB76DDC865AC /* MainShellView.swift */; };
 		D47DCDE8DD8D9F6BE4186C97 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37BB6EA7FCB1CFE8069021D /* Theme.swift */; };
-		E12A4B8C7D9E1F0A6C3D2109 /* InviteShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23B5C9D8E0F2A1B7D4E3210 /* InviteShareView.swift */; };
-		E12A4B8C7D9E1F0A6C3D2110 /* JoinOrbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23B5C9D8E0F2A1B7D4E3211 /* JoinOrbView.swift */; };
 		D627591574F0838B119D01D7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D894045084BAC7ECF003D6DC /* SettingsView.swift */; };
 		D9176915A481EBD86A04B1E6 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0499C47B337DC05EAB80984C /* AuthView.swift */; };
-		FCF823D1FA959CF01E14B81B /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06275BDB4475A336F2D09A3 /* SupabaseService.swift */; };
+		D9176915A481EBD86A04B1E7 /* OrbSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0499C47B337DC05EAB80984D /* OrbSetupView.swift */; };
+		E12A4B8C7D9E1F0A6C3D2109 /* InviteShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23B5C9D8E0F2A1B7D4E3210 /* InviteShareView.swift */; };
+		E12A4B8C7D9E1F0A6C3D2110 /* JoinOrbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23B5C9D8E0F2A1B7D4E3211 /* JoinOrbView.swift */; };
 		E4F5A6B7C8D9E0F1A2B30406 /* CalendarSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F5A6B7C8D9E0F1A2B30405 /* CalendarSync.swift */; };
+		FCF823D1FA959CF01E14B81B /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06275BDB4475A336F2D09A3 /* SupabaseService.swift */; };
 		FFF2EC3B34025F324B2EFA3C /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E2CF128B98BD9C0207520F /* AppModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0499C47B337DC05EAB80984C /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		0499C47B337DC05EAB80984D /* OrbSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrbSetupView.swift; sourceTree = "<group>"; };
 		152F2260E49DE06874ECA5D3 /* Mapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapping.swift; sourceTree = "<group>"; };
-		C2B3C4D5E6F7A8B9C0D1E2F3 /* Copy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Copy.swift; sourceTree = "<group>"; };
 		2220F5B5358CFDCA0323FF88 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		22C6534D4843BB76DDC865AC /* MainShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainShellView.swift; sourceTree = "<group>"; };
 		230281E6660476AB193B9044 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -44,21 +45,22 @@
 		412FB2B7E55638A2B182DA85 /* BucketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BucketView.swift; sourceTree = "<group>"; };
 		472B49EF886BAF4F0DE4D928 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5FB0FFC2A4D225F12EDC9838 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
-		6CACA43F6A8F99C69247A794 /* Fordays.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fordays.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6CACA43F6A8F99C69247A794 /* Fordays.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fordays.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7CE7C6FDBE348B28A340B03E /* FordaysApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FordaysApp.swift; sourceTree = "<group>"; };
 		A06275BDB4475A336F2D09A3 /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
-		E4F5A6B7C8D9E0F1A2B30405 /* CalendarSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSync.swift; sourceTree = "<group>"; };
 		A4EBB535ABBFFC73548D5B4B /* AddActivitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddActivitySheet.swift; sourceTree = "<group>"; };
-		C92F1A0B2C3D4E5F6A7B8C91 /* ExternalDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalDetailView.swift; sourceTree = "<group>"; };
-		C92F1A0B2C3D4E5F6A7B8C90 /* CoverPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPickerView.swift; sourceTree = "<group>"; };
 		B72E1D0A8C3F6B5D4A0E9876 /* Art.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Art.swift; sourceTree = "<group>"; };
+		C2B3C4D5E6F7A8B9C0D1E2F3 /* Copy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Copy.swift; sourceTree = "<group>"; };
 		C37BB6EA7FCB1CFE8069021D /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		C92F1A0B2C3D4E5F6A7B8C90 /* CoverPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPickerView.swift; sourceTree = "<group>"; };
+		C92F1A0B2C3D4E5F6A7B8C91 /* ExternalDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalDetailView.swift; sourceTree = "<group>"; };
 		D0E2CF128B98BD9C0207520F /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		D894045084BAC7ECF003D6DC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		F23B5C9D8E0F2A1B7D4E3210 /* InviteShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteShareView.swift; sourceTree = "<group>"; };
-		F23B5C9D8E0F2A1B7D4E3211 /* JoinOrbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinOrbView.swift; sourceTree = "<group>"; };
 		E3C1DDC77D31F2E265BF0544 /* TabIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabIcons.swift; sourceTree = "<group>"; };
 		E459EA3C41279963E13A8BB8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		E4F5A6B7C8D9E0F1A2B30405 /* CalendarSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSync.swift; sourceTree = "<group>"; };
+		F23B5C9D8E0F2A1B7D4E3210 /* InviteShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteShareView.swift; sourceTree = "<group>"; };
+		F23B5C9D8E0F2A1B7D4E3211 /* JoinOrbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinOrbView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +153,7 @@
 			isa = PBXGroup;
 			children = (
 				0499C47B337DC05EAB80984C /* AuthView.swift */,
+				0499C47B337DC05EAB80984D /* OrbSetupView.swift */,
 			);
 			path = Auth;
 			sourceTree = "<group>";
@@ -238,9 +241,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1430;
-				TargetAttributes = {
-				};
+				LastUpgradeCheck = 2660;
 			};
 			buildConfigurationList = B0C7AD342931EBF8122F5CC0 /* Build configuration list for PBXProject "Fordays" */;
 			developmentRegion = en;
@@ -285,6 +286,7 @@
 				B81E2F3A4B5C6D7E8F9A0B1D /* ExternalDetailView.swift in Sources */,
 				FFF2EC3B34025F324B2EFA3C /* AppModel.swift in Sources */,
 				D9176915A481EBD86A04B1E6 /* AuthView.swift in Sources */,
+				D9176915A481EBD86A04B1E7 /* OrbSetupView.swift in Sources */,
 				67CD068CE6A816FE8F1C9C7F /* BucketView.swift in Sources */,
 				03A0CE056B9983A5EF71CC29 /* DetailView.swift in Sources */,
 				B9E187BA6DACC670E5DA5CC3 /* FordaysApp.swift in Sources */,
@@ -365,6 +367,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -386,6 +389,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -430,6 +434,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -444,6 +449,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;

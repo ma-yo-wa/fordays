@@ -138,6 +138,13 @@ export default function Settings() {
   const visibleOrbs = activeOrbs;
   const members = space?.members ?? [];
   const soloOrb = members.length <= 1;
+  const soloOrbs = activeOrbs.filter((s) => (s.members ?? []).length <= 1);
+  const isPersonalOrb =
+    soloOrb &&
+    Boolean(
+      (space && space.name.trim().toLowerCase() === 'personal') ||
+      soloOrbs.length <= 1,
+    );
   const leaveLabel = soloOrb ? 'Delete this Orb' : 'Leave this Orb';
   const removableMembers =
     space && !space.frozen && space.myRole === 'admin' && members.length >= 3
@@ -366,6 +373,10 @@ export default function Settings() {
   }
 
   function askLeave() {
+    if (isPersonalOrb) {
+      toast(Copy.orbs.cannotDeletePersonal);
+      return;
+    }
     setConfirm({
       heading: soloOrb ? Copy.orbs.deleteSoloTitle : Copy.orbs.leaveSharedTitle,
       note: soloOrb ? Copy.orbs.deleteSoloBody : Copy.orbs.leaveSharedBody,
@@ -615,7 +626,7 @@ export default function Settings() {
                   </button>
                 ))}
 
-                {!space.frozen && !(soloOrb && activeOrbs.length <= 1) ? (
+                {!space.frozen && !isPersonalOrb ? (
                   <button
                     type="button"
                     className={ui.textLink}

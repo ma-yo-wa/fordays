@@ -15,10 +15,14 @@ enum Copy {
     static let yourOrbs = "Your Orbs"
     static let thisOrb = "This Orb"
     static let people = "People"
-    static let setupTitle = "Your Orb"
-    static let setupLead = "Just you, or with people."
+    static let setupTitle = "Your first Orb"
+    static let setupLead = "Just you, or with someone."
     static let justYou = "Just you"
-    static let withPeople = "With people"
+    static let withPeople = "With someone"
+    static let withSomeone = "With someone"
+    static let startPlanning = "Start planning"
+    static let invitePerson = "Invite your person"
+    static let cannotDeletePersonal = "Your Personal Orb is your home base and cannot be deleted."
     static let orbName = "Name"
     static let personalPlaceholder = "Personal"
     static let crewPlaceholder = "Aline’s Crew"
@@ -154,5 +158,12 @@ enum Copy {
     static let noConflicts = "Nothing else on this day"
     static let settingsNoteIos = "Calendars already on this iPhone — including Google or Outlook, if they’re in the Calendar app. Don’t see it? iPhone Settings → Calendar → Accounts → Add Account, then come back and refresh."
     static let settingsNoteWeb = "Google and Outlook here. On iPhone, Fordays reads the Calendar app instead — add Gmail or Outlook there if those days should show, so they don’t land twice."
+  }
+
+  enum Auth {
+    static func invitedToOrb(_ inviter: String) -> String { "\(inviter) invited you to an Orb" }
+    static func invitedToNamedOrb(inviter: String, orb: String) -> String { "\(inviter) invited you to “\(orb)”" }
+    static func joinInviter(_ inviter: String) -> String { "Join \(inviter)" }
+    static let createAccountAndJoin = "Create account & join"
   }
 }

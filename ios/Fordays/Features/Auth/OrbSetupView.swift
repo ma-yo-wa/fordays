@@ -75,7 +75,7 @@ struct OrbSetupView: View {
         kindTab(Copy.Orbs.justYou, selected: !withPeople) {
           withPeople = false
         }
-        kindTab(Copy.Orbs.withPeople, selected: withPeople) {
+        kindTab(Copy.Orbs.withSomeone, selected: withPeople) {
           withPeople = true
         }
       }
@@ -97,7 +97,7 @@ struct OrbSetupView: View {
           Spacer()
           if busy { ProgressView().tint(.white) }
           else {
-            Text(Copy.Orbs.continueAction)
+            Text(withPeople ? Copy.Orbs.invitePerson : Copy.Orbs.startPlanning)
               .font(.headline)
               .foregroundStyle(.white)
           }

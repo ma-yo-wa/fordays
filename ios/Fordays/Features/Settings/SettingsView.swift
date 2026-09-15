@@ -435,6 +435,8 @@ struct SettingsView: View {
 
   private func thisOrbSection(space: SpaceInfo) -> some View {
     let soloOrb = space.members.count <= 1
+    let soloOrbs = activeOrbs.filter { $0.members.count <= 1 }
+    let isPersonalOrb = soloOrb && (space.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "personal" || soloOrbs.count <= 1)
     let leaveLabel = soloOrb ? Copy.Orbs.deleteSoloAction : Copy.Orbs.leaveAction
     let placeholder = soloOrb ? Copy.Orbs.personalPlaceholder : Copy.Orbs.crewPlaceholder
     return VStack(alignment: .leading, spacing: 8) {
@@ -559,7 +561,7 @@ struct SettingsView: View {
         }
       }
 
-      if !space.frozen && !(soloOrb && activeOrbs.count <= 1) {
+      if !space.frozen && !isPersonalOrb {
         Button(leaveLabel) {
           confirm = .leave(solo: soloOrb)
         }

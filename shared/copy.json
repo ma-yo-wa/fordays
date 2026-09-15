@@ -11,10 +11,14 @@
     "yourOrbs": "Your Orbs",
     "thisOrb": "This Orb",
     "people": "People",
-    "setupTitle": "Your Orb",
-    "setupLead": "Just you, or with people.",
+    "setupTitle": "Your first Orb",
+    "setupLead": "Just you, or with someone.",
     "justYou": "Just you",
-    "withPeople": "With people",
+    "withPeople": "With someone",
+    "withSomeone": "With someone",
+    "startPlanning": "Start planning",
+    "invitePerson": "Invite your person",
+    "cannotDeletePersonal": "Your Personal Orb is your home base and cannot be deleted.",
     "orbName": "Name",
     "personalPlaceholder": "Personal",
     "crewPlaceholder": "Aline’s Crew",
@@ -126,5 +130,11 @@
     "noConflicts": "Nothing else on this day",
     "settingsNoteIos": "Calendars already on this iPhone — including Google or Outlook, if they’re in the Calendar app. Don’t see it? iPhone Settings → Calendar → Accounts → Add Account, then come back and refresh.",
     "settingsNoteWeb": "Google and Outlook here. On iPhone, Fordays reads the Calendar app instead — add Gmail or Outlook there if those days should show, so they don’t land twice."
+  },
+  "auth": {
+    "invitedToOrb": "{inviter} invited you to an Orb",
+    "invitedToNamedOrb": "{inviter} invited you to “{orb}”",
+    "joinInviter": "Join {inviter}",
+    "createAccountAndJoin": "Create account & join"
   }
 }

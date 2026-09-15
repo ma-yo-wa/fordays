@@ -15,13 +15,19 @@ interface Props {
   onSignedIn: () => void | Promise<void>;
   /** Shown when they arrived via invite before signing in. */
   inviterHint?: string | null;
+  inviteSpaceName?: string | null;
   /** Open directly on the new-password screen (reset-link session). */
   startInRecovery?: boolean;
 }
 
 type Mode = 'signin' | 'signup' | 'forgot' | 'recover' | 'sent';
 
-export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props) {
+export default function Auth({
+  onSignedIn,
+  inviterHint,
+  inviteSpaceName,
+  startInRecovery,
+}: Props) {
   const [mode, setMode] = useState<Mode>(startInRecovery ? 'recover' : 'signin');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -211,7 +217,13 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
       <h1 className={s.brand}>Fordays</h1>
       <p className={s.lead}>
         {inviterHint
-          ? `${inviterHint} invited you — sign in to join`
+          ? mode === 'signup'
+            ? inviteSpaceName
+              ? `${inviterHint} invited you to “${inviteSpaceName}”`
+              : `${inviterHint} invited you to an Orb`
+            : inviteSpaceName
+              ? `${inviterHint} invited you to “${inviteSpaceName}” — sign in to join`
+              : `${inviterHint} invited you — sign in to join`
           : 'Plans, Bucket lists and Memories'}
       </p>
 
@@ -272,8 +284,12 @@ export default function Auth({ onSignedIn, inviterHint, startInRecovery }: Props
           {busy
             ? '…'
             : mode === 'signup'
-              ? 'Create account'
-              : 'Sign in'}
+              ? inviterHint
+                ? `Join ${inviterHint}`
+                : 'Create account'
+              : inviterHint
+                ? 'Sign in & join'
+                : 'Sign in'}
         </button>
       </div>
 

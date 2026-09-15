@@ -12,6 +12,10 @@ An Orb is **the notebook for a specific we** (including a we of one). Plans belo
 
 Someday / Plans / Memories **are** that notebook. Everyone has at least one **live** Orb.
 
+**Notebook isolation**: Plans stay strictly in the notebook where they were created. No cross-Orb bleeding. Plans from your Personal Orb or another Orb never appear as phantom availability lines or ghost dots in your other Orbs. To see your personal plans, switch to Personal.
+
+**Enforced Personal Orb**: Every user always has a Personal Orb as their permanent anchor. You can rename it, but you cannot delete your Personal Orb. It is your home base.
+
 **Orb** = the notebook. **Faces** = people in *this* space (two: rose / sage; many: names + initials). Not a hue per person or per space.
 
 A name is **required** for Just you and With people. Placeholder in the field (`Personal` / `Aline’s Crew`) is only an example — never saved, never shown as the title. Unnamed legacy Orbs (Fordays / Someday / blank) stay untitled: empty field, no caption on the tile, faces already say who. When they name it, that word sits **under the circle** and **beside This Orb** (label semibold faint, name regular ink). Never title an Orb with a person’s name.
@@ -20,15 +24,16 @@ Several Orbs are normal: Personal, Portugal, siblings. Each is solo, two, or man
 
 Do **not** type Orbs as Work / Personal / Travel. Names are free. Categories are not.
 
-### First Orb
+### First Orb & Signup
 
-- Signup mints a notebook.
-- **Your Orb** (Just you / With people, then a name) is **signup only**, not sign-in.
-- Invite sign-up skips this and joins the we.
-- Blank name is not allowed. Continue stays off until they type one.
+- Every user has a **Personal Orb**.
+- **Fresh sign-up**: Prompts `Your first Orb` with `[ Just you | With someone ]`.
+  - **Just you**: Names their personal space (placeholder example `Personal`). Button says **Start planning**. Lands in Plans.
+  - **With someone**: Names the shared space (placeholder example `Aline’s Crew`). Button says **Invite your person**. Pops the native share sheet immediately with the invite link. Behind the scenes, their permanent **Personal** notebook is already minted and waiting in their Orb switcher.
+- **Invite sign-up**: Someone arriving via an invite link signs up and lands **directly in the invited Orb**. No setup interstitial, no asking them to configure a personal space first. Behind the scenes, their Personal notebook is already minted and waiting in their Orb switcher.
+- Blank name is not allowed when creating an Orb. Continue stays off until they type one.
 - Placeholder is example only (`Personal` / `Aline’s Crew`). Do not write it into the row.
-- With people → invite next.
-- Sign-in does not ask again once the name isn’t Fordays / Someday.
+- Sign-in lands in their last active Orb and never asks for setup again.
 
 ### Settings
 
@@ -56,6 +61,7 @@ Same questions as first signup, in a sheet. Cancel returns to Start / Join. Join
 
 - **Leave** — anyone in a we. You’re out. Others keep the **live** notebook. You keep a **frozen copy** of what was already there. New plans after you leave are not on your copy.
 - **Delete this Orb** — only when you’re **alone** in it (solo, or last member). Soft-delete → Past Orbs. Lives at the bottom of **This Orb**. Confirm before delete.
+- **Personal Orb cannot be deleted.** You always keep your personal home base.
 - **No delete-for-everyone** while someone else is still in.
 - **Last live notebook** — cannot delete. Always keep at least one live Orb.
 - **Delete permanently** — Past Orbs only. That copy is gone for you. Does not un-delete their live we.
@@ -140,9 +146,12 @@ Google / Microsoft / Unsplash / Giphy / VAPID keys are deploy env. Never a key f
 
 ## Invite
 
-Link or code for **this** Orb. Share sheet / copy URL. They get their own login, then land in this Orb.
+Link or code for **this** Orb. Share sheet / copy URL.
 
-No username directory. No required Contacts.
+- **New user via invite**: signs up and lands straight in the invited Orb. No setup interstitial. Their Personal Orb is minted in the background.
+- **Existing user via invite**: tapping an invite link or accepting a code joins the Orb immediately and switches to it with a clean confirmation toast (`Joined “Orb Name”`).
+- Manual join via code remains available in Settings (`Join with a code`).
+- No username directory. No required Contacts.
 
 ---
 

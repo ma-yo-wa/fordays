@@ -409,10 +409,22 @@ export const useApp = create<AppState>()((set, get) => {
       if (!current) return;
       const clean = name.trim();
       if (!clean) return;
-      await renameSpaceRemote(current.id, clean);
-      clearFirstOrbSetupPending();
-      await get().refreshSpace();
-      if (withPeople) get().setInviteShareOpen(true);
+      if (withPeople) {
+        await renameSpaceRemote(current.id, 'Personal');
+        const space = await createSpaceRemote(clean);
+        clearFirstOrbSetupPending();
+        const spaces = await loadSpaces().catch(() => (space ? [space] : []));
+        set({ space, spaces, config: loadConfig() });
+        if (space) {
+          await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
+          void get().pullImportedCalendars();
+        }
+        get().setInviteShareOpen(true);
+      } else {
+        await renameSpaceRemote(current.id, clean);
+        clearFirstOrbSetupPending();
+        await get().refreshSpace();
+      }
     },
 
     async renameCurrentSpace(name) {
@@ -440,6 +452,16 @@ export const useApp = create<AppState>()((set, get) => {
       const solo = others.length === 0 && !leaving?.partner2Id;
       if (solo && live.length <= 1) {
         get().toast('Keep at least one Orb');
+        return;
+      }
+      const soloOrbs = live.filter(
+        (s) => (s.members ?? []).filter((m) => m.id !== s.myId).length === 0 && !s.partner2Id,
+      );
+      const isPersonal =
+        solo &&
+        (leaving?.name.trim().toLowerCase() === 'personal' || soloOrbs.length <= 1);
+      if (isPersonal) {
+        get().toast(Copy.orbs.cannotDeletePersonal);
         return;
       }
       await leaveSpaceRemote(spaceId);
@@ -658,6 +680,16 @@ export const useApp = create<AppState>()((set, get) => {
     async joinOrb(rawCode: string) {
       const spaceId = await joinInvite(rawCode);
       clearFirstOrbSetupPending();
+      const allSpaces = await loadSpaces().catch(() => []);
+      const genericSolo = allSpaces.find(
+        (s) =>
+          (s.members ?? []).filter((m) => m.id !== s.myId).length === 0 &&
+          !s.partner2Id &&
+          isDefaultSpaceName(s.name),
+      );
+      if (genericSolo) {
+        await renameSpaceRemote(genericSolo.id, 'Personal');
+      }
       await get().switchToSpace(spaceId);
       const space = get().space;
       const name = space ? spaceOrbName(space) : '';

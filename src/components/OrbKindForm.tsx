@@ -61,7 +61,7 @@ export default function OrbKindForm({ knobId, onSubmit }: Props) {
               transition={{ type: 'spring', stiffness: 520, damping: 38 }}
             />
           )}
-          <span className={f.segmentLabel}>{Copy.orbs.withPeople}</span>
+          <span className={f.segmentLabel}>{Copy.orbs.withSomeone || Copy.orbs.withPeople}</span>
         </button>
       </div>
 
@@ -88,7 +88,11 @@ export default function OrbKindForm({ knobId, onSubmit }: Props) {
           disabled={busy || !name.trim()}
           onClick={() => void continueSetup()}
         >
-          {busy ? '…' : Copy.orbs.continue}
+          {busy
+            ? '…'
+            : withPeople
+              ? Copy.orbs.invitePerson
+              : Copy.orbs.startPlanning}
         </button>
       </div>
     </>

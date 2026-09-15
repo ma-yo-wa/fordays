@@ -15,7 +15,13 @@ import UpdateBanner from './components/UpdateBanner';
 import BucketList from './screens/BucketList';
 import Calendar from './screens/Calendar';
 import Memories from './screens/Memories';
-import { peekInvite, spaceNeedsFirstSetup, watchPasswordRecovery } from './lib/auth';
+import {
+  clearInviteFromUrl,
+  peekInvite,
+  spaceNeedsFirstSetup,
+  watchPasswordRecovery,
+  type InvitePeek,
+} from './lib/auth';
 import { completeOutlookOAuthReturn, consumeOutlookRedirect } from './lib/outlook';
 import { isDesktopBrowser } from './lib/device';
 import { useApp } from './lib/store';
@@ -53,7 +59,7 @@ function AppShell() {
   const main = useRef<HTMLElement>(null);
   const scrollY = useRef(0);
   const scrollRaf = useRef(0);
-  const [inviterHint, setInviterHint] = useState<string | null>(null);
+  const [invitePeek, setInvitePeek] = useState<InvitePeek | null>(null);
   // After Auth unmounts, iOS often delivers the Sign-in tap to whatever is
   // now under the finger (usually the avatar → Settings). Eat that click.
   const [blockChrome, setBlockChrome] = useState(false);
@@ -101,11 +107,28 @@ function AppShell() {
   }, []);
 
   useEffect(() => {
-    if (!inviteCode || authPhase !== 'signedOut') return;
+    if (!inviteCode) {
+      setInvitePeek(null);
+      return;
+    }
     void peekInvite(inviteCode)
-      .then((p) => setInviterHint(p?.inviterName ?? null))
-      .catch(() => setInviterHint(null));
-  }, [inviteCode, authPhase]);
+      .then((p) => setInvitePeek(p ?? null))
+      .catch(() => setInvitePeek(null));
+  }, [inviteCode]);
+
+  useEffect(() => {
+    if (authPhase !== 'signedIn' || !inviteCode) return;
+    void (async () => {
+      try {
+        await useApp.getState().joinOrb(inviteCode);
+      } catch (err) {
+        useApp.getState().toast(err instanceof Error ? err.message : 'Couldn’t join that Orb');
+      } finally {
+        setInviteCode(null);
+        clearInviteFromUrl();
+      }
+    })();
+  }, [authPhase, inviteCode, setInviteCode]);
 
   useEffect(() => {
     main.current?.scrollTo({ top: 0 });
@@ -119,14 +142,27 @@ function AppShell() {
     return (
       <div className={s.app}>
         <Auth
-          inviterHint={passwordRecovery ? null : inviterHint}
+          inviterHint={passwordRecovery ? null : invitePeek?.inviterName ?? null}
+          inviteSpaceName={passwordRecovery ? null : invitePeek?.spaceName ?? null}
           startInRecovery={passwordRecovery}
           onSignedIn={async () => {
             setPasswordRecovery(false);
             setBlockChrome(true);
             useApp.getState().setSettingsOpen(false);
             try {
-              await refreshSpace();
+              if (inviteCode) {
+                try {
+                  await useApp.getState().joinOrb(inviteCode);
+                } catch (err) {
+                  useApp.getState().toast(err instanceof Error ? err.message : 'Couldn’t join that Orb');
+                  await refreshSpace();
+                } finally {
+                  setInviteCode(null);
+                  clearInviteFromUrl();
+                }
+              } else {
+                await refreshSpace();
+              }
             } finally {
               window.setTimeout(() => setBlockChrome(false), 600);
             }
@@ -193,15 +229,13 @@ function AppShell() {
         onClose={() => setInviteShareOpen(false)}
       />
       <InviteAccept
-        code={inviteCode ?? ''}
-        open={authPhase === 'signedIn' && (!!inviteCode || joinOrbOpen)}
+        code=""
+        open={authPhase === 'signedIn' && joinOrbOpen}
         onJoined={() => {
-          setInviteCode(null);
           setJoinOrbOpen(false);
           void refreshSpace();
         }}
         onDismiss={() => {
-          setInviteCode(null);
           setJoinOrbOpen(false);
         }}
       />

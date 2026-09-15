@@ -16,6 +16,8 @@ final class AppModel: ObservableObject {
   @Published var toast: String?
   @Published var showJoinOrb: Bool = false
   @Published var pendingInviteShare = false
+  @Published var pendingInviteCode: String?
+  @Published var pendingInvitePeek: InvitePeek?
 
   func shiftMonth(by delta: Int) {
     cursorMonth = Calendar.current.date(byAdding: .month, value: delta, to: cursorMonth) ?? cursorMonth
@@ -53,19 +55,29 @@ final class AppModel: ObservableObject {
   }
 
   func completeFirstOrb(name: String, withPeople: Bool) async {
-    guard let id = space?.id else { return }
     let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !clean.isEmpty else { return }
-    do {
-      try await sb.from("spaces")
-        .update(SpaceNameUpdate(name: clean))
-        .eq("id", value: id)
-        .execute()
-      try await refreshSpaceAndData()
+    if withPeople {
+      if let current = space {
+        try? await sb.from("spaces")
+          .update(SpaceNameUpdate(name: "Personal"))
+          .eq("id", value: current.id)
+          .execute()
+      }
       clearFirstOrbSetupPending()
-      pendingInviteShare = withPeople
-    } catch {
-      toast = error.localizedDescription
+      await addSpace(name: clean, withPeople: true)
+    } else {
+      guard let id = space?.id else { return }
+      do {
+        try await sb.from("spaces")
+          .update(SpaceNameUpdate(name: clean))
+          .eq("id", value: id)
+          .execute()
+        try await refreshSpaceAndData()
+        clearFirstOrbSetupPending()
+      } catch {
+        toast = error.localizedDescription
+      }
     }
   }
 
@@ -217,6 +229,15 @@ final class AppModel: ObservableObject {
       try await ensureSpace()
       try await refreshSpaceAndData()
       authPhase = .signedIn
+      if let code = pendingInviteCode {
+        pendingInviteCode = nil
+        pendingInvitePeek = nil
+        do {
+          try await joinInvite(code)
+        } catch {
+          toast = error.localizedDescription
+        }
+      }
     } catch {
       errorMessage = FordaysError.fromAuth(error).errorDescription
     }
@@ -249,6 +270,16 @@ final class AppModel: ObservableObject {
       try await ensureSpace()
       try await refreshSpaceAndData()
       authPhase = .signedIn
+      if let code = pendingInviteCode {
+        pendingInviteCode = nil
+        pendingInvitePeek = nil
+        clearFirstOrbSetupPending()
+        do {
+          try await joinInvite(code)
+        } catch {
+          toast = error.localizedDescription
+        }
+      }
     } catch {
       errorMessage = FordaysError.fromAuth(error).errorDescription
     }
@@ -556,11 +587,17 @@ final class AppModel: ObservableObject {
       return
     }
     if let code = inviteCode(from: url) {
-      do {
-        try await joinInvite(code)
-        toast = "You’re in"
-      } catch {
-        toast = error.localizedDescription
+      if authPhase == .signedIn {
+        do {
+          try await joinInvite(code)
+        } catch {
+          toast = error.localizedDescription
+        }
+      } else {
+        pendingInviteCode = code
+        Task {
+          pendingInvitePeek = try? await peekInvite(code)
+        }
       }
     }
   }
@@ -599,6 +636,20 @@ final class AppModel: ObservableObject {
       storedSpaceId = joined.id
     } catch {
       try await sb.rpc("join_space", params: JoinCode(code: cleaned)).execute()
+    }
+    let allSpaces = (try? await loadSpaces()) ?? []
+    let genericSolo = allSpaces.first { sp in
+      let otherMembers = sp.members.filter { m in
+        m.id.compare(sp.myId, options: .caseInsensitive) != .orderedSame
+      }
+      let isDefaultName = sp.name.caseInsensitiveCompare("Fordays") == .orderedSame || sp.name.caseInsensitiveCompare("Someday") == .orderedSame
+      return otherMembers.isEmpty && sp.partner2Id == nil && isDefaultName
+    }
+    if let genericSolo {
+      try? await sb.from("spaces")
+        .update(SpaceNameUpdate(name: "Personal"))
+        .eq("id", value: genericSolo.id)
+        .execute()
     }
     try await refreshSpaceAndData()
     authPhase = .signedIn
@@ -652,6 +703,17 @@ final class AppModel: ObservableObject {
     let solo = others.isEmpty && leaving?.partner2Id == nil
     if solo && live.count <= 1 {
       toast = "Keep at least one Orb"
+      return
+    }
+    let soloOrbs = live.filter { sp in
+      let otherMembers = sp.members.filter { m in
+        m.id.compare(sp.myId, options: .caseInsensitive) != .orderedSame
+      }
+      return otherMembers.isEmpty && sp.partner2Id == nil
+    }
+    let isPersonal = solo && (leaving?.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "personal" || soloOrbs.count <= 1)
+    if isPersonal {
+      toast = Copy.Orbs.cannotDeletePersonal
       return
     }
     do {

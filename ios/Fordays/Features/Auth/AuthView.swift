@@ -21,10 +21,38 @@ struct AuthView: View {
             .padding(.top, 48)
             .padding(.bottom, 8)
 
-          Text("Plans, Bucket lists and Memories")
-            .font(.title3.weight(.medium))
-            .foregroundStyle(Theme.inkSoft)
-            .padding(.bottom, 20)
+          if let peek = app.pendingInvitePeek {
+            if mode == .signUp {
+              if let spaceName = peek.spaceName, !spaceName.isEmpty {
+                Text(Copy.Auth.invitedToNamedOrb(inviter: peek.inviterName, orb: spaceName))
+                  .font(.title3.weight(.medium))
+                  .foregroundStyle(Theme.inkSoft)
+                  .padding(.bottom, 20)
+              } else {
+                Text(Copy.Auth.invitedToOrb(peek.inviterName))
+                  .font(.title3.weight(.medium))
+                  .foregroundStyle(Theme.inkSoft)
+                  .padding(.bottom, 20)
+              }
+            } else {
+              if let spaceName = peek.spaceName, !spaceName.isEmpty {
+                Text("\(peek.inviterName) invited you to “\(spaceName)” — sign in to join")
+                  .font(.title3.weight(.medium))
+                  .foregroundStyle(Theme.inkSoft)
+                  .padding(.bottom, 20)
+              } else {
+                Text("\(peek.inviterName) invited you — sign in to join")
+                  .font(.title3.weight(.medium))
+                  .foregroundStyle(Theme.inkSoft)
+                  .padding(.bottom, 20)
+              }
+            }
+          } else {
+            Text("Plans, Bucket lists and Memories")
+              .font(.title3.weight(.medium))
+              .foregroundStyle(Theme.inkSoft)
+              .padding(.bottom, 20)
+          }
 
           if mode == .signUp {
             fieldLabel("Your name")
@@ -56,9 +84,13 @@ struct AuthView: View {
               Spacer()
               if busy { ProgressView().tint(.white) }
               else {
-                Text(mode == .signUp ? "Create account" : "Sign in")
-                  .font(.headline)
-                  .foregroundStyle(.white)
+                Text(
+                  mode == .signUp
+                    ? (app.pendingInvitePeek != nil ? Copy.Auth.joinInviter(app.pendingInvitePeek!.inviterName) : "Create account")
+                    : (app.pendingInvitePeek != nil ? "Sign in & join" : "Sign in")
+                )
+                .font(.headline)
+                .foregroundStyle(.white)
               }
               Spacer()
             }
