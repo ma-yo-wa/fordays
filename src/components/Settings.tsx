@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Sheet from './Sheet';
+import ActionSheet from './ActionSheet';
 import Switch from './Switch';
 import GcalPicker from './GcalPicker';
 import { useApp, spaceOrbName, spacePeopleLabel } from '../lib/store';
@@ -128,9 +129,9 @@ export default function Settings() {
   const [bellBusy, setBellBusy] = useState(false);
   const [spaceBusy, setSpaceBusy] = useState(false);
   const [confirm, setConfirm] = useState<SettingsConfirm | null>(null);
-  const [pastOrbsOpen, setPastOrbsOpen] = useState(false);
-  const [orbAddOpen, setOrbAddOpen] = useState(false);
-  const [orbSetupOpen, setOrbSetupOpen] = useState(false);
+  const [subview, setSubview] = useState<
+    'main' | 'anotherOrb' | 'orbSetup' | 'pastOrbs' | 'calPicker'
+  >('main');
 
   const allOrbs = spaces.length ? spaces : space ? [space] : [];
   const activeOrbs = allOrbs.filter((s) => !s.frozen);
@@ -152,7 +153,10 @@ export default function Settings() {
       : [];
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setSubview('main');
+      return;
+    }
     setMyName(space?.myName ?? config.names[config.me]);
     setOrbDraft(space && !isDefaultSpaceName(space.name) ? space.name : '');
     setConfirm(null);
@@ -169,7 +173,10 @@ export default function Settings() {
       setOutlookOn(true);
       try {
         const calendars = await listOutlookCalendars(token);
-        if (calendars.length) setCalPicker({ source: 'outlook', items: calendars });
+        if (calendars.length) {
+          setCalPicker({ source: 'outlook', items: calendars });
+          setSubview('calPicker');
+        }
       } catch {
         /* wait for an explicit connect */
       }
@@ -269,6 +276,7 @@ export default function Settings() {
   function closeCalPicker() {
     const source = calPicker?.source;
     setCalPicker(null);
+    setSubview('main');
     if (source === 'outlook') {
       if (!savedOutlookCalendar()) {
         clearOutlookTokens();
@@ -315,8 +323,7 @@ export default function Settings() {
     setSpaceBusy(true);
     try {
       await addSpace(name, withPeople);
-      setOrbSetupOpen(false);
-      setOrbAddOpen(false);
+      setSubview('main');
       setOpen(false);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t make an Orb');
@@ -363,7 +370,7 @@ export default function Settings() {
       await deletePastOrb(id);
       setConfirm(null);
       if (pastOrbs.length <= 1) {
-        setPastOrbsOpen(false);
+        setSubview('main');
       }
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t delete Orb');
@@ -406,11 +413,24 @@ export default function Settings() {
     });
   }
 
+  const heading =
+    subview === 'anotherOrb'
+      ? Copy.orbs.anotherOrb
+      : subview === 'orbSetup'
+        ? Copy.orbs.setupTitle
+        : subview === 'pastOrbs'
+          ? Copy.orbs.pastOrbs
+          : subview === 'calPicker'
+            ? 'Import calendars'
+            : 'Settings';
+
   return (
     <>
-      <Sheet open={open} onClose={() => setOpen(false)} heading="Settings">
-        {signedIn && (
+      <Sheet open={open} onClose={() => setOpen(false)} heading={heading}>
+        {subview === 'main' && (
           <>
+            {signedIn && (
+              <>
             {space?.frozen && (
               <div className={ui.frozenBanner}>
                 <p className={ui.frozenBannerText}>{Copy.orbs.viewingFrozenBanner}</p>
@@ -462,7 +482,7 @@ export default function Settings() {
                   className={ui.orbTile}
                   disabled={spaceBusy}
                   aria-label="Another Orb"
-                  onClick={() => setOrbAddOpen(true)}
+                  onClick={() => setSubview('anotherOrb')}
                 >
                   <span className={ui.orbCircle}>
                     <span className={ui.orbAddMark} aria-hidden>
@@ -510,7 +530,7 @@ export default function Settings() {
                 <button
                   type="button"
                   className={ui.pastOrbsRow}
-                  onClick={() => setPastOrbsOpen(true)}
+                  onClick={() => setSubview('pastOrbs')}
                 >
                   <div className={ui.pastOrbsLeft}>
                     <span className={ui.pastOrbsTitle}>{Copy.orbs.pastOrbs}</span>
@@ -684,6 +704,7 @@ export default function Settings() {
                     }
                     setGcalOn(true);
                     setCalPicker({ source: 'google', items: calendars });
+                    setSubview('calPicker');
                   } catch (err) {
                     setGcalOn(false);
                     toast(err instanceof Error ? err.message : 'Google connect failed');
@@ -713,6 +734,7 @@ export default function Settings() {
                       source: 'google',
                       items: await listGoogleCalendars(token),
                     });
+                    setSubview('calPicker');
                   } catch (err) {
                     toast(err instanceof Error ? err.message : 'Couldn’t list calendars');
                   } finally {
@@ -772,6 +794,7 @@ export default function Settings() {
                     }
                     setOutlookOn(true);
                     setCalPicker({ source: 'outlook', items: calendars });
+                    setSubview('calPicker');
                   } catch (err) {
                     setOutlookOn(false);
                     toast(err instanceof Error ? err.message : 'Outlook connect failed');
@@ -801,6 +824,7 @@ export default function Settings() {
                       source: 'outlook',
                       items: await listOutlookCalendars(token),
                     });
+                    setSubview('calPicker');
                   } catch (err) {
                     toast(err instanceof Error ? err.message : 'Couldn’t list calendars');
                   } finally {
@@ -865,23 +889,22 @@ export default function Settings() {
             </button>
           </div>
         )}
-      </Sheet>
+      </>
+    )}
 
-      {/* Outside Settings sheet — nested fixed sheets get clipped by the
-          parent’s transform and never cover the screen. */}
-      <Sheet
-        open={orbAddOpen}
-        onClose={() => {
-          setOrbAddOpen(false);
-          setOrbSetupOpen(false);
-        }}
-        heading={Copy.orbs.anotherOrb}
-        stacked
-      >
+    {subview === 'anotherOrb' && (
+      <div>
+        <button
+          type="button"
+          className={ui.navBack}
+          onClick={() => setSubview('main')}
+        >
+          ← Settings
+        </button>
         <button
           type="button"
           className={add.option}
-          onClick={() => setOrbSetupOpen(true)}
+          onClick={() => setSubview('orbSetup')}
         >
           <span className={add.glyph} aria-hidden>
             +
@@ -895,7 +918,7 @@ export default function Settings() {
           type="button"
           className={add.option}
           onClick={() => {
-            setOrbAddOpen(false);
+            setSubview('main');
             setOpen(false);
             setJoinOrbOpen(true);
           }}
@@ -908,57 +931,35 @@ export default function Settings() {
             <span className={add.optionNote}>{Copy.orbs.joinWithCodeNote}</span>
           </span>
         </button>
-      </Sheet>
+      </div>
+    )}
 
-      <Sheet
-        open={orbSetupOpen}
-        onClose={() => setOrbSetupOpen(false)}
-        heading={Copy.orbs.setupTitle}
-        stacked
-      >
+    {subview === 'orbSetup' && (
+      <div>
+        <button
+          type="button"
+          className={ui.navBack}
+          onClick={() => setSubview('anotherOrb')}
+        >
+          ← Another Orb
+        </button>
         <p className={auth.lead}>{Copy.orbs.setupLead}</p>
         <OrbKindForm
           knobId="orb-create-kind-knob"
           onSubmit={handleCreateOrb}
         />
-      </Sheet>
+      </div>
+    )}
 
-      <Sheet
-        open={Boolean(confirm)}
-        onClose={() => setConfirm(null)}
-        heading={confirm?.heading}
-        stacked
-      >
-        {confirm && (
-          <>
-            <p className={ui.confirmNote}>{confirm.note}</p>
-            <button
-              type="button"
-              className={`${ui.confirmAction} ${ui.confirmDanger}`}
-              disabled={spaceBusy}
-              onClick={() => void confirm.run()}
-            >
-              {confirm.action}
-            </button>
-            <button
-              type="button"
-              className={ui.confirmAction}
-              disabled={spaceBusy}
-              onClick={() => setConfirm(null)}
-            >
-              {confirm.cancel}
-            </button>
-          </>
-        )}
-      </Sheet>
-
-      <Sheet
-        open={pastOrbsOpen}
-        onClose={() => {
-          setPastOrbsOpen(false);
-        }}
-        heading={Copy.orbs.pastOrbs}
-      >
+    {subview === 'pastOrbs' && (
+      <div>
+        <button
+          type="button"
+          className={ui.navBack}
+          onClick={() => setSubview('main')}
+        >
+          ← Settings
+        </button>
         <div className={ui.pastOrbList}>
           {pastOrbs.map((pOrb) => {
             const pFaces = orbFaceChips(pOrb);
@@ -994,7 +995,7 @@ export default function Settings() {
                       className={ui.pastOrbBtn}
                       disabled={spaceBusy}
                       onClick={() => {
-                        setPastOrbsOpen(false);
+                        setSubview('main');
                         void handleSwitchOrb(pOrb);
                       }}
                     >
@@ -1002,33 +1003,72 @@ export default function Settings() {
                     </button>
                   )}
 
-                    <button
-                      type="button"
-                      className={`${ui.pastOrbBtn} ${ui.pastOrbBtnDanger}`}
-                      disabled={spaceBusy}
-                      onClick={() => askPurge(pOrb.id)}
-                    >
-                      {Copy.orbs.deletePermanent}
-                    </button>
+                  <button
+                    type="button"
+                    className={`${ui.pastOrbBtn} ${ui.pastOrbBtnDanger}`}
+                    disabled={spaceBusy}
+                    onClick={() => askPurge(pOrb.id)}
+                  >
+                    {Copy.orbs.deletePermanent}
+                  </button>
                 </div>
               </div>
             );
           })}
         </div>
-      </Sheet>
+      </div>
+    )}
 
-      <GcalPicker
-        open={!!calPicker?.items.length}
-        calendars={calPicker?.items ?? []}
-        selectedId={
-          calPicker?.source === 'outlook'
-            ? (savedOutlookCalendar()?.id ?? null)
-            : (savedGoogleCalendar()?.id ?? null)
-        }
-        busy={calBusy}
-        onClose={closeCalPicker}
-        onPick={(cal) => void pickImportedCalendar(cal)}
-      />
+    {subview === 'calPicker' && (
+      <div>
+        <button
+          type="button"
+          className={ui.navBack}
+          onClick={closeCalPicker}
+        >
+          ← External calendars
+        </button>
+        {calPicker && (
+          <GcalPicker
+            calendars={calPicker.items}
+            selectedId={
+              calPicker.source === 'outlook'
+                ? (savedOutlookCalendar()?.id ?? null)
+                : (savedGoogleCalendar()?.id ?? null)
+            }
+            busy={calBusy}
+            onClose={closeCalPicker}
+            onPick={async (cal) => {
+              await pickImportedCalendar(cal);
+              setSubview('main');
+            }}
+          />
+        )}
+      </div>
+    )}
+  </Sheet>
+
+  <ActionSheet
+    open={Boolean(confirm)}
+    title={confirm?.heading}
+    message={confirm?.note}
+    actions={
+      confirm
+        ? [
+            {
+              label: confirm.action,
+              danger: true,
+              disabled: spaceBusy,
+              onClick: async () => {
+                await confirm.run();
+              },
+            },
+          ]
+        : []
+    }
+    cancelLabel={confirm?.cancel ?? 'Cancel'}
+    onCancel={() => setConfirm(null)}
+  />
     </>
   );
 }

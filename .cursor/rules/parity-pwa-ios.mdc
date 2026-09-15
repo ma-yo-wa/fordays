@@ -13,6 +13,7 @@ Fordays has two clients that must stay in sync:
 ## Rules
 
 - **PWA is the source of truth.** Mayowa always checks the PWA first, then iOS. iOS must mimic the PWA to a tee: same copy, same fields, same sheet flow, same empty states, on every screen. Do not invent iOS-only chrome (e.g. a native Form “Add” when the PWA asks “Add to your space”).
+- **Never stack sheets.** Never open a draggable Sheet on top of another Sheet. Sheets are draggable destinations with a grabber bar (Settings, Composer, Detail, Add). Sub-flows navigate in-place inside the sheet with a back button. Confirmations and destructive choices MUST use `ActionSheet` (`.confirmationDialog` in SwiftUI) — locked to bottom, separated Cancel capsule, zero grabber bars, non-draggable.
 - Do **not** ship a fix or feature on only one client. If you change Detail, plans timing, tab icons, copy, empty states, etc. on the PWA, mirror it in Swift before considering the task done.
 - Prefer shared product language: plans, days, bucket — not “calendar app” chrome.
 - Push both PWA and iOS equally to `origin/main` (see push-pwa rule).

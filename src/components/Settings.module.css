@@ -1,3 +1,23 @@
+.navBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: -2px 0 16px;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 500;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+
+.navBack:hover {
+  color: var(--ink);
+}
+
 .section {
   margin-top: 24px;
 }

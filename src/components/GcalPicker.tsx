@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import Sheet from './Sheet';
 import type { ImportedCalendar } from '../lib/calendars';
 import { Copy } from '../lib/copy';
 import f from './Form.module.css';
 import s from './GcalPicker.module.css';
 
 interface Props {
-  open: boolean;
   calendars: ImportedCalendar[];
   selectedId: string | null;
   busy?: boolean;
@@ -24,7 +22,6 @@ function CalIcon() {
 }
 
 export default function GcalPicker({
-  open,
   calendars,
   selectedId,
   busy,
@@ -34,7 +31,6 @@ export default function GcalPicker({
   const [pending, setPending] = useState<string | null>(selectedId);
 
   useEffect(() => {
-    if (!open) return;
     if (selectedId) {
       setPending(selectedId);
       return;
@@ -44,7 +40,7 @@ export default function GcalPicker({
       calendars.find((c) => c.accessRole === 'owner') ??
       calendars[0];
     setPending(main?.id ?? null);
-  }, [open, selectedId, calendars]);
+  }, [selectedId, calendars]);
 
   const sections = useMemo(() => {
     const mine = calendars.filter((c) => c.accessRole === 'owner' || c.primary);
@@ -59,7 +55,7 @@ export default function GcalPicker({
     calendars.find((c) => c.id === (pending ?? selectedId)) ?? null;
 
   return (
-    <Sheet open={open} onClose={onClose} heading="Import calendars" stacked>
+    <div>
       <p className={s.lead}>{Copy.availability.pickerLead}</p>
 
       {sections.map((sec) => (
@@ -105,6 +101,6 @@ export default function GcalPicker({
           {busy ? 'Importing…' : 'Import'}
         </button>
       </div>
-    </Sheet>
+    </div>
   );
 }

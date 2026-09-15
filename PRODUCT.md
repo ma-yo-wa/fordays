@@ -158,3 +158,14 @@ Link or code for **this** Orb. Share sheet / copy URL.
 ## Auth
 
 Sign in first. Sign up is a link. Name placeholder **Aline**. No Mayowa in app copy.
+
+---
+
+## Sheets & Confirmations
+
+- **Never stack sheets.** A Sheet (`<Sheet>` in PWA, `.sheet` in SwiftUI) is a draggable drawer with a grabber bar for primary destinations (Settings, Composer, Detail, Add). Stacking a sheet on top of another sheet creates double grabber bars, conflicting gestures, and visual clutter.
+- **In-sheet sub-views**: Multi-step flows within a sheet (e.g. Settings → Another Orb → Your Orb; Settings → Past Orbs; Settings → Import calendars) navigate in-place inside that single sheet with a `← Back` button. The sheet retains its single top grabber bar.
+- **Confirmations & destructive choices**: Never use a Sheet for confirmation (Leave Orb, Delete Orb, Remove member, Purge, Discard). Always use an **Action Sheet** (`<ActionSheet>` in PWA, `.confirmationDialog` in SwiftUI).
+  - Anchored to the bottom of the screen above the safe area / home indicator.
+  - Zero grabber bars, completely non-draggable.
+  - Two-capsule geometry: content capsule with title/message/action(s), separated by 8px from an independent Cancel capsule below.

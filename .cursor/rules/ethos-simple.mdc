@@ -12,4 +12,5 @@ Read and follow [`ETHOS.md`](../../ETHOS.md).
 - Soft blanks are valid. Never force Until or Ends on.
 - Copy: Someday / plan / day — not calendar / schedule / event / bucket / ideas chrome.
 - Settled craft (tab type, sheets, month grids): read Apple / Notion / etc., check our job, use or tweak. Don’t paste verbatim. Don’t import their fields.
+- Never stack sheets. Sub-flows stay inside the single sheet; confirmations use ActionSheet / confirmationDialog (no grabber, bottom-anchored, separated cancel).
 - Ship PWA and iOS together.
