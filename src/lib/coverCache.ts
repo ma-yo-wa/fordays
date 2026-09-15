@@ -1,3 +1,5 @@
+import { todayISO } from './date';
+
 /** One screen of the two-column Someday / Memories board. */
 export const FIRST_BOARD_COVERS = 6;
 
@@ -20,7 +22,7 @@ function lastDay(a: { date_time: string | null; ends_at?: string | null }): stri
 
 function isPastPlan(
   a: { date_time: string | null; ends_at?: string | null },
-  today = new Date().toISOString().slice(0, 10),
+  today = todayISO(),
 ): boolean {
   if (!a.date_time) return false;
   return lastDay(a) < today;

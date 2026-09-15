@@ -138,21 +138,24 @@ enum DateLocal {
   }
 
   /// Convert timestamptz ISO from server → local `YYYY-MM-DD` or `YYYY-MM-DDTHH:MM`.
-  /// Clock times on ends_at survive even when the start is all-day.
+  /// All-day plans never have a clock time.
   static func fromTimestamptz(_ value: String?, allDay: Bool) -> String? {
     guard let value, let date = parseServerDate(value) else { return nil }
     let day = todayISO(date)
+    if allDay { return day }
     let c = Calendar.current
     let h = c.component(.hour, from: date)
     let min = c.component(.minute, from: date)
-    if allDay && h == 0 && min == 0 { return day }
     return String(format: "%@T%02d:%02d", day, h, min)
   }
 
   static func toTimestamptz(_ local: String) -> String {
     let parts = local.split(separator: "T", maxSplits: 1).map(String.init)
     let day = parts[0]
-    let time = parts.count > 1 ? parts[1] : "00:00"
+    if parts.count < 2 || parts[1].isEmpty {
+      return "\(day)T12:00:00Z"
+    }
+    let time = parts[1]
     let dp = day.split(separator: "-").compactMap { Int($0) }
     let tp = time.split(separator: ":").compactMap { Int($0) }
     guard dp.count == 3 else { return local }

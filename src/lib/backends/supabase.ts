@@ -13,22 +13,26 @@ import { getClient } from '../auth';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-/** App form ("2026-08-03" or "2026-08-03T19:30") -> timestamptz. */
+/** App form ("2026-08-03" or "2026-08-03T19:30") -> timestamptz.
+ *  All-day dates anchor at noon UTC so they stay on the exact same calendar day
+ *  across all global timezones (-11h to +12h). */
 function toTimestamptz(v: string): string {
   const [datePart, timePart] = v.split('T');
+  if (!timePart) {
+    return `${datePart}T12:00:00.000Z`;
+  }
   const [y, m, d] = (datePart ?? '').split('-').map(Number);
-  const [hh, mm] = (timePart ?? '00:00').split(':').map(Number);
+  const [hh, mm] = timePart.split(':').map(Number);
   return new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1, hh ?? 0, mm ?? 0).toISOString();
 }
 
 /** timestamptz -> app form, rendered in the reader's own timezone.
- *  Clock times on ends_at survive even when the start is all-day. */
+ *  All-day plans never have a clock time. */
 function fromTimestamptz(v: string | null, allDay: boolean): string | null {
   if (!v) return null;
   const d = new Date(v);
   const date = iso(d);
-  const hasClock = d.getHours() !== 0 || d.getMinutes() !== 0;
-  if (allDay && !hasClock) return date;
+  if (allDay) return date;
   return `${date}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 

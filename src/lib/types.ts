@@ -1,4 +1,5 @@
 import type { CalendarSource } from './calendars';
+import { todayISO } from './date';
 
 export type { CalendarSource };
 
@@ -118,7 +119,7 @@ export function planDraftFromExternal(e: ExternalEvent): PlanDraft {
 
 /** Whether an external event is ongoing today or upcoming (not already in the past). */
 export function isExternalFutureOrToday(e: ExternalEvent, today?: string): boolean {
-  const day = today ?? new Date().toISOString().slice(0, 10);
+  const day = today ?? todayISO();
   const last = (e.endsAt || e.startsAt).slice(0, 10);
   return last >= day;
 }
@@ -133,7 +134,7 @@ export const isMultiDay = (a: Activity): boolean =>
 /** Plans whose last day is before today — lived, not upcoming. */
 export function isMemory(a: Activity, today?: string): boolean {
   if (!a.date_time) return false;
-  const day = today ?? new Date().toISOString().slice(0, 10);
+  const day = today ?? todayISO();
   const lastDay = (a.ends_at ?? a.date_time).slice(0, 10);
   return lastDay < day;
 }
