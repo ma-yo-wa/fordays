@@ -54,12 +54,11 @@ final class AppModel: ObservableObject {
 
   func completeFirstOrb(name: String, withPeople: Bool) async {
     guard let id = space?.id else { return }
-    let fallback = withPeople ? Copy.Orbs.crewPlaceholder : Copy.Orbs.personalPlaceholder
     let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
-    let finalName = clean.isEmpty ? fallback : clean
+    guard !clean.isEmpty else { return }
     do {
       try await sb.from("spaces")
-        .update(SpaceNameUpdate(name: finalName))
+        .update(SpaceNameUpdate(name: clean))
         .eq("id", value: id)
         .execute()
       try await refreshSpaceAndData()
@@ -72,15 +71,11 @@ final class AppModel: ObservableObject {
 
   func renameCurrentSpace(_ name: String) async {
     guard let current = space, !current.frozen else { return }
-    let others = current.members.filter {
-      $0.id.compare(current.myId, options: .caseInsensitive) != .orderedSame
-    }
-    let fallback = others.isEmpty ? Copy.Orbs.personalPlaceholder : Copy.Orbs.crewPlaceholder
     let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
-    let finalName = clean.isEmpty ? fallback : clean
+    guard !clean.isEmpty else { return }
     do {
       try await sb.from("spaces")
-        .update(SpaceNameUpdate(name: finalName))
+        .update(SpaceNameUpdate(name: clean))
         .eq("id", value: current.id)
         .execute()
       try await refreshSpaceAndData()
@@ -608,7 +603,7 @@ final class AppModel: ObservableObject {
     try await refreshSpaceAndData()
     authPhase = .signedIn
     clearFirstOrbSetupPending()
-    let name = space?.peopleLabel ?? "Orb"
+    let name = space?.peopleLabel.isEmpty == false ? space!.peopleLabel : "this Orb"
     toast = Copy.Invite.joinedSuccess(name)
   }
 
@@ -626,13 +621,12 @@ final class AppModel: ObservableObject {
 
   @discardableResult
   func addSpace(name: String = "", withPeople: Bool = false) async -> Bool {
-    let placeholder = withPeople ? Copy.Orbs.crewPlaceholder : Copy.Orbs.personalPlaceholder
     let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-    let finalName = trimmed.isEmpty ? placeholder : trimmed
+    guard !trimmed.isEmpty else { return false }
     do {
       let created: SpaceRow = try await sb.rpc(
         "create_space",
-        params: CreateSpaceParams(p_name: finalName)
+        params: CreateSpaceParams(p_name: trimmed)
       ).execute().value
       storedSpaceId = created.id
       try await refreshSpaceAndData()

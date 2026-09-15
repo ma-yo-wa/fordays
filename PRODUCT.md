@@ -12,18 +12,21 @@ An Orb is **the notebook for a specific we** (including a we of one). Plans belo
 
 Someday / Plans / Memories **are** that notebook. Everyone has at least one **live** Orb.
 
-**Orb** = the notebook. **Faces** = people in *this* space (two: rose / sage; many: names + initials). Not a hue per person or per space. Tiles show the notebook’s **name**. **This Orb** is only that label — the field underneath is the name. Just you is only the setup kind, never the title. Unnamed solo → **Personal**. Unnamed we → **Aline’s Crew** (the signup placeholder, a homage — not the other member). Never title an Orb with a person’s name.
+**Orb** = the notebook. **Faces** = people in *this* space (two: rose / sage; many: names + initials). Not a hue per person or per space.
 
-Several Orbs are normal: Personal, Aline’s Crew, siblings. Each is solo, two, or many.
+A name is **required** for Just you and With people. Placeholder in the field (`Personal` / `Aline’s Crew`) is only an example — never saved, never shown as the title. Unnamed legacy Orbs (Fordays / Someday / blank) stay untitled: empty field, no caption on the tile, faces already say who. When they name it, that word sits **under the circle** and **beside This Orb** (label semibold faint, name regular ink). Never title an Orb with a person’s name.
 
-Do **not** type Orbs as Work / Personal / Travel. Names are free (Personal, Portugal, Aline’s Crew). Categories are not.
+Several Orbs are normal: Personal, Portugal, siblings. Each is solo, two, or many.
+
+Do **not** type Orbs as Work / Personal / Travel. Names are free. Categories are not.
 
 ### First Orb
 
 - Signup mints a notebook.
 - **Your Orb** (Just you / With people, then a name) is **signup only**, not sign-in.
 - Invite sign-up skips this and joins the we.
-- Blank name → **Personal** or **Aline’s Crew**.
+- Blank name is not allowed. Continue stays off until they type one.
+- Placeholder is example only (`Personal` / `Aline’s Crew`). Do not write it into the row.
 - With people → invite next.
 - Sign-in does not ask again once the name isn’t Fordays / Someday.
 
@@ -32,7 +35,7 @@ Do **not** type Orbs as Work / Personal / Travel. Names are free (Personal, Port
 One sheet, two bands — not two Settings screens.
 
 - **Your Orbs** — all notebooks. Grid, +, Past Orbs. Switch and create.
-- **This Orb** — the open notebook. The field is the name (placeholder Personal or Aline’s Crew). People / invite / remove, Leave or Delete. No “Orb actions” heading. No · person or · name in the label.
+- **This Orb** — the open notebook. If it has a name, that name sits beside the label in a lighter weight. The field is the name (placeholder still the example). People / invite / remove, Leave or Delete. No “Orb actions” heading.
 
 You / calendars / notifications / sign out are you, not a notebook.
 

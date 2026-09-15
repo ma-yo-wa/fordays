@@ -106,19 +106,21 @@ struct OrbSetupView: View {
         .padding(.vertical, 14)
         .background(Theme.ink, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
       }
-      .disabled(busy)
+      .disabled(busy || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
       .padding(.top, 20)
     }
   }
 
   private func submit() async {
+    let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !busy, !clean.isEmpty else { return }
     busy = true
     defer { busy = false }
     if mode == .create {
-      let ok = await app.addSpace(name: name, withPeople: withPeople)
+      let ok = await app.addSpace(name: clean, withPeople: withPeople)
       if ok { onFinished?() }
     } else {
-      await app.completeFirstOrb(name: name, withPeople: withPeople)
+      await app.completeFirstOrb(name: clean, withPeople: withPeople)
     }
   }
 

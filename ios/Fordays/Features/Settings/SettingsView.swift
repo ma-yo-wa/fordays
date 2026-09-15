@@ -310,7 +310,7 @@ struct SettingsView: View {
         }
         .frame(width: Self.orbSize, height: Self.orbSize)
 
-        Text(orb.peopleLabel)
+        Text(orb.peopleLabel.isEmpty ? " " : orb.peopleLabel)
           .font(.caption)
           .foregroundStyle(Theme.inkSoft)
           .lineLimit(1)
@@ -438,7 +438,15 @@ struct SettingsView: View {
     let leaveLabel = soloOrb ? Copy.Orbs.deleteSoloAction : Copy.Orbs.leaveAction
     let placeholder = soloOrb ? Copy.Orbs.personalPlaceholder : Copy.Orbs.crewPlaceholder
     return VStack(alignment: .leading, spacing: 8) {
-      sectionLabel(Copy.Orbs.thisOrb)
+      HStack(alignment: .firstTextBaseline, spacing: 6) {
+        sectionLabel(Copy.Orbs.thisOrb)
+        if !space.peopleLabel.isEmpty {
+          Text(space.peopleLabel)
+            .font(.footnote.weight(.regular))
+            .foregroundStyle(Theme.ink)
+            .lineLimit(1)
+        }
+      }
 
       TextField(placeholder, text: $orbDraft)
         .disabled(space.frozen || spaceBusy)
@@ -585,7 +593,7 @@ struct SettingsView: View {
 
             VStack(alignment: .leading, spacing: 12) {
               HStack(alignment: .center) {
-                Text(pOrb.peopleLabel)
+                Text(pOrb.peopleLabel.isEmpty ? " " : pOrb.peopleLabel)
                   .font(.headline)
                   .foregroundStyle(Theme.ink)
 
@@ -970,6 +978,10 @@ struct SettingsView: View {
     guard let space = app.space, !space.frozen else { return }
     let current = isDefaultOrbName(space.name) ? "" : space.name.trimmingCharacters(in: .whitespacesAndNewlines)
     let next = orbDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+    if next.isEmpty {
+      orbDraft = current
+      return
+    }
     guard next != current else { return }
     await app.renameCurrentSpace(orbDraft)
   }

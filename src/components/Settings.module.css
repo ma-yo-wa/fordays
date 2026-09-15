@@ -11,6 +11,28 @@
   color: var(--ink-faint);
 }
 
+.thisOrbHead {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.thisOrbHead .label {
+  margin: 0;
+}
+
+.thisOrbName {
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  font-weight: 400;
+  color: var(--ink);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .profileCard {
   display: flex;
   align-items: center;
@@ -126,6 +148,7 @@
 .orbTileName {
   width: 72px;
   min-width: 0;
+  min-height: 1.2em;
   font: var(--t-caption);
   letter-spacing: var(--tr-caption);
   color: var(--ink-soft);

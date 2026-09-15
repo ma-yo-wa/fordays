@@ -281,6 +281,10 @@ export default function Settings() {
     if (!space || space.frozen) return;
     const current = isDefaultSpaceName(space.name) ? '' : space.name.trim();
     const next = orbDraft.trim();
+    if (!next) {
+      setOrbDraft(current);
+      return;
+    }
     if (next === current) return;
     await renameCurrentSpace(next);
   }
@@ -464,7 +468,7 @@ export default function Settings() {
                       type="button"
                       className={`${ui.orbTile} ${on ? ui.orbTileOn : ''}`}
                       disabled={spaceBusy}
-                      title={spaceOrbName(orb)}
+                      title={spaceOrbName(orb) || undefined}
                       onClick={() => void handleSwitchOrb(orb)}
                     >
                       <span className={ui.orbCircle}>
@@ -486,7 +490,7 @@ export default function Settings() {
                           )}
                         </span>
                       </span>
-                      <span className={ui.orbTileName}>{spaceOrbName(orb)}</span>
+                      <span className={ui.orbTileName}>{spaceOrbName(orb) || '\u00a0'}</span>
                     </button>
                   );
                 })}
@@ -513,7 +517,12 @@ export default function Settings() {
 
             {space && (
               <section className={ui.section}>
-                <span className={ui.label}>{Copy.orbs.thisOrb}</span>
+                <span className={ui.thisOrbHead}>
+                  <span className={ui.label}>{Copy.orbs.thisOrb}</span>
+                  {spaceOrbName(space) ? (
+                    <span className={ui.thisOrbName}>{spaceOrbName(space)}</span>
+                  ) : null}
+                </span>
                 <div className={ui.profileCard}>
                   <input
                     className={ui.profileInput}
@@ -947,7 +956,7 @@ export default function Settings() {
               <div key={pOrb.id} className={ui.pastOrbCard}>
                 <div className={ui.pastOrbTop}>
                   <div className={ui.pastOrbInfo}>
-                    <span className={ui.pastOrbName}>{spacePeopleLabel(pOrb)}</span>
+                    <span className={ui.pastOrbName}>{spacePeopleLabel(pOrb) || '\u00a0'}</span>
                   </div>
                   <div className={ui.orbFaceStack}>
                     {pFaces.slice(0, 3).map((fc, idx) => (

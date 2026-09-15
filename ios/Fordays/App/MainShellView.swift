@@ -266,15 +266,8 @@ struct MainShellView: View {
 
   private var customOrbName: String? {
     guard let space = app.space else { return nil }
-    let others = space.members.filter {
-      $0.id.compare(space.myId, options: .caseInsensitive) != .orderedSame
-    }
-    let raw = space.name.trimmingCharacters(in: .whitespacesAndNewlines)
-    let generic = raw.isEmpty
-      || raw.caseInsensitiveCompare("Fordays") == .orderedSame
-      || raw.caseInsensitiveCompare("Someday") == .orderedSame
-    if others.isEmpty || !generic { return space.peopleLabel }
-    return nil
+    let named = space.peopleLabel
+    return named.isEmpty ? nil : named
   }
 
   /// You = sage, everyone else in this space = rose.

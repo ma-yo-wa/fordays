@@ -19,7 +19,7 @@ export default function OrbKindForm({ knobId, onSubmit }: Props) {
     : Copy.orbs.personalPlaceholder;
 
   async function continueSetup() {
-    if (busy) return;
+    if (busy || !name.trim()) return;
     setBusy(true);
     try {
       await onSubmit(name, withPeople);
@@ -85,7 +85,7 @@ export default function OrbKindForm({ knobId, onSubmit }: Props) {
         <button
           type="button"
           className={`${f.btn} ${f.accent}`}
-          disabled={busy}
+          disabled={busy || !name.trim()}
           onClick={() => void continueSetup()}
         >
           {busy ? '…' : Copy.orbs.continue}
