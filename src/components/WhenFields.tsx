@@ -73,7 +73,7 @@ function generateStartSlots(currentValue: string): TimeSlot[] {
     slots.push({ time: t, label: pretty(t) });
   }
   if (currentValue && !slots.some((s) => s.time === currentValue)) {
-    slots.push({ time: currentValue, label: `${pretty(currentValue)} (custom)` });
+    slots.push({ time: currentValue, label: pretty(currentValue) });
     slots.sort((a, b) => parseMinutes(a.time) - parseMinutes(b.time));
   }
   return slots;
@@ -98,7 +98,7 @@ function generateEndSlots(currentValue: string, baseFrom: string): TimeSlot[] {
     const diff = curMins >= startMins ? curMins - startMins : curMins + 1440 - startMins;
     slots.push({
       time: currentValue,
-      label: `${pretty(currentValue)} (custom)`,
+      label: pretty(currentValue),
       duration: formatDuration(diff),
     });
     slots.sort((a, b) => {
@@ -112,7 +112,7 @@ function generateEndSlots(currentValue: string, baseFrom: string): TimeSlot[] {
 }
 
 /**
- * Forgiving human parser for typed times:
+ * Forgiving human parser for custom typed times:
  * - "01", "1" -> 1:00
  * - "02", "2" -> 2:00
  * - "1:15", "01:15" -> 1:15
@@ -181,26 +181,33 @@ function parseUserTypedTime(raw: string, currentValue: string): string | null {
   return `${pad(h24)}:${pad(m)}`;
 }
 
+/**
+ * Apple Web style floating time popover.
+ * - Floats directly beneath the time pill with soft shadow.
+ * - Clean list of 30-minute intervals with relative durations for end times.
+ * - Optional "Reset time" at the top to clear.
+ * - Quiet custom time input at the bottom.
+ * - Dismisses on outside click.
+ */
 function TimeDropdownList({
-  title,
   value,
   baseFrom,
   isUntil = false,
   onChange,
-  onClear,
+  onReset,
   onClose,
 }: {
-  title: string;
   value: string;
   baseFrom?: string;
   isUntil?: boolean;
   onChange: (time: string) => void;
-  onClear?: () => void;
+  onReset?: () => void;
   onClose: () => void;
 }) {
+  const popoverRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<HTMLButtonElement>(null);
-  const [typeVal, setTypeVal] = useState('');
+  const [customText, setCustomText] = useState('');
 
   const slots = isUntil
     ? generateEndSlots(value, baseFrom || '')
@@ -212,8 +219,20 @@ function TimeDropdownList({
     }
   }, []);
 
-  function handleApplyTyped() {
-    const parsed = parseUserTypedTime(typeVal, value);
+  useEffect(() => {
+    function handlePointerDown(e: PointerEvent) {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [onClose]);
+
+  function handleCustomSubmit() {
+    const parsed = parseUserTypedTime(customText, value);
     if (parsed) {
       onChange(parsed);
       onClose();
@@ -221,51 +240,19 @@ function TimeDropdownList({
   }
 
   return (
-    <div className={f.timeDropdown}>
-      <div className={f.timeDropdownHeader}>
-        <span className={f.timeDropdownTitle}>{title}</span>
-        <div className={f.timeDropdownActions}>
-          {onClear && (
-            <button
-              type="button"
-              className={f.timeDropdownClearBtn}
-              onClick={() => {
-                onClear();
-                onClose();
-              }}
-            >
-              Remove
-            </button>
-          )}
-          <button type="button" className={f.calNavBtn} onClick={onClose} aria-label="Close">
-            ×
-          </button>
-        </div>
-      </div>
-
-      <form
-        className={f.timeDropdownInputRow}
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleApplyTyped();
-        }}
-      >
-        <input
-          type="text"
-          className={f.timeDropdownInput}
-          value={typeVal}
-          placeholder={value ? pretty(value) : 'Type exact time (e.g. 2:15 PM)'}
-          onChange={(e) => setTypeVal(e.target.value)}
-          aria-label="Type exact time"
-        />
+    <div className={f.timeDropdown} ref={popoverRef}>
+      {onReset && (
         <button
-          type="submit"
-          className={f.timeDropdownApplyBtn}
-          disabled={!typeVal.trim()}
+          type="button"
+          className={f.timeDropdownResetItem}
+          onClick={() => {
+            onReset();
+            onClose();
+          }}
         >
-          Apply
+          Reset time
         </button>
-      </form>
+      )}
 
       <div className={f.timeDropdownList} ref={listRef}>
         {slots.map((slot) => {
@@ -289,6 +276,30 @@ function TimeDropdownList({
           );
         })}
       </div>
+
+      <form
+        className={f.timeDropdownCustomRow}
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleCustomSubmit();
+        }}
+      >
+        <input
+          type="text"
+          className={f.timeDropdownCustomInput}
+          placeholder="Custom minute e.g. 2:15"
+          value={customText}
+          onChange={(e) => setCustomText(e.target.value)}
+          aria-label="Custom time"
+        />
+        <button
+          type="submit"
+          className={f.timeDropdownCustomBtn}
+          disabled={!customText.trim()}
+        >
+          Set
+        </button>
+      </form>
     </div>
   );
 }
@@ -382,12 +393,12 @@ function InlineMonthCalendar({
 }
 
 /**
- * WhenFields: Apple Calendar / Notion style unified When card.
+ * WhenFields: Apple Calendar Web style unified When card.
  *
  * - Starts row: Date capsule + Time capsule side-by-side as twin clean pills.
  * - Tap date capsule to expand inline month grid (exact match to Plans page).
- * - Tap time capsule to open clean scrollable dropdown list with relative durations.
- * - Inside dropdown: subtle typing bar at top for exact custom minutes, plus half-hour slot list.
+ * - Tap time capsule to open Apple-style floating popover with relative durations.
+ * - Popover has zero header chrome, a quiet "Reset time" top item, and a quiet custom minute bar at the bottom.
  * - Apple Next Half-Hour Rule on default start time.
  * - Apple 1-Hour Duration Rule on default end time.
  * - Ends row: revealed conditionally for Until or Multi-day.
@@ -458,17 +469,32 @@ export default function WhenFields({
             </button>
 
             {from ? (
-              <button
-                type="button"
-                className={`${f.applePill} ${activeTimePicker === 'from' ? f.applePillActive : ''}`}
-                onClick={() => {
-                  setActiveTimePicker((cur) => (cur === 'from' ? null : 'from'));
-                  setPickerOpen(false);
-                }}
-                aria-label="Pick start time"
-              >
-                {pretty(from)} {activeTimePicker === 'from' ? '⌃' : '⌵'}
-              </button>
+              <div className={f.appleTimeContainer}>
+                <button
+                  type="button"
+                  className={`${f.applePill} ${activeTimePicker === 'from' ? f.applePillActive : ''}`}
+                  onClick={() => {
+                    setActiveTimePicker((cur) => (cur === 'from' ? null : 'from'));
+                    setPickerOpen(false);
+                  }}
+                  aria-label="Pick start time"
+                >
+                  {pretty(from)} {activeTimePicker === 'from' ? '⌃' : '⌵'}
+                </button>
+
+                {activeTimePicker === 'from' && (
+                  <TimeDropdownList
+                    value={from || defaultAppleStartTime()}
+                    onChange={onFrom}
+                    onReset={() => {
+                      onFrom('');
+                      onUntil('');
+                      setActiveTimePicker(null);
+                    }}
+                    onClose={() => setActiveTimePicker(null)}
+                  />
+                )}
+              </div>
             ) : (
               <button
                 type="button"
@@ -497,21 +523,6 @@ export default function WhenFields({
           />
         )}
 
-        {/* Start Time Clean List */}
-        {activeTimePicker === 'from' && (
-          <TimeDropdownList
-            title={multiDay ? 'Starts' : 'When'}
-            value={from || defaultAppleStartTime()}
-            onChange={onFrom}
-            onClear={() => {
-              onFrom('');
-              onUntil('');
-              setActiveTimePicker(null);
-            }}
-            onClose={() => setActiveTimePicker(null)}
-          />
-        )}
-
         {/* Multi-day Ends Row */}
         {multiDay && (
           <div
@@ -529,17 +540,33 @@ export default function WhenFields({
               />
               {from && (
                 until ? (
-                  <button
-                    type="button"
-                    className={`${f.applePill} ${activeTimePicker === 'until' ? f.applePillActive : ''}`}
-                    onClick={() => {
-                      setActiveTimePicker((cur) => (cur === 'until' ? null : 'until'));
-                      setPickerOpen(false);
-                    }}
-                    aria-label="Pick end time"
-                  >
-                    {pretty(until)} {activeTimePicker === 'until' ? '⌃' : '⌵'}
-                  </button>
+                  <div className={f.appleTimeContainer}>
+                    <button
+                      type="button"
+                      className={`${f.applePill} ${activeTimePicker === 'until' ? f.applePillActive : ''}`}
+                      onClick={() => {
+                        setActiveTimePicker((cur) => (cur === 'until' ? null : 'until'));
+                        setPickerOpen(false);
+                      }}
+                      aria-label="Pick end time"
+                    >
+                      {pretty(until)} {activeTimePicker === 'until' ? '⌃' : '⌵'}
+                    </button>
+
+                    {activeTimePicker === 'until' && (
+                      <TimeDropdownList
+                        value={until || (from ? defaultAppleEndTime(from) : defaultAppleStartTime())}
+                        baseFrom={from}
+                        isUntil
+                        onChange={onUntil}
+                        onReset={() => {
+                          onUntil('');
+                          setActiveTimePicker(null);
+                        }}
+                        onClose={() => setActiveTimePicker(null)}
+                      />
+                    )}
+                  </div>
                 ) : (
                   <button
                     type="button"
@@ -558,22 +585,6 @@ export default function WhenFields({
           </div>
         )}
 
-        {/* Multi-day End Time Clean List */}
-        {multiDay && activeTimePicker === 'until' && (
-          <TimeDropdownList
-            title="Ends"
-            value={until || (from ? defaultAppleEndTime(from) : defaultAppleStartTime())}
-            baseFrom={from}
-            isUntil
-            onChange={onUntil}
-            onClear={() => {
-              onUntil('');
-              setActiveTimePicker(null);
-            }}
-            onClose={() => setActiveTimePicker(null)}
-          />
-        )}
-
         {/* Single-day Until Row (if set) */}
         {!multiDay && from && until && (
           <div
@@ -582,35 +593,35 @@ export default function WhenFields({
           >
             <span className={f.appleWhenLabel}>Until</span>
             <div className={f.applePillGroup}>
-              <button
-                type="button"
-                className={`${f.applePill} ${activeTimePicker === 'until' ? f.applePillActive : ''}`}
-                onClick={() => {
-                  setActiveTimePicker((cur) => (cur === 'until' ? null : 'until'));
-                  setPickerOpen(false);
-                }}
-                aria-label="Pick until time"
-              >
-                {pretty(until)} {activeTimePicker === 'until' ? '⌃' : '⌵'}
-              </button>
+              <div className={f.appleTimeContainer}>
+                <button
+                  type="button"
+                  className={`${f.applePill} ${activeTimePicker === 'until' ? f.applePillActive : ''}`}
+                  onClick={() => {
+                    setActiveTimePicker((cur) => (cur === 'until' ? null : 'until'));
+                    setPickerOpen(false);
+                  }}
+                  aria-label="Pick until time"
+                >
+                  {pretty(until)} {activeTimePicker === 'until' ? '⌃' : '⌵'}
+                </button>
+
+                {activeTimePicker === 'until' && (
+                  <TimeDropdownList
+                    value={until || (from ? defaultAppleEndTime(from) : defaultAppleStartTime())}
+                    baseFrom={from}
+                    isUntil
+                    onChange={onUntil}
+                    onReset={() => {
+                      onUntil('');
+                      setActiveTimePicker(null);
+                    }}
+                    onClose={() => setActiveTimePicker(null)}
+                  />
+                )}
+              </div>
             </div>
           </div>
-        )}
-
-        {/* Single-day Until Time Clean List */}
-        {!multiDay && activeTimePicker === 'until' && (
-          <TimeDropdownList
-            title="Until"
-            value={until || (from ? defaultAppleEndTime(from) : defaultAppleStartTime())}
-            baseFrom={from}
-            isUntil
-            onChange={onUntil}
-            onClear={() => {
-              onUntil('');
-              setActiveTimePicker(null);
-            }}
-            onClose={() => setActiveTimePicker(null)}
-          />
         )}
       </div>
 

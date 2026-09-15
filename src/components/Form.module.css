@@ -257,7 +257,8 @@ textarea.input {
   margin-top: 8px;
   background: var(--paper-warm);
   border-radius: 14px;
-  overflow: hidden;
+  position: relative;
+  overflow: visible;
   display: flex;
   flex-direction: column;
 }
@@ -287,6 +288,11 @@ textarea.input {
   justify-content: flex-end;
 }
 
+.appleTimeContainer {
+  position: relative;
+  display: inline-flex;
+}
+
 .applePill {
   border: none;
   background: rgba(120, 120, 128, 0.12);
@@ -309,9 +315,9 @@ textarea.input {
 }
 
 .applePillActive {
-  background: var(--rose);
-  color: #17140f;
-  font-weight: 600;
+  background: rgba(120, 120, 128, 0.22);
+  color: var(--ink);
+  font-weight: 500;
 }
 
 .appleDateInput {
@@ -332,6 +338,7 @@ textarea.input {
   padding: 8px 14px 14px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   background: var(--paper-warm);
+  border-radius: 0 0 14px 14px;
 }
 
 /* Inline Calendar Header and Grid (matches Plans page) */
@@ -452,128 +459,71 @@ textarea.input {
   box-shadow: none;
 }
 
-/* Notion / Apple Web clean time dropdown list */
+/* Apple Web floating time popover */
 .timeDropdown {
-  margin-top: 8px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  background: var(--paper-warm);
-  padding: 10px 14px 14px;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 220px;
+  max-width: 90vw;
+  background: var(--paper);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  z-index: 100;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  animation: popoverFadeIn 0.14s ease-out;
 }
 
-.timeDropdownHeader {
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.timeDropdownResetItem {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 2px;
-}
-
-.timeDropdownTitle {
-  font: var(--t-caption2);
-  letter-spacing: var(--tr-caption2);
-  font-weight: 600;
-  color: var(--ink-faint);
-  text-transform: uppercase;
-}
-
-.timeDropdownActions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.timeDropdownClearBtn {
+  width: 100%;
+  padding: 8px 14px;
   border: none;
   background: transparent;
-  color: var(--ink-faint);
+  cursor: pointer;
   font: var(--t-caption1);
   font-weight: 500;
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: color 0.12s ease;
-}
-
-.timeDropdownClearBtn:hover {
-  color: var(--ink);
-}
-
-.timeDropdownInputRow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--paper);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 8px;
-  padding: 3px 4px 3px 10px;
-  transition: border-color 0.14s ease, box-shadow 0.14s ease;
-}
-
-.timeDropdownInputRow:focus-within {
-  border-color: rgba(0, 0, 0, 0.22);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-}
-
-.timeDropdownInput {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  background: transparent;
-  outline: none;
-  font: var(--t-subhead);
-  letter-spacing: var(--tr-subhead);
-  font-weight: 400;
-  color: var(--ink);
-  font-family: inherit;
-  padding: 3px 0;
-}
-
-.timeDropdownInput::placeholder {
   color: var(--ink-faint);
-  opacity: 0.6;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: background 0.12s ease, color 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.timeDropdownApplyBtn {
-  border: none;
-  background: rgba(120, 120, 128, 0.1);
+.timeDropdownResetItem:active,
+.timeDropdownResetItem:hover {
+  background: rgba(120, 120, 128, 0.08);
   color: var(--ink);
-  font: var(--t-footnote);
-  font-weight: 500;
-  padding: 4px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.12s ease, opacity 0.12s ease;
-  white-space: nowrap;
-}
-
-.timeDropdownApplyBtn:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
-.timeDropdownApplyBtn:not(:disabled):hover {
-  background: rgba(120, 120, 128, 0.2);
 }
 
 .timeDropdownList {
-  max-height: 200px;
+  max-height: 220px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  border-radius: 10px;
-  padding: 2px;
-  background: var(--fill-tertiary);
+  padding: 4px;
 }
 
 .timeDropdownItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 12px;
+  padding: 8px 10px;
   border: none;
   background: transparent;
   border-radius: 8px;
@@ -581,29 +531,79 @@ textarea.input {
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   color: var(--ink);
-  transition: background 0.12s ease;
+  transition: background 0.1s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-.timeDropdownItem:active {
-  background: rgba(120, 120, 128, 0.16);
+.timeDropdownItem:active,
+.timeDropdownItem:hover {
+  background: rgba(120, 120, 128, 0.1);
 }
 
 .timeDropdownItemActive {
-  background: var(--paper);
-  color: var(--ink);
+  background: rgba(120, 120, 128, 0.12);
   font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .timeDropdownTime {
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
 }
 
 .timeDropdownDuration {
   font-size: 13px;
   color: var(--ink-faint);
   font-weight: 400;
+  margin-left: 8px;
+}
+
+.timeDropdownCustomRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background: var(--paper-warm);
+}
+
+.timeDropdownCustomInput {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  background: var(--paper);
+  outline: none;
+  font: var(--t-caption1);
+  color: var(--ink);
+  padding: 5px 8px;
+  font-family: inherit;
+}
+
+.timeDropdownCustomInput:focus {
+  border-color: rgba(0, 0, 0, 0.24);
+}
+
+.timeDropdownCustomInput::placeholder {
+  color: var(--ink-faint);
+  opacity: 0.7;
+}
+
+.timeDropdownCustomBtn {
+  border: none;
+  background: rgba(120, 120, 128, 0.12);
+  color: var(--ink);
+  font: var(--t-caption1);
+  font-weight: 500;
+  padding: 5px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.timeDropdownCustomBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 .appleSubRow {
