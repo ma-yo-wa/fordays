@@ -45,6 +45,18 @@ struct SearchView: View {
     )
   }
 
+  private var recentActivities: (plans: [Activity], someday: [Activity]) {
+    let upcomingPlans = app.activities
+      .filter { $0.isPlan && !$0.isMemory() }
+      .sorted { ($0.dateTime ?? "") < ($1.dateTime ?? "") }
+      .prefix(4)
+    let recentSomeday = app.activities
+      .filter { !$0.isPlan }
+      .sorted { ($0.createdAt ?? "") > ($1.createdAt ?? "") }
+      .prefix(4)
+    return (Array(upcomingPlans), Array(recentSomeday))
+  }
+
   private func group(_ list: [Activity]) -> [DayGroup] {
     var order: [String] = []
     var map: [String: [Activity]] = [:]
@@ -87,7 +99,19 @@ struct SearchView: View {
   }
 
   private var topSearchBar: some View {
-    HStack(spacing: 10) {
+    HStack(spacing: 8) {
+      Button {
+        onClose()
+      } label: {
+        Image(systemName: "chevron.left")
+          .font(.subheadline.weight(.semibold))
+          .foregroundStyle(Theme.roseInk)
+          .frame(width: 32, height: 32)
+          .contentShape(Rectangle())
+      }
+      .buttonStyle(.plain)
+      .accessibilityLabel(Copy.Search.cancel)
+
       HStack(spacing: 8) {
         Image(systemName: "magnifyingglass")
           .font(.subheadline)
@@ -135,15 +159,53 @@ struct SearchView: View {
     let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
 
     if q.isEmpty {
-      VStack(spacing: 12) {
-        Image(systemName: "magnifyingglass")
-          .font(.system(size: 36))
-          .foregroundStyle(Theme.inkFaint.opacity(0.4))
-        Text(Copy.Search.emptyPrompt)
-          .font(.subheadline)
-          .foregroundStyle(Theme.inkSoft)
+      let recents = recentActivities
+      if recents.plans.isEmpty && recents.someday.isEmpty {
+        VStack(spacing: 12) {
+          Image(systemName: "magnifyingglass")
+            .font(.system(size: 36))
+            .foregroundStyle(Theme.inkFaint.opacity(0.4))
+          Text(Copy.Search.emptyPrompt)
+            .font(.subheadline)
+            .foregroundStyle(Theme.inkSoft)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+      } else {
+        ScrollView {
+          LazyVStack(alignment: .leading, spacing: 20) {
+            if !recents.plans.isEmpty {
+              VStack(alignment: .leading, spacing: 12) {
+                Text("Upcoming Plans")
+                  .font(.caption.weight(.semibold))
+                  .foregroundStyle(Theme.inkSoft)
+                  .textCase(.uppercase)
+                  .padding(.horizontal, 4)
+
+                ForEach(recents.plans) { item in
+                  activityRow(item, accentColor: Theme.rose, trailingTime: DateLocal.formatItemTime(dateTime: item.dateTime, endsAt: item.endsAt))
+                }
+              }
+            }
+
+            if !recents.someday.isEmpty {
+              VStack(alignment: .leading, spacing: 12) {
+                Text("Recent in Someday")
+                  .font(.caption.weight(.semibold))
+                  .foregroundStyle(Theme.inkSoft)
+                  .textCase(.uppercase)
+                  .padding(.horizontal, 4)
+
+                ForEach(recents.someday) { item in
+                  activityRow(item, accentColor: Theme.inkFaint, badge: Copy.Search.someday)
+                }
+              }
+            }
+          }
+          .padding(.horizontal, 16)
+          .padding(.top, 14)
+          .padding(.bottom, 40)
+        }
       }
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
     } else if results.totalCount == 0 {
       VStack(spacing: 12) {
         Text(Copy.Search.noResults(q))

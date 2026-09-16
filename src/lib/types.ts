@@ -139,6 +139,6 @@ export const isMultiDay = (a: Activity): boolean =>
 export function isMemory(a: Activity, today?: string): boolean {
   if (!a.date_time) return false;
   const day = today ?? todayISO();
-  const lastDay = (a.ends_at ?? a.date_time).slice(0, 10);
-  return lastDay < day;
+  const last = a.ends_at && a.ends_at.trim().length >= 10 ? a.ends_at : a.date_time;
+  return last.slice(0, 10) < day;
 }

@@ -15,6 +15,14 @@ function SearchIcon() {
   );
 }
 
+function BackIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden>
+      <path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function formatItemTime(a: Activity): string {
   if (!a.date_time) return '';
   const sTime = dtTime(a.date_time);
@@ -110,7 +118,21 @@ export default function SearchOverlay() {
     };
   }, [activities, q]);
 
+  const recentItems = useMemo(() => {
+    if (q) return { plans: [], someday: [] };
+    const upcomingPlans = activities
+      .filter((a) => Boolean(a.date_time) && !isMemory(a))
+      .sort((a, b) => (a.date_time ?? '').localeCompare(b.date_time ?? ''))
+      .slice(0, 4);
+    const recentSomeday = activities
+      .filter((a) => !a.date_time)
+      .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
+      .slice(0, 4);
+    return { plans: upcomingPlans, someday: recentSomeday };
+  }, [activities, q]);
+
   function handleSelect(id: string) {
+    setSearchOpen(false);
     openDetail(id);
   }
 
@@ -130,6 +152,15 @@ export default function SearchOverlay() {
           transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
         >
           <div className={s.topBar}>
+            <button
+              type="button"
+              className={s.backBtn}
+              onClick={handleClose}
+              aria-label={Copy.search.cancel}
+              title={Copy.search.cancel}
+            >
+              <BackIcon />
+            </button>
             <div className={s.searchBox}>
               <span className={s.searchIcon}>
                 <SearchIcon />
@@ -167,12 +198,84 @@ export default function SearchOverlay() {
 
           <div className={s.content}>
             {!q && (
-              <div className={s.emptyPrompt}>
-                <span className={s.emptyPromptIcon}>
-                  <SearchIcon />
-                </span>
-                <p className={s.emptyPromptText}>{Copy.search.emptyPrompt}</p>
-              </div>
+              <>
+                {recentItems.plans.length === 0 && recentItems.someday.length === 0 ? (
+                  <div className={s.emptyPrompt}>
+                    <span className={s.emptyPromptIcon}>
+                      <SearchIcon />
+                    </span>
+                    <p className={s.emptyPromptText}>{Copy.search.emptyPrompt}</p>
+                  </div>
+                ) : (
+                  <div className={s.recentWrap}>
+                    {recentItems.plans.length > 0 && (
+                      <div className={s.section}>
+                        <h3 className={s.sectionHeader}>Upcoming Plans</h3>
+                        <div className={s.rowsList}>
+                          {recentItems.plans.map((item) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              className={s.row}
+                              onClick={() => handleSelect(item.id)}
+                            >
+                              <span className={s.accentBar} />
+                              <div className={s.rowMain}>
+                                <span className={s.rowTitle}>{item.title}</span>
+                                {item.location && (
+                                  <span className={s.rowLoc}>
+                                    <span className={s.rowLocPin} aria-hidden>
+                                      📍
+                                    </span>
+                                    <span>{item.location}</span>
+                                  </span>
+                                )}
+                                {item.description && (
+                                  <span className={s.rowNote}>{item.description}</span>
+                                )}
+                              </div>
+                              <span className={s.rowTrailing}>{formatItemTime(item)}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {recentItems.someday.length > 0 && (
+                      <div className={s.section}>
+                        <h3 className={s.sectionHeader}>Recent in Someday</h3>
+                        <div className={s.rowsList}>
+                          {recentItems.someday.map((item) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              className={s.row}
+                              onClick={() => handleSelect(item.id)}
+                            >
+                              <span className={`${s.accentBar} ${s.accentBarSomeday}`} />
+                              <div className={s.rowMain}>
+                                <span className={s.rowTitle}>{item.title}</span>
+                                {item.location && (
+                                  <span className={s.rowLoc}>
+                                    <span className={s.rowLocPin} aria-hidden>
+                                      📍
+                                    </span>
+                                    <span>{item.location}</span>
+                                  </span>
+                                )}
+                                {item.description && (
+                                  <span className={s.rowNote}>{item.description}</span>
+                                )}
+                              </div>
+                              <span className={s.somedayBadge}>{Copy.search.someday}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             )}
 
             {q && totalCount === 0 && (

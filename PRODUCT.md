@@ -266,12 +266,13 @@ A quiet search across the entire active notebook.
 - **Notebook-scoped**: Searching strictly respects Orb isolation. Searching in Personal only searches Personal; searching in Aline only searches that shared Orb.
 - **Unified across the three spaces**: Rather than separate search bars in each tab, one unified search checks **Plans**, **Someday**, and **Memories** simultaneously.
 - **Fields matched**: Searches `title`, `location`, and `description` (notes). Matches are case-insensitive.
-- **Top Bar Entry**: A magnifying glass `🔍` icon sits quietly on the trailing side of the top bar across all tabs (on Plans, alongside the month chevrons).
+- **Top Bar Entry**: A magnifying glass `🔍` icon sits quietly on the trailing side of the top bar across all tabs (on Plans, alongside the month chevrons). Search is locked to the trailing margin so it never shifts horizontally between views.
 - **Results Presentation**:
   - Grouped into three calm sections if matches exist: **Plans** (with upcoming date, time, location), **Someday** (with notes preview, location), and **Memories** (with historical date, location).
   - Tapping any result closes search and opens the card's **Detail sheet** directly.
-  - Empty query shows a quiet prompt (`Search plans, someday & memories`).
+  - When the query is empty, surfaces calm suggestions: **Upcoming Plans** and **Recent in Someday** so the overlay is never an empty void.
   - No matches shows `No results for “{query}”`.
+- **Safe-area & Multiple Exit Paths**: Fully padded below the hardware safe-area (`--safe-t`, Dynamic Island / notch). Accessible Back (`←`) button, Cancel button, and Escape key provide effortless dismissal.
 - **Parity**: Identical design, groupings, and behavior on PWA and iOS.
 
 ---
@@ -301,10 +302,17 @@ Fordays operates local-first on the client so the notebook feels like paper — 
 Fordays feels like a warm personal capsule and stationery, never a corporate calendar or spreadsheet.
 
 - **No Straight Lines**: There are no razor-thin horizontal divider lines cutting across the interface. Content transitions organically using whitespace and generous margins.
-- **Curved Sticky Top Shelf**:
-  - The sticky top bar (`topBar` on iOS, `.nav` on PWA) floats with frosted glass (`.ultraThinMaterial` / `backdrop-filter`).
-  - Its bottom corners are gently curved with a 24pt continuous radius (`UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24)` on iOS, `border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;` on PWA) rather than meeting the viewport edges with a sharp straight line.
-  - Content in Someday and Memories scrolls underneath this curved glass canopy smoothly.
+- **Vertical Layout (Large Title) on Someday & Memories**:
+  - Someday and Memories lead with a bold Apple-style large title above the card grid.
+  - At rest, the top bar remains clean and open (Orb capsule on the leading edge, Search on the trailing edge; no compact center title).
+  - When the user scrolls, the compact title smoothly transitions into the top bar.
+- **Curved Sticky Top Shelf on Scroll**:
+  - *At rest (scroll offset = 0)*: The top bar is 100% transparent. The ambient Orb background gradient flows uninterrupted from top to bottom.
+  - *On scroll (scroll offset > 0)*: The frosted sticky shelf (`.ultraThinMaterial` / `backdrop-filter`) smoothly fades in with a continuous 24pt bottom curved corner radius (`UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24)` on iOS, `border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;` on PWA).
+  - Content in Plans, Someday, and Memories scrolls underneath this curved glass canopy smoothly.
+- **Stable Top Bar Geometry**:
+  - The month title on Plans is dead-centered in the viewport (using a `ZStack` on iOS / 3-column grid on PWA) so it never shifts or wobbles when moving between months or when the `Today` pill appears.
+  - The Search action button (`🔍`) is locked to the trailing margin across all tabs.
 - **Ambient Orb Background Gradient (Dual Parity)**:
   - Both iOS (`OrbBackground`) and PWA (`global.css`) render the signature 4-layer ambient radial gradient over `Theme.paper`:
     1. Rose bloom behind the top masthead.

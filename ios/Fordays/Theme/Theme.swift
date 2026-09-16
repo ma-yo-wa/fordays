@@ -115,3 +115,24 @@ struct OrbBackground: View {
   }
 }
 
+struct ScrollOffsetPreferenceKey: PreferenceKey {
+  static var defaultValue: CGFloat = 0
+  static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+    value = nextValue()
+  }
+}
+
+struct ScrollOffsetTracker: View {
+  var coordinateSpace: String = "homeScroll"
+
+  var body: some View {
+    GeometryReader { proxy in
+      Color.clear.preference(
+        key: ScrollOffsetPreferenceKey.self,
+        value: proxy.frame(in: .named(coordinateSpace)).minY
+      )
+    }
+    .frame(height: 0)
+  }
+}
+

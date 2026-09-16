@@ -97,6 +97,7 @@ struct MainShellView: View {
       if showSearch {
         SearchView(
           onSelect: { activity in
+            showSearch = false
             selected = activity
           },
           onClose: {
@@ -190,8 +191,24 @@ struct MainShellView: View {
   }
 
   private var topBar: some View {
-    HStack(spacing: 0) {
-      HStack {
+    ZStack {
+      // Centered compact title
+      if app.tab == .plans {
+        Text(title)
+          .font(.headline)
+          .foregroundStyle(Theme.ink)
+          .lineLimit(1)
+      } else if app.isScrolled {
+        Text(title)
+          .font(.headline)
+          .foregroundStyle(Theme.ink)
+          .lineLimit(1)
+          .transition(.opacity.combined(with: .offset(y: 4)))
+      }
+
+      // Bar controls pinned to edges
+      HStack(spacing: 0) {
+        // Leading: Orb capsule
         Button { showSettings = true } label: {
           HStack(spacing: customOrbName != nil ? 7 : 6) {
             if let custom = customOrbName {
@@ -232,41 +249,37 @@ struct MainShellView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(customOrbName.map { "Open settings for \($0)" } ?? "Open Orb settings")
-      }
-      .frame(maxWidth: .infinity, alignment: .leading)
 
-      Text(title)
-        .font(.headline)
-        .foregroundStyle(Theme.ink)
-        .lineLimit(1)
-        .layoutPriority(1)
+        Spacer(minLength: 8)
 
-      HStack(spacing: 2) {
-        if app.tab == .plans {
-          trailingCalendarControls
+        // Trailing: controls + Search
+        HStack(spacing: 2) {
+          if app.tab == .plans {
+            trailingCalendarControls
+          }
+
+          Button {
+            showSearch = true
+          } label: {
+            Image(systemName: "magnifyingglass")
+              .font(.subheadline.weight(.semibold))
+              .foregroundStyle(Theme.roseInk)
+              .frame(width: 32, height: 32)
+              .contentShape(Rectangle())
+          }
+          .buttonStyle(.plain)
+          .accessibilityLabel("Search")
         }
-
-        Button {
-          showSearch = true
-        } label: {
-          Image(systemName: "magnifyingglass")
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(Theme.roseInk)
-            .frame(width: 32, height: 32)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Search")
       }
-      .frame(maxWidth: .infinity, alignment: .trailing)
     }
     .padding(.horizontal, 16)
     .padding(.top, 6)
     .padding(.bottom, 14)
     .background {
-      Theme.paperWarm.opacity(0.85)
-        .background(.ultraThinMaterial)
+      Theme.paperWarm.opacity(app.isScrolled ? 0.85 : 0)
+        .background(.ultraThinMaterial.opacity(app.isScrolled ? 1 : 0))
         .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24, style: .continuous))
+        .animation(.easeInOut(duration: 0.2), value: app.isScrolled)
         .ignoresSafeArea(edges: .top)
     }
   }

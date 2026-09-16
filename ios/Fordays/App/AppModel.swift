@@ -9,7 +9,12 @@ final class AppModel: ObservableObject {
   @Published var spaces: [SpaceInfo] = []
   @Published var activities: [Activity] = []
   @Published var externalEvents: [ExternalEvent] = []
-  @Published var tab: HomeTab = .plans
+  @Published var tab: HomeTab = .plans {
+    didSet {
+      isScrolled = false
+    }
+  }
+  @Published var isScrolled: Bool = false
   @Published var cursorMonth: Date = Date()
   @Published var pickedDay: String = DateLocal.todayISO()
   @Published var errorMessage: String?
@@ -816,7 +821,7 @@ final class AppModel: ObservableObject {
 
   func extractInviteCode(from string: String) -> String {
     let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
-    if let range = trimmed.range(of: #"[?&]invite=([a-zA-Z0-9]+)"#, options: .regularExpression) {
+    if let range = trimmed.range(of: #"[?&](?:invite|code)=([a-zA-Z0-9]+)"#, options: .regularExpression) {
       let matched = String(trimmed[range])
       if let eqIdx = matched.firstIndex(of: "=") {
         return String(matched[matched.index(after: eqIdx)...]).lowercased()
@@ -828,7 +833,14 @@ final class AppModel: ObservableObject {
         return String(matched[matched.index(after: slashIdx)...]).lowercased()
       }
     }
-    return trimmed.filter { $0.isLetter || $0.isNumber }.lowercased()
+    if trimmed.contains("://") || trimmed.contains("/") || trimmed.contains("?") {
+      return ""
+    }
+    let codeOnly = trimmed.filter { $0.isLetter || $0.isNumber }.lowercased()
+    if codeOnly.count >= 4 && codeOnly.count <= 24 {
+      return codeOnly
+    }
+    return ""
   }
 
   func peekInvite(_ code: String) async throws -> InvitePeek? {
