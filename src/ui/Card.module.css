@@ -1,0 +1,45 @@
+.card {
+  border-radius: var(--r-card);
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Variants */
+.warm {
+  background: var(--paper-warm);
+  box-shadow: var(--shadow-card);
+}
+
+.paper {
+  background: var(--paper);
+  border: var(--hairline-w) solid var(--rule);
+}
+
+.sunk {
+  background: var(--fill-quaternary);
+}
+
+.roseWash {
+  background: var(--rose-wash);
+}
+
+.sageWash {
+  background: var(--sage-wash);
+}
+
+/* Padding presets */
+.padNone {
+  padding: 0;
+}
+
+.padSm {
+  padding: 12px;
+}
+
+.padMd {
+  padding: 16px;
+}
+
+.padLg {
+  padding: 20px;
+}

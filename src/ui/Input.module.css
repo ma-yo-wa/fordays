@@ -1,0 +1,91 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.label {
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.hint {
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-faint);
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  background: var(--fill-quaternary);
+  border-radius: var(--r-control);
+  position: relative;
+  transition: box-shadow 0.14s var(--ease-ios);
+}
+
+.containerFocus {
+  box-shadow: 0 0 0 1.5px var(--ink-soft);
+}
+
+.containerError {
+  box-shadow: 0 0 0 1.5px var(--rose-ink);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  padding: 12px 14px;
+  font: var(--t-body);
+  letter-spacing: var(--tr-body);
+  color: var(--ink);
+  outline: none;
+  font-family: inherit;
+}
+
+.input::placeholder {
+  color: var(--ink-faint);
+}
+
+textarea.input {
+  resize: none;
+  min-height: 80px;
+  line-height: 1.4;
+}
+
+.clearBtn {
+  border: none;
+  background: transparent;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.clearBtn:active {
+  color: var(--ink);
+}
+
+.errorText {
+  margin-top: 5px;
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--rose-ink);
+}

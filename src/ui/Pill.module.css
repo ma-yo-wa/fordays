@@ -1,0 +1,68 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: var(--r-capsule);
+  font-family: var(--ui);
+  user-select: none;
+  white-space: nowrap;
+  border: none;
+  background: transparent;
+  transition:
+    transform 0.14s var(--ease-ios),
+    opacity 0.14s var(--ease-ios);
+}
+
+.clickable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.clickable:active {
+  transform: scale(0.96);
+  opacity: 0.8;
+}
+
+/* Sizes */
+.sizeSm {
+  min-height: 24px;
+  padding: 3px 9px;
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+}
+
+.sizeMd {
+  min-height: 32px;
+  padding: 6px 13px;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 500;
+}
+
+/* Variants */
+.neutral {
+  background: var(--fill-tertiary);
+  color: var(--ink-2);
+}
+
+.rose {
+  background: var(--rose-wash);
+  color: var(--rose-ink);
+}
+
+.sage {
+  background: var(--sage-wash);
+  color: var(--sage-ink);
+}
+
+.solid {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.rule {
+  background: transparent;
+  border: var(--hairline-w) solid var(--rule);
+  color: var(--ink-soft);
+}

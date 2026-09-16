@@ -3,19 +3,53 @@ import SwiftUI
 enum Theme {
   static let paper = Color(hex: 0xF9F6F2)
   static let paperWarm = Color(hex: 0xFFFDFB)
+  static let paperSunk = Color(hex: 0xEFEAE3)
   static let ink = Color(hex: 0x17140F)
+  static let ink2 = Color(hex: 0x3B352C)
   static let inkSoft = Color(hex: 0x7C7365)
   static let inkFaint = Color(hex: 0xA79E90)
+  static let rule = Color(hex: 0xE4DCD0)
+  static let separator = Color(hex: 0x17140F).opacity(0.09)
+  static let hairline = Color(hex: 0x17140F).opacity(0.12)
+
+  static let fillQuaternary = Color(hex: 0x17140F).opacity(0.045)
+  static let fillTertiary = Color(hex: 0x17140F).opacity(0.07)
+  static let fillSecondary = Color(hex: 0x17140F).opacity(0.11)
+
   static let rose = Color(hex: 0xF2648B)
   static let roseInk = Color(hex: 0xC4285A)
   static let roseWash = Color(hex: 0xFFEAEE)
   static let sage = Color(hex: 0xA8CE85)
+  static let sageInk = Color(hex: 0x4F7735)
   static let sageWash = Color(hex: 0xEDF6E3)
+
+  static let ext = Color(hex: 0x98917F)
+  static let extWash = Color(hex: 0xECE7DA)
+
   /// Avatar seats — one partner at each end of the orb (matches web).
   static let faceSage = Color(hex: 0x4F7735)
   static let faceRose = Color(hex: 0xC4285A)
+
+  // Concentric corner radii
+  static let radiusSm: CGFloat = 8
+  static let controlRadius: CGFloat = 12
+  static let radiusMd: CGFloat = 14
   static let cardRadius: CGFloat = 20
+  static let sheetRadius: CGFloat = 38
   static let capsuleRadius: CGFloat = 999
+
+  // Spacing scale
+  enum Spacing {
+    static let xxs: CGFloat = 2
+    static let xs: CGFloat = 4
+    static let sm: CGFloat = 8
+    static let md: CGFloat = 12
+    static let base: CGFloat = 16
+    static let lg: CGFloat = 20
+    static let xl: CGFloat = 24
+    static let xxl: CGFloat = 32
+  }
+
   static let brandName = "Fordays"
 
   /// Same orb washes as the web board. Title families pick a hue;
@@ -135,4 +169,21 @@ struct ScrollOffsetTracker: View {
     .frame(height: 0)
   }
 }
+
+// MARK: - Typography Ramp (matches PWA tokens.css)
+
+extension Font {
+  static let fdLargeTitle = Font.system(size: 34, weight: .bold, design: .default)
+  static let fdTitle1 = Font.system(size: 28, weight: .bold, design: .default)
+  static let fdTitle2 = Font.system(size: 22, weight: .bold, design: .default)
+  static let fdTitle3 = Font.system(size: 20, weight: .semibold, design: .default)
+  static let fdHeadline = Font.system(size: 17, weight: .semibold, design: .default)
+  static let fdBody = Font.system(size: 17, weight: .regular, design: .default)
+  static let fdCallout = Font.system(size: 16, weight: .regular, design: .default)
+  static let fdSubhead = Font.system(size: 15, weight: .regular, design: .default)
+  static let fdFootnote = Font.system(size: 13, weight: .regular, design: .default)
+  static let fdCaption = Font.system(size: 12, weight: .regular, design: .default)
+  static let fdCaption2 = Font.system(size: 11, weight: .medium, design: .default)
+}
+
 

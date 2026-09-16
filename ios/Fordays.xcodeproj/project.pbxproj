@@ -35,6 +35,11 @@
 		E4F5A6B7C8D9E0F1A2B30406 /* CalendarSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F5A6B7C8D9E0F1A2B30405 /* CalendarSync.swift */; };
 		FCF823D1FA959CF01E14B81B /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06275BDB4475A336F2D09A3 /* SupabaseService.swift */; };
 		FFF2EC3B34025F324B2EFA3C /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E2CF128B98BD9C0207520F /* AppModel.swift */; };
+		FD0000000000000000000021 /* FDButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000011 /* FDButton.swift */; };
+		FD0000000000000000000022 /* FDCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000012 /* FDCard.swift */; };
+		FD0000000000000000000023 /* FDTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000013 /* FDTextField.swift */; };
+		FD0000000000000000000024 /* FDAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000014 /* FDAvatar.swift */; };
+		FD0000000000000000000025 /* FDPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000015 /* FDPill.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -67,6 +72,11 @@
 		E4F5A6B7C8D9E0F1A2B30405 /* CalendarSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSync.swift; sourceTree = "<group>"; };
 		F23B5C9D8E0F2A1B7D4E3210 /* InviteShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteShareView.swift; sourceTree = "<group>"; };
 		F23B5C9D8E0F2A1B7D4E3211 /* JoinOrbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinOrbView.swift; sourceTree = "<group>"; };
+		FD0000000000000000000011 /* FDButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDButton.swift; sourceTree = "<group>"; };
+		FD0000000000000000000012 /* FDCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDCard.swift; sourceTree = "<group>"; };
+		FD0000000000000000000013 /* FDTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDTextField.swift; sourceTree = "<group>"; };
+		FD0000000000000000000014 /* FDAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDAvatar.swift; sourceTree = "<group>"; };
+		FD0000000000000000000015 /* FDPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDPill.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -157,6 +167,18 @@
 			path = Theme;
 			sourceTree = "<group>";
 		};
+		FD0000000000000000000001 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				FD0000000000000000000011 /* FDButton.swift */,
+				FD0000000000000000000012 /* FDCard.swift */,
+				FD0000000000000000000013 /* FDTextField.swift */,
+				FD0000000000000000000014 /* FDAvatar.swift */,
+				FD0000000000000000000015 /* FDPill.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
 		92B6367F625A8ED803431753 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
@@ -215,6 +237,7 @@
 				BE01E94E3344A71467F6E56B /* Resources */,
 				24BBEFEC6412F83B07C74DD6 /* Services */,
 				826D5658CC1ED2CDFA93EF33 /* Theme */,
+				FD0000000000000000000001 /* UI */,
 				E459EA3C41279963E13A8BB8 /* Info.plist */,
 			);
 			path = Fordays;
@@ -324,6 +347,11 @@
 				A81F3C2B9D4E7A6C5B0F1234 /* Art.swift in Sources */,
 				0651DB3C9829ACD683B0B49F /* TabIcons.swift in Sources */,
 				D47DCDE8DD8D9F6BE4186C97 /* Theme.swift in Sources */,
+				FD0000000000000000000021 /* FDButton.swift in Sources */,
+				FD0000000000000000000022 /* FDCard.swift in Sources */,
+				FD0000000000000000000023 /* FDTextField.swift in Sources */,
+				FD0000000000000000000024 /* FDAvatar.swift in Sources */,
+				FD0000000000000000000025 /* FDPill.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

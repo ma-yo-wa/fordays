@@ -851,6 +851,3 @@ struct DetailView: View {
   }
 }
 
-private extension Theme {
-  static let ink2 = Color(hex: 0x3B352C)
-}
