@@ -74,6 +74,7 @@ enum Copy {
     }
     static let emptyTogether = "Nothing planned together"
     static let emptyFrozen = "A copy from when you left"
+    static let upNext = "Up next"
   }
 
   enum Tabs {

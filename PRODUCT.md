@@ -114,6 +114,19 @@ The app **opens here**. Someday and Memories stay in the dock; this is the defau
 
 Empty: the line only. Plus adds. No empty CTA.
 
+- **Two dot categories (no black dots)**:
+  - **Solid Rose dot (`●`)**: Plans created in the active notebook (whether in Personal or in a shared Orb).
+  - **Hollow Ring dot (`○`)**: External calendar events (Google / Apple / Outlook).
+  - **Zero black dots**: The black selection pip is prohibited. Selected day is communicated cleanly through bold text (and the solid rose circle on Today).
+  - **Cap at 3 dots total**: If a day has 4 or more plans/events, it shows 3 dots (`...` heat map shorthand) without writing `3+` inside the cell, preserving clean typography.
+- **Up Next (Anticipation Capsule)**:
+  - When **Today** has nothing planned, the screen doesn't stay dead air. Below the quiet note (`Nothing planned between you and Aline today`), surface an **Up next** capsule showing the next upcoming plan: `Up next · [Date] (in X days)`.
+  - Tapping the card opens its Detail sheet directly.
+  - Selecting any other future or past day on the grid displays only that specific day's agenda.
+- **No creating plans in the past**:
+  - Creating a new plan strictly looks forward. The date picker in Composer locks to `>= today`, with past dates muted and disabled.
+  - Plans in the past are Memories. Editing an existing memory via "Change the day" in Detail remains allowed to correct historical typos.
+
 Default when-flow:
 
 1. **Starts** — unified date pill + optional time pill. No bloated quick chips (`Today / Tomorrow / This weekend`). Opens on the focused date; tapping the date capsule reveals the clean month grid matching the Plans page calendar (exact same DOW header, circular date cells, and rose today highlight).
@@ -182,7 +195,13 @@ Google / Microsoft / Unsplash / Giphy / VAPID keys are deploy env. Never a key f
 When composing a plan, ambient availability context appears quietly below the date and time fields.
 
 - **Calm ambient context, never a gatekeeper**: The Whisper never blocks saving. The action button is always active and one tap ("Make it a plan"). There are zero warning dialogs, confirmation prompts, or "Proceed anyway?" modals. Overlaps are informative, not blockers (e.g. joining a Netflix party while traveling in France, skipping a workout for drinks, or joining dinner 30 minutes late).
-- **Privacy respect**: Only events explicitly shared with the Orb appear. If shared with title, the title is shown (`Aline · Dinner (6:00 – 8:30 pm)`). If shared as busy only (null title), it displays as `Busy` (`Aline · Busy (6:00 – 8:30 pm)`). If not shared to this Orb, it remains completely private and silent.
+- **Universal Ambient Availability (Personal Plans)**:
+  - Personal timed plans automatically whisper as `[Name] · Busy ([time])` into all your shared Orbs.
+  - Strict privacy: titles, locations, and descriptions remain 100% private in Personal; shared Orbs only see `Busy` and the time window.
+  - Ambient availability requires zero toggles or manual sharing for native plans.
+- **Imported External Calendars (Apple, Google, Outlook)**:
+  - Your own imported calendar events whisper to you for self-awareness without needing to be shared.
+  - Partner external calendar events whisper only when explicitly shared with the Orb. If shared with title, the title is shown (`Aline · Dinner (6:00 – 8:30 pm)`). If shared as busy only (null title), it displays as `Busy` (`Aline · Busy (6:00 – 8:30 pm)`). If unshared, it remains completely private and silent.
 - **Transparent time ranges**: Show concrete ranges (`6:00 – 8:30 pm` or `All day`) rather than ambiguous statements like "busy until 8:30 pm".
 - **Intelligent time-aware filtering**:
   - *Date-only plan (no From/Until)*: Whispers events scheduled across that day so members see open pockets before picking a time.

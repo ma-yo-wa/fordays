@@ -105,11 +105,15 @@ struct ComposerView: View {
     self.kind = kind
     self.draft = draft
     self.onClose = onClose
+    let today = DateLocal.todayISO()
+    let initialDate = (draft?.date != nil && (draft?.date ?? "") >= today)
+      ? (draft?.date ?? today)
+      : today
     _title = State(initialValue: draft?.title ?? "")
     _location = State(initialValue: draft?.location ?? "")
     _notes = State(initialValue: draft?.notes ?? "")
     _cover = State(initialValue: draft?.cover ?? "")
-    _date = State(initialValue: draft?.date ?? DateLocal.todayISO())
+    _date = State(initialValue: initialDate)
     _from = State(initialValue: draft?.from ?? "")
     _until = State(initialValue: draft?.until ?? "")
     _end = State(initialValue: draft?.end)
@@ -235,6 +239,7 @@ struct ComposerView: View {
                 if let end, end <= iso { self.end = nil }
               }
             ),
+            in: isPlan ? (DateLocal.parseLocalDay(DateLocal.todayISO()) ?? Date())... : Date.distantPast...,
             displayedComponents: .date
           )
           .datePickerStyle(.compact)
@@ -421,6 +426,11 @@ struct ComposerView: View {
     let clean = title.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !clean.isEmpty else {
       app.toast = "Give it a name"
+      return
+    }
+    let today = DateLocal.todayISO()
+    if isPlan && date < today {
+      app.toast = "Plans can't be set in the past"
       return
     }
     saving = true

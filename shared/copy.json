@@ -63,7 +63,8 @@
     "emptyTodayPartner": "Nothing planned between you and {partner} today",
     "emptyDayPartner": "Nothing planned between you and {partner} this day",
     "emptyTogether": "Nothing planned together",
-    "emptyFrozen": "A copy from when you left"
+    "emptyFrozen": "A copy from when you left",
+    "upNext": "Up next"
   },
   "tabs": {
     "ideas": "Someday",

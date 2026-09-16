@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import CoverArt from '../components/CoverArt';
 import { useApp, partnerName, isMatched } from '../lib/store';
 import { isPlan, type ExternalEvent } from '../lib/types';
@@ -8,6 +8,7 @@ import {
   MONTHS,
   dtDate,
   dtTime,
+  formatUpNextLabel,
   monthGrid,
   parseISO,
   prettyLower,
@@ -129,6 +130,25 @@ export default function Calendar() {
       ? 'Today'
       : `${MONTHS[pickedDate.getMonth()]} ${pickedDate.getDate()}`;
 
+  // When Today is selected and has nothing planned, find the next upcoming plan date
+  const upNext = useMemo(() => {
+    if (picked !== today) return null;
+    if (dayPlans.length > 0 || dayExternal.length > 0) return null;
+    const futurePlans = activities
+      .filter((a) => isPlan(a) && (dtDate(a.date_time) ?? '') > today)
+      .sort((a, b) => (a.date_time ?? '').localeCompare(b.date_time ?? ''));
+    if (!futurePlans.length || !futurePlans[0]?.date_time) return null;
+    const targetDate = dtDate(futurePlans[0].date_time)!;
+    const targetPlans = futurePlans.filter(
+      (a) => (dtDate(a.date_time) ?? '') === targetDate,
+    );
+    return {
+      date: targetDate,
+      label: formatUpNextLabel(targetDate, today),
+      plans: targetPlans,
+    };
+  }, [activities, picked, today, dayPlans.length, dayExternal.length]);
+
   return (
     <div className={s.wrap}>
       <div className={s.dow}>
@@ -218,7 +238,6 @@ export default function Calendar() {
                   <i key={e.id} className={s.ext} />
                 ))}
               </span>
-              {date === picked && <span className={s.cursorPip} />}
             </button>
           );
         })}
@@ -228,19 +247,73 @@ export default function Calendar() {
         <div className={s.dayLabel}>{dayHeading}</div>
 
         {!dayPlans.length && !dayExternal.length ? (
-          <div className={s.blank}>
-            <p>
-              {space?.frozen
-                ? Copy.plans.emptyFrozen
-                : other
-                  ? picked === today
-                    ? formatCopy(Copy.plans.emptyTodayPartner, { partner: other })
-                    : formatCopy(Copy.plans.emptyDayPartner, { partner: other })
-                  : picked === today
-                    ? Copy.plans.emptyToday
-                    : Copy.plans.emptyDay}
-            </p>
-          </div>
+          <>
+            <div className={s.blank}>
+              <p>
+                {space?.frozen
+                  ? Copy.plans.emptyFrozen
+                  : other
+                    ? picked === today
+                      ? formatCopy(Copy.plans.emptyTodayPartner, { partner: other })
+                      : formatCopy(Copy.plans.emptyDayPartner, { partner: other })
+                    : picked === today
+                      ? Copy.plans.emptyToday
+                      : Copy.plans.emptyDay}
+              </p>
+            </div>
+
+            {upNext && (
+              <div className={s.upNextSection}>
+                <div className={s.upNextHeader}>
+                  <span className={s.upNextBadge}>{Copy.plans.upNext}</span>
+                  <span className={s.upNextDate}>{upNext.label}</span>
+                </div>
+                <div className={s.plansList}>
+                  {upNext.plans.map((a) => {
+                    const time = dtTime(a.date_time);
+                    const timing = time ? prettyLower(time) : 'All day';
+                    return (
+                      <button
+                        key={a.id}
+                        type="button"
+                        className={s.entry}
+                        onClick={() => openDetail(a.id)}
+                      >
+                        <CoverArt
+                          url={a.image_url}
+                          washId={a.id}
+                          washTitle={a.title}
+                          size="thumb"
+                          className={s.thumb}
+                        />
+                        <span>
+                          <span className={s.title}>{a.title}</span>
+                          <div className={s.range}>{timing}</div>
+                          {a.location && (
+                            <div className={s.loc}>
+                              <span>📍</span> {a.location}
+                            </div>
+                          )}
+                          {a.description && <div className={s.note}>{a.description}</div>}
+                          <div className={s.meta}>
+                            <span
+                              className={s.avatar}
+                              style={{
+                                background: faceColor(faceIndexFor(a.created_by, faceCtx)),
+                              }}
+                            >
+                              {(partnerName(config, a.created_by)[0] ?? '?').toUpperCase()}
+                            </span>
+                            {partnerName(config, a.created_by)}
+                          </div>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <div className={s.plansList}>
             {dayItems.map((item) => {

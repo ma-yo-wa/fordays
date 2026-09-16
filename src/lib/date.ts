@@ -331,3 +331,18 @@ export function formatSearchDate(dayStr: string): string {
   }
   return `${weekday} – ${month} ${day}`;
 }
+
+export function formatUpNextLabel(dateISO: string, from = todayISO()): string {
+  const target = parseISO(dateISO.slice(0, 10));
+  const start = parseISO(from);
+  const days = Math.round((target.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const weekday = WEEKDAYS[target.getDay()];
+  const month = MONTHS_SHORT[target.getMonth()];
+  const day = target.getDate();
+  const year = target.getFullYear();
+  const yearSuffix = year !== new Date().getFullYear() ? `, ${year}` : '';
+
+  if (days === 1) return `Tomorrow · ${month} ${day}${yearSuffix}`;
+  if (days > 1) return `${weekday}, ${month} ${day}${yearSuffix} (in ${days} days)`;
+  return `${weekday}, ${month} ${day}${yearSuffix}`;
+}

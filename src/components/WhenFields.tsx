@@ -19,6 +19,7 @@ type Props = {
   until: string;
   end: string | null;
   multiDay: boolean;
+  minDate?: string;
   onDate: (v: string) => void;
   onFrom: (v: string) => void;
   onUntil: (v: string) => void;
@@ -344,9 +345,11 @@ function TimeDropdownList({
 
 function InlineMonthCalendar({
   selectedDate,
+  minDate,
   onSelect,
 }: {
   selectedDate: string;
+  minDate?: string;
   onSelect: (date: string) => void;
 }) {
   const [cursorMonth, setCursorMonth] = useState<Date>(() => parseISO(selectedDate));
@@ -406,10 +409,12 @@ function InlineMonthCalendar({
           }
           const isToday = cell.date === today;
           const isPicked = cell.date === selectedDate;
+          const isDisabled = Boolean(minDate && cell.date && cell.date < minDate);
           const classNames = [
             f.calDay,
             isToday ? f.calToday : '',
             isPicked ? f.calPicked : '',
+            isDisabled ? f.calDisabled : '',
           ]
             .filter(Boolean)
             .join(' ');
@@ -419,7 +424,10 @@ function InlineMonthCalendar({
               key={i}
               type="button"
               className={classNames}
-              onClick={() => onSelect(cell.date as string)}
+              disabled={isDisabled}
+              onClick={() => {
+                if (!isDisabled && cell.date) onSelect(cell.date);
+              }}
             >
               <span className={f.calNum}>{cell.label}</span>
             </button>
@@ -448,6 +456,7 @@ export default function WhenFields({
   until,
   end,
   multiDay,
+  minDate,
   onDate,
   onFrom,
   onUntil,
@@ -553,6 +562,7 @@ export default function WhenFields({
         {pickerOpen && (
           <InlineMonthCalendar
             selectedDate={date}
+            minDate={minDate}
             onSelect={(next) => {
               onDate(next);
               if (end && end <= next) onEnd(null);

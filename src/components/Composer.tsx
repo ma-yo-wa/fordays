@@ -4,7 +4,7 @@ import CoverPicker from './CoverPicker';
 import WhenFields from './WhenFields';
 import { LocationInput } from './LocationInput';
 import { partnerName, useApp } from '../lib/store';
-import { composeWhen, describePlan, iso, parseISO, prettyLower, shortDate } from '../lib/date';
+import { composeWhen, describePlan, iso, parseISO, prettyLower, shortDate, todayISO } from '../lib/date';
 import { Copy } from '../lib/copy';
 import f from './Form.module.css';
 
@@ -38,15 +38,24 @@ export default function Composer() {
   const [end, setEnd] = useState<string | null>(null);
   const [multiDay, setMultiDay] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [sessionKey, setSessionKey] = useState(0);
 
   useEffect(() => {
     if (!mode) return;
+    setSessionKey((k) => k + 1);
     setTitle(draft?.title ?? '');
     setLocation(draft?.location ?? '');
     setNotes(draft?.notes ?? '');
     setCover(draft?.cover ?? null);
-    // A plan opens on the draft date if provided, or the day you were already looking at.
-    setDate(draft?.date ?? picked);
+    const today = todayISO();
+    // A plan opens on the draft date if provided, or the day you were already looking at (never in the past).
+    const initialDate =
+      draft?.date && draft.date >= today
+        ? draft.date
+        : picked >= today
+          ? picked
+          : today;
+    setDate(initialDate);
     setFrom(draft?.from ?? '');
     setUntil(draft?.until ?? '');
     setEnd(draft?.endDate ?? null);
@@ -135,6 +144,10 @@ export default function Composer() {
       toast('Give it a name');
       return;
     }
+    if (isPlan && date < todayISO()) {
+      toast("Plans can't be set in the past");
+      return;
+    }
     setSaving(true);
     const when = isPlan
       ? composeWhen({ date, from, until, endDate: multiDay ? end : null })
@@ -220,6 +233,7 @@ export default function Composer() {
             until={until}
             end={end}
             multiDay={multiDay}
+            minDate={todayISO()}
             onDate={setDate}
             onFrom={setFrom}
             onUntil={setUntil}
@@ -256,7 +270,7 @@ export default function Composer() {
       <span className={f.label}>
         Cover <span className={f.hint}>— optional</span>
       </span>
-      <CoverPicker value={cover} onChange={setCover} titleHint={() => title} />
+      <CoverPicker key={sessionKey} value={cover} onChange={setCover} titleHint={() => title} />
 
       <div className={f.row}>
         <button type="button" className={`${f.btn} ${f.ghost}`} onClick={close}>

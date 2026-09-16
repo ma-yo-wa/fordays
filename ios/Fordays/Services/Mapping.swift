@@ -333,6 +333,28 @@ enum DateLocal {
     }
     return prettyTime(sTime)
   }
+
+  static func formatUpNextLabel(_ dateISO: String, from: String = todayISO()) -> String {
+    guard let start = parseLocalDay(from), let target = parseLocalDay(String(dateISO.prefix(10))) else {
+      return String(dateISO.prefix(10))
+    }
+    let days = Calendar.current.dateComponents([.day], from: start, to: target).day ?? 0
+    let f = DateFormatter()
+    let currentYear = Calendar.current.component(.year, from: Date())
+    let year = Calendar.current.component(.year, from: target)
+    let yearFormat = year == currentYear ? "" : ", yyyy"
+
+    if days == 1 {
+      f.dateFormat = "MMM d\(yearFormat)"
+      return "Tomorrow · \(f.string(from: target))"
+    }
+    f.dateFormat = "EEEE, MMM d\(yearFormat)"
+    let dateStr = f.string(from: target)
+    if days > 1 {
+      return "\(dateStr) (in \(days) days)"
+    }
+    return dateStr
+  }
 }
 
 extension ActivityRow {

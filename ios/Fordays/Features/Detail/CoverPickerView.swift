@@ -195,9 +195,7 @@ struct CoverPickerView: View {
       customUrlSection
     }
     .onAppear {
-      if query.isEmpty {
-        query = titleHint().trimmingCharacters(in: .whitespacesAndNewlines)
-      }
+      query = ""
     }
   }
 

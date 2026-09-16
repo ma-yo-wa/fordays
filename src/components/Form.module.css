@@ -451,6 +451,12 @@ textarea.input {
   pointer-events: none;
 }
 
+.calDisabled {
+  opacity: 0.22;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Today when NOT selected: rose text to keep it distinct */
 .calToday .calNum {
   color: var(--rose-ink);

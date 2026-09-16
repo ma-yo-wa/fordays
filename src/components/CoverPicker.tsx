@@ -74,23 +74,13 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
 
   function openSearchTab(id: SearchTab) {
     setTab(id);
-    const query = q.trim() || titleHint().trim();
-    if (query) {
-      setQ(query);
-      void load(id, query);
-    } else {
-      void load(id, '');
-    }
+    const query = q.trim();
+    void load(id, query);
   }
 
   useEffect(() => {
-    const t = titleHint().trim();
-    if (t) {
-      setQ(t);
-      void load('gifs', t);
-    } else {
-      void load('gifs', '');
-    }
+    setQ('');
+    void load('gifs', '');
     return () => ctrl.current?.abort();
   }, []);
 

@@ -61,6 +61,26 @@ struct PlansView: View {
     return (plans + imported).sorted { $0.sort < $1.sort }
   }
 
+  private var upNext: (date: String, label: String, plans: [Activity])? {
+    guard app.pickedDay == DateLocal.todayISO(),
+          dayPlans.isEmpty && dayExternal.isEmpty else {
+      return nil
+    }
+    let today = DateLocal.todayISO()
+    let futurePlans = app.activities
+      .filter { $0.isPlan && (DateLocal.dtDate($0.dateTime) ?? "") > today }
+      .sorted { ($0.dateTime ?? "") < ($1.dateTime ?? "") }
+    guard let first = futurePlans.first, let firstDate = DateLocal.dtDate(first.dateTime) else {
+      return nil
+    }
+    let targetPlans = futurePlans.filter { (DateLocal.dtDate($0.dateTime) ?? "") == firstDate }
+    return (
+      date: firstDate,
+      label: DateLocal.formatUpNextLabel(firstDate, from: today),
+      plans: targetPlans
+    )
+  }
+
   var body: some View {
     VStack(spacing: 0) {
       monthGrid
@@ -78,6 +98,66 @@ struct PlansView: View {
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity)
             .padding(.top, 24)
+
+          if let next = upNext {
+            VStack(alignment: .leading, spacing: 10) {
+              HStack(spacing: 8) {
+                Text(Copy.Plans.upNext)
+                  .font(.caption2.weight(.bold))
+                  .foregroundStyle(Theme.roseInk)
+                  .padding(.horizontal, 8)
+                  .padding(.vertical, 3)
+                  .background(Theme.rose, in: Capsule())
+
+                Text(next.label)
+                  .font(.subheadline.weight(.semibold))
+                  .foregroundStyle(Theme.ink)
+              }
+              .padding(.top, 16)
+              .padding(.horizontal, 2)
+
+              ForEach(next.plans) { a in
+                Button {
+                  onSelect(a)
+                } label: {
+                  HStack(alignment: .top, spacing: 12) {
+                    planThumb(a)
+                    VStack(alignment: .leading, spacing: 4) {
+                      Text(a.title)
+                        .font(.body.weight(.medium))
+                        .foregroundStyle(Theme.ink)
+                      Text(planTiming(a))
+                        .font(.footnote)
+                        .foregroundStyle(Theme.inkSoft)
+                      if let loc = a.location, !loc.isEmpty {
+                        HStack(spacing: 4) {
+                          Text("📍").font(.caption2)
+                          Text(loc)
+                            .font(.footnote)
+                            .foregroundStyle(Theme.inkSoft)
+                        }
+                      }
+                      if let note = a.description, !note.isEmpty {
+                        Text(note)
+                          .font(.footnote)
+                          .foregroundStyle(Theme.inkFaint)
+                      }
+                      HStack(spacing: 6) {
+                        face(for: a.createdBy)
+                        Text(displayName(for: a.createdBy))
+                          .font(.footnote)
+                          .foregroundStyle(Theme.inkSoft)
+                      }
+                    }
+                    Spacer(minLength: 0)
+                  }
+                  .padding(14)
+                  .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                .buttonStyle(.plain)
+              }
+            }
+          }
         } else {
           ForEach(dayAgenda) { item in
             switch item {
@@ -94,6 +174,14 @@ struct PlansView: View {
                     Text(planTiming(a))
                       .font(.footnote)
                       .foregroundStyle(Theme.inkSoft)
+                    if let loc = a.location, !loc.isEmpty {
+                      HStack(spacing: 4) {
+                        Text("📍").font(.caption2)
+                        Text(loc)
+                          .font(.footnote)
+                          .foregroundStyle(Theme.inkSoft)
+                      }
+                    }
                     if let note = a.description, !note.isEmpty {
                       Text(note)
                         .font(.footnote)
@@ -314,15 +402,6 @@ struct PlansView: View {
                   }
                 }
                 .frame(height: 5)
-
-                if isPicked {
-                  Circle()
-                    .fill(Theme.ink)
-                    .frame(width: 4, height: 4)
-                } else {
-                  Color.clear
-                    .frame(width: 4, height: 4)
-                }
               }
               .frame(maxWidth: .infinity, minHeight: 52)
               .background(alignment: .top) {
