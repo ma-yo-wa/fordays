@@ -8,7 +8,7 @@
 .dow {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  padding: 10px 10px 4px;
+  padding: 16px 10px 4px;
 }
 
 .dow span {

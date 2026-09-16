@@ -119,6 +119,10 @@ Empty: the line only. Plus adds. No empty CTA.
   - **Hollow Ring dot (`○`)**: External calendar events (Google / Apple / Outlook).
   - **Zero black dots**: The black selection pip is prohibited. Selected day is communicated cleanly through bold text (and the solid rose circle on Today).
   - **Cap at 3 dots total**: If a day has 4 or more plans/events, it shows 3 dots (`...` heat map shorthand) without writing `3+` inside the cell, preserving clean typography.
+- **Frosted Shelf Header (Approach A)**:
+  - The sticky top header provides a spacious frosted shelf (~56pt min-height) with a generous 14pt cushion directly below the Orb selector pill (`Alowa ∨`).
+  - At rest, weekday headers (`S M T W T F S`) sit 16pt below the bar for calm, unhurried breathing room.
+  - On scroll, content passes smoothly under the frosted glass material (`blur(30px)`) and subtle hairline, rather than crashing immediately into the bottom edge of the pill.
 - **Up Next (Anticipation)**:
   - When **Today** has nothing planned, the screen doesn't stay dead air.
   - The empty state message (`Nothing planned between you and Aline today`) is kept tight and compact rather than consuming half the screen.

@@ -257,8 +257,18 @@ struct MainShellView: View {
         .allowsHitTesting(false)
     }
     .padding(.horizontal, 16)
-    .padding(.top, 4)
-    .padding(.bottom, 12)
+    .padding(.top, 6)
+    .padding(.bottom, 14)
+    .background {
+      Theme.paperWarm.opacity(0.85)
+        .background(.ultraThinMaterial)
+        .ignoresSafeArea(edges: .top)
+    }
+    .overlay(alignment: .bottom) {
+      Rectangle()
+        .fill(Theme.ink.opacity(0.08))
+        .frame(height: 0.5)
+    }
   }
 
   private var trailingCalendarControls: some View {

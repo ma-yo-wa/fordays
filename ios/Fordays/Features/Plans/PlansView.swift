@@ -87,6 +87,7 @@ struct PlansView: View {
     VStack(spacing: 0) {
       monthGrid
         .padding(.horizontal, 12)
+        .padding(.top, 8)
         .padding(.bottom, 8)
 
       VStack(alignment: .leading, spacing: 12) {
