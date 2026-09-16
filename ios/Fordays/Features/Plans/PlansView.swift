@@ -85,8 +85,6 @@ struct PlansView: View {
 
   var body: some View {
     ScrollView {
-      ScrollOffsetTracker()
-
       VStack(spacing: 0) {
       monthGrid
         .padding(.horizontal, 12)
@@ -274,15 +272,6 @@ struct PlansView: View {
       .padding(.top, 18)
       .frame(maxWidth: .infinity, alignment: .topLeading)
       .padding(.bottom, 132)
-      }
-    }
-    .coordinateSpace(name: "homeScroll")
-    .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
-      let scrolled = minY < -6
-      if app.isScrolled != scrolled {
-        withAnimation(.easeInOut(duration: 0.18)) {
-          app.isScrolled = scrolled
-        }
       }
     }
     .onAppear {

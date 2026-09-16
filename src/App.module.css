@@ -16,16 +16,12 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  /* 56pt bar with generous frosted shelf below the Orb capsule */
+  /* 56pt bar across all tabs */
   padding-top: calc(var(--safe-t) + 56px);
 }
 
 .main::-webkit-scrollbar {
   display: none;
-}
-
-.largeTitleRoom {
-  padding-top: calc(var(--safe-t) + 56px + 44px);
 }
 
 .screen {

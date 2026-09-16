@@ -18,16 +18,6 @@ struct BucketView: View {
 
   var body: some View {
     ScrollView {
-      ScrollOffsetTracker()
-
-      Text(Copy.Tabs.ideas)
-        .font(.system(size: 34, weight: .bold))
-        .foregroundStyle(Theme.ink)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 20)
-        .padding(.top, 4)
-        .padding(.bottom, 6)
-
       if items.isEmpty {
         empty
       } else {
@@ -39,15 +29,6 @@ struct BucketView: View {
         .padding(.horizontal, 20)
         .padding(.top, 4)
         .padding(.bottom, 132)
-      }
-    }
-    .coordinateSpace(name: "homeScroll")
-    .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
-      let scrolled = minY < -6
-      if app.isScrolled != scrolled {
-        withAnimation(.easeInOut(duration: 0.18)) {
-          app.isScrolled = scrolled
-        }
       }
     }
   }
@@ -98,16 +79,6 @@ struct MemoriesView: View {
 
   var body: some View {
     ScrollView {
-      ScrollOffsetTracker()
-
-      Text(Copy.Tabs.memories)
-        .font(.system(size: 34, weight: .bold))
-        .foregroundStyle(Theme.ink)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 20)
-        .padding(.top, 4)
-        .padding(.bottom, 6)
-
       if sections.isEmpty {
         Text(
           app.space?.isMatched == true
@@ -140,15 +111,6 @@ struct MemoriesView: View {
         .padding(.horizontal, 20)
         .padding(.top, 4)
         .padding(.bottom, 132)
-      }
-    }
-    .coordinateSpace(name: "homeScroll")
-    .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
-      let scrolled = minY < -6
-      if app.isScrolled != scrolled {
-        withAnimation(.easeInOut(duration: 0.18)) {
-          app.isScrolled = scrolled
-        }
       }
     }
   }

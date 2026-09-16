@@ -228,7 +228,7 @@ function AppShell() {
 
       <main
         ref={main}
-        className={`${s.main} ${screen !== 'calendar' ? s.largeTitleRoom : ''}`}
+        className={s.main}
         onScroll={(e) => {
           scrollY.current = e.currentTarget.scrollTop;
           if (scrollRaf.current) return;

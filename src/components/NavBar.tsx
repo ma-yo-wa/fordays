@@ -1,4 +1,3 @@
-import { motion } from 'motion/react';
 import { useApp, isMatched, spaceOrbName } from '../lib/store';
 import { faceColor } from '../lib/tint';
 import { MONTHS, iso, parseISO, todayISO } from '../lib/date';
@@ -34,17 +33,11 @@ function SearchIcon() {
   );
 }
 
-/* Two bar styles, because iOS has two and uses them for different things:
-   a list gets a large title that collapses as you scroll it, and a fixed
-   view like a month grid gets a compact bar. Using the large title
-   everywhere is the most common way this ends up looking almost-native
-   rather than native. */
 export default function NavBar() {
   const screen = useApp((st) => st.screen);
   const config = useApp((st) => st.config);
   const live = useApp((st) => st.live);
   const backendName = useApp((st) => st.backendName);
-  const navScroll = useApp((st) => st.navScroll);
   const cursor = useApp((st) => st.cursor);
   const setCursor = useApp((st) => st.setCursor);
   const setPicked = useApp((st) => st.setPicked);
@@ -99,14 +92,6 @@ export default function NavBar() {
       ? Copy.tabs.memories
       : Copy.tabs.ideas;
 
-  /* The large title hands off to the compact one over ~22px of travel,
-     which is roughly where iOS makes the swap. A compact bar has no
-     handoff to do — its title is always up. */
-  const t = isCalendar ? 1 : Math.min(1, Math.max(0, (navScroll - 4) / 22));
-  const collapsed = t > 0.5;
-  // The glass only appears once there's something behind it to blur.
-  const scrolled = navScroll > 2;
-
   const now = new Date();
   const offCurrentMonth =
     cursorDate.getMonth() !== now.getMonth() ||
@@ -122,8 +107,6 @@ export default function NavBar() {
 
   return (
     <header className={s.nav}>
-      <div className={`${s.material} ${scrolled ? s.materialOn : ''}`} />
-
       <div className={s.bar}>
         <div className={s.leading}>
           <button
@@ -151,8 +134,6 @@ export default function NavBar() {
                     +{moreCount}
                   </span>
                 )}
-                {/* Only ever amber, only when sync is down. A light that's always
-                    on reads as presence and gets tuned out. */}
                 {!live && backendName === 'supabase' && (
                   <span className={s.bulb} aria-hidden />
                 )}
@@ -164,20 +145,13 @@ export default function NavBar() {
           </button>
         </div>
 
-        <motion.div
-          className={s.compactTitle}
-          animate={{ opacity: t, y: (1 - t) * 8 }}
-          transition={{ duration: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
-          aria-hidden={!collapsed}
-        >
+        <div className={s.compactTitle}>
           {title}
-        </motion.div>
+        </div>
 
         <div className={s.trailing}>
           {isCalendar && (
             <>
-              {/* Contextual: there's no point offering "Today" while you're
-                  already looking at today's month. */}
               {offCurrentMonth && (
                 <button type="button" className={s.todayPill} onClick={goToday}>
                   Today
@@ -212,21 +186,6 @@ export default function NavBar() {
           </button>
         </div>
       </div>
-
-      {/* Fades and lifts in place rather than collapsing its box: an
-          animated height here would drag the whole screen up and down
-          under the user's finger while they scroll. */}
-      {!isCalendar && (
-        <motion.div
-          className={s.large}
-          animate={{ opacity: 1 - t, y: -10 * t }}
-          initial={false}
-          transition={{ duration: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
-          aria-hidden={collapsed}
-        >
-          <h1 className={s.largeTitle}>{title}</h1>
-        </motion.div>
-      )}
     </header>
   );
 }

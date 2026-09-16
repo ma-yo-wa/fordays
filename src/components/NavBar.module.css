@@ -5,29 +5,10 @@
   right: 0;
   z-index: 40;
   padding-top: var(--safe-t);
+  background: transparent;
 }
 
-/* The material and its hairline only exist once content has gone under
-   the bar. At the top of a screen an iOS nav bar is invisible. */
-.material {
-  position: absolute;
-  inset: 0;
-  background: var(--mat-regular-bg);
-  -webkit-backdrop-filter: var(--mat-regular);
-  backdrop-filter: var(--mat-regular);
-  border-bottom-left-radius: 24px;
-  border-bottom-right-radius: 24px;
-  opacity: 0;
-  transition: opacity 0.22s var(--ease-ios);
-  pointer-events: none;
-}
-
-.materialOn {
-  opacity: 1;
-}
-
-/* 44pt. Not a number to improvise on — it's the height every iOS bar
-   has, and the eye knows it. */
+/* 56pt bar with generous breathing room below the Orb capsule */
 .bar {
   position: relative;
   min-height: 56px;
@@ -57,18 +38,6 @@
   color: var(--ink);
   white-space: nowrap;
   text-align: center;
-}
-
-.large {
-  position: relative;
-  padding: 0 20px 6px;
-  transform-origin: left bottom;
-}
-
-.largeTitle {
-  font: var(--t-large-title);
-  letter-spacing: var(--tr-large-title);
-  color: var(--ink);
 }
 
 /* ---- bar buttons ---- */

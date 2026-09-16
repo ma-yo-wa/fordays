@@ -193,18 +193,10 @@ struct MainShellView: View {
   private var topBar: some View {
     ZStack {
       // Centered compact title
-      if app.tab == .plans {
-        Text(title)
-          .font(.headline)
-          .foregroundStyle(Theme.ink)
-          .lineLimit(1)
-      } else if app.isScrolled {
-        Text(title)
-          .font(.headline)
-          .foregroundStyle(Theme.ink)
-          .lineLimit(1)
-          .transition(.opacity.combined(with: .offset(y: 4)))
-      }
+      Text(title)
+        .font(.headline)
+        .foregroundStyle(Theme.ink)
+        .lineLimit(1)
 
       // Bar controls pinned to edges
       HStack(spacing: 0) {
@@ -275,13 +267,8 @@ struct MainShellView: View {
     .padding(.horizontal, 16)
     .padding(.top, 6)
     .padding(.bottom, 14)
-    .background {
-      Theme.paperWarm.opacity(app.isScrolled ? 0.85 : 0)
-        .background(.ultraThinMaterial.opacity(app.isScrolled ? 1 : 0))
-        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24, style: .continuous))
-        .animation(.easeInOut(duration: 0.2), value: app.isScrolled)
-        .ignoresSafeArea(edges: .top)
-    }
+    .background(Color.clear)
+    .transaction { $0.animation = nil }
   }
 
   private var trailingCalendarControls: some View {

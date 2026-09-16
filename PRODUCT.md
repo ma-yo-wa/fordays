@@ -302,14 +302,15 @@ Fordays operates local-first on the client so the notebook feels like paper — 
 Fordays feels like a warm personal capsule and stationery, never a corporate calendar or spreadsheet.
 
 - **No Straight Lines**: There are no razor-thin horizontal divider lines cutting across the interface. Content transitions organically using whitespace and generous margins.
-- **Vertical Layout (Large Title) on Someday & Memories**:
-  - Someday and Memories lead with a bold Apple-style large title above the card grid.
-  - At rest, the top bar remains clean and open (Orb capsule on the leading edge, Search on the trailing edge; no compact center title).
-  - When the user scrolls, the compact title smoothly transitions into the top bar.
-- **Curved Sticky Top Shelf on Scroll**:
-  - *At rest (scroll offset = 0)*: The top bar is 100% transparent. The ambient Orb background gradient flows uninterrupted from top to bottom.
-  - *On scroll (scroll offset > 0)*: The frosted sticky shelf (`.ultraThinMaterial` / `backdrop-filter`) smoothly fades in with a continuous 24pt bottom curved corner radius (`UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24)` on iOS, `border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;` on PWA).
-  - Content in Plans, Someday, and Memories scrolls underneath this curved glass canopy smoothly.
+- **Clean, Transparent Top Bar (Zero Frostiness)**:
+  - The top bar floats 100% transparently over the ambient Orb background gradient on both iOS and PWA.
+  - Zero frostiness, zero blurry material backdrops, and zero heavy curved shelf overlays. The screen breathes naturally.
+- **Identical Top Padding Rhythm across Plans, Bucket, and Memories**:
+  - The navbar height (56pt) and content top margin are completely uniform across all three views (Plans, Someday, Memories).
+  - No bloated large-title headers or extra offsets in Bucket or Memories; content in all tabs starts at the exact same vertical baseline.
+- **Static, Rock-Solid Top Bar Controls (No Animations)**:
+  - The top bar title is centered and static (no opacity/offset animations when switching tabs, scrolling, or navigating months).
+  - Trailing calendar controls (`Today`, `<`, `>`) and the locked Search icon (`🔍`) sit reliably with zero jumping or sliding animations.
 - **Stable Top Bar Geometry**:
   - The month title on Plans is dead-centered in the viewport (using a `ZStack` on iOS / 3-column grid on PWA) so it never shifts or wobbles when moving between months or when the `Today` pill appears.
   - The Search action button (`🔍`) is locked to the trailing margin across all tabs.
