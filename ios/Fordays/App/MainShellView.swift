@@ -257,7 +257,8 @@ struct MainShellView: View {
         .allowsHitTesting(false)
     }
     .padding(.horizontal, 16)
-    .padding(.vertical, 10)
+    .padding(.top, 4)
+    .padding(.bottom, 12)
   }
 
   private var trailingCalendarControls: some View {

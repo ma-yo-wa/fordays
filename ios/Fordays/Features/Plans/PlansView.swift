@@ -91,7 +91,7 @@ struct PlansView: View {
 
       VStack(alignment: .leading, spacing: 12) {
         Text(dayTitle)
-          .font(.title3.weight(.semibold))
+          .font(.headline)
           .foregroundStyle(Theme.ink)
         if dayPlans.isEmpty && dayExternal.isEmpty {
           if let next = upNext {
@@ -105,7 +105,7 @@ struct PlansView: View {
             VStack(alignment: .leading, spacing: 10) {
               VStack(alignment: .leading, spacing: 3) {
                 Text(Copy.Plans.upNext)
-                  .font(.title3.weight(.semibold))
+                  .font(.headline)
                   .foregroundStyle(Theme.ink)
 
                 HStack(spacing: 6) {

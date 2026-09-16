@@ -16,11 +16,8 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  /* 44pt bar. The extra room on Ideas is the large title's. Nothing is
-     reserved at the bottom here on purpose: each screen pads its own
-     last surface, so a panel's material runs under the tab bar instead
-     of stopping at a visible seam above it. */
-  padding-top: calc(var(--safe-t) + 44px);
+  /* 52pt bar with generous bottom padding below the Orb capsule. */
+  padding-top: calc(var(--safe-t) + 52px);
 }
 
 .main::-webkit-scrollbar {
@@ -28,7 +25,7 @@
 }
 
 .largeTitleRoom {
-  padding-top: calc(var(--safe-t) + 44px + 44px);
+  padding-top: calc(var(--safe-t) + 52px + 44px);
 }
 
 .screen {

@@ -8,7 +8,7 @@
 .dow {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  padding: 8px 10px 4px;
+  padding: 10px 10px 4px;
 }
 
 .dow span {
@@ -317,10 +317,8 @@
 
 .upNextHeading {
   font: var(--t-headline);
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--ink);
   letter-spacing: var(--tr-headline);
+  color: var(--ink);
   margin-bottom: 4px;
   padding: 0 2px;
 }
