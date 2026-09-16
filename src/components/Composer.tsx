@@ -6,6 +6,7 @@ import { LocationInput } from './LocationInput';
 import { partnerName, useApp } from '../lib/store';
 import { composeWhen, describePlan, iso, parseISO, prettyLower, shortDate, todayISO } from '../lib/date';
 import { Copy } from '../lib/copy';
+import { Button, Input } from '../ui';
 import f from './Form.module.css';
 
 /* Still one form and still one nullable column underneath, but which of
@@ -184,14 +185,9 @@ export default function Composer() {
       onClose={close}
       heading={isPlan ? Copy.composer.newPlan : Copy.composer.newIdea}
     >
-      {isPlan && (
-        <span className={f.label} style={{ marginTop: 14 }}>
-          Plan
-        </span>
-      )}
-      <div className={f.group} style={isPlan ? undefined : { marginTop: 14 }}>
-        <input
-          className={f.input}
+      <div style={{ marginTop: 14 }}>
+        <Input
+          label={isPlan ? 'Plan' : undefined}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder={isPlan ? 'Dinner at Alma' : 'Kayak the Grand River'}
@@ -212,15 +208,14 @@ export default function Composer() {
         placeholder="Where is this?"
       />
 
-      <span className={f.label}>
-        Notes <span className={f.hint}>— optional</span>
-      </span>
-      <div className={f.group}>
-        <textarea
-          className={f.input}
+      <div style={{ marginTop: 14 }}>
+        <Input
+          label="Notes"
+          hint="— optional"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Anything worth remembering"
+          multiline
           rows={3}
         />
       </div>
@@ -273,17 +268,17 @@ export default function Composer() {
       <CoverPicker key={sessionKey} value={cover} onChange={setCover} titleHint={() => title} />
 
       <div className={f.row}>
-        <button type="button" className={`${f.btn} ${f.ghost}`} onClick={close}>
+        <Button variant="secondary" onClick={close}>
           Cancel
-        </button>
-        <button
-          type="button"
-          className={`${f.btn} ${f.accent}`}
+        </Button>
+        <Button
+          variant="primary"
           onClick={() => void save()}
+          loading={saving}
           disabled={saving}
         >
           {isPlan ? Copy.composer.addPlan : Copy.composer.addIdea}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );

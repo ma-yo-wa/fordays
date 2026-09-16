@@ -40,6 +40,8 @@
 		FD0000000000000000000023 /* FDTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000013 /* FDTextField.swift */; };
 		FD0000000000000000000024 /* FDAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000014 /* FDAvatar.swift */; };
 		FD0000000000000000000025 /* FDPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000015 /* FDPill.swift */; };
+		FD0000000000000000000026 /* FDActionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000016 /* FDActionRow.swift */; };
+		FD0000000000000000000027 /* FDFormGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000017 /* FDFormGroup.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -77,6 +79,8 @@
 		FD0000000000000000000013 /* FDTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDTextField.swift; sourceTree = "<group>"; };
 		FD0000000000000000000014 /* FDAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDAvatar.swift; sourceTree = "<group>"; };
 		FD0000000000000000000015 /* FDPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDPill.swift; sourceTree = "<group>"; };
+		FD0000000000000000000016 /* FDActionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDActionRow.swift; sourceTree = "<group>"; };
+		FD0000000000000000000017 /* FDFormGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDFormGroup.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -175,6 +179,8 @@
 				FD0000000000000000000013 /* FDTextField.swift */,
 				FD0000000000000000000014 /* FDAvatar.swift */,
 				FD0000000000000000000015 /* FDPill.swift */,
+				FD0000000000000000000016 /* FDActionRow.swift */,
+				FD0000000000000000000017 /* FDFormGroup.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -352,6 +358,8 @@
 				FD0000000000000000000023 /* FDTextField.swift in Sources */,
 				FD0000000000000000000024 /* FDAvatar.swift in Sources */,
 				FD0000000000000000000025 /* FDPill.swift in Sources */,
+				FD0000000000000000000026 /* FDActionRow.swift in Sources */,
+				FD0000000000000000000027 /* FDFormGroup.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -37,6 +37,7 @@ import {
   type PushState,
 } from '../lib/push';
 import { Copy, formatCopy } from '../lib/copy';
+import { Button, Avatar } from '../ui';
 import f from './Form.module.css';
 import add from './AddSheet.module.css';
 import ui from './Settings.module.css';
@@ -458,9 +459,11 @@ export default function Settings() {
             <section className={ui.section}>
               <span className={ui.label}>Your profile</span>
               <div className={ui.profileCard}>
-                <span className={`${ui.face} ${ui.faceMe}`} aria-hidden>
-                  {firstLetter(myName || space?.myName || 'Me')}
-                </span>
+                <Avatar
+                  name={myName || space?.myName || 'Me'}
+                  seat={0}
+                  size="md"
+                />
                 <input
                   className={ui.profileInput}
                   value={myName}
@@ -906,13 +909,12 @@ export default function Settings() {
 
         {signedIn && (
           <div className={f.row}>
-            <button
-              type="button"
-              className={`${f.btn} ${f.ghost}`}
+            <Button
+              variant="destructive"
               onClick={() => void signOutUser()}
             >
               Sign out
-            </button>
+            </Button>
           </div>
         )}
       </>

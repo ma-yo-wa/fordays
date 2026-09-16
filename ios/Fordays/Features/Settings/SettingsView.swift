@@ -201,15 +201,16 @@ struct SettingsView: View {
     VStack(alignment: .leading, spacing: 8) {
       sectionLabel("Your profile")
       HStack(spacing: 12) {
-        face(space.myName, mine: true, size: 32)
+        FDAvatar(name: space.myName, seat: 0, size: .md)
         Text(space.myName)
-          .font(.body)
+          .font(.fdBody)
           .foregroundStyle(Theme.ink)
       }
       .frame(maxWidth: .infinity, alignment: .leading)
-      .padding(.horizontal, 12)
-      .padding(.vertical, 10)
-      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+      .padding(.horizontal, 14)
+      .padding(.vertical, 12)
+      .background(Theme.fillQuaternary)
+      .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
     }
   }
 
@@ -713,74 +714,51 @@ struct SettingsView: View {
   private var calendarsSection: some View {
     VStack(alignment: .leading, spacing: 8) {
       sectionLabel("External calendars")
-      VStack(spacing: 0) {
-        HStack {
-          Text(Copy.Availability.appleCalendar)
-            .font(.body)
-            .foregroundStyle(Theme.ink)
-          Spacer()
+      FDFormGroup {
+        FDFormRow(label: Copy.Availability.appleCalendar) {
           Toggle("Connect Apple Calendar", isOn: appleToggle)
             .labelsHidden()
             .tint(Theme.roseInk)
             .disabled(appleBusy)
         }
-        .padding(12)
 
         if appleOn {
-          Button {
-            Task { await openApplePicker() }
-          } label: {
-            HStack {
-              Text(appleName ?? "Choose calendar")
-                .font(.subheadline)
-                .foregroundStyle(Theme.ink)
-              Spacer()
-              Text(appleName == nil ? "›" : "Change ›")
-                .font(.subheadline)
-                .foregroundStyle(Theme.inkFaint)
-            }
-            .padding(12)
+          Divider().opacity(0.12)
+          FDFormRow(
+            label: appleName ?? "Choose calendar",
+            note: appleBusy ? "…" : nil,
+            action: { Task { await openApplePicker() } }
+          ) {
+            Text(appleName == nil ? "›" : "Change ›")
+              .font(.fdSubhead)
+              .foregroundStyle(Theme.inkFaint)
           }
-          .buttonStyle(.plain)
-          .disabled(appleBusy)
 
           if appleName != nil {
-            Button {
-              Task { await importApple() }
-            } label: {
-              HStack {
-                Text("Refresh overlay")
-                  .font(.subheadline)
-                  .foregroundStyle(Theme.ink)
-                Spacer()
-                Text(appleBusy ? "…" : "›")
-                  .font(.subheadline)
-                  .foregroundStyle(Theme.inkFaint)
-              }
-              .padding(12)
+            Divider().opacity(0.12)
+            FDFormRow(
+              label: "Refresh overlay",
+              note: appleBusy ? "…" : nil,
+              action: { Task { await importApple() } }
+            ) {
+              Text(appleBusy ? "…" : "›")
+                .font(.fdSubhead)
+                .foregroundStyle(Theme.inkFaint)
             }
-            .buttonStyle(.plain)
-            .disabled(appleBusy)
           }
         }
 
         Divider().opacity(0.12)
 
-        HStack {
-          Text(Copy.Availability.outlookCalendar)
-            .font(.body)
-            .foregroundStyle(Theme.ink)
-          Spacer()
+        FDFormRow(label: Copy.Availability.outlookCalendar) {
           Toggle("Connect Outlook Calendar", isOn: outlookToggle)
             .labelsHidden()
             .tint(Theme.roseInk)
         }
-        .padding(12)
       }
-      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
       Text(Copy.Availability.settingsNoteIos)
-        .font(.footnote)
+        .font(.fdFootnote)
         .foregroundStyle(Theme.inkSoft)
     }
   }
@@ -962,11 +940,9 @@ struct SettingsView: View {
   private var signOutSection: some View {
     VStack(alignment: .leading, spacing: 8) {
       sectionLabel("Session")
-      dangerButton("Sign out") {
-        Task {
-          await app.signOut()
-          dismiss()
-        }
+      FDButton("Sign out", variant: .destructive, disabled: spaceBusy) {
+        await app.signOut()
+        dismiss()
       }
     }
   }
@@ -977,30 +953,8 @@ struct SettingsView: View {
       .foregroundStyle(Theme.inkFaint)
   }
 
-  private func dangerButton(_ label: String, action: @escaping () -> Void) -> some View {
-    Button(action: action) {
-      Text(label)
-        .font(.subheadline.weight(.semibold))
-        .foregroundStyle(.white)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
-        .background(Theme.roseInk, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-    }
-    .buttonStyle(.plain)
-    .disabled(spaceBusy)
-  }
-
   private func face(_ name: String, mine: Bool, size: CGFloat = 32) -> some View {
-    ZStack {
-      Circle()
-        .fill(mine ? Theme.faceSage : Theme.faceRose)
-      Text(initial(name))
-        .font(.system(size: size * 0.44, weight: .bold))
-        .foregroundStyle(.white)
-        .offset(y: -0.5)
-    }
-    .frame(width: size, height: size)
-    .fixedSize()
+    FDAvatar(name: name, seat: mine ? 0 : 1, size: size <= 24 ? .sm : .md)
   }
 
   private func isDefaultOrbName(_ name: String) -> Bool {

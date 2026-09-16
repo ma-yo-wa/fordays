@@ -1,0 +1,40 @@
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 4px;
+  border: none;
+  background: transparent;
+  font: var(--t-body);
+  letter-spacing: var(--tr-body);
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.14s var(--ease-ios),
+    opacity 0.14s var(--ease-ios);
+}
+
+.actionRow:active {
+  transform: scale(0.985);
+  opacity: 0.72;
+}
+
+.destructive {
+  color: var(--rose-ink);
+}
+
+.icon {
+  width: 22px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.label {
+  flex: 1;
+}

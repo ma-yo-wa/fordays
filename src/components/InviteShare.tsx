@@ -3,6 +3,7 @@ import Sheet from './Sheet';
 import { inviteUrl } from '../lib/auth';
 import { useApp } from '../lib/store';
 import { Copy, formatCopy } from '../lib/copy';
+import { Button, Input, Pill } from '../ui';
 import f from './Form.module.css';
 
 interface Props {
@@ -86,19 +87,16 @@ export default function InviteShare({ open, code, onClose }: Props) {
             <span className={f.codeLabel}>{Copy.invite.orbCodeLabel}</span>
             <span className={f.codeValue}>{code}</span>
           </div>
-          <button type="button" className={f.copyPill} onClick={() => void copyCodeOnly()}>
+          <Pill variant="neutral" size="sm" onClick={() => void copyCodeOnly()}>
             {Copy.invite.copyCode}
-          </button>
+          </Pill>
         </div>
       )}
 
-      <span className={f.label} style={{ marginTop: 16 }}>
-        {Copy.invite.ideaLabel}{' '}
-        <span className={f.hint}>{Copy.invite.ideaHint}</span>
-      </span>
-      <div className={f.group}>
-        <input
-          className={f.input}
+      <div style={{ marginTop: 16 }}>
+        <Input
+          label={Copy.invite.ideaLabel}
+          hint={Copy.invite.ideaHint}
           value={first}
           onChange={(e) => setFirst(e.target.value)}
           placeholder="Kayak the Grand River"
@@ -107,17 +105,17 @@ export default function InviteShare({ open, code, onClose }: Props) {
       </div>
 
       <div className={f.row}>
-        <button type="button" className={`${f.btn} ${f.ghost}`} onClick={onClose}>
+        <Button variant="secondary" onClick={onClose}>
           {Copy.invite.notNow}
-        </button>
-        <button
-          type="button"
-          className={`${f.btn} ${f.accent}`}
+        </Button>
+        <Button
+          variant="primary"
+          loading={busy}
           disabled={busy}
           onClick={() => void share()}
         >
-          {busy ? '…' : Copy.invite.shareInvite}
-        </button>
+          {Copy.invite.shareInvite}
+        </Button>
       </div>
     </Sheet>
   );

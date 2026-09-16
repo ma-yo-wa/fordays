@@ -121,16 +121,15 @@ struct ExternalDetailView: View {
         // Rows
         VStack(alignment: .leading, spacing: 14) {
           HStack(spacing: 10) {
-            face(for: event.userId)
+            FDAvatar(name: ownerName, seat: isMine ? 0 : 1, size: .sm)
             Text(ownerName)
               .font(.subheadline)
               .foregroundStyle(Theme.ink)
-            Text(event.calendar.isEmpty ? event.sourceLabel : event.calendar)
-              .font(.caption2.weight(.medium))
-              .foregroundStyle(Theme.inkSoft)
-              .padding(.horizontal, 6)
-              .padding(.vertical, 1)
-              .background(Theme.ink.opacity(0.06), in: Capsule())
+            FDPill(
+              title: event.calendar.isEmpty ? event.sourceLabel : event.calendar,
+              variant: .neutral,
+              size: .sm
+            )
           }
         }
         .padding(.vertical, 16)
@@ -138,42 +137,20 @@ struct ExternalDetailView: View {
         // Do with [Partner] action
         if app.space?.isMatched != true, !activeSharedOrbs.isEmpty {
           if activeSharedOrbs.count == 1, let target = activeSharedOrbs.first {
-            Button {
+            FDActionRow(
+              title: Copy.Orbs.doWith(targetOrbName(target)),
+              systemImage: "person.2.fill"
+            ) {
               Task { await handleDoWith(target) }
-            } label: {
-              HStack(spacing: 10) {
-                Image(systemName: "person.2.fill")
-                  .font(.subheadline)
-                  .foregroundStyle(Theme.inkSoft)
-                  .frame(width: 20)
-                Text(Copy.Orbs.doWith(targetOrbName(target)))
-                  .font(.body)
-                  .foregroundStyle(Theme.ink)
-                Spacer()
-              }
-              .padding(14)
-              .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
-            .buttonStyle(.plain)
             .padding(.top, 4)
           } else {
-            Button {
+            FDActionRow(
+              title: Copy.Orbs.doWithEllipsis,
+              systemImage: "person.2.fill"
+            ) {
               showMoveDialog = true
-            } label: {
-              HStack(spacing: 10) {
-                Image(systemName: "person.2.fill")
-                  .font(.subheadline)
-                  .foregroundStyle(Theme.inkSoft)
-                  .frame(width: 20)
-                Text(Copy.Orbs.doWithEllipsis)
-                  .font(.body)
-                  .foregroundStyle(Theme.ink)
-                Spacer()
-              }
-              .padding(14)
-              .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
-            .buttonStyle(.plain)
             .padding(.top, 4)
           }
         }
@@ -212,16 +189,5 @@ struct ExternalDetailView: View {
         Button("Cancel", role: .cancel) { }
       }
     }
-  }
-
-  private func face(for userId: String) -> some View {
-    let me = app.space?.myId
-    let seat = (me != nil && userId == me) ? (app.space?.me ?? 0) : (1 - (app.space?.me ?? 0))
-    let fill = seat == 0 ? Theme.faceSage : Theme.faceRose
-    return Text(String(ownerName.prefix(1)).uppercased())
-      .font(.caption2.weight(.bold))
-      .foregroundStyle(.white)
-      .frame(width: 18, height: 18)
-      .background(fill, in: Circle())
   }
 }

@@ -12,3 +12,9 @@ export type { AvatarProps, AvatarSize } from './Avatar';
 
 export { Pill } from './Pill';
 export type { PillProps, PillVariant, PillSize } from './Pill';
+
+export { ActionRow } from './ActionRow';
+export type { ActionRowProps } from './ActionRow';
+
+export { FormGroup, FormRow } from './FormGroup';
+export type { FormGroupProps, FormRowProps } from './FormGroup';

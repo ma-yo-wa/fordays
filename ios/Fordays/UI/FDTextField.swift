@@ -9,6 +9,7 @@ struct FDTextField: View {
   var axis: Axis = .horizontal
   var lineLimit: ClosedRange<Int>? = nil
   var clearable: Bool = false
+  var isSecure: Bool = false
 
   var body: some View {
     VStack(alignment: .leading, spacing: 6) {
@@ -28,7 +29,11 @@ struct FDTextField: View {
       }
 
       HStack(spacing: 8) {
-        if axis == .vertical {
+        if isSecure {
+          SecureField(placeholder, text: $text)
+            .font(.fdBody)
+            .foregroundStyle(Theme.ink)
+        } else if axis == .vertical {
           TextField(placeholder, text: $text, axis: .vertical)
             .font(.fdBody)
             .foregroundStyle(Theme.ink)

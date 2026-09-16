@@ -3,7 +3,7 @@ import Sheet from './Sheet';
 import CoverArt from './CoverArt';
 import ActionSheet from './ActionSheet';
 import { useApp } from '../lib/store';
-import { faceColor } from '../lib/tint';
+import { Avatar, Pill, ActionRow } from '../ui';
 import { formatRange } from '../lib/date';
 import { Copy, formatCopy } from '../lib/copy';
 import type { SpaceInfo } from '../lib/auth';
@@ -41,7 +41,6 @@ export default function ExternalDetail() {
   const space = useApp((st) => st.space);
 
   const [doWithOpen, setDoWithOpen] = useState(false);
-  const [movingBusy, setMovingBusy] = useState(false);
 
   const event = external.find((e) => e.id === externalId) ?? null;
   const owner = event
@@ -52,14 +51,6 @@ export default function ExternalDetail() {
     ? 'You'
     : (space?.partnerName ?? config.names[owner] ?? 'Them');
   const possessive = isMine ? 'your' : `${ownerName}’s`;
-  const initial = (
-    (isMine ? space?.myName : space?.partnerName) ??
-    config.names[owner] ??
-    '?'
-  )
-    .trim()
-    .charAt(0)
-    .toUpperCase() || '?';
 
   const activeOrbs = spaces.filter((s) => !s.frozen);
   const activeSharedOrbs = activeOrbs.filter((s) => s.id !== space?.id);
@@ -70,7 +61,6 @@ export default function ExternalDetail() {
 
   async function handleDoWith(targetSpace: SpaceInfo) {
     if (!event) return;
-    setMovingBusy(true);
     try {
       await create({
         title: event.title ?? 'Plan',
@@ -84,8 +74,6 @@ export default function ExternalDetail() {
       openExternal(null);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t add plan');
-    } finally {
-      setMovingBusy(false);
     }
   }
 
@@ -124,44 +112,34 @@ export default function ExternalDetail() {
 
             <div className={s.rows}>
               <div className={s.row}>
-                <span
-                  className={s.avatar}
-                  style={{ background: faceColor(owner) }}
-                  aria-hidden
-                >
-                  {initial}
-                </span>
+                <Avatar
+                  name={ownerName}
+                  seat={owner}
+                  size="sm"
+                />
                 <span>{ownerName}</span>
-                <span className={s.sourcePill}>
+                <Pill variant="neutral" size="sm">
                   {event.calendar || (event.source ? event.source.toUpperCase() : 'CALENDAR')}
-                </span>
+                </Pill>
               </div>
             </div>
 
             {activeSharedOrbs.length > 0 && (
               <div className={s.actions}>
                 {activeSharedOrbs.length === 1 && activeSharedOrbs[0] ? (
-                  <button
-                    type="button"
-                    className={s.action}
-                    onClick={() => void handleDoWith(activeSharedOrbs[0]!)}
-                    disabled={movingBusy}
-                  >
-                    <PeopleIcon />
-                    {formatCopy(Copy.orbs.doWith, {
+                  <ActionRow
+                    icon={<PeopleIcon />}
+                    label={formatCopy(Copy.orbs.doWith, {
                       name: targetOrbName(activeSharedOrbs[0]),
                     })}
-                  </button>
+                    onClick={() => void handleDoWith(activeSharedOrbs[0]!)}
+                  />
                 ) : (
-                  <button
-                    type="button"
-                    className={s.action}
+                  <ActionRow
+                    icon={<PeopleIcon />}
+                    label={Copy.orbs.doWithEllipsis}
                     onClick={() => setDoWithOpen(true)}
-                    disabled={movingBusy}
-                  >
-                    <PeopleIcon />
-                    {Copy.orbs.doWithEllipsis}
-                  </button>
+                  />
                 )}
               </div>
             )}

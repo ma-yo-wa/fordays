@@ -8,6 +8,7 @@ import {
   signUpWithPassword,
   updatePassword,
 } from '../lib/auth';
+import { Button, Input } from '../ui';
 import f from './Form.module.css';
 import s from './Auth.module.css';
 
@@ -109,16 +110,15 @@ export default function Auth({
         <h1 className={s.brand}>Fordays</h1>
         <p className={s.lead}>Check your email for a reset link — open it on this phone</p>
         <div className={f.row}>
-          <button
-            type="button"
-            className={`${f.btn} ${f.ghost}`}
+          <Button
+            variant="secondary"
             onClick={() => {
               setMode('signin');
               setError(null);
             }}
           >
             Back to sign in
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -130,30 +130,27 @@ export default function Auth({
         <h1 className={s.brand}>Fordays</h1>
         <p className={s.lead}>Choose a new password</p>
 
-        <span className={f.label}>New password</span>
-        <div className={f.group}>
-          <input
-            className={f.input}
-            type="password"
-            autoComplete="new-password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') void submit();
-            }}
-          />
-        </div>
+        <Input
+          label="New password"
+          type="password"
+          autoComplete="new-password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') void submit();
+          }}
+        />
 
         <div className={f.row}>
-          <button
-            type="button"
-            className={`${f.btn} ${f.accent}`}
+          <Button
+            variant="primary"
+            loading={busy}
             disabled={busy}
             onClick={() => void submit()}
           >
-            {busy ? '…' : 'Save password'}
-          </button>
+            Save password
+          </Button>
         </div>
 
         {error && <p className={s.error}>{error}</p>}
@@ -167,33 +164,30 @@ export default function Auth({
         <h1 className={s.brand}>Fordays</h1>
         <p className={s.lead}>We’ll email a link to reset your password</p>
 
-        <span className={f.label}>Email</span>
-        <div className={f.group}>
-          <input
-            className={f.input}
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            autoCapitalize="none"
-            spellCheck={false}
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') void submit();
-            }}
-          />
-        </div>
+        <Input
+          label="Email"
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          spellCheck={false}
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') void submit();
+          }}
+        />
 
         <div className={f.row}>
-          <button
-            type="button"
-            className={`${f.btn} ${f.accent}`}
+          <Button
+            variant="primary"
+            loading={busy}
             disabled={busy}
             onClick={() => void submit()}
           >
-            {busy ? '…' : 'Send reset link'}
-          </button>
+            Send reset link
+          </Button>
         </div>
 
         <button
@@ -228,26 +222,22 @@ export default function Auth({
       </p>
 
       {mode === 'signup' && (
-        <>
-          <span className={f.label}>Your name</span>
-          <div className={f.group}>
-            <input
-              className={f.input}
-              type="text"
-              autoComplete="name"
-              autoCapitalize="words"
-              placeholder="Aline"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-        </>
+        <div style={{ marginBottom: 12 }}>
+          <Input
+            label="Your name"
+            type="text"
+            autoComplete="name"
+            autoCapitalize="words"
+            placeholder="Aline"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
       )}
 
-      <span className={f.label}>Email</span>
-      <div className={f.group}>
-        <input
-          className={f.input}
+      <div style={{ marginBottom: 12 }}>
+        <Input
+          label="Email"
           type="email"
           inputMode="email"
           autoComplete="email"
@@ -259,10 +249,9 @@ export default function Auth({
         />
       </div>
 
-      <span className={f.label}>Password</span>
-      <div className={f.group}>
-        <input
-          className={f.input}
+      <div style={{ marginBottom: 12 }}>
+        <Input
+          label="Password"
           type="password"
           autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
           placeholder="••••••••"
@@ -275,22 +264,20 @@ export default function Auth({
       </div>
 
       <div className={f.row}>
-        <button
-          type="button"
-          className={`${f.btn} ${f.accent}`}
+        <Button
+          variant="primary"
+          loading={busy}
           disabled={busy}
           onClick={() => void submit()}
         >
-          {busy
-            ? '…'
-            : mode === 'signup'
-              ? inviterHint
-                ? `Join ${inviterHint}`
-                : 'Create account'
-              : inviterHint
-                ? 'Sign in & join'
-                : 'Sign in'}
-        </button>
+          {mode === 'signup'
+            ? inviterHint
+              ? `Join ${inviterHint}`
+              : 'Create account'
+            : inviterHint
+              ? 'Sign in & join'
+              : 'Sign in'}
+        </Button>
       </div>
 
       {mode === 'signin' && (

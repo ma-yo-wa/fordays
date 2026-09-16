@@ -88,33 +88,17 @@ struct OrbSetupView: View {
         }
       }
 
-      Text(Copy.Orbs.orbName)
-        .font(.caption.weight(.semibold))
-        .foregroundStyle(Theme.inkFaint)
-        .padding(.top, 20)
-        .padding(.bottom, 8)
+      FDTextField(label: Copy.Orbs.orbName, placeholder: placeholder, text: $name)
+        .padding(.top, 16)
 
-      TextField(placeholder, text: $name)
-        .padding(14)
-        .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-
-      Button {
-        Task { await submit() }
-      } label: {
-        HStack {
-          Spacer()
-          if busy { ProgressView().tint(.white) }
-          else {
-            Text(withPeople ? Copy.Orbs.invitePerson : Copy.Orbs.startPlanning)
-              .font(.headline)
-              .foregroundStyle(.white)
-          }
-          Spacer()
-        }
-        .padding(.vertical, 14)
-        .background(Theme.ink, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+      FDButton(
+        withPeople ? Copy.Orbs.invitePerson : Copy.Orbs.startPlanning,
+        variant: .primary,
+        loading: busy,
+        disabled: busy || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+      ) {
+        await submit()
       }
-      .disabled(busy || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
       .padding(.top, 20)
     }
   }

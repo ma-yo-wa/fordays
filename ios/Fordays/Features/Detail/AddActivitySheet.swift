@@ -130,19 +130,23 @@ struct ComposerView: View {
           .foregroundStyle(Theme.ink)
           .padding(.bottom, 14)
 
-        if isPlan {
-          fieldLabel("Plan")
-        }
-        textField(
-          isPlan ? "Dinner at Alma" : "Kayak the Grand River",
+        FDTextField(
+          label: isPlan ? "Plan" : nil,
+          placeholder: isPlan ? "Dinner at Alma" : "Kayak the Grand River",
           text: $title
         )
 
         fieldLabel("Location", hint: "— optional")
         LocationInputView(text: $location)
 
-        fieldLabel("Notes", hint: "— optional")
-        textField("Anything worth remembering", text: $notes, lines: 3...6)
+        FDTextField(
+          label: "Notes",
+          hint: "— optional",
+          placeholder: "Anything worth remembering",
+          text: $notes,
+          axis: .vertical,
+          lineLimit: 3...6
+        )
 
         if isPlan {
           fieldLabel("When")
@@ -174,8 +178,13 @@ struct ComposerView: View {
         CoverPickerView(cover: $cover, titleHint: { title })
 
         HStack(spacing: 10) {
-          ghost("Cancel", action: onClose)
-          accent(isPlan ? Copy.Composer.addPlan : Copy.Composer.addIdea) {
+          FDButton("Cancel", variant: .secondary, action: onClose)
+          FDButton(
+            isPlan ? Copy.Composer.addPlan : Copy.Composer.addIdea,
+            variant: .primary,
+            loading: saving,
+            disabled: saving
+          ) {
             await save()
           }
         }
@@ -563,41 +572,5 @@ struct ComposerView: View {
     }
     .padding(.top, 16)
     .padding(.bottom, 8)
-  }
-
-  private func textField(
-    _ placeholder: String,
-    text: Binding<String>,
-    lines: ClosedRange<Int> = 1...1
-  ) -> some View {
-    TextField(placeholder, text: text, axis: lines.upperBound > 1 ? .vertical : .horizontal)
-      .lineLimit(lines)
-      .padding(12)
-      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-  }
-
-  private func ghost(_ label: String, action: @escaping () -> Void) -> some View {
-    Button(action: action) {
-      Text(label)
-        .font(.body.weight(.medium))
-        .foregroundStyle(Theme.ink)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-  }
-
-  private func accent(_ label: String, action: @escaping () async -> Void) -> some View {
-    Button {
-      Task { await action() }
-    } label: {
-      Text(label)
-        .font(.body.weight(.semibold))
-        .foregroundStyle(.white)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Theme.ink, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-    .disabled(saving)
   }
 }

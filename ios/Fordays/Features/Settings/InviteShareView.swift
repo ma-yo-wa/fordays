@@ -38,67 +38,45 @@ struct InviteShareView: View {
           HStack {
             VStack(alignment: .leading, spacing: 2) {
               Text(Copy.Invite.orbCodeLabel)
-                .font(.caption2.weight(.medium))
+                .font(.fdCaption2.weight(.medium))
                 .foregroundStyle(Theme.inkFaint)
               Text(code)
                 .font(.system(.body, design: .monospaced).weight(.bold))
                 .foregroundStyle(Theme.ink)
             }
             Spacer()
-            Button {
+            FDPill(title: Copy.Invite.copyCode, variant: .neutral, size: .sm) {
               UIPasteboard.general.string = code
               app.toast = Copy.Invite.codeCopied
-            } label: {
-              Text(Copy.Invite.copyCode)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(Theme.ink)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 6)
-                .background(Theme.ink.opacity(0.08), in: Capsule())
             }
           }
           .padding(12)
-          .background(Theme.ink.opacity(0.04), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+          .background(Theme.fillQuaternary)
+          .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
           .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-              .stroke(Theme.ink.opacity(0.1), lineWidth: 1)
+            RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous)
+              .stroke(Theme.separator, lineWidth: 1)
           )
           .padding(.bottom, 16)
         }
 
-        HStack(spacing: 4) {
-          Text(Copy.Invite.ideaLabel)
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(Theme.inkFaint)
-          Text(Copy.Invite.ideaHint)
-            .font(.caption)
-            .foregroundStyle(Theme.inkFaint)
-        }
-        .padding(.bottom, 8)
-
-        TextField("Kayak the Grand River", text: $first)
-          .padding(12)
-          .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        FDTextField(
+          label: Copy.Invite.ideaLabel,
+          hint: Copy.Invite.ideaHint,
+          placeholder: "Kayak the Grand River",
+          text: $first
+        )
 
         HStack(spacing: 10) {
-          Button(Copy.Invite.notNow) { dismiss() }
-            .font(.body.weight(.medium))
-            .foregroundStyle(Theme.ink)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-
-          Button {
-            Task { await share() }
-          } label: {
-            Text(busy ? "…" : Copy.Invite.shareInvite)
-              .font(.body.weight(.semibold))
-              .foregroundStyle(.white)
-              .frame(maxWidth: .infinity)
-              .padding(.vertical, 12)
-              .background(Theme.ink, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+          FDButton(Copy.Invite.notNow, variant: .secondary) { dismiss() }
+          FDButton(
+            Copy.Invite.shareInvite,
+            variant: .primary,
+            loading: busy,
+            disabled: busy
+          ) {
+            await share()
           }
-          .disabled(busy)
         }
         .padding(.top, 20)
       }

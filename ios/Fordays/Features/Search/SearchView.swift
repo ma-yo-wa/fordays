@@ -334,12 +334,7 @@ struct SearchView: View {
         }
 
         if let badge {
-          Text(badge)
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(Theme.inkSoft)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+          FDPill(title: badge, variant: .neutral, size: .sm)
         }
       }
       .padding(12)

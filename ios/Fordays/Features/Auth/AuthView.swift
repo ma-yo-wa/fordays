@@ -55,49 +55,33 @@ struct AuthView: View {
           }
 
           if mode == .signUp {
-            fieldLabel("Your name")
-            field("Aline", text: $name)
+            FDTextField(label: "Your name", placeholder: "Aline", text: $name)
+              .padding(.bottom, 12)
           }
 
-          fieldLabel("Email")
-          field("you@example.com", text: $email)
+          FDTextField(label: "Email", placeholder: "you@example.com", text: $email)
             .textInputAutocapitalization(.never)
             .keyboardType(.emailAddress)
+            .padding(.bottom, 12)
 
-          fieldLabel("Password")
-          SecureField("••••••••", text: $password)
-            .padding(14)
-            .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+          FDTextField(label: "Password", placeholder: "••••••••", text: $password, isSecure: true)
 
-          Button {
-            Task {
-              busy = true
-              defer { busy = false }
-              if mode == .signIn {
-                await app.signIn(email: email, password: password)
-              } else {
-                await app.signUp(email: email, password: password, displayName: name)
-              }
+          FDButton(
+            mode == .signUp
+              ? (app.pendingInvitePeek != nil ? Copy.Auth.joinInviter(app.pendingInvitePeek!.inviterName) : "Create account")
+              : (app.pendingInvitePeek != nil ? "Sign in & join" : "Sign in"),
+            variant: .primary,
+            loading: busy,
+            disabled: busy
+          ) {
+            busy = true
+            defer { busy = false }
+            if mode == .signIn {
+              await app.signIn(email: email, password: password)
+            } else {
+              await app.signUp(email: email, password: password, displayName: name)
             }
-          } label: {
-            HStack {
-              Spacer()
-              if busy { ProgressView().tint(.white) }
-              else {
-                Text(
-                  mode == .signUp
-                    ? (app.pendingInvitePeek != nil ? Copy.Auth.joinInviter(app.pendingInvitePeek!.inviterName) : "Create account")
-                    : (app.pendingInvitePeek != nil ? "Sign in & join" : "Sign in")
-                )
-                .font(.headline)
-                .foregroundStyle(.white)
-              }
-              Spacer()
-            }
-            .padding(.vertical, 14)
-            .background(Theme.ink, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
           }
-          .disabled(busy)
           .padding(.top, 20)
 
           Button {
@@ -124,19 +108,5 @@ struct AuthView: View {
         .padding(24)
       }
     }
-  }
-
-  private func fieldLabel(_ text: String) -> some View {
-    Text(text)
-      .font(.caption.weight(.semibold))
-      .foregroundStyle(Theme.inkFaint)
-      .padding(.top, 16)
-      .padding(.bottom, 8)
-  }
-
-  private func field(_ placeholder: String, text: Binding<String>) -> some View {
-    TextField(placeholder, text: text)
-      .padding(14)
-      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
   }
 }

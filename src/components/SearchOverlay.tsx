@@ -4,6 +4,7 @@ import { useApp } from '../lib/store';
 import { isMemory, type Activity } from '../lib/types';
 import { Copy, formatCopy } from '../lib/copy';
 import { dtDate, dtTime, formatSearchDate, pretty } from '../lib/date';
+import { Pill } from '../ui';
 import s from './SearchOverlay.module.css';
 
 function SearchIcon() {
@@ -267,7 +268,7 @@ export default function SearchOverlay() {
                                   <span className={s.rowNote}>{item.description}</span>
                                 )}
                               </div>
-                              <span className={s.somedayBadge}>{Copy.search.someday}</span>
+                              <Pill variant="neutral" size="sm">{Copy.search.someday}</Pill>
                             </button>
                           ))}
                         </div>
@@ -352,7 +353,7 @@ export default function SearchOverlay() {
                         )}
                         {item.description && <span className={s.rowNote}>{item.description}</span>}
                       </div>
-                      <span className={s.somedayBadge}>{Copy.search.someday}</span>
+                      <Pill variant="neutral" size="sm">{Copy.search.someday}</Pill>
                     </button>
                   ))}
                 </div>

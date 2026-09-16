@@ -8,6 +8,7 @@ import {
 } from '../lib/auth';
 import { useApp } from '../lib/store';
 import { Copy } from '../lib/copy';
+import { Button, Input, Card } from '../ui';
 import f from './Form.module.css';
 
 interface Props {
@@ -127,12 +128,9 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
           : Copy.invite.joinSubtitle}
       </p>
 
-      <span className={f.label} style={{ marginTop: 16 }}>
-        {Copy.invite.codeOrLink}
-      </span>
-      <div className={f.inputRow}>
-        <input
-          className={f.input}
+      <div style={{ marginTop: 16 }}>
+        <Input
+          label={Copy.invite.codeOrLink}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={Copy.invite.codePlaceholder}
@@ -140,9 +138,16 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
           autoCorrect="off"
           spellCheck={false}
           enterKeyHint="done"
+          clearable={Boolean(input)}
+          onClear={() => setInput('')}
         />
-        {typeof navigator !== 'undefined' && 'clipboard' in navigator && (
-          <button type="button" className={f.pasteBtn} onClick={() => void handlePaste()}>
+        {typeof navigator !== 'undefined' && 'clipboard' in navigator && !input && (
+          <button
+            type="button"
+            className={f.pasteBtn}
+            onClick={() => void handlePaste()}
+            style={{ marginTop: 8 }}
+          >
             {Copy.invite.paste}
           </button>
         )}
@@ -155,14 +160,14 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
       )}
 
       {peek && peek.isOpen && (
-        <div className={f.peekCard}>
+        <Card variant="sageWash" padding="sm" style={{ marginTop: 14 }}>
           <div className={f.peekTitle}>
             {peek.inviterName} invited you to {peek.spaceName ? `“${peek.spaceName}”` : 'their Orb'}
           </div>
           <div className={f.peekSub}>
             You’ll be added to this Orb and keep your existing Orbs.
           </div>
-        </div>
+        </Card>
       )}
 
       {error && (
@@ -172,24 +177,23 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
       )}
 
       <div className={f.row} style={{ marginTop: 20 }}>
-        <button
-          type="button"
-          className={`${f.btn} ${f.ghost}`}
+        <Button
+          variant="secondary"
           onClick={() => {
             clearInviteFromUrl();
             onDismiss();
           }}
         >
           {Copy.invite.notNow}
-        </button>
-        <button
-          type="button"
-          className={`${f.btn} ${f.accent}`}
+        </Button>
+        <Button
+          variant="primary"
+          loading={busy}
           disabled={!canJoin}
           onClick={() => void accept()}
         >
           {busy ? Copy.invite.joining : Copy.invite.joinAction}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );

@@ -2,6 +2,7 @@ import { useApp, isMatched, spaceOrbName } from '../lib/store';
 import { faceColor } from '../lib/tint';
 import { MONTHS, iso, parseISO, todayISO } from '../lib/date';
 import { Copy } from '../lib/copy';
+import { Pill } from '../ui';
 import s from './NavBar.module.css';
 
 function Chevron({ dir }: { dir: 'left' | 'right' }) {
@@ -158,9 +159,9 @@ export default function NavBar() {
           {isCalendar && (
             <>
               {offCurrentMonth && (
-                <button type="button" className={s.todayPill} onClick={goToday}>
+                <Pill variant="neutral" size="sm" onClick={goToday}>
                   Today
-                </button>
+                </Pill>
               )}
               <button
                 type="button"

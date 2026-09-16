@@ -72,25 +72,18 @@ struct JoinOrbView: View {
         }
 
         if let peek, peek.isOpen {
-          VStack(alignment: .leading, spacing: 4) {
-            Text("\(peek.inviterName) invited you to \(peek.spaceName.map { "“\($0)”" } ?? "their Orb")")
-              .font(.headline)
-              .foregroundStyle(Theme.ink)
+          FDCard(variant: .sageWash, padding: .sm) {
+            VStack(alignment: .leading, spacing: 4) {
+              Text("\(peek.inviterName) invited you to \(peek.spaceName.map { "“\($0)”" } ?? "their Orb")")
+                .font(.headline)
+                .foregroundStyle(Theme.ink)
 
-            Text("You’ll be added to this Orb and keep your existing Orbs.")
-              .font(.footnote)
-              .foregroundStyle(Theme.inkSoft)
+              Text("You’ll be added to this Orb and keep your existing Orbs.")
+                .font(.footnote)
+                .foregroundStyle(Theme.inkSoft)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
           }
-          .padding(14)
-          .frame(maxWidth: .infinity, alignment: .leading)
-          .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-              .fill(Theme.sageWash)
-          )
-          .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-              .stroke(Theme.faceSage.opacity(0.3), lineWidth: 1)
-          )
           .padding(.top, 14)
         }
 
@@ -102,24 +95,16 @@ struct JoinOrbView: View {
         }
 
         HStack(spacing: 10) {
-          Button(Copy.Invite.notNow) { dismiss() }
-            .font(.body.weight(.medium))
-            .foregroundStyle(Theme.ink)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+          FDButton(Copy.Invite.notNow, variant: .secondary) { dismiss() }
 
-          Button {
-            Task { await join() }
-          } label: {
-            Text(isBusy ? Copy.Invite.joining : Copy.Invite.joinAction)
-              .font(.body.weight(.semibold))
-              .foregroundStyle(.white)
-              .frame(maxWidth: .infinity)
-              .padding(.vertical, 12)
-              .background(canJoin ? Theme.ink : Theme.ink.opacity(0.18), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+          FDButton(
+            isBusy ? Copy.Invite.joining : Copy.Invite.joinAction,
+            variant: .primary,
+            loading: isBusy,
+            disabled: !canJoin
+          ) {
+            await join()
           }
-          .disabled(!canJoin)
         }
         .padding(.top, 24)
       }

@@ -5,11 +5,12 @@ import CoverPicker from './CoverPicker';
 import CoverArt from './CoverArt';
 import WhenFields from './WhenFields';
 import { LocationInput } from './LocationInput';
+import { Button, Card, Input, Avatar, ActionRow } from '../ui';
 import { useApp, partnerName, isMatched } from '../lib/store';
 import { Copy, formatCopy } from '../lib/copy';
 import { isPlan, isMemory } from '../lib/types';
 import type { SpaceInfo } from '../lib/auth';
-import { faceColor, faceIndexFor } from '../lib/tint';
+import { faceIndexFor } from '../lib/tint';
 import {
   composeWhen,
   describePlan,
@@ -384,17 +385,13 @@ export default function Detail() {
       )}
 
       {mode === 'view' && pending && item.suggested_date_time && (
-        <div className={s.suggestCard}>
+        <Card variant="sageWash" padding="sm" className={s.suggestCard}>
           <div className={s.suggestWho}>
-            <span
-              className={s.who}
-              style={{
-                background: faceColor(faceIndexFor(item.suggested_by!, faceCtx)),
-              }}
-              aria-hidden
-            >
-              {(partnerName(config, item.suggested_by!)[0] ?? '?').toUpperCase()}
-            </span>
+            <Avatar
+              name={partnerName(config, item.suggested_by!)}
+              seat={faceIndexFor(item.suggested_by!, faceCtx)}
+              size="sm"
+            />
             <span>
               {minePending
                 ? 'You suggested'
@@ -408,59 +405,55 @@ export default function Detail() {
           {!frozen && (
           <div className={s.suggestActions}>
             {minePending ? (
-              <button
-                type="button"
-                className={`${f.btn} ${f.ghost}`}
+              <Button
+                variant="secondary"
+                size="sm"
                 disabled={busy}
                 onClick={() => void onDismiss()}
               >
                 Cancel
-              </button>
+              </Button>
             ) : (
               <>
-                <button
-                  type="button"
-                  className={`${f.btn} ${f.accent}`}
+                <Button
+                  variant="primary"
+                  size="sm"
                   disabled={busy}
                   onClick={() => void onAccept()}
                 >
                   Accept
-                </button>
-                <button
-                  type="button"
-                  className={`${f.btn} ${f.ghost}`}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
                   disabled={busy}
                   onClick={() => void onDismiss()}
                 >
                   Dismiss
-                </button>
-                <button
-                  type="button"
-                  className={`${f.btn} ${f.ghost}`}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
                   disabled={busy}
                   onClick={openSuggest}
                 >
                   Suggest something else
-                </button>
+                </Button>
               </>
             )}
           </div>
           )}
-        </div>
+        </Card>
       )}
 
       {mode === 'edit' && (
         <>
-          <span className={f.label} style={{ marginTop: 14 }}>
-            Name
-          </span>
-          <div className={f.group}>
-            <input
-              className={f.input}
+          <div style={{ marginTop: 14 }}>
+            <Input
+              label="Name"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Name"
-              enterKeyHint="done"
             />
           </div>
           <span className={f.label}>
@@ -471,35 +464,32 @@ export default function Detail() {
             onChange={setLocation}
             placeholder="Where is this?"
           />
-          <span className={f.label}>
-            Notes <span className={f.hint}>— optional</span>
-          </span>
-          <div className={f.group}>
-            <textarea
-              className={f.input}
+          <div style={{ marginTop: 14 }}>
+            <Input
+              label="Notes"
+              hint="— optional"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Anything worth remembering"
+              multiline
               rows={3}
             />
           </div>
           <span className={f.label}>Cover</span>
           <CoverPicker value={cover} onChange={setCover} titleHint={() => title} />
           <div className={f.row}>
-            <button
-              type="button"
-              className={`${f.btn} ${f.ghost}`}
+            <Button
+              variant="secondary"
               onClick={() => setMode('view')}
             >
               Cancel
-            </button>
-            <button
-              type="button"
-              className={`${f.btn} ${f.accent}`}
+            </Button>
+            <Button
+              variant="primary"
               onClick={() => void saveEdits()}
             >
               Save
-            </button>
+            </Button>
           </div>
         </>
       )}
@@ -520,58 +510,51 @@ export default function Detail() {
           />
 
           {mode === 'suggest' && (
-            <>
-              <span className={f.label}>
-                Why <span className={f.hint}>— optional, but helpful</span>
-              </span>
-              <div className={f.group}>
-                <textarea
-                  className={f.input}
-                  value={suggestNote}
-                  onChange={(e) => setSuggestNote(e.target.value)}
-                  placeholder="I’m free that afternoon…"
-                  rows={2}
-                />
-              </div>
-            </>
+            <div style={{ marginTop: 14 }}>
+              <Input
+                label="Why"
+                hint="— optional, but helpful"
+                value={suggestNote}
+                onChange={(e) => setSuggestNote(e.target.value)}
+                placeholder="I’m free that afternoon…"
+                multiline
+                rows={2}
+              />
+            </div>
           )}
 
           <div className={f.row}>
-            <button
-              type="button"
-              className={`${f.btn} ${f.ghost}`}
+            <Button
+              variant="secondary"
               onClick={() => setMode('view')}
             >
               Cancel
-            </button>
-            <button
-              type="button"
-              className={`${f.btn} ${f.accent}`}
+            </Button>
+            <Button
+              variant="primary"
               disabled={busy}
               onClick={() => void (mode === 'suggest' ? saveSuggest() : saveWhen())}
             >
               {mode === 'suggest' ? 'Suggest' : planned ? 'Save' : 'Make it a plan'}
-            </button>
+            </Button>
           </div>
         </>
       )}
 
       {mode === 'confirmDelete' && (
-        <div className={s.confirm}>
+        <Card variant="roseWash" padding="sm" className={s.confirm}>
           <p className={s.confirmText}>
             Delete “{item.title}”? This removes it for everyone in this Orb.
           </p>
-          <div className={f.row} style={{ marginTop: 0 }}>
-            <button
-              type="button"
-              className={`${f.btn} ${f.ghost}`}
+          <div className={f.row} style={{ marginTop: 12 }}>
+            <Button
+              variant="secondary"
               onClick={() => setMode('view')}
             >
               Keep it
-            </button>
-            <button
-              type="button"
-              className={`${f.btn} ${f.danger}`}
+            </Button>
+            <Button
+              variant="destructive"
               onClick={() => {
                 void remove(item.id);
                 close();
@@ -579,9 +562,9 @@ export default function Detail() {
               }}
             >
               Delete
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       )}
 
       {mode === 'view' && frozen && (
@@ -593,63 +576,59 @@ export default function Detail() {
       {mode === 'view' && !frozen && (
         <div className={s.actions}>
           {memory && (
-            <button type="button" className={s.action} onClick={() => setDoAgainOpen(true)}>
-              <RepeatIcon />
-              {Copy.memories.doAgain}
-            </button>
+            <ActionRow
+              icon={<RepeatIcon />}
+              label={Copy.memories.doAgain}
+              onClick={() => setDoAgainOpen(true)}
+            />
           )}
 
           {!memory && isPersonalOrb && activeSharedOrbs.length > 0 && activeSharedOrbs[0] && (
             activeSharedOrbs.length === 1 ? (
-              <button
-                type="button"
-                className={s.action}
-                onClick={() => void handleDoWith(activeSharedOrbs[0]!)}
-              >
-                <PeopleIcon />
-                {formatCopy(Copy.orbs.doWith, {
+              <ActionRow
+                icon={<PeopleIcon />}
+                label={formatCopy(Copy.orbs.doWith, {
                   name: activeSharedOrbs[0]!.partnerName || activeSharedOrbs[0]!.name,
                 })}
-              </button>
+                onClick={() => void handleDoWith(activeSharedOrbs[0]!)}
+              />
             ) : (
-              <button
-                type="button"
-                className={s.action}
+              <ActionRow
+                icon={<PeopleIcon />}
+                label={Copy.orbs.doWithEllipsis}
                 onClick={() => setDoWithOpen(true)}
-              >
-                <PeopleIcon />
-                {Copy.orbs.doWithEllipsis}
-              </button>
+              />
             )
           )}
 
-          <button type="button" className={s.action} onClick={() => setMode('when')}>
-            <CalendarPlusIcon />
-            {planned ? 'Change the day' : 'Make it a plan'}
-          </button>
+          <ActionRow
+            icon={<CalendarPlusIcon />}
+            label={planned ? 'Change the day' : 'Make it a plan'}
+            onClick={() => setMode('when')}
+          />
 
           {matched && !memory && (
-            <button type="button" className={s.action} onClick={openSuggest}>
-              <SuggestIcon />
-              Suggest a date
-            </button>
+            <ActionRow
+              icon={<SuggestIcon />}
+              label="Suggest a date"
+              onClick={openSuggest}
+            />
           )}
 
           {planned && !memory && (
-            <button type="button" className={s.action} onClick={() => void toBucket()}>
-              <BucketIcon />
-              {Copy.ideas.backTo}
-            </button>
+            <ActionRow
+              icon={<BucketIcon />}
+              label={Copy.ideas.backTo}
+              onClick={() => void toBucket()}
+            />
           )}
 
-          <button
-            type="button"
-            className={`${s.action} ${s.destructive}`}
+          <ActionRow
+            icon={<TrashIcon />}
+            label="Delete"
+            destructive
             onClick={() => setMode('confirmDelete')}
-          >
-            <TrashIcon />
-            Delete
-          </button>
+          />
         </div>
       )}
 
@@ -658,13 +637,11 @@ export default function Detail() {
           <span className={s.historyHead}>History</span>
           {history.map((l) => (
             <div key={l.id} className={s.entry}>
-              <span
-                className={s.who}
-                style={{ background: faceColor(faceIndexFor(l.user_id, faceCtx)) }}
-                aria-hidden
-              >
-                {(partnerName(config, l.user_id)[0] ?? '?').toUpperCase()}
-              </span>
+              <Avatar
+                name={partnerName(config, l.user_id)}
+                seat={faceIndexFor(l.user_id, faceCtx)}
+                size="sm"
+              />
               <span className={s.what}>
                 {partnerName(config, l.user_id)} {localizeAuditDetails(l.details)}{' '}
                 <span className={s.ago}>· {timeAgo(l.timestamp)}</span>

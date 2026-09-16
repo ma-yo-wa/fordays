@@ -255,70 +255,72 @@ struct DetailView: View {
       DateLocal.describePlan($0, endsAt: item.suggestedEndsAt)
     } ?? ""
 
-    return VStack(alignment: .leading, spacing: 12) {
-      HStack(spacing: 10) {
-        face(for: item.suggestedBy)
-        (
-          Text(mine ? "You suggested " : "\(who) suggests ")
-            + Text(label).fontWeight(.semibold)
-        )
-        .font(.subheadline)
-        .foregroundStyle(Theme.ink)
-      }
-
-      if let note = item.suggestedNote, !note.isEmpty {
-        Text(note)
+    return FDCard(variant: .sageWash, padding: .sm) {
+      VStack(alignment: .leading, spacing: 12) {
+        HStack(spacing: 10) {
+          FDAvatar(name: who, seat: faceSeat(for: item.suggestedBy), size: .sm)
+          (
+            Text(mine ? "You suggested " : "\(who) suggests ")
+              + Text(label).fontWeight(.semibold)
+          )
           .font(.subheadline)
-          .foregroundStyle(Theme.inkSoft)
-      }
+          .foregroundStyle(Theme.ink)
+        }
 
-      if app.space?.frozen != true {
-      HStack(spacing: 8) {
-        if mine {
-          ghostButton("Cancel") {
-            await dismissSuggestion(item, mine: true)
-          }
-        } else {
-          accentButton("Accept") {
-            busy = true
-            await app.acceptSuggestion(item.id)
-            busy = false
-            dismiss()
-          }
-          ghostButton("Dismiss") {
-            await dismissSuggestion(item, mine: false)
-          }
-          ghostButton("Suggest something else") {
-            openSuggest(item)
+        if let note = item.suggestedNote, !note.isEmpty {
+          Text(note)
+            .font(.subheadline)
+            .foregroundStyle(Theme.inkSoft)
+        }
+
+        if app.space?.frozen != true {
+          HStack(spacing: 8) {
+            if mine {
+              FDButton("Cancel", variant: .secondary, size: .sm, disabled: busy) {
+                await dismissSuggestion(item, mine: true)
+              }
+            } else {
+              FDButton("Accept", variant: .primary, size: .sm, disabled: busy) {
+                busy = true
+                await app.acceptSuggestion(item.id)
+                busy = false
+                dismiss()
+              }
+              FDButton("Dismiss", variant: .secondary, size: .sm, disabled: busy) {
+                await dismissSuggestion(item, mine: false)
+              }
+              FDButton("Suggest something else", variant: .secondary, size: .sm, disabled: busy) {
+                openSuggest(item)
+              }
+            }
           }
         }
       }
-      }
     }
-    .padding(14)
-    .background(Theme.sageWash, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
   }
 
   private var editForm: some View {
     VStack(alignment: .leading, spacing: 12) {
-      fieldLabel("Name")
-      TextField("Name", text: $title)
-        .textFieldStyle(.roundedBorder)
+      FDTextField(label: "Name", placeholder: "Name", text: $title)
 
       fieldLabel("Location", hint: "— optional")
       LocationInputView(text: $location)
 
-      fieldLabel("Notes", hint: "— optional")
-      TextField("Anything worth remembering", text: $notes, axis: .vertical)
-        .lineLimit(3...6)
-        .textFieldStyle(.roundedBorder)
+      FDTextField(
+        label: "Notes",
+        hint: "— optional",
+        placeholder: "Anything worth remembering",
+        text: $notes,
+        axis: .vertical,
+        lineLimit: 3...6
+      )
 
       fieldLabel("Cover", hint: "— optional")
       CoverPickerView(cover: $cover, titleHint: { title })
 
-      HStack {
-        ghostButton("Cancel") { mode = .view }
-        accentButton("Save") { await saveEdits() }
+      HStack(spacing: 10) {
+        FDButton("Cancel", variant: .secondary) { mode = .view }
+        FDButton("Save", variant: .primary, disabled: busy) { await saveEdits() }
       }
     }
   }
@@ -536,16 +538,22 @@ struct DetailView: View {
       .padding(.top, 4)
 
       if suggest {
-        fieldLabel("Why", hint: "— optional, but helpful")
-        TextField("I’m free that afternoon…", text: $suggestNote, axis: .vertical)
-          .lineLimit(2...4)
-          .textFieldStyle(.roundedBorder)
+        FDTextField(
+          label: "Why",
+          hint: "— optional, but helpful",
+          placeholder: "I’m free that afternoon…",
+          text: $suggestNote,
+          axis: .vertical,
+          lineLimit: 2...4
+        )
       }
 
-      HStack {
-        ghostButton("Cancel") { mode = .view }
-        accentButton(
-          suggest ? "Suggest" : (item?.isPlan == true ? "Save" : "Make it a plan")
+      HStack(spacing: 10) {
+        FDButton("Cancel", variant: .secondary) { mode = .view }
+        FDButton(
+          suggest ? "Suggest" : (item?.isPlan == true ? "Save" : "Make it a plan"),
+          variant: .primary,
+          disabled: busy
         ) {
           if suggest {
             await saveSuggest()
@@ -558,35 +566,27 @@ struct DetailView: View {
   }
 
   private func confirmDelete(_ item: Activity) -> some View {
-    VStack(alignment: .leading, spacing: 12) {
-      Text("Delete “\(item.title)”? This removes it for everyone in this Orb.")
-        .foregroundStyle(Theme.ink2)
-      HStack {
-        ghostButton("Keep it") { mode = .view }
-        Button {
-          Task {
+    FDCard(variant: .roseWash, padding: .sm) {
+      VStack(alignment: .leading, spacing: 12) {
+        Text("Delete “\(item.title)”? This removes it for everyone in this Orb.")
+          .font(.fdBody)
+          .foregroundStyle(Theme.ink2)
+        HStack(spacing: 10) {
+          FDButton("Keep it", variant: .secondary) { mode = .view }
+          FDButton("Delete", variant: .destructive) {
             await app.deleteActivity(item.id)
             app.toast = "Deleted"
             dismiss()
           }
-        } label: {
-          Text("Delete")
-            .font(.body.weight(.semibold))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(Theme.roseInk, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
       }
     }
-    .padding(14)
-    .background(Theme.roseWash, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
   }
 
   private func actionList(_ item: Activity) -> some View {
     VStack(spacing: 4) {
       if item.isMemory() {
-        actionRow(title: Copy.Memories.doAgain, system: "arrow.triangle.2.circlepath") {
+        FDActionRow(title: Copy.Memories.doAgain, systemImage: "arrow.triangle.2.circlepath") {
           showDoAgainDialog = true
         }
       }
@@ -595,32 +595,32 @@ struct DetailView: View {
         if activeSharedOrbs.count == 1 {
           let target = activeSharedOrbs[0]
           let targetName = target.partnerName ?? target.name
-          actionRow(title: Copy.Orbs.doWith(targetName), system: "person.2") {
+          FDActionRow(title: Copy.Orbs.doWith(targetName), systemImage: "person.2") {
             Task { await handleDoWith(target) }
           }
         } else {
-          actionRow(title: Copy.Orbs.doWithEllipsis, system: "person.2") {
+          FDActionRow(title: Copy.Orbs.doWithEllipsis, systemImage: "person.2") {
             showMoveDialog = true
           }
         }
       }
 
-      actionRow(
+      FDActionRow(
         title: item.isPlan ? "Change the day" : "Make it a plan",
-        system: "calendar.badge.plus"
+        systemImage: "calendar.badge.plus"
       ) {
         seedWhen(from: item)
         mode = .when
       }
 
       if app.space?.isMatched == true && !item.isMemory() {
-        actionRow(title: "Suggest a date", system: "bubble.left.and.bubble.right") {
+        FDActionRow(title: "Suggest a date", systemImage: "bubble.left.and.bubble.right") {
           openSuggest(item)
         }
       }
 
       if item.isPlan && !item.isMemory() {
-        actionRow(title: Copy.Ideas.backTo, system: "checklist") {
+        FDActionRow(title: Copy.Ideas.backTo, systemImage: "checklist") {
           Task {
             await app.moveToBucket(item.id)
             dismiss()
@@ -628,7 +628,7 @@ struct DetailView: View {
         }
       }
 
-      actionRow(title: "Delete", system: "trash", destructive: true) {
+      FDActionRow(title: "Delete", systemImage: "trash", destructive: true) {
         mode = .confirmDelete
       }
     }
@@ -645,27 +645,6 @@ struct DetailView: View {
     dismiss()
   }
 
-  private func actionRow(
-    title: String,
-    system: String,
-    destructive: Bool = false,
-    action: @escaping () -> Void
-  ) -> some View {
-    Button(action: action) {
-      HStack(spacing: 12) {
-        Image(systemName: system)
-          .font(.body.weight(.semibold))
-          .frame(width: 22)
-        Text(title)
-          .font(.body.weight(.medium))
-        Spacer()
-      }
-      .foregroundStyle(destructive ? Theme.roseInk : Theme.ink)
-      .padding(.vertical, 14)
-      .padding(.horizontal, 4)
-    }
-  }
-
   private func fieldLabel(_ text: String, hint: String? = nil) -> some View {
     HStack(spacing: 4) {
       Text(text)
@@ -679,56 +658,10 @@ struct DetailView: View {
     }
   }
 
-  @ViewBuilder
-  private func accentButton(_ label: String, action: @escaping () async -> Void) -> some View {
-    Button {
-      Task { await action() }
-    } label: {
-      Text(label)
-        .font(.body.weight(.semibold))
-        .foregroundStyle(.white)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Theme.ink, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-    .disabled(busy)
-  }
-
-  @ViewBuilder
-  private func ghostButton(_ label: String, action: @escaping () async -> Void) -> some View {
-    Button {
-      Task { await action() }
-    } label: {
-      Text(label)
-        .font(.body.weight(.medium))
-        .foregroundStyle(Theme.ink)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-    .disabled(busy)
-  }
-
-  private func ghostButton(_ label: String, action: @escaping () -> Void) -> some View {
-    Button(action: action) {
-      Text(label)
-        .font(.body.weight(.medium))
-        .foregroundStyle(Theme.ink)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-  }
-
   private func face(for userId: String?) -> some View {
     let seat = faceSeat(for: userId)
-    let fill = seat == 0 ? Theme.faceSage : Theme.faceRose
-    let initial = String(displayName(for: userId ?? "").prefix(1)).uppercased()
-    return Text(initial)
-      .font(.caption.weight(.bold))
-      .foregroundStyle(.white)
-      .frame(width: 28, height: 28)
-      .background(fill, in: Circle())
+    let name = displayName(for: userId ?? "")
+    return FDAvatar(name: name, seat: seat, size: .sm)
   }
 
   private func faceSeat(for userId: String?) -> Int {

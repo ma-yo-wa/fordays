@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Copy } from '../lib/copy';
+import { Button, Input } from '../ui';
 import f from './Form.module.css';
 import s from './Auth.module.css';
 
@@ -66,10 +67,9 @@ export default function OrbKindForm({ knobId, initialWithPeople = false, onSubmi
         </button>
       </div>
 
-      <span className={`${f.label} ${s.kindName}`}>{Copy.orbs.orbName}</span>
-      <div className={f.group}>
-        <input
-          className={f.input}
+      <div style={{ marginTop: 20 }}>
+        <Input
+          label={Copy.orbs.orbName}
           type="text"
           autoComplete="off"
           autoCapitalize="words"
@@ -83,18 +83,16 @@ export default function OrbKindForm({ knobId, initialWithPeople = false, onSubmi
       </div>
 
       <div className={f.row}>
-        <button
-          type="button"
-          className={`${f.btn} ${f.accent}`}
+        <Button
+          variant="primary"
+          loading={busy}
           disabled={busy || !name.trim()}
           onClick={() => void continueSetup()}
         >
-          {busy
-            ? '…'
-            : withPeople
-              ? Copy.orbs.invitePerson
-              : Copy.orbs.startPlanning}
-        </button>
+          {withPeople
+            ? Copy.orbs.invitePerson
+            : Copy.orbs.startPlanning}
+        </Button>
       </div>
     </>
   );
