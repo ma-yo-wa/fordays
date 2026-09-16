@@ -27,6 +27,7 @@ struct BucketView: View {
           }
         }
         .padding(.horizontal, 20)
+        .padding(.top, 8)
         .padding(.bottom, 132)
       }
     }
@@ -108,6 +109,7 @@ struct MemoriesView: View {
           }
         }
         .padding(.horizontal, 20)
+        .padding(.top, 8)
         .padding(.bottom, 132)
       }
     }

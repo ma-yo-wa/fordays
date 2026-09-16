@@ -51,3 +51,67 @@ extension Color {
     self.init(.sRGB, red: r, green: g, blue: b, opacity: opacity)
   }
 }
+
+/// The ambient orb background unwrapped across the viewport, matching PWA global.css:
+/// rose bloom behind the masthead, greens at the edges, peach pooling at the bottom.
+struct OrbBackground: View {
+  var body: some View {
+    GeometryReader { geo in
+      let w = geo.size.width
+      let h = geo.size.height
+      let maxDim = max(w, h)
+
+      ZStack {
+        Theme.paper
+
+        // Rose bloom behind masthead
+        RadialGradient(
+          stops: [
+            .init(color: Color(red: 253/255, green: 122/255, blue: 154/255).opacity(0.40), location: 0),
+            .init(color: Color(red: 253/255, green: 164/255, blue: 146/255).opacity(0.20), location: 0.44),
+            .init(color: .clear, location: 0.74),
+          ],
+          center: UnitPoint(x: 0.5, y: -0.10),
+          startRadius: 0,
+          endRadius: maxDim * 0.52
+        )
+
+        // Soft sage at top-right
+        RadialGradient(
+          stops: [
+            .init(color: Color(red: 205/255, green: 231/255, blue: 179/255).opacity(0.52), location: 0),
+            .init(color: .clear, location: 0.62),
+          ],
+          center: UnitPoint(x: 1.04, y: 0.16),
+          startRadius: 0,
+          endRadius: maxDim * 0.42
+        )
+
+        // Soft sage at mid-left
+        RadialGradient(
+          stops: [
+            .init(color: Color(red: 214/255, green: 222/255, blue: 170/255).opacity(0.44), location: 0),
+            .init(color: .clear, location: 0.64),
+          ],
+          center: UnitPoint(x: -0.06, y: 0.30),
+          startRadius: 0,
+          endRadius: maxDim * 0.42
+        )
+
+        // Peach pooling at bottom
+        RadialGradient(
+          stops: [
+            .init(color: Color(red: 240/255, green: 194/255, blue: 150/255).opacity(0.34), location: 0),
+            .init(color: .clear, location: 0.66),
+          ],
+          center: UnitPoint(x: 0.50, y: 1.14),
+          startRadius: 0,
+          endRadius: maxDim * 0.58
+        )
+      }
+      .ignoresSafeArea()
+    }
+    .ignoresSafeArea()
+  }
+}
+

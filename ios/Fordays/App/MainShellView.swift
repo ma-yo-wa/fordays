@@ -13,32 +13,32 @@ struct MainShellView: View {
 
   var body: some View {
     ZStack(alignment: .bottom) {
-      Theme.paper.ignoresSafeArea()
+      OrbBackground().ignoresSafeArea()
 
-      VStack(spacing: 0) {
-        topBar
-        Group {
-          switch app.tab {
-          case .bucket:
-            BucketView(
-              onSelect: { selected = $0 },
-              onInvite: { showInvite = true }
-            )
-          case .plans:
-            PlansView(
-              onSelect: { selected = $0 },
-              onSelectExternal: { selectedExternal = $0 },
-              onMakePlanFromExternal: { event in
-                composerDraft = PlanDraft.from(external: event)
-                composer = .plan
-              },
-              onInvite: { showInvite = true }
-            )
-          case .memories:
-            MemoriesView(onSelect: { selected = $0 })
-          }
+      Group {
+        switch app.tab {
+        case .bucket:
+          BucketView(
+            onSelect: { selected = $0 },
+            onInvite: { showInvite = true }
+          )
+        case .plans:
+          PlansView(
+            onSelect: { selected = $0 },
+            onSelectExternal: { selectedExternal = $0 },
+            onMakePlanFromExternal: { event in
+              composerDraft = PlanDraft.from(external: event)
+              composer = .plan
+            },
+            onInvite: { showInvite = true }
+          )
+        case .memories:
+          MemoriesView(onSelect: { selected = $0 })
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .safeAreaInset(edge: .top, spacing: 0) {
+        topBar
       }
 
       VStack(spacing: 12) {
@@ -190,71 +190,75 @@ struct MainShellView: View {
   }
 
   private var topBar: some View {
-    HStack {
-      Button { showSettings = true } label: {
-        HStack(spacing: customOrbName != nil ? 7 : 6) {
-          if let custom = customOrbName {
-            Text(custom)
-              .font(.subheadline.weight(.semibold))
-              .foregroundStyle(Theme.ink)
-              .lineLimit(1)
-              .truncationMode(.tail)
-              .frame(maxWidth: 110, alignment: .leading)
-          } else {
-            HStack(spacing: -8) {
-              if let members = app.space?.members, !members.isEmpty {
-                let ordered = orderedHeaderMembers(members, myId: app.space?.myId)
-                ForEach(ordered.prefix(2), id: \.id) { member in
-                  face(member.name, them: member.id != app.space?.myId)
-                }
-                let more = max(0, ordered.count - 2)
-                if more > 0 {
-                  moreFace(more)
-                }
-              } else {
-                face(app.space?.myName, them: false)
-                if app.space?.isMatched == true {
-                  face(app.space?.partnerName, them: true)
+    HStack(spacing: 0) {
+      HStack {
+        Button { showSettings = true } label: {
+          HStack(spacing: customOrbName != nil ? 7 : 6) {
+            if let custom = customOrbName {
+              Text(custom)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Theme.ink)
+                .lineLimit(1)
+                .truncationMode(.tail)
+            } else {
+              HStack(spacing: -8) {
+                if let members = app.space?.members, !members.isEmpty {
+                  let ordered = orderedHeaderMembers(members, myId: app.space?.myId)
+                  ForEach(ordered.prefix(2), id: \.id) { member in
+                    face(member.name, them: member.id != app.space?.myId)
+                  }
+                  let more = max(0, ordered.count - 2)
+                  if more > 0 {
+                    moreFace(more)
+                  }
+                } else {
+                  face(app.space?.myName, them: false)
+                  if app.space?.isMatched == true {
+                    face(app.space?.partnerName, them: true)
+                  }
                 }
               }
             }
+
+            Image(systemName: "chevron.down")
+              .font(.caption2.weight(.semibold))
+              .foregroundStyle(Theme.inkSoft)
           }
-
-          Image(systemName: "chevron.down")
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(Theme.inkSoft)
+          .padding(.leading, customOrbName != nil ? 12 : 2)
+          .padding(.trailing, customOrbName != nil ? 10 : 8)
+          .frame(height: 36)
+          .background(.ultraThinMaterial, in: Capsule())
+          .overlay(Capsule().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
         }
-        .padding(.leading, customOrbName != nil ? 12 : 2)
-        .padding(.trailing, customOrbName != nil ? 10 : 8)
-        .frame(height: 36)
-        .background(.ultraThinMaterial, in: Capsule())
-        .overlay(Capsule().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
+        .buttonStyle(.plain)
+        .accessibilityLabel(customOrbName.map { "Open settings for \($0)" } ?? "Open Orb settings")
       }
-      .buttonStyle(.plain)
-      .accessibilityLabel(customOrbName.map { "Open settings for \($0)" } ?? "Open Orb settings")
-      Spacer(minLength: 8)
+      .frame(maxWidth: .infinity, alignment: .leading)
 
-      if app.tab == .plans {
-        trailingCalendarControls
-      }
-
-      Button {
-        showSearch = true
-      } label: {
-        Image(systemName: "magnifyingglass")
-          .font(.subheadline.weight(.semibold))
-          .foregroundStyle(Theme.roseInk)
-          .frame(width: 32, height: 32)
-          .contentShape(Rectangle())
-      }
-      .buttonStyle(.plain)
-      .accessibilityLabel("Search")
-    }
-    .overlay {
       Text(title)
         .font(.headline)
         .foregroundStyle(Theme.ink)
-        .allowsHitTesting(false)
+        .lineLimit(1)
+        .layoutPriority(1)
+
+      HStack(spacing: 2) {
+        if app.tab == .plans {
+          trailingCalendarControls
+        }
+
+        Button {
+          showSearch = true
+        } label: {
+          Image(systemName: "magnifyingglass")
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(Theme.roseInk)
+            .frame(width: 32, height: 32)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Search")
+      }
+      .frame(maxWidth: .infinity, alignment: .trailing)
     }
     .padding(.horizontal, 16)
     .padding(.top, 6)
@@ -262,12 +266,8 @@ struct MainShellView: View {
     .background {
       Theme.paperWarm.opacity(0.85)
         .background(.ultraThinMaterial)
+        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24, style: .continuous))
         .ignoresSafeArea(edges: .top)
-    }
-    .overlay(alignment: .bottom) {
-      Rectangle()
-        .fill(Theme.ink.opacity(0.08))
-        .frame(height: 0.5)
     }
   }
 

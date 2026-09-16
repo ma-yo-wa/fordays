@@ -15,7 +15,8 @@
   background: var(--mat-regular-bg);
   -webkit-backdrop-filter: var(--mat-regular);
   backdrop-filter: var(--mat-regular);
-  border-bottom: var(--hairline-w) solid var(--hairline);
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
   opacity: 0;
   transition: opacity 0.22s var(--ease-ios);
   pointer-events: none;

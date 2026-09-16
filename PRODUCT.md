@@ -293,3 +293,25 @@ Fordays operates local-first on the client so the notebook feels like paper — 
   - Mutations execute against Supabase in the background. On success, temporary optimistic IDs reconcile cleanly with server rows.
   - If a network error or server constraint occurs, the local state and snapshot roll back to the previous backup, and a calm toast explains the issue.
 - **Parity**: Identical local hydration keys, optimistic lifecycle, and failure rollbacks across PWA and iOS.
+
+---
+
+## Visual Craft & No Straight Lines
+
+Fordays feels like a warm personal capsule and stationery, never a corporate calendar or spreadsheet.
+
+- **No Straight Lines**: There are no razor-thin horizontal divider lines cutting across the interface. Content transitions organically using whitespace and generous margins.
+- **Curved Sticky Top Shelf**:
+  - The sticky top bar (`topBar` on iOS, `.nav` on PWA) floats with frosted glass (`.ultraThinMaterial` / `backdrop-filter`).
+  - Its bottom corners are gently curved with a 24pt continuous radius (`UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24)` on iOS, `border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;` on PWA) rather than meeting the viewport edges with a sharp straight line.
+  - Content in Someday and Memories scrolls underneath this curved glass canopy smoothly.
+- **Ambient Orb Background Gradient (Dual Parity)**:
+  - Both iOS (`OrbBackground`) and PWA (`global.css`) render the signature 4-layer ambient radial gradient over `Theme.paper`:
+    1. Rose bloom behind the top masthead.
+    2. Soft sage bloom at top-right.
+    3. Soft sage bloom at mid-left.
+    4. Peach bloom pooling at bottom center.
+  - The background is never flat beige.
+- **Tactile Cards for Plans & Agenda**:
+  - On both clients, plans and external events in the agenda are presented as individual floating tactile cards (`background: var(--paper-warm)`, `border-radius: 14px`, `padding: 14px`, 10px spacing, subtle elevation) rather than flat divider-separated rows.
+

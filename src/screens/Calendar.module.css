@@ -150,7 +150,6 @@
   padding: 18px max(20px, var(--safe-l))
     calc(var(--safe-b) + 128px)
     max(20px, var(--safe-r));
-  border-top: var(--hairline-w) solid var(--hairline);
   min-height: 0;
 }
 
@@ -164,6 +163,7 @@
 .plansList {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .calThumb {
@@ -201,29 +201,33 @@
   font-weight: 500;
 }
 
-/* An iOS list row: the separator starts where the text starts, not at
-   the edge of the screen, so the leading column reads as a gutter. */
+/* Warm, rounded tactile cards matching iOS */
 .entry {
   display: grid;
   grid-template-columns: 42px 1fr;
   gap: 12px;
   align-items: start;
-  padding: 11px 0;
+  padding: 14px;
   border: none;
-  background: none;
+  background: var(--paper-warm);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(23, 20, 15, 0.04);
   width: 100%;
   text-align: left;
   cursor: pointer;
   color: inherit;
-  transition: opacity 0.12s var(--ease-ios);
+  transition:
+    transform 0.14s var(--ease-ios),
+    opacity 0.14s var(--ease-ios);
 }
 
 .entry:active {
-  opacity: 0.45;
+  transform: scale(0.985);
+  opacity: 0.8;
 }
 
 .entry + .entry {
-  border-top: var(--hairline-w) solid var(--separator);
+  border-top: none;
 }
 
 .thumb {
@@ -244,6 +248,16 @@
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   color: var(--ink-soft);
+}
+
+.loc {
+  margin-top: 2px;
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .note {

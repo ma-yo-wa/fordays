@@ -8,7 +8,7 @@ struct RootView: View {
       switch app.authPhase {
       case .loading:
         ZStack {
-          Theme.paper.ignoresSafeArea()
+          OrbBackground().ignoresSafeArea()
           ProgressView()
             .tint(Theme.roseInk)
         }

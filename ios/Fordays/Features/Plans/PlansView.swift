@@ -270,11 +270,6 @@ struct PlansView: View {
       .padding(.horizontal, 20)
       .padding(.top, 18)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-      .overlay(alignment: .top) {
-        Rectangle()
-          .fill(Theme.ink.opacity(0.08))
-          .frame(height: 0.5)
-      }
       .padding(.bottom, 88)
     }
     .onAppear {
@@ -420,7 +415,8 @@ struct PlansView: View {
                 }
                 .frame(height: 5)
               }
-              .frame(maxWidth: .infinity, minHeight: 52)
+              .padding(.top, 4)
+              .frame(maxWidth: .infinity, minHeight: 52, alignment: .top)
               .background(alignment: .top) {
                 multiDayTrack(for: iso, index: index)
               }
@@ -471,7 +467,7 @@ struct PlansView: View {
         )
         .fill(Theme.sage.opacity(0.26))
         .frame(width: width, height: 30)
-        .offset(x: left, y: 0)
+        .offset(x: left, y: 4)
       }
     }
   }

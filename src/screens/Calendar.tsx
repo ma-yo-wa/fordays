@@ -343,6 +343,11 @@ export default function Calendar() {
                     <span>
                       <span className={s.title}>{a.title}</span>
                       <div className={s.range}>{timing}</div>
+                      {a.location && (
+                        <div className={s.loc}>
+                          <span>📍</span> {a.location}
+                        </div>
+                      )}
                       {a.description && <div className={s.note}>{a.description}</div>}
                       <div className={s.meta}>
                         <span
