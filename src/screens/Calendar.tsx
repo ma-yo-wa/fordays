@@ -2,7 +2,6 @@ import { useEffect, useMemo } from 'react';
 import CoverArt from '../components/CoverArt';
 import { useApp, partnerName, isMatched } from '../lib/store';
 import { isPlan, type ExternalEvent } from '../lib/types';
-import { artFor } from '../lib/art';
 import { faceColor, faceIndexFor } from '../lib/tint';
 import {
   MONTHS,
@@ -379,15 +378,23 @@ export default function Calendar() {
                 <button
                   key={e.id}
                   type="button"
-                  className={`${s.entry} ${s.entryCal}`}
+                  className={s.entry}
                   onClick={() => openExternal(e.id)}
                 >
-                  <span className={s.calThumb} aria-hidden>
-                    {artFor(e.title)}
-                  </span>
+                  <CoverArt
+                    washId={e.id}
+                    washTitle={e.title}
+                    size="thumb"
+                    className={s.thumb}
+                  />
                   <span>
                     <span className={s.title}>{e.title || Copy.availability.busy}</span>
                     <div className={s.range}>{timing}</div>
+                    {e.location && (
+                      <div className={s.loc}>
+                        <span>📍</span> {e.location}
+                      </div>
+                    )}
                     <div className={s.meta}>
                       <span className={s.avatar} style={{ background: faceColor(owner) }}>
                         {(ownerName[0] ?? '?').toUpperCase()}

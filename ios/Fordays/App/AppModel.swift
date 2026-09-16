@@ -395,10 +395,12 @@ final class AppModel: ObservableObject {
     location: String? = nil,
     imageUrl: String? = nil,
     dateTime: String? = nil,
-    endsAt: String? = nil
+    endsAt: String? = nil,
+    spaceId: String? = nil
   ) async {
-    guard let space else { return }
-    guard space.canCompose else {
+    let targetSpaceId = spaceId ?? space?.id
+    guard let targetSpaceId else { return }
+    guard space?.canCompose == true || spaceId != nil else {
       toast = "This is a copy from when you left — it can’t take new plans"
       return
     }
@@ -412,40 +414,43 @@ final class AppModel: ObservableObject {
     let desc = description?.trimmingCharacters(in: .whitespacesAndNewlines)
     let loc = location?.trimmingCharacters(in: .whitespacesAndNewlines)
     let cover = imageUrl?.trimmingCharacters(in: .whitespacesAndNewlines)
-    let myId = space.myId
+    let myId = space?.myId ?? ""
 
-    // Optimistic activity with a local temporary ID
+    // Optimistic activity with a local temporary ID (if targeting active space)
     let tempId = "opt-\(UUID().uuidString.lowercased())"
     let nowISO = ISO8601DateFormatter().string(from: Date())
-    let optimisticActivity = Activity(
-      id: tempId,
-      spaceId: space.id,
-      title: trimmed,
-      description: (desc?.isEmpty == false) ? desc : nil,
-      location: (loc?.isEmpty == false) ? loc : nil,
-      imageUrl: (cover?.isEmpty == false) ? cover : nil,
-      createdBy: myId,
-      dateTime: dateTime,
-      endsAt: endsAt,
-      allDay: !isPlan || (dateTime?.count ?? 0) <= 10,
-      suggestedDateTime: nil,
-      suggestedEndsAt: nil,
-      suggestedAllDay: false,
-      suggestedBy: nil,
-      suggestedAt: nil,
-      suggestedNote: nil,
-      createdAt: nowISO
-    )
+    let isCurrentSpace = targetSpaceId == space?.id
+    if isCurrentSpace {
+      let optimisticActivity = Activity(
+        id: tempId,
+        spaceId: targetSpaceId,
+        title: trimmed,
+        description: (desc?.isEmpty == false) ? desc : nil,
+        location: (loc?.isEmpty == false) ? loc : nil,
+        imageUrl: (cover?.isEmpty == false) ? cover : nil,
+        createdBy: myId,
+        dateTime: dateTime,
+        endsAt: endsAt,
+        allDay: !isPlan || (dateTime?.count ?? 0) <= 10,
+        suggestedDateTime: nil,
+        suggestedEndsAt: nil,
+        suggestedAllDay: false,
+        suggestedBy: nil,
+        suggestedAt: nil,
+        suggestedNote: nil,
+        createdAt: nowISO
+      )
 
-    activities.insert(optimisticActivity, at: 0)
-    persistNotebook()
-    tab = isPlan ? .plans : .bucket
-    toast = isPlan ? "Made it a plan" : Copy.Ideas.added
+      activities.insert(optimisticActivity, at: 0)
+      persistNotebook()
+      tab = isPlan ? .plans : .bucket
+      toast = isPlan ? "Made it a plan" : Copy.Ideas.added
+    }
 
     do {
       let session = try await sb.auth.session
       let insert = NewActivityInsert(
-        space_id: space.id,
+        space_id: targetSpaceId,
         title: trimmed,
         description: (desc?.isEmpty == false) ? desc : nil,
         location: (loc?.isEmpty == false) ? loc : nil,
@@ -462,14 +467,14 @@ final class AppModel: ObservableObject {
           .single()
           .execute()
           .value
-        if let idx = activities.firstIndex(where: { $0.id == tempId }) {
+        if isCurrentSpace, let idx = activities.firstIndex(where: { $0.id == tempId }) {
           activities[idx] = inserted.asActivity()
           persistNotebook()
         }
       } catch {
         if insert.location != nil && error.localizedDescription.lowercased().contains("location") {
           let fallback = NewActivityInsert(
-            space_id: space.id,
+            space_id: targetSpaceId,
             title: trimmed,
             description: (desc?.isEmpty == false) ? desc : nil,
             location: nil,
@@ -485,7 +490,7 @@ final class AppModel: ObservableObject {
             .single()
             .execute()
             .value
-          if let idx = activities.firstIndex(where: { $0.id == tempId }) {
+          if isCurrentSpace, let idx = activities.firstIndex(where: { $0.id == tempId }) {
             activities[idx] = inserted.asActivity()
             persistNotebook()
           }
@@ -494,8 +499,10 @@ final class AppModel: ObservableObject {
         }
       }
     } catch {
-      activities.removeAll { $0.id == tempId }
-      persistNotebook()
+      if isCurrentSpace {
+        activities.removeAll { $0.id == tempId }
+        persistNotebook()
+      }
       toast = error.localizedDescription
     }
   }

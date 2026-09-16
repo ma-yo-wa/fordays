@@ -3,7 +3,7 @@ import SwiftUI
 struct ExternalDetailView: View {
   @EnvironmentObject private var app: AppModel
   @Environment(\.dismiss) private var dismiss
-  @State private var isSharingBusy = false
+  @State private var showMoveDialog = false
 
   let event: ExternalEvent
   var onMakePlan: ((PlanDraft) -> Void)? = nil
@@ -21,6 +21,21 @@ struct ExternalDetailView: View {
   private var possessive: String {
     if isMine { return "your" }
     return "\(ownerName)’s"
+  }
+
+  private var activeSharedOrbs: [SpaceInfo] {
+    app.spaces.filter { !$0.frozen && $0.id != app.space?.id }
+  }
+
+  private func targetOrbName(_ target: SpaceInfo) -> String {
+    target.partnerName ?? target.name
+  }
+
+  private func targetOrbLabel(_ target: SpaceInfo) -> String {
+    if let partner = target.partnerName {
+      return "\(partner) (\(target.name))"
+    }
+    return target.name
   }
 
   private var rangeDescription: String {
@@ -43,14 +58,34 @@ struct ExternalDetailView: View {
     return "\(DateLocal.relativeDay(startDay)) \(startTime) – \(DateLocal.relativeDay(endDay)) \(endTime)"
   }
 
+  private func handleDoWith(_ targetSpace: SpaceInfo) async {
+    let title = event.title ?? "Plan"
+    dismiss()
+    await app.createActivity(
+      title: title,
+      description: nil,
+      location: event.location,
+      imageUrl: nil,
+      dateTime: event.startsAt.isEmpty ? nil : event.startsAt,
+      endsAt: event.endsAt.isEmpty ? nil : event.endsAt,
+      spaceId: targetSpace.id
+    )
+    let name = targetOrbName(targetSpace)
+    app.toast = "Moved to \(name)’s Plans"
+  }
+
   var body: some View {
     NavigationStack {
       VStack(alignment: .leading, spacing: 0) {
         // Header
         HStack(alignment: .top, spacing: 14) {
-          Text(Art.emoji(for: event.title))
-            .font(.system(size: 36))
-            .frame(width: 46, height: 46)
+          LinearGradient(
+            colors: Theme.orbColors(for: event.id, title: event.title),
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+          )
+          .frame(width: 46, height: 46)
+          .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
           VStack(alignment: .leading, spacing: 4) {
             Text(event.title ?? Copy.Availability.busy)
@@ -59,6 +94,23 @@ struct ExternalDetailView: View {
             Text(rangeDescription)
               .font(.subheadline)
               .foregroundStyle(Theme.inkSoft)
+            if let loc = event.location, !loc.isEmpty {
+              if let url = URL(string: "https://maps.apple.com/?q=\(loc.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? loc)") {
+                Link(destination: url) {
+                  HStack(spacing: 4) {
+                    Text("📍")
+                      .font(.caption)
+                    Text(loc)
+                      .font(.subheadline)
+                      .foregroundStyle(Theme.inkSoft)
+                      .lineLimit(1)
+                    Image(systemName: "arrow.up.right")
+                      .font(.caption2)
+                      .foregroundStyle(Theme.inkFaint)
+                  }
+                }
+              }
+            }
           }
         }
         .padding(.bottom, 20)
@@ -68,122 +120,69 @@ struct ExternalDetailView: View {
 
         // Rows
         VStack(alignment: .leading, spacing: 14) {
-          // Owner row
           HStack(spacing: 10) {
             face(for: event.userId)
-            Text("\(ownerName)\(event.calendar.isEmpty ? "" : " · \(event.calendar)")")
+            Text(ownerName)
               .font(.subheadline)
               .foregroundStyle(Theme.ink)
-          }
-
-          // Location row
-          if let loc = event.location, !loc.isEmpty {
-            HStack(spacing: 10) {
-              Image(systemName: "mappin.and.ellipse")
-                .font(.subheadline)
-                .foregroundStyle(Theme.inkSoft)
-                .frame(width: 18)
-              Text(loc)
-                .font(.subheadline)
-                .foregroundStyle(Theme.ink)
-            }
-          }
-
-          // Privacy / sync note
-          HStack(spacing: 10) {
-            Image(systemName: "lock.fill")
-              .font(.subheadline)
+            Text(event.calendar.isEmpty ? event.sourceLabel : event.calendar)
+              .font(.caption2.weight(.medium))
               .foregroundStyle(Theme.inkSoft)
-              .frame(width: 18)
-            Text(
-              isMine && !event.sharedWithSpace
-                ? Copy.Availability.privateTitle
-                : Copy.Availability.notSharedPlan(possessive)
-            )
-              .font(.subheadline)
-              .foregroundStyle(Theme.ink)
+              .padding(.horizontal, 6)
+              .padding(.vertical, 1)
+              .background(Theme.ink.opacity(0.06), in: Capsule())
           }
         }
         .padding(.vertical, 16)
 
-        if app.space?.isMatched == true {
-        Divider()
-          .overlay(Theme.ink.opacity(0.08))
-
-        // Share Box
-        HStack(alignment: .center, spacing: 12) {
-          VStack(alignment: .leading, spacing: 2) {
-            Text(isMine
-                 ? (event.sharedWithSpace ? Copy.Availability.sharedTitle : Copy.Availability.privateTitle)
-                 : Copy.Availability.sharedBy(ownerName))
-              .font(.subheadline.weight(.semibold))
-              .foregroundStyle(Theme.ink)
-            Text(isMine
-                 ? (event.sharedWithSpace ? Copy.Availability.sharedWithOrbDesc : Copy.Availability.privateDesc)
-                 : Copy.Availability.sharedByDesc(ownerName))
-              .font(.caption)
-              .foregroundStyle(Theme.inkSoft)
-              .lineLimit(2)
-          }
-
-          Spacer(minLength: 4)
-
-          if isMine {
+        // Do with [Partner] action
+        if app.space?.isMatched != true, !activeSharedOrbs.isEmpty {
+          if activeSharedOrbs.count == 1, let target = activeSharedOrbs.first {
             Button {
-              Task {
-                isSharingBusy = true
-                await app.toggleExternalShare(event: event, shared: !event.sharedWithSpace)
-                isSharingBusy = false
-              }
+              Task { await handleDoWith(target) }
             } label: {
-              Text(event.sharedWithSpace ? Copy.Availability.makePrivate : Copy.Availability.shareWithOrb)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(event.sharedWithSpace ? Theme.inkSoft : Theme.faceSage)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
-                .background(
-                  event.sharedWithSpace ? Color.clear : Theme.sageWash,
-                  in: Capsule()
-                )
-                .overlay(
-                  Capsule().stroke(
-                    event.sharedWithSpace ? Theme.ink.opacity(0.18) : Theme.faceSage.opacity(0.4),
-                    lineWidth: 0.8
-                  )
-                )
+              HStack(spacing: 10) {
+                Image(systemName: "person.2.fill")
+                  .font(.subheadline)
+                  .foregroundStyle(Theme.inkSoft)
+                  .frame(width: 20)
+                Text(Copy.Orbs.doWith(targetOrbName(target)))
+                  .font(.body)
+                  .foregroundStyle(Theme.ink)
+                Spacer()
+              }
+              .padding(14)
+              .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
             .buttonStyle(.plain)
-            .disabled(isSharingBusy)
+            .padding(.top, 4)
+          } else {
+            Button {
+              showMoveDialog = true
+            } label: {
+              HStack(spacing: 10) {
+                Image(systemName: "person.2.fill")
+                  .font(.subheadline)
+                  .foregroundStyle(Theme.inkSoft)
+                  .frame(width: 20)
+                Text(Copy.Orbs.doWithEllipsis)
+                  .font(.body)
+                  .foregroundStyle(Theme.ink)
+                Spacer()
+              }
+              .padding(14)
+              .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 4)
           }
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .padding(.top, 16)
-        }
-
-        // Make plan primary button
-        if event.title != nil && event.isFutureOrToday(today: DateLocal.todayISO()) && app.space?.canCompose == true {
-          Button {
-            dismiss()
-            onMakePlan?(PlanDraft.from(external: event))
-          } label: {
-            Text(Copy.Availability.convertToPlan)
-              .font(.headline.weight(.semibold))
-              .foregroundStyle(Theme.paperWarm)
-              .frame(maxWidth: .infinity)
-              .padding(.vertical, 13)
-              .background(Theme.roseInk, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-          }
-          .buttonStyle(.plain)
-          .padding(.top, 20)
         }
 
         Text(Copy.Availability.importedFoot(possessive))
           .font(.footnote)
           .foregroundStyle(Theme.inkSoft)
           .lineSpacing(2)
-          .padding(.top, 14)
+          .padding(.top, 16)
 
         Spacer(minLength: 0)
       }
@@ -199,6 +198,18 @@ struct ExternalDetailView: View {
           .font(.body.weight(.semibold))
           .foregroundStyle(Theme.ink)
         }
+      }
+      .confirmationDialog(
+        Copy.Orbs.doWithEllipsis,
+        isPresented: $showMoveDialog,
+        titleVisibility: .visible
+      ) {
+        ForEach(activeSharedOrbs, id: \.id) { target in
+          Button(targetOrbLabel(target)) {
+            Task { await handleDoWith(target) }
+          }
+        }
+        Button("Cancel", role: .cancel) { }
       }
     }
   }

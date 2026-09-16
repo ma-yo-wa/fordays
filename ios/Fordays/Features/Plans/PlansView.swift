@@ -228,10 +228,7 @@ struct PlansView: View {
                 onSelectExternal?(e)
               } label: {
                 HStack(alignment: .top, spacing: 12) {
-                  Text(Art.emoji(for: e.title))
-                    .font(.system(size: 20))
-                    .frame(width: 42, height: 42)
-                    .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                  externalThumb(e)
                   VStack(alignment: .leading, spacing: 4) {
                     Text(e.title ?? Copy.Availability.busy)
                       .font(.body.weight(.medium))
@@ -239,6 +236,16 @@ struct PlansView: View {
                     Text(planExternalTiming(e))
                       .font(.footnote)
                       .foregroundStyle(Theme.inkSoft)
+                    if let loc = e.location, !loc.isEmpty {
+                      HStack(spacing: 4) {
+                        Text("📍")
+                          .font(.caption2)
+                        Text(loc)
+                          .font(.footnote)
+                          .foregroundStyle(Theme.inkSoft)
+                          .lineLimit(1)
+                      }
+                    }
                     HStack(spacing: 6) {
                       face(for: e.userId)
                       Text(ownerName)
@@ -301,6 +308,17 @@ struct PlansView: View {
         )
       }
     }
+    .frame(width: 42, height: 42)
+    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+  }
+
+  @ViewBuilder
+  private func externalThumb(_ e: ExternalEvent) -> some View {
+    LinearGradient(
+      colors: Theme.orbColors(for: e.id, title: e.title),
+      startPoint: .topLeading,
+      endPoint: .bottomTrailing
+    )
     .frame(width: 42, height: 42)
     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
   }

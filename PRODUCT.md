@@ -119,9 +119,15 @@ Empty: the line only. Plus adds. No empty CTA.
   - There are no hollow ring dots (`○`) and no black selection dots. External events and app plans are all plans — just created differently.
   - A dot simply means something is happening on that day.
   - Capped at 3 dots total per day cell (`...` heat map shorthand) without numbers cluttering the cell.
-- **External Events & Shared Orb Isolation**:
+- **External Events are Plans (No Extra Setup)**:
   - In a shared Orb (with a partner or group), external calendar events never appear. Shared Orbs are pure notebooks of what you plan together.
-  - External events (Google / Apple / Outlook) live only in your Personal Orb alongside personal plans, tagged simply with their source (`Google`, `Apple`, or `Outlook`).
+  - External events (Google / Apple / Outlook) live in your Personal Orb alongside personal plans, tagged simply with their source (`Google`, `Apple`, or `Outlook`).
+  - **First-class plans, no difference**: A massage appointment, hotel booking, or workout is a plan. There is no second-class setup or modal barrier.
+  - **Cover Art**: Displayed with the signature Fordays gradient orb wash (matching native plans without photos), completely replacing emoji glyphs.
+  - **Agenda Cards**: Rendered as identical floating tactile cards with cover art wash, title, time range, location link (📍), owner face, and a quiet source capsule (`Google`, `Apple`, `Outlook`).
+  - **Detail Sheet**: Features the signature gradient cover header, title, time range, tappable location to Apple Maps, and source badge.
+  - **No "Share with the Orb" / Lock Chrome**: Zero "Share with the Orb" buttons, zero privacy locks, and zero "Make private" toggles. External events whisper ambiently as `Busy ([time])` to partners in shared Orbs for conflict awareness without exposing details.
+  - **Do with [Partner / Space]**: Just like any personal plan, an external plan in Personal can be brought into a shared Orb via `Do with [Partner]` with a single tap, creating a live shared plan in that notebook.
 - **Frosted Shelf Header (Approach A)**:
   - The sticky top header provides a spacious frosted shelf (~56pt min-height) with a generous 14pt cushion directly below the Orb selector pill (`Alowa ∨`).
   - At rest, weekday headers (`S M T W T F S`) sit 16pt below the bar for calm, unhurried breathing room.

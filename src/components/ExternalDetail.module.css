@@ -7,28 +7,59 @@
   grid-template-columns: 46px 1fr;
   gap: 12px;
   align-items: start;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
-.glyph {
-  font-size: 34px;
-  line-height: 1;
-  text-align: center;
+.headWash {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+}
+
+.headMeta {
+  min-width: 0;
 }
 
 .title {
-  font-family: var(--display);
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.25;
+  font: var(--t-title2);
+  letter-spacing: var(--tr-title2);
+  color: var(--ink);
+  text-wrap: balance;
 }
 
 .range {
-  margin-top: 4px;
-  font-size: 14px;
+  margin-top: 3px;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
   color: var(--ink-soft);
-  letter-spacing: -0.005em;
+}
+
+.locationLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  color: var(--ink-soft);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.locationLink:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.locationPin {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.locationArrow {
+  font-size: 11px;
+  opacity: 0.6;
 }
 
 .rows {
@@ -36,8 +67,8 @@
   flex-direction: column;
   gap: 12px;
   padding: 14px 0;
-  border-top: 0.5px solid var(--rule);
-  border-bottom: 0.5px solid var(--rule);
+  border-top: var(--hairline-w) solid var(--rule);
+  border-bottom: var(--hairline-w) solid var(--rule);
 }
 
 .row {
@@ -68,105 +99,61 @@
   font-weight: 700;
   line-height: 1;
   color: var(--paper-warm);
-  /* Capitals sit optically low in small circles on iOS. */
   padding-bottom: 1px;
 }
 
-.place {
-  min-width: 0;
-  overflow-wrap: anywhere;
+.sourcePill {
+  font: var(--t-caption2);
+  letter-spacing: var(--tr-caption2);
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--paper-sunk);
+  color: var(--ink-soft);
+  margin-left: 4px;
 }
 
-.shareBox {
-  margin-top: 14px;
-  padding: 12px 14px;
-  background: var(--paper-warm);
-  border-radius: 12px;
+.actions {
+  margin-top: 18px;
+  background: var(--fill-quaternary);
+  border-radius: var(--r-control);
+  overflow: hidden;
+}
+
+.action {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-}
-
-.shareBoxInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.shareBoxTitle {
-  font-size: 14px;
-  font-weight: 600;
+  width: 100%;
+  padding: 13px 14px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
   color: var(--ink);
-  letter-spacing: -0.01em;
+  font: var(--t-body);
+  letter-spacing: var(--tr-body);
+  transition: background-color 0.12s var(--ease-ios);
 }
 
-.shareBoxSub {
-  font-size: 12px;
-  color: var(--ink-soft);
-  line-height: 1.35;
+.action:active {
+  background: var(--fill-tertiary);
 }
 
-.shareWithOrbBtn {
-  flex: none;
-  padding: 7px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--sage-ink, #426330);
-  background: var(--sage, #edf6e3);
-  color: var(--sage-ink, #426330);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: opacity 0.15s ease;
-}
-
-.makePrivateBtn {
-  flex: none;
-  padding: 7px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  background: transparent;
-  color: var(--ink-soft);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: opacity 0.15s ease;
-}
-
-.shareWithOrbBtn:disabled,
-.makePrivateBtn:disabled {
+.action:disabled {
   opacity: 0.5;
   cursor: default;
 }
 
-.makePlanBtn {
-  margin-top: 18px;
-  width: 100%;
-  padding: 13px 16px;
-  border-radius: 14px;
-  border: none;
-  background: var(--rose-ink);
-  color: var(--paper-warm);
-  font: var(--t-headline);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.15s ease, transform 0.1s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.makePlanBtn:active {
-  opacity: 0.85;
-  transform: scale(0.99);
+.action svg {
+  width: 19px;
+  height: 19px;
+  flex: none;
+  color: var(--ink-soft);
 }
 
 .foot {
-  margin-top: 14px;
+  margin-top: 16px;
   font-size: 13px;
   line-height: 1.5;
   color: var(--ink-soft);

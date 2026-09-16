@@ -8,6 +8,7 @@ export interface NewActivity {
   image_url?: string | null;
   date_time?: string | null;
   ends_at?: string | null;
+  space_id?: string | null;
 }
 
 export type { WhenSuggestion };

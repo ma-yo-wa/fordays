@@ -168,36 +168,39 @@ export class SupabaseBackend implements Backend {
     }
     this.uid = userData.user.id;
 
-    if (!this.spaceId) {
+    const targetSpaceId = input.space_id || this.spaceId;
+    if (!targetSpaceId) {
       throw new Error('No Orb yet — sign out and sign back in.');
     }
 
-    // 1. Optimistic insert: show in local state immediately at 0ms
+    // 1. Optimistic insert: show in local state immediately at 0ms (if target is current space)
     const tempId = `opt-${crypto.randomUUID()}`;
-    const optimistic: Activity = {
-      id: tempId,
-      space_id: this.spaceId,
-      title: input.title,
-      description: input.description || null,
-      location: input.location?.trim() || null,
-      image_url: input.image_url || null,
-      created_by: this.uid,
-      created_at: new Date().toISOString(),
-      date_time: input.date_time ?? null,
-      ends_at: input.ends_at ?? null,
-      all_day: !input.date_time || input.date_time.length <= 10,
-      suggested_date_time: null,
-      suggested_ends_at: null,
-      suggested_all_day: false,
-      suggested_by: null,
-      suggested_at: null,
-      suggested_note: null,
-    };
-    this.cachedActivities = [optimistic, ...this.cachedActivities.filter((a) => a.id !== tempId)];
-    this.handlers.onActivities(this.cachedActivities);
+    if (targetSpaceId === this.spaceId) {
+      const optimistic: Activity = {
+        id: tempId,
+        space_id: this.spaceId,
+        title: input.title,
+        description: input.description || null,
+        location: input.location?.trim() || null,
+        image_url: input.image_url || null,
+        created_by: this.uid,
+        created_at: new Date().toISOString(),
+        date_time: input.date_time ?? null,
+        ends_at: input.ends_at ?? null,
+        all_day: !input.date_time || input.date_time.length <= 10,
+        suggested_date_time: null,
+        suggested_ends_at: null,
+        suggested_all_day: false,
+        suggested_by: null,
+        suggested_at: null,
+        suggested_note: null,
+      };
+      this.cachedActivities = [optimistic, ...this.cachedActivities.filter((a) => a.id !== tempId)];
+      this.handlers.onActivities(this.cachedActivities);
+    }
 
     const row: Record<string, unknown> = {
-      space_id: this.spaceId,
+      space_id: targetSpaceId,
       title: input.title,
       description: input.description || null,
       image_url: input.image_url || null,

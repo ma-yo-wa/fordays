@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import Sheet from './Sheet';
-import { useApp, canCompose, isMatched } from '../lib/store';
-import { artFor } from '../lib/art';
+import CoverArt from './CoverArt';
+import ActionSheet from './ActionSheet';
+import { useApp } from '../lib/store';
 import { faceColor } from '../lib/tint';
-import { formatRange, todayISO } from '../lib/date';
-import { planDraftFromExternal, isExternalFutureOrToday } from '../lib/types';
+import { formatRange } from '../lib/date';
 import { Copy, formatCopy } from '../lib/copy';
+import type { SpaceInfo } from '../lib/auth';
 import s from './ExternalDetail.module.css';
 
 function resolveOwner(
@@ -18,41 +19,30 @@ function resolveOwner(
   return (1 - me) as 0 | 1;
 }
 
-function LockIcon() {
+function PeopleIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <rect x="4" y="10" width="16" height="11" rx="3" />
-      <path d="M8 10V7a4 4 0 0 1 8 0v3" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" />
     </svg>
   );
 }
 
-function PinIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <path
-        d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11z"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="10" r="2.2" />
-    </svg>
-  );
-}
-
-/* Read-only by construction. There is no edit, no delete, no "turn this
-   into a plan" — the calendar it came from owns it, and the one thing
-   this sheet must never do is imply otherwise. */
 export default function ExternalDetail() {
   const externalId = useApp((st) => st.externalId);
   const external = useApp((st) => st.external);
   const config = useApp((st) => st.config);
   const openExternal = useApp((st) => st.openExternal);
-  const openComposer = useApp((st) => st.openComposer);
-  const toggleExternalShare = useApp((st) => st.toggleExternalShare);
+  const create = useApp((st) => st.create);
+  const spaces = useApp((st) => st.spaces);
   const toast = useApp((st) => st.toast);
-  const [sharingBusy, setSharingBusy] = useState(false);
-
   const space = useApp((st) => st.space);
+
+  const [doWithOpen, setDoWithOpen] = useState(false);
+  const [movingBusy, setMovingBusy] = useState(false);
+
   const event = external.find((e) => e.id === externalId) ?? null;
   const owner = event
     ? resolveOwner(event.ownerId, space?.me ?? config.me, space?.myId)
@@ -71,117 +61,127 @@ export default function ExternalDetail() {
     .charAt(0)
     .toUpperCase() || '?';
 
-  const isShared = Boolean(event?.sharedWithSpace);
-  const hasWe = isMatched(space);
+  const activeOrbs = spaces.filter((s) => !s.frozen);
+  const activeSharedOrbs = activeOrbs.filter((s) => s.id !== space?.id);
 
-  async function handleToggleShare() {
+  function targetOrbName(target: SpaceInfo): string {
+    return target.partnerName || target.name || 'Orb';
+  }
+
+  async function handleDoWith(targetSpace: SpaceInfo) {
     if (!event) return;
-    setSharingBusy(true);
+    setMovingBusy(true);
     try {
-      await toggleExternalShare(event.id, !isShared);
-      toast(!isShared ? Copy.availability.sharedTitle : Copy.availability.makePrivate);
+      await create({
+        title: event.title ?? 'Plan',
+        location: event.location,
+        date_time: event.startsAt,
+        ends_at: event.endsAt || null,
+        space_id: targetSpace.id,
+      });
+      const targetName = targetOrbName(targetSpace);
+      toast(formatCopy(Copy.orbs.movedToPlans, { orb: targetName }));
+      openExternal(null);
     } catch (err) {
-      toast(err instanceof Error ? err.message : 'Couldn’t update sharing');
+      toast(err instanceof Error ? err.message : 'Couldn’t add plan');
     } finally {
-      setSharingBusy(false);
+      setMovingBusy(false);
     }
   }
 
   return (
-    <Sheet open={!!event} onClose={() => openExternal(null)}>
-      {event && (
-        <div className={s.body}>
-          <div className={s.head}>
-            <span className={s.glyph} aria-hidden>
-              {artFor(event.title)}
-            </span>
-            <div>
-              <h3 className={s.title}>{event.title ?? 'Busy'}</h3>
-              <div className={s.range}>
-                {formatRange(event.startsAt, event.endsAt, event.allDay)}
+    <>
+      <Sheet open={!!event} onClose={() => openExternal(null)}>
+        {event && (
+          <div className={s.body}>
+            <div className={s.head}>
+              <CoverArt
+                washId={event.id}
+                washTitle={event.title}
+                size="thumb"
+                className={s.headWash}
+              />
+              <div className={s.headMeta}>
+                <h3 className={s.title}>{event.title ?? 'Busy'}</h3>
+                <div className={s.range}>
+                  {formatRange(event.startsAt, event.endsAt, event.allDay)}
+                </div>
+                {event.location && (
+                  <a
+                    href={`https://maps.apple.com/?q=${encodeURIComponent(event.location)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={s.locationLink}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <span className={s.locationPin} aria-hidden>📍</span>
+                    <span>{event.location}</span>
+                    <span className={s.locationArrow} aria-hidden>↗</span>
+                  </a>
+                )}
               </div>
             </div>
-          </div>
 
-          <div className={s.rows}>
-            <div className={s.row}>
-              <span
-                className={s.avatar}
-                style={{ background: faceColor(owner) }}
-                aria-hidden
-              >
-                {initial}
-              </span>
-              <span>
-                {ownerName}
-                {event.calendar ? ` · ${event.calendar}` : ''}
-              </span>
-            </div>
-            {event.location && (
+            <div className={s.rows}>
               <div className={s.row}>
-                <PinIcon />
-                <span className={s.place}>{event.location}</span>
-              </div>
-            )}
-            <div className={s.row}>
-              <LockIcon />
-              <span>
-                {isMine && !isShared
-                  ? Copy.availability.privateTitle
-                  : formatCopy(Copy.availability.notSharedPlan, { owner: possessive })}
-              </span>
-            </div>
-          </div>
-
-          {hasWe && (
-          <div className={s.shareBox}>
-            <div className={s.shareBoxInfo}>
-              <div className={s.shareBoxTitle}>
-                {isMine
-                  ? isShared
-                    ? Copy.availability.sharedTitle
-                    : Copy.availability.privateTitle
-                  : formatCopy(Copy.availability.sharedBy, { owner: ownerName })}
-              </div>
-              <div className={s.shareBoxSub}>
-                {isMine
-                  ? isShared
-                    ? Copy.availability.sharedWithOrbDesc
-                    : Copy.availability.privateDesc
-                  : formatCopy(Copy.availability.sharedByDesc, { owner: ownerName })}
+                <span
+                  className={s.avatar}
+                  style={{ background: faceColor(owner) }}
+                  aria-hidden
+                >
+                  {initial}
+                </span>
+                <span>{ownerName}</span>
+                <span className={s.sourcePill}>
+                  {event.calendar || (event.source ? event.source.toUpperCase() : 'CALENDAR')}
+                </span>
               </div>
             </div>
-            {isMine && (
-              <button
-                type="button"
-                className={isShared ? s.makePrivateBtn : s.shareWithOrbBtn}
-                onClick={handleToggleShare}
-                disabled={sharingBusy}
-              >
-                {isShared ? Copy.availability.makePrivate : Copy.availability.shareWithOrb}
-              </button>
+
+            {activeSharedOrbs.length > 0 && (
+              <div className={s.actions}>
+                {activeSharedOrbs.length === 1 && activeSharedOrbs[0] ? (
+                  <button
+                    type="button"
+                    className={s.action}
+                    onClick={() => void handleDoWith(activeSharedOrbs[0]!)}
+                    disabled={movingBusy}
+                  >
+                    <PeopleIcon />
+                    {formatCopy(Copy.orbs.doWith, {
+                      name: targetOrbName(activeSharedOrbs[0]),
+                    })}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className={s.action}
+                    onClick={() => setDoWithOpen(true)}
+                    disabled={movingBusy}
+                  >
+                    <PeopleIcon />
+                    {Copy.orbs.doWithEllipsis}
+                  </button>
+                )}
+              </div>
             )}
+
+            <p className={s.foot}>
+              {formatCopy(Copy.availability.importedFoot, { owner: possessive })}
+            </p>
           </div>
-          )}
+        )}
+      </Sheet>
 
-          {event.title && isExternalFutureOrToday(event, todayISO()) && canCompose(space) && (
-            <button
-              type="button"
-              className={s.makePlanBtn}
-              onClick={() => {
-                openExternal(null);
-                openComposer('plan', planDraftFromExternal(event));
-              }}
-            >
-              {Copy.availability.convertToPlan}
-            </button>
-          )}
-
-          <p className={s.foot}>
-            {formatCopy(Copy.availability.importedFoot, { owner: possessive })}
-          </p>
-        </div>
-      )}
-    </Sheet>
+      <ActionSheet
+        open={doWithOpen}
+        title={Copy.orbs.doWithEllipsis}
+        actions={activeSharedOrbs.map((target) => ({
+          label: targetOrbName(target),
+          onClick: () => void handleDoWith(target),
+        }))}
+        onCancel={() => setDoWithOpen(false)}
+      />
+    </>
   );
 }
