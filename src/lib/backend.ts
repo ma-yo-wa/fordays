@@ -39,6 +39,7 @@ export interface Backend {
   init(handlers: BackendHandlers): Promise<void>;
   create(input: NewActivity): Promise<void>;
   patch(id: string, changes: Partial<Activity>): Promise<void>;
+  moveToSpace(id: string, targetSpaceId: string): Promise<void>;
   remove(id: string): Promise<void>;
   /** Propose a when without locking the calendar. Replaces any pending one. */
   suggestWhen(id: string, input: WhenSuggestion): Promise<void>;

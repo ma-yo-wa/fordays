@@ -156,8 +156,14 @@ struct MainShellView: View {
       }
     }
     .sheet(item: $selected, onDismiss: { app.detailActivityId = nil }) { activity in
-      DetailView(activityId: activity.id)
-        .environmentObject(app)
+      DetailView(activityId: activity.id, onDoAgain: { kind, draft in
+        selected = nil
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+          composerDraft = draft
+          composer = kind
+        }
+      })
+      .environmentObject(app)
     }
     .sheet(isPresented: $showSettings) {
       SettingsView()

@@ -50,6 +50,17 @@ enum Copy {
     static let deletePermanent = "Delete permanently"
     static let deletePermanentTitle = "Delete permanently?"
     static let deletePermanentBody = "All past plans here will be purged forever."
+    static func movedToSomeday(_ orb: String) -> String { "Moved to \(orb)’s Someday" }
+    static func movedToPlans(_ orb: String) -> String { "Moved to \(orb)’s Plans" }
+    static func doWith(_ name: String) -> String { "Do with \(name)" }
+    static let doWithEllipsis = "Do with…"
+  }
+
+  enum Memories {
+    static let doAgain = "Do again"
+    static func doAgainPrompt(_ title: String) -> String { "Do “\(title)” again?" }
+    static let makePlan = "Make it a plan"
+    static let addToSomeday = "Add to Someday"
   }
 
   enum Plans {

@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import Sheet from './Sheet';
+import ActionSheet from './ActionSheet';
 import CoverPicker from './CoverPicker';
 import CoverArt from './CoverArt';
 import WhenFields from './WhenFields';
 import { LocationInput } from './LocationInput';
 import { useApp, partnerName, isMatched } from '../lib/store';
-import { Copy } from '../lib/copy';
+import { Copy, formatCopy } from '../lib/copy';
 import { isPlan, isMemory } from '../lib/types';
+import type { SpaceInfo } from '../lib/auth';
 import { faceColor, faceIndexFor } from '../lib/tint';
 import {
   composeWhen,
@@ -72,6 +74,28 @@ function TrashIcon() {
   );
 }
 
+function RepeatIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M17 2l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3 11v-1a4 4 0 0 1 4-4h14" strokeLinecap="round" />
+      <path d="M7 22l-4-4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M21 13v1a4 4 0 0 1-4 4H3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function PeopleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 type Mode = 'view' | 'edit' | 'when' | 'suggest' | 'confirmDelete';
 
 function sameWhen(
@@ -98,10 +122,23 @@ export default function Detail() {
   const setPicked = useApp((st) => st.setPicked);
   const setCursor = useApp((st) => st.setCursor);
   const space = useApp((st) => st.space);
+  const spaces = useApp((st) => st.spaces);
+  const openComposer = useApp((st) => st.openComposer);
+  const moveToSpace = useApp((st) => st.moveToSpace);
 
   const item = activities.find((a) => a.id === detailId) ?? null;
   const faceCtx = { me: space?.me ?? config.me, myId: space?.myId };
   const myId = space?.myId ?? String(config.me);
+
+  const allOrbs = spaces.length ? spaces : space ? [space] : [];
+  const activeOrbs = allOrbs.filter((s) => !s.frozen);
+  const soloOrbs = activeOrbs.filter((s) => (s.members ?? []).length <= 1);
+  const isPersonalOrb = Boolean(
+    space &&
+      (space.members ?? []).length <= 1 &&
+      (space.name.trim().toLowerCase() === 'personal' || soloOrbs.length <= 1),
+  );
+  const activeSharedOrbs = activeOrbs.filter((s) => s.id !== space?.id);
 
   const [mode, setMode] = useState<Mode>('view');
   const [title, setTitle] = useState('');
@@ -115,6 +152,27 @@ export default function Detail() {
   const [multiDay, setMultiDay] = useState(false);
   const [suggestNote, setSuggestNote] = useState('');
   const [busy, setBusy] = useState(false);
+  const [doAgainOpen, setDoAgainOpen] = useState(false);
+  const [doWithOpen, setDoWithOpen] = useState(false);
+
+  async function handleDoWith(targetSpace: SpaceInfo) {
+    if (!item) return;
+    setBusy(true);
+    try {
+      await moveToSpace(item.id, targetSpace.id);
+      const targetName = targetSpace.partnerName || targetSpace.name || 'Orb';
+      toast(
+        item.date_time
+          ? formatCopy(Copy.orbs.movedToPlans, { orb: targetName })
+          : formatCopy(Copy.orbs.movedToSomeday, { orb: targetName }),
+      );
+      close();
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Couldn’t move item');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   // Reset every time a different card opens, so nothing leaks between them.
   useEffect(() => {
@@ -273,6 +331,7 @@ export default function Detail() {
     describePlan(item.suggested_date_time, item.suggested_ends_at);
 
   return (
+    <>
     <Sheet open={!!detailId} onClose={close}>
       <div className={`${s.head} ${item.image_url ? s.headCovered : ''}`}>
         {!item.image_url && (
@@ -533,6 +592,37 @@ export default function Detail() {
 
       {mode === 'view' && !frozen && (
         <div className={s.actions}>
+          {memory && (
+            <button type="button" className={s.action} onClick={() => setDoAgainOpen(true)}>
+              <RepeatIcon />
+              {Copy.memories.doAgain}
+            </button>
+          )}
+
+          {!memory && isPersonalOrb && activeSharedOrbs.length > 0 && activeSharedOrbs[0] && (
+            activeSharedOrbs.length === 1 ? (
+              <button
+                type="button"
+                className={s.action}
+                onClick={() => void handleDoWith(activeSharedOrbs[0]!)}
+              >
+                <PeopleIcon />
+                {formatCopy(Copy.orbs.doWith, {
+                  name: activeSharedOrbs[0]!.partnerName || activeSharedOrbs[0]!.name,
+                })}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={s.action}
+                onClick={() => setDoWithOpen(true)}
+              >
+                <PeopleIcon />
+                {Copy.orbs.doWithEllipsis}
+              </button>
+            )
+          )}
+
           <button type="button" className={s.action} onClick={() => setMode('when')}>
             <CalendarPlusIcon />
             {planned ? 'Change the day' : 'Make it a plan'}
@@ -584,5 +674,59 @@ export default function Detail() {
         </>
       )}
     </Sheet>
+
+    <ActionSheet
+      open={doAgainOpen}
+      title={formatCopy(Copy.memories.doAgainPrompt, { title: item.title })}
+      actions={[
+        {
+          label: Copy.memories.makePlan,
+          onClick: () => {
+            setDoAgainOpen(false);
+            const draft = {
+              title: item.title,
+              notes: item.description ?? '',
+              location: item.location ?? '',
+              cover: item.image_url ?? null,
+            };
+            close();
+            openComposer('plan', draft);
+          },
+        },
+        {
+          label: Copy.memories.addToSomeday,
+          onClick: () => {
+            setDoAgainOpen(false);
+            const draft = {
+              title: item.title,
+              notes: item.description ?? '',
+              location: item.location ?? '',
+              cover: item.image_url ?? null,
+            };
+            close();
+            openComposer('bucket', draft);
+          },
+        },
+      ]}
+      cancelLabel="Cancel"
+      onCancel={() => setDoAgainOpen(false)}
+    />
+
+    <ActionSheet
+      open={doWithOpen}
+      title={Copy.orbs.doWithEllipsis}
+      actions={activeSharedOrbs.map((targetSpace) => ({
+        label: targetSpace.partnerName
+          ? `${targetSpace.partnerName} (${targetSpace.name})`
+          : targetSpace.name,
+        onClick: () => {
+          setDoWithOpen(false);
+          void handleDoWith(targetSpace);
+        },
+      }))}
+      cancelLabel="Cancel"
+      onCancel={() => setDoWithOpen(false)}
+    />
+    </>
   );
 }

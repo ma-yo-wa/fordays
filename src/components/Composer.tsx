@@ -44,7 +44,7 @@ export default function Composer() {
     setTitle(draft?.title ?? '');
     setLocation(draft?.location ?? '');
     setNotes(draft?.notes ?? '');
-    setCover(null);
+    setCover(draft?.cover ?? null);
     // A plan opens on the draft date if provided, or the day you were already looking at.
     setDate(draft?.date ?? picked);
     setFrom(draft?.from ?? '');

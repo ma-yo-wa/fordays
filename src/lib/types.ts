@@ -94,6 +94,7 @@ export interface PlanDraft {
   title?: string;
   notes?: string;
   location?: string;
+  cover?: string | null;
   date?: string;
   from?: string;
   until?: string;

@@ -155,6 +155,14 @@ export class LocalBackend implements Backend {
     this.commit();
   }
 
+  async moveToSpace(id: string, targetSpaceId: string): Promise<void> {
+    const a = this.data.activities.find((x) => x.id === id);
+    if (!a) return;
+    a.space_id = targetSpaceId;
+    this.data.activities = this.data.activities.filter((x) => x.id !== id);
+    this.commit();
+  }
+
   async suggestWhen(id: string, input: WhenSuggestion): Promise<void> {
     const a = this.data.activities.find((x) => x.id === id);
     if (!a) return;

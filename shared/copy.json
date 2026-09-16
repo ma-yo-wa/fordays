@@ -45,7 +45,17 @@
     "switchBackToActive": "Switch back to active Orb",
     "deletePermanent": "Delete permanently",
     "deletePermanentTitle": "Delete permanently?",
-    "deletePermanentBody": "All past plans here will be purged forever."
+    "deletePermanentBody": "All past plans here will be purged forever.",
+    "movedToSomeday": "Moved to {orb}’s Someday",
+    "movedToPlans": "Moved to {orb}’s Plans",
+    "doWith": "Do with {name}",
+    "doWithEllipsis": "Do with…"
+  },
+  "memories": {
+    "doAgain": "Do again",
+    "doAgainPrompt": "Do “{title}” again?",
+    "makePlan": "Make it a plan",
+    "addToSomeday": "Add to Someday"
   },
   "plans": {
     "emptyToday": "Nothing planned today",

@@ -108,6 +108,7 @@ struct ComposerView: View {
     _title = State(initialValue: draft?.title ?? "")
     _location = State(initialValue: draft?.location ?? "")
     _notes = State(initialValue: draft?.notes ?? "")
+    _cover = State(initialValue: draft?.cover ?? "")
     _date = State(initialValue: draft?.date ?? DateLocal.todayISO())
     _from = State(initialValue: draft?.from ?? "")
     _until = State(initialValue: draft?.until ?? "")

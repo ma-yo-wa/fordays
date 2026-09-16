@@ -270,6 +270,7 @@ struct PlanDraft: Hashable {
   var title: String?
   var notes: String?
   var location: String?
+  var cover: String?
   var date: String?
   var from: String?
   var until: String?
@@ -287,6 +288,7 @@ struct PlanDraft: Hashable {
       title: external.title,
       notes: nil,
       location: external.location,
+      cover: nil,
       date: startDate,
       from: startTime,
       until: endTime,

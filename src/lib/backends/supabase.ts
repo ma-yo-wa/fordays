@@ -252,6 +252,15 @@ export class SupabaseBackend implements Backend {
     await this.refresh();
   }
 
+  async moveToSpace(id: string, targetSpaceId: string): Promise<void> {
+    const { error } = await this.client
+      .from('activities')
+      .update({ space_id: targetSpaceId })
+      .eq('id', id);
+    if (error) throw error;
+    await this.refresh();
+  }
+
   async suggestWhen(id: string, input: WhenSuggestion): Promise<void> {
     const { data: userData, error: userErr } = await this.client.auth.getUser();
     if (userErr || !userData.user) {

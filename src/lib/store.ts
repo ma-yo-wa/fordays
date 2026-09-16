@@ -124,6 +124,7 @@ interface AppState {
 
   create: (input: NewActivity) => Promise<void>;
   patch: (id: string, changes: Partial<Activity>) => Promise<void>;
+  moveToSpace: (id: string, targetSpaceId: string) => Promise<void>;
   remove: (id: string) => Promise<void>;
   suggestWhen: (id: string, input: WhenSuggestion) => Promise<void>;
   acceptSuggestion: (id: string) => Promise<void>;
@@ -593,6 +594,15 @@ export const useApp = create<AppState>()((set, get) => {
       } catch (err) {
         get().toast(err instanceof Error ? err.message : 'Could not save');
       }
+    },
+
+    async moveToSpace(id, targetSpaceId) {
+      if (!backend) throw new Error('Not connected — try signing out and back in');
+      if (!canCompose(get().space)) {
+        get().toast('This is a copy from when you left');
+        return;
+      }
+      await backend.moveToSpace(id, targetSpaceId);
     },
 
     async remove(id) {

@@ -22,6 +22,12 @@ Someday / Plans / Memories **are** that notebook. Everyone has at least one **li
 - When you want to plan with someone, you create a shared Orb (`With someone`).
 - This guarantees private plans, doctor appointments, surprises, and personal bucket items never accidentally leak to a partner or group. Personal remains an untouchable private capsule.
 
+**Moving active items from Personal to Shared (`Do with...`)**:
+- Plans and Someday items created in Personal can be moved into a shared Orb (`Do with [Partner Name / Space Name]`).
+- Moving is strictly one-way from Personal to Shared (you can gift an idea to a relationship, but you cannot steal a plan from a shared group into your private notebook).
+- Type parity: Someday moves directly to Someday; Plans move directly to Plans (retaining their date, time, location, notes, and cover).
+- When moved, the item leaves Personal and appears in the target Orb with a clean confirmation toast (`Moved to Aline’s Someday` / `Moved to Aline’s Plans`).
+
 **Orb** = the notebook. **Faces** = people in *this* space (two: rose / sage; many: names + initials). Not a hue per person or per space.
 
 A name is **required** for Just you and With people. Placeholder in the field (`Personal` / `Aline’s Crew`) is only an example — never saved, never shown as the title. Unnamed legacy Orbs (Fordays / Someday / blank) stay untitled: empty field, no caption on the tile, faces already say who. When they name it, that word sits **under the circle** and **beside This Orb** (label semibold faint, name regular ink). Never title an Orb with a person’s name.
@@ -128,7 +134,8 @@ Say plan / day — not event, schedule, or calendar.
 Plans whose day has passed. Look back, not a third kind of object.
 
 - **Permanent lived history**: Memories cannot be moved back to Someday / bucket list. You cannot unlive an experience.
-- **Actions on a Memory**: Only **Change the day** (to fix typos) and **Delete** (if an event never happened) are allowed. Never show **Back to Someday** or **Suggest a date** on a memory.
+- **Do again**: Tapping **Do again** lets you repeat a great experience without altering history. Prompts **Make it a plan** (opens Composer prefilled with the title, notes, location, and cover to pick an upcoming date) or **Add to Someday** (places a fresh copy into Someday). The original memory stays 100% frozen in history.
+- **Actions on a Memory**: Only **Do again**, **Change the day** (to fix typos in the past), and **Delete** (if an event never happened) are allowed. Never show **Back to Someday** or **Suggest a date** on a memory.
 - **Audit history localization**: History entries stored in the database by server triggers must be localized to the user's device timezone so times like 9:00 PM EST never display as 01:00 AM UTC.
 
 ---

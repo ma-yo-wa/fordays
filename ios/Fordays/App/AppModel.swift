@@ -452,6 +452,22 @@ final class AppModel: ObservableObject {
     }
   }
 
+  func moveActivityToSpace(_ id: String, targetSpaceId: String) async {
+    guard space?.canCompose == true else {
+      toast = "This is a copy from when you left"
+      return
+    }
+    do {
+      try await sb.from("activities")
+        .update(["space_id": .string(targetSpaceId)])
+        .eq("id", value: id)
+        .execute()
+      activities.removeAll { $0.id == id }
+    } catch {
+      toast = error.localizedDescription
+    }
+  }
+
   /// Patch fields like the PWA `backend.patch`.
   /// Pass `.some(nil)` for `dateTime` / `endsAt` to clear those columns.
   func patchActivity(

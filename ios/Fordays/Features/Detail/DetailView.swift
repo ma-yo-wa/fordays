@@ -5,6 +5,7 @@ struct DetailView: View {
   @Environment(\.dismiss) private var dismiss
 
   let activityId: String
+  var onDoAgain: ((ComposerKind, PlanDraft) -> Void)? = nil
 
   private enum Mode {
     case view, edit, when, suggest, confirmDelete
@@ -23,6 +24,8 @@ struct DetailView: View {
   @State private var suggestNote = ""
   @State private var busy = false
   @State private var seededFor: String?
+  @State private var showDoAgainDialog = false
+  @State private var showMoveDialog = false
 
   private var item: Activity? {
     app.activity(id: activityId)
@@ -30,6 +33,18 @@ struct DetailView: View {
 
   private var myId: String {
     app.space?.myId ?? ""
+  }
+
+  private var isPersonalOrb: Bool {
+    guard let space = app.space else { return false }
+    let soloOrb = space.members.count <= 1
+    let soloOrbs = app.spaces.filter { !$0.frozen && $0.members.count <= 1 }
+    return soloOrb && (space.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "personal" || soloOrbs.count <= 1)
+  }
+
+  private var activeSharedOrbs: [SpaceInfo] {
+    let currentId = app.space?.id
+    return app.spaces.filter { !$0.frozen && $0.id != currentId }
   }
 
   var body: some View {
@@ -53,6 +68,48 @@ struct DetailView: View {
       .onChange(of: item?.id) { _, _ in seed(from: item) }
       .onChange(of: item?.title) { _, _ in
         if mode == .view { seed(from: item) }
+      }
+      .confirmationDialog(
+        item.map { Copy.Memories.doAgainPrompt($0.title) } ?? "",
+        isPresented: $showDoAgainDialog,
+        titleVisibility: .visible
+      ) {
+        Button(Copy.Memories.makePlan) {
+          guard let item else { return }
+          let draft = PlanDraft(
+            title: item.title,
+            notes: item.description,
+            location: item.location,
+            cover: item.imageUrl
+          )
+          dismiss()
+          onDoAgain?(.plan, draft)
+        }
+        Button(Copy.Memories.addToSomeday) {
+          guard let item else { return }
+          let draft = PlanDraft(
+            title: item.title,
+            notes: item.description,
+            location: item.location,
+            cover: item.imageUrl
+          )
+          dismiss()
+          onDoAgain?(.idea, draft)
+        }
+        Button("Cancel", role: .cancel) { }
+      }
+      .confirmationDialog(
+        Copy.Orbs.doWithEllipsis,
+        isPresented: $showMoveDialog,
+        titleVisibility: .visible
+      ) {
+        ForEach(activeSharedOrbs, id: \.id) { target in
+          let label = target.partnerName != nil ? "\(target.partnerName!) (\(target.name))" : target.name
+          Button(label) {
+            Task { await handleDoWith(target) }
+          }
+        }
+        Button("Cancel", role: .cancel) { }
       }
     }
   }
@@ -506,6 +563,26 @@ struct DetailView: View {
 
   private func actionList(_ item: Activity) -> some View {
     VStack(spacing: 4) {
+      if item.isMemory() {
+        actionRow(title: Copy.Memories.doAgain, system: "arrow.triangle.2.circlepath") {
+          showDoAgainDialog = true
+        }
+      }
+
+      if !item.isMemory() && isPersonalOrb && !activeSharedOrbs.isEmpty {
+        if activeSharedOrbs.count == 1 {
+          let target = activeSharedOrbs[0]
+          let targetName = target.partnerName ?? target.name
+          actionRow(title: Copy.Orbs.doWith(targetName), system: "person.2") {
+            Task { await handleDoWith(target) }
+          }
+        } else {
+          actionRow(title: Copy.Orbs.doWithEllipsis, system: "person.2") {
+            showMoveDialog = true
+          }
+        }
+      }
+
       actionRow(
         title: item.isPlan ? "Change the day" : "Make it a plan",
         system: "calendar.badge.plus"
@@ -534,6 +611,16 @@ struct DetailView: View {
       }
     }
     .padding(.top, 8)
+  }
+
+  private func handleDoWith(_ targetSpace: SpaceInfo) async {
+    guard let item else { return }
+    let targetName = targetSpace.partnerName ?? targetSpace.name
+    await app.moveActivityToSpace(item.id, targetSpaceId: targetSpace.id)
+    app.toast = item.isPlan
+      ? Copy.Orbs.movedToPlans(targetName)
+      : Copy.Orbs.movedToSomeday(targetName)
+    dismiss()
   }
 
   private func actionRow(
