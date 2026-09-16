@@ -88,13 +88,13 @@ struct PlansView: View {
     ScrollView {
       ScrollOffsetTracker()
 
-      VStack(spacing: 0) {
+      VStack(spacing: Theme.Spacing.none) {
       monthGrid
-        .padding(.horizontal, 12)
-        .padding(.top, 14)
-        .padding(.bottom, 8)
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.top, Theme.Spacing.row)
+        .padding(.bottom, Theme.Spacing.sm)
 
-      VStack(alignment: .leading, spacing: 12) {
+      VStack(alignment: .leading, spacing: Theme.Spacing.md) {
         Text(dayTitle)
           .font(.headline)
           .foregroundStyle(Theme.ink)
@@ -104,16 +104,16 @@ struct PlansView: View {
               .font(.subheadline)
               .foregroundStyle(Theme.inkSoft)
               .frame(maxWidth: .infinity, alignment: .leading)
-              .padding(.top, 2)
-              .padding(.bottom, 6)
+              .padding(.top, Theme.Spacing.xxs)
+              .padding(.bottom, Theme.Spacing.s6)
 
-            VStack(alignment: .leading, spacing: 10) {
-              VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.s10) {
+              VStack(alignment: .leading, spacing: Theme.Spacing.s3) {
                 Text(Copy.Plans.upNext)
                   .font(.headline)
                   .foregroundStyle(Theme.ink)
 
-                HStack(spacing: 6) {
+                HStack(spacing: Theme.Spacing.s6) {
                   Text(next.countdown)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Theme.roseInk)
@@ -127,16 +127,16 @@ struct PlansView: View {
                     .foregroundStyle(Theme.inkSoft)
                 }
               }
-              .padding(.top, 4)
-              .padding(.horizontal, 2)
+              .padding(.top, Theme.Spacing.xs)
+              .padding(.horizontal, Theme.Spacing.xxs)
 
               ForEach(next.plans) { a in
                 Button {
                   onSelect(a)
                 } label: {
-                  HStack(alignment: .top, spacing: 12) {
+                  HStack(alignment: .top, spacing: Theme.Spacing.md) {
                     planThumb(a)
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                       Text(a.title)
                         .font(.body.weight(.medium))
                         .foregroundStyle(Theme.ink)
@@ -144,7 +144,7 @@ struct PlansView: View {
                         .font(.footnote)
                         .foregroundStyle(Theme.inkSoft)
                       if let loc = a.location, !loc.isEmpty {
-                        HStack(spacing: 4) {
+                        HStack(spacing: Theme.Spacing.xs) {
                           Text("📍").font(.caption2)
                           Text(loc)
                             .font(.footnote)
@@ -156,7 +156,7 @@ struct PlansView: View {
                           .font(.footnote)
                           .foregroundStyle(Theme.inkFaint)
                       }
-                      HStack(spacing: 6) {
+                      HStack(spacing: Theme.Spacing.s6) {
                         face(for: a.createdBy)
                         Text(displayName(for: a.createdBy))
                           .font(.footnote)
@@ -165,7 +165,7 @@ struct PlansView: View {
                     }
                     Spacer(minLength: 0)
                   }
-                  .padding(14)
+                  .padding(Theme.Spacing.row)
                   .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
                 }
                 .buttonStyle(.plain)
@@ -177,7 +177,7 @@ struct PlansView: View {
               .foregroundStyle(Theme.inkSoft)
               .multilineTextAlignment(.center)
               .frame(maxWidth: .infinity)
-              .padding(.top, 24)
+              .padding(.top, Theme.Spacing.xl)
           }
         } else {
           ForEach(dayAgenda) { item in
@@ -186,9 +186,9 @@ struct PlansView: View {
               Button {
                 onSelect(a)
               } label: {
-                HStack(alignment: .top, spacing: 12) {
+                HStack(alignment: .top, spacing: Theme.Spacing.md) {
                   planThumb(a)
-                  VStack(alignment: .leading, spacing: 4) {
+                  VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                     Text(a.title)
                       .font(.body.weight(.medium))
                       .foregroundStyle(Theme.ink)
@@ -196,7 +196,7 @@ struct PlansView: View {
                       .font(.footnote)
                       .foregroundStyle(Theme.inkSoft)
                     if let loc = a.location, !loc.isEmpty {
-                      HStack(spacing: 4) {
+                      HStack(spacing: Theme.Spacing.xs) {
                         Text("📍").font(.caption2)
                         Text(loc)
                           .font(.footnote)
@@ -208,7 +208,7 @@ struct PlansView: View {
                         .font(.footnote)
                         .foregroundStyle(Theme.inkFaint)
                     }
-                    HStack(spacing: 6) {
+                    HStack(spacing: Theme.Spacing.s6) {
                       face(for: a.createdBy)
                       Text(displayName(for: a.createdBy))
                         .font(.footnote)
@@ -217,7 +217,7 @@ struct PlansView: View {
                   }
                   Spacer(minLength: 0)
                 }
-                .padding(14)
+                .padding(Theme.Spacing.row)
                 .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
               }
               .buttonStyle(.plain)
@@ -227,9 +227,9 @@ struct PlansView: View {
               Button {
                 onSelectExternal?(e)
               } label: {
-                HStack(alignment: .top, spacing: 12) {
+                HStack(alignment: .top, spacing: Theme.Spacing.md) {
                   externalThumb(e)
-                  VStack(alignment: .leading, spacing: 4) {
+                  VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                     Text(e.title ?? Copy.Availability.busy)
                       .font(.body.weight(.medium))
                       .foregroundStyle(Theme.ink)
@@ -237,7 +237,7 @@ struct PlansView: View {
                       .font(.footnote)
                       .foregroundStyle(Theme.inkSoft)
                     if let loc = e.location, !loc.isEmpty {
-                      HStack(spacing: 4) {
+                      HStack(spacing: Theme.Spacing.xs) {
                         Text("📍")
                           .font(.caption2)
                         Text(loc)
@@ -246,7 +246,7 @@ struct PlansView: View {
                           .lineLimit(1)
                       }
                     }
-                    HStack(spacing: 6) {
+                    HStack(spacing: Theme.Spacing.s6) {
                       face(for: e.userId)
                       Text(ownerName)
                         .font(.footnote)
@@ -254,14 +254,14 @@ struct PlansView: View {
                       Text(e.sourceLabel)
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(Theme.inkSoft)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 1)
+                        .padding(.horizontal, Theme.Spacing.s6)
+                        .padding(.vertical, Theme.TouchTarget.hairlineWidth)
                         .background(Theme.fillTertiary, in: Capsule())
                     }
                   }
                   Spacer(minLength: 0)
                 }
-                .padding(14)
+                .padding(Theme.Spacing.row)
                 .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
               }
               .buttonStyle(.plain)
@@ -270,22 +270,22 @@ struct PlansView: View {
         }
         Spacer(minLength: 0)
       }
-      .padding(.horizontal, 20)
-      .padding(.top, 18)
+      .padding(.horizontal, Theme.Spacing.lg)
+      .padding(.top, Theme.Spacing.s18)
       .frame(maxWidth: .infinity, alignment: .topLeading)
       .overlay(alignment: .top) {
         Rectangle()
           .fill(Theme.hairline)
-          .frame(height: 0.5)
+          .frame(height: Theme.TouchTarget.hairlineWidth)
       }
-      .padding(.bottom, 132)
+      .padding(.bottom, Theme.Spacing.scrollBottomClearance)
       }
     }
     .coordinateSpace(name: "homeScroll")
     .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
       let scrolled = minY < -6
       if app.isScrolled != scrolled {
-        withAnimation(.easeInOut(duration: 0.18)) {
+        withAnimation(.easeInOut(duration: Theme.Motion.fade)) {
           app.isScrolled = scrolled
         }
       }
@@ -308,7 +308,7 @@ struct PlansView: View {
         )
       }
     }
-    .frame(width: 42, height: 42)
+    .frame(width: Theme.TouchTarget.thumb, height: Theme.TouchTarget.thumb)
     .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
   }
 
@@ -319,7 +319,7 @@ struct PlansView: View {
       startPoint: .topLeading,
       endPoint: .bottomTrailing
     )
-    .frame(width: 42, height: 42)
+    .frame(width: Theme.TouchTarget.thumb, height: Theme.TouchTarget.thumb)
     .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
   }
 
@@ -391,7 +391,7 @@ struct PlansView: View {
     return Text(String(displayName(for: userId).prefix(1)).uppercased())
       .font(.caption2.weight(.bold))
       .foregroundStyle(.white)
-      .frame(width: 18, height: 18)
+      .frame(width: Theme.TouchTarget.avatarXs, height: Theme.TouchTarget.avatarXs)
       .background(fill, in: Circle())
   }
 
@@ -403,8 +403,8 @@ struct PlansView: View {
   private var monthGrid: some View {
     let days = monthDays()
     let today = DateLocal.todayISO()
-    return VStack(spacing: 8) {
-      LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: 6) {
+    return VStack(spacing: Theme.Spacing.sm) {
+      LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Theme.Spacing.none), count: 7), spacing: Theme.Spacing.s6) {
         ForEach(["S", "M", "T", "W", "T", "F", "S"], id: \.self) { d in
           Text(d)
             .font(.caption2.weight(.semibold))
@@ -421,11 +421,11 @@ struct PlansView: View {
             Button {
               app.pickedDay = iso
             } label: {
-              VStack(spacing: 2) {
+              VStack(spacing: Theme.Spacing.xxs) {
                 Text("\(calendar.component(.day, from: day))")
                   .font(.callout.weight(isToday ? .semibold : (isPicked ? .bold : .regular)))
                   .foregroundStyle(Theme.ink)
-                  .frame(width: 30, height: 30)
+                  .frame(width: Theme.Spacing.s30, height: Theme.Spacing.s30)
                   .background {
                     if isToday {
                       Circle().fill(Theme.rose)
@@ -433,22 +433,22 @@ struct PlansView: View {
                   }
 
                 let totalDots = min(count + extCount, 3)
-                HStack(spacing: 2) {
+                HStack(spacing: Theme.Spacing.xxs) {
                   ForEach(0..<totalDots, id: \.self) { _ in
-                    Circle().fill(Theme.roseInk).frame(width: 4, height: 4)
+                    Circle().fill(Theme.roseInk).frame(width: Theme.Spacing.xs, height: Theme.Spacing.xs)
                   }
                 }
-                .frame(height: 5)
+                .frame(height: Theme.Spacing.s5)
               }
-              .padding(.top, 4)
-              .frame(maxWidth: .infinity, minHeight: 52, alignment: .top)
+              .padding(.top, Theme.Spacing.xs)
+              .frame(maxWidth: .infinity, minHeight: Theme.TouchTarget.dayCellHeight, alignment: .top)
               .background(alignment: .top) {
                 multiDayTrack(for: iso, index: index)
               }
             }
             .buttonStyle(.plain)
           } else {
-            Color.clear.frame(height: 52)
+            Color.clear.frame(height: Theme.TouchTarget.dayCellHeight)
           }
         }
       }
@@ -491,8 +491,8 @@ struct PlansView: View {
           chevronEnd: isContinuationToNext
         )
         .fill(Theme.sageWash)
-        .frame(width: width, height: 30)
-        .offset(x: left, y: 4)
+        .frame(width: width, height: Theme.TouchTarget.dayNumber)
+        .offset(x: left, y: Theme.Spacing.xs)
       }
     }
   }

@@ -1,15 +1,15 @@
 .wrap {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: calc(104px + var(--safe-b));
-  z-index: 80;
+  left: var(--space-0);
+  right: var(--space-0);
+  bottom: calc(var(--h-toast-anchor) + var(--safe-b));
+  z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   pointer-events: none;
-  padding: 0 20px;
+  padding: var(--space-0) var(--space-5);
 }
 
 /* Reads as a system capsule rather than a website's flash message: a
@@ -23,7 +23,7 @@
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   font-weight: 500;
-  padding: 11px 18px;
+  padding: var(--space-2-75) var(--space-4-5);
   border-radius: var(--r-capsule);
   box-shadow: var(--shadow-lift);
   max-width: 100%;

@@ -45,16 +45,105 @@ enum Theme {
   static let sheetRadius: CGFloat = 38
   static let capsuleRadius: CGFloat = 999
 
-  // Spacing scale
+  // Spacing scale — matches tokens.css. Prefer named aliases.
   enum Spacing {
+    static let none: CGFloat = 0
+    static let px: CGFloat = 1
     static let xxs: CGFloat = 2
+    static let s3: CGFloat = 3
     static let xs: CGFloat = 4
+    static let s5: CGFloat = 5
+    static let s6: CGFloat = 6
+    static let s7: CGFloat = 7
     static let sm: CGFloat = 8
+    static let s9: CGFloat = 9
+    static let s10: CGFloat = 10
+    static let s11: CGFloat = 11
     static let md: CGFloat = 12
+    static let s13: CGFloat = 13
+    static let row: CGFloat = 14
+    static let s15: CGFloat = 15
     static let base: CGFloat = 16
+    static let s17: CGFloat = 17
+    static let s18: CGFloat = 18
+    static let s19: CGFloat = 19
     static let lg: CGFloat = 20
+    static let s22: CGFloat = 22
     static let xl: CGFloat = 24
+    static let s26: CGFloat = 26
+    static let s28: CGFloat = 28
+    static let s30: CGFloat = 30
     static let xxl: CGFloat = 32
+    static let s34: CGFloat = 34
+    static let s36: CGFloat = 36
+    static let s38: CGFloat = 38
+    static let xxxl: CGFloat = 40
+    static let s42: CGFloat = 42
+    static let s48: CGFloat = 48
+    static let huge: CGFloat = 56
+    static let toastClearance: CGFloat = 100
+    static let scrollBottomClearance: CGFloat = 132
+    static let overlapSm: CGFloat = -6
+    static let overlapMd: CGFloat = -8
+    static let opticalNudge: CGFloat = -0.5
+    static let removeBadgeX: CGFloat = 10
+    static let removeBadgeY: CGFloat = -2
+  }
+
+  // Touch targets & component dimensions
+  enum TouchTarget {
+    static let min: CGFloat = 44
+    static let formRow: CGFloat = 46
+    static let buttonMd: CGFloat = 50
+    static let control: CGFloat = 36
+    static let navBar: CGFloat = 56
+    static let tabItemWidth: CGFloat = 84
+    static let pill: CGFloat = 28
+    static let tabBar: CGFloat = 64
+    static let dayCellHeight: CGFloat = 52
+    static let avatarXs: CGFloat = 18
+    static let avatarSm: CGFloat = 24
+    static let avatarChip: CGFloat = 22
+    static let avatarFace: CGFloat = 26
+    static let avatarMd: CGFloat = 32
+    static let avatarLg: CGFloat = 40
+    static let thumb: CGFloat = 42
+    static let dayNumber: CGFloat = 30
+    static let coverPreview: CGFloat = 140
+    static let coverHero: CGFloat = 200
+    static let coverTile: CGFloat = 74
+    static let orbTile: CGFloat = 64
+    static let orbFace: CGFloat = 72
+    static let sheetDetentCompact: CGFloat = 280
+    static let hairlineWidth: CGFloat = 0.5
+    static let borderWidth: CGFloat = 1.0
+    static let ringWidth: CGFloat = 1.5
+    static let strokeThick: CGFloat = 2
+    static let strokeFocus: CGFloat = 2.5
+  }
+
+  enum Motion {
+    static let pressScale: CGFloat = 0.97
+    static let pressSoft: CGFloat = 0.96
+    static let spinner: CGFloat = 0.85
+    static let photoSpinner: CGFloat = 0.8
+    static let pressDuration: Double = 0.14
+    static let fade: Double = 0.18
+    static let shelf: Double = 0.2
+    static let spring: Double = 0.3
+    static let snappy: Double = 0.25
+    static let snappyDamping: Double = 0.8
+    static let tabSpring: Double = 0.35
+    static let tabDamping: Double = 0.85
+    static let sheetHandoff: Double = 0.15
+    static let disabledOpacity: Double = 0.38
+  }
+
+  enum Shadow {
+    static let cardRadius: CGFloat = 10
+    static let cardY: CGFloat = 4
+    static let badgeRadius: CGFloat = 2
+    static let badgeY: CGFloat = 1
   }
 
   static let brandName = "Fordays"
@@ -173,13 +262,15 @@ struct ScrollOffsetTracker: View {
         value: proxy.frame(in: .named(coordinateSpace)).minY
       )
     }
-    .frame(height: 0)
+    .frame(height: Theme.Spacing.none)
   }
 }
 
 // MARK: - Typography Ramp (matches PWA tokens.css)
 
 extension Font {
+  static let fdMicro = Font.system(size: 9, weight: .bold, design: .default)
+  static let fdTiny = Font.system(size: 10, weight: .semibold, design: .default)
   static let fdLargeTitle = Font.system(size: 34, weight: .bold, design: .default)
   static let fdTitle1 = Font.system(size: 28, weight: .bold, design: .default)
   static let fdTitle2 = Font.system(size: 22, weight: .bold, design: .default)
@@ -191,6 +282,8 @@ extension Font {
   static let fdFootnote = Font.system(size: 13, weight: .regular, design: .default)
   static let fdCaption = Font.system(size: 12, weight: .regular, design: .default)
   static let fdCaption2 = Font.system(size: 11, weight: .medium, design: .default)
+  static let fdGlyph = Font.system(size: 36, weight: .regular, design: .default)
+  static let fdBrand = Font.system(size: 40, weight: .semibold, design: .rounded)
 }
 
 

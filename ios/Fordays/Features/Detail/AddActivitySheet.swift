@@ -13,7 +13,7 @@ struct AddSheetView: View {
   var onPick: (ComposerKind) -> Void
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 0) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.none) {
       HStack(alignment: .top) {
         Text("Add to your Orb")
           .font(.title2.weight(.semibold))
@@ -23,12 +23,12 @@ struct AddSheetView: View {
           Image(systemName: "xmark")
             .font(.footnote.weight(.bold))
             .foregroundStyle(Theme.inkSoft)
-            .frame(width: 34, height: 34)
+            .frame(width: Theme.TouchTarget.control, height: Theme.TouchTarget.control)
             .background(Theme.fillTertiary, in: Circle())
         }
         .accessibilityLabel("Close")
       }
-      .padding(.bottom, 20)
+      .padding(.bottom, Theme.Spacing.lg)
 
       option(
         kind: .plan,
@@ -38,7 +38,7 @@ struct AddSheetView: View {
       )
       Rectangle()
         .fill(Theme.hairline)
-        .frame(height: 0.5)
+        .frame(height: Theme.TouchTarget.hairlineWidth)
       option(
         kind: .bucket,
         title: Copy.Tabs.ideas,
@@ -46,8 +46,8 @@ struct AddSheetView: View {
         glyph: .bucket
       )
     }
-    .padding(20)
-    .padding(.bottom, 8)
+    .padding(Theme.Spacing.lg)
+    .padding(.bottom, Theme.Spacing.sm)
     .background(Theme.paper)
     .presentationDetents([.height(300)])
     .presentationDragIndicator(.visible)
@@ -62,11 +62,11 @@ struct AddSheetView: View {
     Button {
       onPick(kind)
     } label: {
-      HStack(alignment: .top, spacing: 16) {
+      HStack(alignment: .top, spacing: Theme.Spacing.base) {
         TabIcon(glyph: glyph, on: false)
           .foregroundStyle(Theme.ink)
-          .frame(width: 30, height: 24)
-        VStack(alignment: .leading, spacing: 2) {
+          .frame(width: Theme.Spacing.s30, height: Theme.Spacing.xl)
+        VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
           Text(title)
             .font(.headline)
             .foregroundStyle(Theme.ink)
@@ -76,7 +76,7 @@ struct AddSheetView: View {
         }
         Spacer(minLength: 0)
       }
-      .padding(.vertical, 16)
+      .padding(.vertical, Theme.Spacing.base)
       .contentShape(Rectangle())
     }
     .buttonStyle(.plain)
@@ -124,11 +124,11 @@ struct ComposerView: View {
 
   var body: some View {
     ScrollView {
-      VStack(alignment: .leading, spacing: 0) {
+      VStack(alignment: .leading, spacing: Theme.Spacing.none) {
         Text(isPlan ? Copy.Composer.newPlan : Copy.Composer.newIdea)
           .font(.title2.weight(.semibold))
           .foregroundStyle(Theme.ink)
-          .padding(.bottom, 14)
+          .padding(.bottom, Theme.Spacing.row)
 
         FDTextField(
           label: isPlan ? "Plan" : nil,
@@ -156,10 +156,10 @@ struct ComposerView: View {
           Text(previewWhen)
             .font(.footnote)
             .foregroundStyle(Theme.inkFaint)
-            .padding(.top, 12)
+            .padding(.top, Theme.Spacing.md)
 
           if let whisper = contextWhisper {
-            HStack(spacing: 8) {
+            HStack(spacing: Theme.Spacing.sm) {
               Text("💬")
                 .font(.footnote)
               Text(whisper)
@@ -167,17 +167,17 @@ struct ComposerView: View {
                 .foregroundStyle(Theme.ink)
                 .lineLimit(1)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.horizontal, Theme.Spacing.md)
+            .padding(.vertical, Theme.Spacing.sm)
             .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
-            .padding(.top, 10)
+            .padding(.top, Theme.Spacing.s10)
           }
         }
 
         fieldLabel("Cover", hint: "— optional")
         CoverPickerView(cover: $cover, titleHint: { title })
 
-        HStack(spacing: 10) {
+        HStack(spacing: Theme.Spacing.s10) {
           FDButton("Cancel", variant: .secondary, action: onClose)
           FDButton(
             isPlan ? Copy.Composer.addPlan : Copy.Composer.addIdea,
@@ -188,10 +188,10 @@ struct ComposerView: View {
             await save()
           }
         }
-        .padding(.top, 20)
+        .padding(.top, Theme.Spacing.lg)
       }
-      .padding(20)
-      .padding(.bottom, 28)
+      .padding(Theme.Spacing.lg)
+      .padding(.bottom, Theme.Spacing.s28)
     }
     .background(Theme.paper.ignoresSafeArea())
     .presentationDetents([.large])
@@ -228,7 +228,7 @@ struct ComposerView: View {
   }
 
   private var appleWhenCard: some View {
-    VStack(spacing: 0) {
+    VStack(spacing: Theme.Spacing.none) {
       // Starts / When row
       HStack {
         Text(multiDay ? "Starts" : "When")
@@ -237,7 +237,7 @@ struct ComposerView: View {
 
         Spacer()
 
-        HStack(spacing: 8) {
+        HStack(spacing: Theme.Spacing.sm) {
           DatePicker(
             "",
             selection: Binding(
@@ -260,13 +260,13 @@ struct ComposerView: View {
               Text("+ Add time")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(Theme.inkSoft)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
+                .padding(.horizontal, Theme.Spacing.s10)
+                .padding(.vertical, Theme.Spacing.s6)
                 .background(Theme.fillTertiary, in: RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
             }
             .buttonStyle(.plain)
           } else {
-            HStack(spacing: 6) {
+            HStack(spacing: Theme.Spacing.s6) {
               CompactTimePicker(
                 selection: Binding(
                   get: { parseTime(from) },
@@ -288,13 +288,13 @@ struct ComposerView: View {
           }
         }
       }
-      .padding(.horizontal, 14)
-      .padding(.vertical, 10)
+      .padding(.horizontal, Theme.Spacing.row)
+      .padding(.vertical, Theme.Spacing.s10)
 
       // Multi-day Ends row
       if multiDay {
         Divider()
-          .padding(.leading, 14)
+          .padding(.leading, Theme.Spacing.row)
 
         HStack {
           Text("Ends")
@@ -303,7 +303,7 @@ struct ComposerView: View {
 
           Spacer()
 
-          HStack(spacing: 8) {
+          HStack(spacing: Theme.Spacing.sm) {
             DatePicker(
               "",
               selection: Binding(
@@ -323,13 +323,13 @@ struct ComposerView: View {
                   Text("+ End time")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(Theme.inkSoft)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, Theme.Spacing.s10)
+                    .padding(.vertical, Theme.Spacing.s6)
                     .background(Theme.fillTertiary, in: RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
                 }
                 .buttonStyle(.plain)
               } else {
-                HStack(spacing: 6) {
+                HStack(spacing: Theme.Spacing.s6) {
                   CompactTimePicker(
                     selection: Binding(
                       get: { parseTime(until) },
@@ -351,12 +351,12 @@ struct ComposerView: View {
             }
           }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, Theme.Spacing.row)
+        .padding(.vertical, Theme.Spacing.s10)
       } else if !from.isEmpty && !until.isEmpty {
         // Single-day Until row
         Divider()
-          .padding(.leading, 14)
+          .padding(.leading, Theme.Spacing.row)
 
         HStack {
           Text("Until")
@@ -365,7 +365,7 @@ struct ComposerView: View {
 
           Spacer()
 
-          HStack(spacing: 6) {
+          HStack(spacing: Theme.Spacing.s6) {
             CompactTimePicker(
               selection: Binding(
                 get: { parseTime(until) },
@@ -384,8 +384,8 @@ struct ComposerView: View {
             .buttonStyle(.plain)
           }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, Theme.Spacing.row)
+        .padding(.vertical, Theme.Spacing.s10)
       }
     }
     .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
@@ -418,7 +418,7 @@ struct ComposerView: View {
         Spacer()
       }
     }
-    .padding(.top, 8)
+    .padding(.top, Theme.Spacing.sm)
   }
 
   private var previewWhen: String {
@@ -560,7 +560,7 @@ struct ComposerView: View {
   }
 
   private func fieldLabel(_ text: String, hint: String? = nil) -> some View {
-    HStack(spacing: 4) {
+    HStack(spacing: Theme.Spacing.xs) {
       Text(text)
         .font(.caption.weight(.semibold))
         .foregroundStyle(Theme.inkFaint)
@@ -570,7 +570,7 @@ struct ComposerView: View {
           .foregroundStyle(Theme.inkFaint)
       }
     }
-    .padding(.top, 16)
-    .padding(.bottom, 8)
+    .padding(.top, Theme.Spacing.base)
+    .padding(.bottom, Theme.Spacing.sm)
   }
 }

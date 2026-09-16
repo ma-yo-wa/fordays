@@ -538,16 +538,16 @@ export default function Settings() {
                 })}
               </div>
               {pastOrbs.length > 0 && (
-                <div style={{ marginTop: 12 }}>
+                <div style={{ marginTop: 'var(--space-3)' }}>
                   <FormGroup>
                     <FormRow
                       label={Copy.orbs.pastOrbs}
                       note={Copy.orbs.pastOrbsSub}
                       onClick={() => setSubview('pastOrbs')}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1-5)' }}>
                         <Pill variant="neutral" size="sm">{pastOrbs.length}</Pill>
-                        <span style={{ color: 'var(--ink-faint)', fontSize: 13 }} aria-hidden>›</span>
+                        <span style={{ color: 'var(--ink-faint)', fontSize: 'var(--fs-footnote)' }} aria-hidden>›</span>
                       </div>
                     </FormRow>
                   </FormGroup>
@@ -861,7 +861,7 @@ export default function Settings() {
           )}
         </FormGroup>
 
-        <div style={{ marginTop: 16 }}>
+        <div style={{ marginTop: 'var(--space-4)' }}>
           <FormGroup
             header="Notifications"
             footer={bellBusy ? 'Working…' : pushCopy(bell, space?.partnerName)}
@@ -912,7 +912,7 @@ export default function Settings() {
         >
           ← Settings
         </button>
-        <div style={{ marginTop: 8 }}>
+        <div style={{ marginTop: 'var(--space-2)' }}>
           <ActionRow
             icon="+"
             label={Copy.orbs.startNew}
@@ -965,7 +965,7 @@ export default function Settings() {
         >
           ← Settings
         </button>
-        <div className={ui.pastOrbList} style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
+        <div className={ui.pastOrbList} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', marginTop: 'var(--space-3)' }}>
           {pastOrbs.map((pOrb) => {
             const pFaces = orbFaceChips(pOrb);
             const isCurrent = pOrb.id === space?.id;
@@ -989,7 +989,7 @@ export default function Settings() {
                   </div>
                 </div>
 
-                <div className={ui.pastOrbActions} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+                <div className={ui.pastOrbActions} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'var(--space-3)' }}>
                   {isCurrent ? (
                     <Button variant="primary" size="sm" disabled>
                       Currently viewing

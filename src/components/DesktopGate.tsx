@@ -71,14 +71,14 @@ export default function DesktopGate() {
             <div className={s.mockupHeader}>
               <div className={s.mockupPill}>
                 <div className={s.mockupFaces}>
-                  <span className={s.mockupFace} style={{ background: '#4F7735' }}>
+                  <span className={s.mockupFace} style={{ background: 'var(--sage-ink)' }}>
                     M
                   </span>
-                  <span className={s.mockupFace} style={{ background: '#C4285A' }}>
+                  <span className={s.mockupFace} style={{ background: 'var(--rose-ink)' }}>
                     A
                   </span>
                 </div>
-                <span style={{ fontSize: 10, color: '#888' }}>⌵</span>
+                <span style={{ fontSize: 'var(--fs-tiny)', color: 'var(--ink-faint)' }}>⌵</span>
               </div>
               <span className={s.mockupTitle}>September</span>
               <span className={s.mockupControls}>Today</span>
@@ -97,7 +97,7 @@ export default function DesktopGate() {
                   className={s.mockupCardThumb}
                   style={{
                     background:
-                      'radial-gradient(circle at 30% 30%, #f0c296, #ff7396)',
+                      'radial-gradient(circle at 30% 30%, var(--orb-peach), var(--orb-rose))',
                   }}
                 />
                 <div className={s.mockupCardText}>

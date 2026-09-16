@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: var(--space-1-5);
   border-radius: var(--r-capsule);
   font-family: var(--ui);
   user-select: none;
@@ -10,8 +10,8 @@
   border: none;
   background: transparent;
   transition:
-    transform 0.14s var(--ease-ios),
-    opacity 0.14s var(--ease-ios);
+    transform var(--duration-press) var(--ease-ios),
+    opacity var(--duration-press) var(--ease-ios);
 }
 
 .clickable {
@@ -20,21 +20,21 @@
 }
 
 .clickable:active {
-  transform: scale(0.96);
-  opacity: 0.8;
+  transform: scale(var(--scale-press-soft));
+  opacity: var(--op-80);
 }
 
 /* Sizes */
 .sizeSm {
-  min-height: 24px;
-  padding: 3px 9px;
+  min-height: var(--space-6);
+  padding: var(--space-0-75) var(--space-2-25);
   font: var(--t-footnote);
   letter-spacing: var(--tr-footnote);
 }
 
 .sizeMd {
-  min-height: 32px;
-  padding: 6px 13px;
+  min-height: var(--space-8);
+  padding: var(--space-1-5) var(--space-3-25);
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   font-weight: 500;

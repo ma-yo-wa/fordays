@@ -170,13 +170,13 @@ struct CoverPickerView: View {
   @State private var showCustomUrl = false
 
   private let gridColumns = [
-    GridItem(.flexible(), spacing: 10),
-    GridItem(.flexible(), spacing: 10),
-    GridItem(.flexible(), spacing: 10)
+    GridItem(.flexible(), spacing: Theme.Spacing.s10),
+    GridItem(.flexible(), spacing: Theme.Spacing.s10),
+    GridItem(.flexible(), spacing: Theme.Spacing.s10)
   ]
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 12) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.md) {
       if !cover.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
         previewSection
       }
@@ -205,21 +205,21 @@ struct CoverPickerView: View {
     ZStack(alignment: .topTrailing) {
       RemoteOrDataImage(urlString: cover, contentMode: .fill)
         .frame(maxWidth: .infinity)
-        .frame(height: 140)
+        .frame(height: Theme.TouchTarget.coverPreview)
         .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
 
       Button {
-        withAnimation(.spring(response: 0.3)) {
+        withAnimation(.spring(response: Theme.Motion.spring)) {
           cover = ""
         }
       } label: {
         Text("Remove")
           .font(.caption.weight(.semibold))
           .foregroundStyle(.white)
-          .padding(.horizontal, 10)
-          .padding(.vertical, 5)
+          .padding(.horizontal, Theme.Spacing.s10)
+          .padding(.vertical, Theme.Spacing.s5)
           .background(Theme.ink, in: Capsule())
-          .padding(8)
+          .padding(Theme.Spacing.sm)
       }
       .buttonStyle(.plain)
     }
@@ -228,10 +228,10 @@ struct CoverPickerView: View {
   // MARK: - Tabs
 
   private var tabSelector: some View {
-    HStack(spacing: 4) {
+    HStack(spacing: Theme.Spacing.xs) {
       ForEach(CoverTab.allCases) { t in
         Button {
-          withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+          withAnimation(.spring(response: Theme.Motion.snappy, dampingFraction: Theme.Motion.snappyDamping)) {
             tab = t
           }
         } label: {
@@ -239,26 +239,26 @@ struct CoverPickerView: View {
             .font(.footnote.weight(tab == t ? .semibold : .regular))
             .foregroundStyle(tab == t ? Theme.ink : Theme.inkSoft)
             .frame(maxWidth: .infinity)
-            .frame(height: 32)
+            .frame(height: Theme.TouchTarget.avatarMd)
             .background {
               if tab == t {
                 Capsule().fill(Theme.paperWarm)
-                  .shadow(color: Theme.fillSecondary, radius: 4, y: 1)
+                  .shadow(color: Theme.fillSecondary, radius: Theme.Spacing.xs, y: Theme.TouchTarget.borderWidth)
               }
             }
         }
         .buttonStyle(.plain)
       }
     }
-    .padding(3)
+    .padding(Theme.Spacing.s3)
     .background(Theme.fillTertiary, in: Capsule())
   }
 
   // MARK: - Search & Grid
 
   private func searchableGrid(placeholder: String, items: [CoverItem]) -> some View {
-    VStack(alignment: .leading, spacing: 10) {
-      HStack(spacing: 8) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.s10) {
+      HStack(spacing: Theme.Spacing.sm) {
         Image(systemName: "magnifyingglass")
           .font(.footnote)
           .foregroundStyle(Theme.inkFaint)
@@ -278,8 +278,8 @@ struct CoverPickerView: View {
           .buttonStyle(.plain)
         }
       }
-      .padding(.horizontal, 12)
-      .padding(.vertical, 8)
+      .padding(.horizontal, Theme.Spacing.md)
+      .padding(.vertical, Theme.Spacing.sm)
       .background(Theme.fillQuaternary)
       .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
 
@@ -287,23 +287,23 @@ struct CoverPickerView: View {
         Text("No pictures found for “\(query)”. Try another word.")
           .font(.footnote)
           .foregroundStyle(Theme.inkFaint)
-          .padding(.vertical, 12)
+          .padding(.vertical, Theme.Spacing.md)
       } else {
-        LazyVGrid(columns: gridColumns, spacing: 8) {
+        LazyVGrid(columns: gridColumns, spacing: Theme.Spacing.sm) {
           ForEach(items) { item in
             Button {
-              withAnimation(.spring(response: 0.3)) {
+              withAnimation(.spring(response: Theme.Motion.spring)) {
                 cover = item.fullUrl
               }
             } label: {
               RemoteOrDataImage(urlString: item.previewUrl, contentMode: .fill)
-                .frame(height: 74)
+                .frame(height: Theme.TouchTarget.coverTile)
                 .frame(maxWidth: .infinity)
                 .clipShape(RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
                 .overlay {
                   if cover == item.fullUrl {
                     RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous)
-                      .stroke(Theme.roseInk, lineWidth: 2.5)
+                      .stroke(Theme.roseInk, lineWidth: Theme.TouchTarget.strokeFocus)
                   }
                 }
             }
@@ -317,12 +317,12 @@ struct CoverPickerView: View {
   // MARK: - Photos Section
 
   private var photosSection: some View {
-    VStack(alignment: .leading, spacing: 10) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.s10) {
       PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-        HStack(spacing: 8) {
+        HStack(spacing: Theme.Spacing.sm) {
           if isProcessingPhoto {
             ProgressView()
-              .scaleEffect(0.8)
+              .scaleEffect(Theme.Motion.photoSpinner)
           } else {
             Image(systemName: "photo.on.rectangle")
               .font(.subheadline)
@@ -332,7 +332,7 @@ struct CoverPickerView: View {
         }
         .foregroundStyle(Theme.ink)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
+        .padding(.vertical, Theme.Spacing.row)
         .background(Theme.fillQuaternary)
         .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
       }
@@ -349,7 +349,7 @@ struct CoverPickerView: View {
         .font(.caption)
         .foregroundStyle(Theme.inkFaint)
     }
-    .padding(.top, 4)
+    .padding(.top, Theme.Spacing.xs)
   }
 
   private func processPickedPhoto(_ item: PhotosPickerItem) async {
@@ -359,7 +359,7 @@ struct CoverPickerView: View {
       if let data = try await item.loadTransferable(type: Data.self) {
         if let compressedDataUrl = compressPhoto(data: data) {
           await MainActor.run {
-            withAnimation(.spring(response: 0.3)) {
+            withAnimation(.spring(response: Theme.Motion.spring)) {
               cover = compressedDataUrl
             }
           }
@@ -388,13 +388,13 @@ struct CoverPickerView: View {
   // MARK: - Custom URL
 
   private var customUrlSection: some View {
-    VStack(alignment: .leading, spacing: 6) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.s6) {
       Button {
-        withAnimation(.easeInOut(duration: 0.2)) {
+        withAnimation(.easeInOut(duration: Theme.Motion.shelf)) {
           showCustomUrl.toggle()
         }
       } label: {
-        HStack(spacing: 4) {
+        HStack(spacing: Theme.Spacing.xs) {
           Text(showCustomUrl ? "Hide link input" : "Or paste image link")
           Image(systemName: showCustomUrl ? "chevron.up" : "chevron.down")
             .font(.caption2)
@@ -410,7 +410,7 @@ struct CoverPickerView: View {
           .keyboardType(.URL)
       }
     }
-    .padding(.top, 4)
+    .padding(.top, Theme.Spacing.xs)
   }
 
   // MARK: - Preset Catalogues

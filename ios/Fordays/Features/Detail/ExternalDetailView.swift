@@ -76,18 +76,18 @@ struct ExternalDetailView: View {
 
   var body: some View {
     NavigationStack {
-      VStack(alignment: .leading, spacing: 0) {
+      VStack(alignment: .leading, spacing: Theme.Spacing.none) {
         // Header
-        HStack(alignment: .top, spacing: 14) {
+        HStack(alignment: .top, spacing: Theme.Spacing.row) {
           LinearGradient(
             colors: Theme.orbColors(for: event.id, title: event.title),
             startPoint: .topLeading,
             endPoint: .bottomTrailing
           )
-          .frame(width: 46, height: 46)
+          .frame(width: Theme.TouchTarget.formRow, height: Theme.TouchTarget.formRow)
           .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
 
-          VStack(alignment: .leading, spacing: 4) {
+          VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
             Text(event.title ?? Copy.Availability.busy)
               .font(.title2.weight(.bold))
               .foregroundStyle(Theme.ink)
@@ -97,7 +97,7 @@ struct ExternalDetailView: View {
             if let loc = event.location, !loc.isEmpty {
               if let url = URL(string: "https://maps.apple.com/?q=\(loc.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? loc)") {
                 Link(destination: url) {
-                  HStack(spacing: 4) {
+                  HStack(spacing: Theme.Spacing.xs) {
                     Text("📍")
                       .font(.caption)
                     Text(loc)
@@ -113,14 +113,14 @@ struct ExternalDetailView: View {
             }
           }
         }
-        .padding(.bottom, 20)
+        .padding(.bottom, Theme.Spacing.lg)
 
         Divider()
           .overlay(Theme.hairline)
 
         // Rows
-        VStack(alignment: .leading, spacing: 14) {
-          HStack(spacing: 10) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.row) {
+          HStack(spacing: Theme.Spacing.s10) {
             FDAvatar(name: ownerName, seat: isMine ? 0 : 1, size: .sm)
             Text(ownerName)
               .font(.subheadline)
@@ -132,7 +132,7 @@ struct ExternalDetailView: View {
             )
           }
         }
-        .padding(.vertical, 16)
+        .padding(.vertical, Theme.Spacing.base)
 
         // Do with [Partner] action
         if app.space?.isMatched != true, !activeSharedOrbs.isEmpty {
@@ -143,7 +143,7 @@ struct ExternalDetailView: View {
             ) {
               Task { await handleDoWith(target) }
             }
-            .padding(.top, 4)
+            .padding(.top, Theme.Spacing.xs)
           } else {
             FDActionRow(
               title: Copy.Orbs.doWithEllipsis,
@@ -151,19 +151,19 @@ struct ExternalDetailView: View {
             ) {
               showMoveDialog = true
             }
-            .padding(.top, 4)
+            .padding(.top, Theme.Spacing.xs)
           }
         }
 
         Text(Copy.Availability.importedFoot(possessive))
           .font(.footnote)
           .foregroundStyle(Theme.inkSoft)
-          .lineSpacing(2)
-          .padding(.top, 16)
+          .lineSpacing(Theme.Spacing.xxs)
+          .padding(.top, Theme.Spacing.base)
 
         Spacer(minLength: 0)
       }
-      .padding(20)
+      .padding(Theme.Spacing.lg)
       .background(Theme.paper.ignoresSafeArea())
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {

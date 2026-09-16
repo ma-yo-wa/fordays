@@ -6,14 +6,14 @@ struct FDFormGroup<Content: View>: View {
   @ViewBuilder var content: () -> Content
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 6) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.s6) {
       if let header {
         Text(header)
           .font(.fdFootnote.weight(.semibold))
           .foregroundStyle(Theme.inkSoft)
-          .padding(.horizontal, 4)
+          .padding(.horizontal, Theme.Spacing.xs)
       }
-      VStack(spacing: 0) {
+      VStack(spacing: Theme.Spacing.none) {
         content()
       }
       .background(Theme.fillQuaternary)
@@ -22,7 +22,7 @@ struct FDFormGroup<Content: View>: View {
         Text(footer)
           .font(.fdFootnote)
           .foregroundStyle(Theme.inkFaint)
-          .padding(.horizontal, 4)
+          .padding(.horizontal, Theme.Spacing.xs)
       }
     }
   }
@@ -47,8 +47,8 @@ struct FDFormRow<RightContent: View>: View {
   }
 
   var body: some View {
-    let rowContent = HStack(spacing: 14) {
-      VStack(alignment: .leading, spacing: 2) {
+    let rowContent = HStack(spacing: Theme.Spacing.row) {
+      VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
         Text(label)
           .font(.fdBody)
           .foregroundStyle(Theme.ink)
@@ -61,9 +61,9 @@ struct FDFormRow<RightContent: View>: View {
       Spacer()
       rightContent()
     }
-    .padding(.horizontal, 14)
-    .padding(.vertical, 11)
-    .frame(minHeight: 46)
+    .padding(.horizontal, Theme.Spacing.row)
+    .padding(.vertical, Theme.Spacing.s10)
+    .frame(minHeight: Theme.TouchTarget.formRow)
     .contentShape(Rectangle())
 
     if let action {

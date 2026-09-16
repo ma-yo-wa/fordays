@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   border: none;
   border-radius: var(--r-capsule);
   font: var(--t-headline);
@@ -12,18 +12,18 @@
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   transition:
-    transform 0.14s var(--ease-ios),
-    opacity 0.14s var(--ease-ios),
-    background-color 0.14s var(--ease-ios);
+    transform var(--duration-press) var(--ease-ios),
+    opacity var(--duration-press) var(--ease-ios),
+    background-color var(--duration-press) var(--ease-ios);
 }
 
 .btn:active:not(:disabled) {
-  transform: scale(0.97);
-  opacity: 0.85;
+  transform: scale(var(--scale-press));
+  opacity: var(--op-85);
 }
 
 .btn:disabled {
-  opacity: 0.35;
+  opacity: var(--op-35);
   cursor: not-allowed;
   transform: none;
 }
@@ -34,15 +34,15 @@
 
 /* Sizes */
 .sizeMd {
-  min-height: 50px;
-  padding: 14px 20px;
+  min-height: var(--h-button-md);
+  padding: var(--space-3-5) var(--space-5);
   font: var(--t-headline);
   letter-spacing: var(--tr-headline);
 }
 
 .sizeSm {
-  min-height: 36px;
-  padding: 8px 14px;
+  min-height: var(--space-9);
+  padding: var(--space-2) var(--space-3-5);
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   font-weight: 600;
@@ -74,9 +74,9 @@
 }
 
 .spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid currentColor;
+  width: var(--space-4);
+  height: var(--space-4);
+  border: var(--border-thick) solid currentColor;
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;

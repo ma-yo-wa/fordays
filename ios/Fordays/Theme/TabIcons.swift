@@ -22,7 +22,7 @@ struct TabIcon: View {
         MemoriesGlyph(on: on)
       }
     }
-    .frame(width: 24, height: 24)
+    .frame(width: Theme.Spacing.xl, height: Theme.Spacing.xl)
   }
 }
 

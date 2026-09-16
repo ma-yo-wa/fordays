@@ -23,20 +23,20 @@ struct InviteShareView: View {
         .onAppear { dismiss() }
     } else {
       ScrollView {
-      VStack(alignment: .leading, spacing: 0) {
+      VStack(alignment: .leading, spacing: Theme.Spacing.none) {
         Text(Copy.Invite.title)
           .font(.title2.weight(.semibold))
           .foregroundStyle(Theme.ink)
-          .padding(.bottom, 8)
+          .padding(.bottom, Theme.Spacing.sm)
 
         Text(Copy.Invite.subtitle)
           .font(.footnote)
           .foregroundStyle(Theme.inkFaint)
-          .padding(.bottom, 16)
+          .padding(.bottom, Theme.Spacing.base)
 
         if !code.isEmpty {
           HStack {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
               Text(Copy.Invite.orbCodeLabel)
                 .font(.fdCaption2.weight(.medium))
                 .foregroundStyle(Theme.inkFaint)
@@ -50,14 +50,14 @@ struct InviteShareView: View {
               app.toast = Copy.Invite.codeCopied
             }
           }
-          .padding(12)
+          .padding(Theme.Spacing.md)
           .background(Theme.fillQuaternary)
           .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
           .overlay(
             RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous)
-              .stroke(Theme.separator, lineWidth: 1)
+              .stroke(Theme.separator, lineWidth: Theme.TouchTarget.borderWidth)
           )
-          .padding(.bottom, 16)
+          .padding(.bottom, Theme.Spacing.base)
         }
 
         FDTextField(
@@ -67,7 +67,7 @@ struct InviteShareView: View {
           text: $first
         )
 
-        HStack(spacing: 10) {
+        HStack(spacing: Theme.Spacing.s10) {
           FDButton(Copy.Invite.notNow, variant: .secondary) { dismiss() }
           FDButton(
             Copy.Invite.shareInvite,
@@ -78,9 +78,9 @@ struct InviteShareView: View {
             await share()
           }
         }
-        .padding(.top, 20)
+        .padding(.top, Theme.Spacing.lg)
       }
-      .padding(20)
+      .padding(Theme.Spacing.lg)
     }
       .background(Theme.paper.ignoresSafeArea())
       .presentationDetents([.medium])

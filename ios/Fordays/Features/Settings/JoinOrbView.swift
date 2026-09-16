@@ -23,16 +23,16 @@ struct JoinOrbView: View {
 
   var body: some View {
     ScrollView {
-      VStack(alignment: .leading, spacing: 0) {
+      VStack(alignment: .leading, spacing: Theme.Spacing.none) {
         Text(peek != nil ? "\(peek!.inviterName) invited you" : Copy.Invite.joinTitle)
           .font(.title2.weight(.semibold))
           .foregroundStyle(Theme.ink)
-          .padding(.bottom, 8)
+          .padding(.bottom, Theme.Spacing.sm)
 
         Text(peek != nil ? "You’ll share this Orb with \(peek!.inviterName)." : Copy.Invite.joinSubtitle)
           .font(.footnote)
           .foregroundStyle(Theme.inkFaint)
-          .padding(.bottom, 16)
+          .padding(.bottom, Theme.Spacing.base)
 
         FDTextField(
           label: Copy.Invite.codeOrLink,
@@ -52,19 +52,19 @@ struct JoinOrbView: View {
               input = paste
             }
           }
-          .padding(.top, 8)
+          .padding(.top, Theme.Spacing.sm)
         }
 
         if isLookingUp {
           Text(Copy.Invite.lookingUp)
             .font(.footnote)
             .foregroundStyle(Theme.inkSoft)
-            .padding(.top, 10)
+            .padding(.top, Theme.Spacing.s10)
         }
 
         if let peek, peek.isOpen {
           FDCard(variant: .sageWash, padding: .sm) {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
               Text("\(peek.inviterName) invited you to \(peek.spaceName.map { "“\($0)”" } ?? "their Orb")")
                 .font(.headline)
                 .foregroundStyle(Theme.ink)
@@ -75,17 +75,17 @@ struct JoinOrbView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
           }
-          .padding(.top, 14)
+          .padding(.top, Theme.Spacing.row)
         }
 
         if let errorText {
           Text(errorText)
             .font(.footnote)
             .foregroundStyle(Theme.roseInk)
-            .padding(.top, 10)
+            .padding(.top, Theme.Spacing.s10)
         }
 
-        HStack(spacing: 10) {
+        HStack(spacing: Theme.Spacing.s10) {
           FDButton(Copy.Invite.notNow, variant: .secondary) { dismiss() }
 
           FDButton(
@@ -97,9 +97,9 @@ struct JoinOrbView: View {
             await join()
           }
         }
-        .padding(.top, 24)
+        .padding(.top, Theme.Spacing.xl)
       }
-      .padding(20)
+      .padding(Theme.Spacing.lg)
     }
     .background(Theme.paper.ignoresSafeArea())
     .presentationDetents([.medium])

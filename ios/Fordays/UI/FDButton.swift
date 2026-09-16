@@ -13,8 +13,8 @@ enum FDButtonSize {
 
   var minHeight: CGFloat {
     switch self {
-    case .md: return 50
-    case .sm: return 36
+    case .md: return Theme.TouchTarget.buttonMd
+    case .sm: return Theme.TouchTarget.control
     }
   }
 
@@ -27,8 +27,8 @@ enum FDButtonSize {
 
   var horizontalPadding: CGFloat {
     switch self {
-    case .md: return 20
-    case .sm: return 14
+    case .md: return Theme.Spacing.lg
+    case .sm: return Theme.Spacing.row
     }
   }
 }
@@ -36,9 +36,9 @@ enum FDButtonSize {
 struct FDScaleButtonStyle: ButtonStyle {
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
-      .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-      .opacity(configuration.isPressed ? 0.85 : 1.0)
-      .animation(.easeOut(duration: 0.14), value: configuration.isPressed)
+      .scaleEffect(configuration.isPressed ? Theme.Motion.pressScale : 1.0)
+      .opacity(configuration.isPressed ? Theme.Motion.spinner : 1.0)
+      .animation(.easeOut(duration: Theme.Motion.pressDuration), value: configuration.isPressed)
   }
 }
 
@@ -109,11 +109,11 @@ struct FDButton: View {
 
   var body: some View {
     Button(action: action) {
-      HStack(spacing: 8) {
+      HStack(spacing: Theme.Spacing.sm) {
         if loading {
           ProgressView()
             .tint(foregroundColor)
-            .scaleEffect(0.85)
+            .scaleEffect(Theme.Motion.spinner)
         } else {
           Text(title)
             .font(size.font)
@@ -127,6 +127,6 @@ struct FDButton: View {
     }
     .buttonStyle(FDScaleButtonStyle())
     .disabled(disabled || loading)
-    .opacity((disabled || loading) ? 0.38 : 1.0)
+    .opacity((disabled || loading) ? Theme.Motion.disabledOpacity : 1.0)
   }
 }

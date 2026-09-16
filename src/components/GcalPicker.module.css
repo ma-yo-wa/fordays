@@ -1,12 +1,12 @@
 .lead {
-  margin: 4px 0 18px;
+  margin: var(--space-1) var(--space-0) var(--space-4-5);
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   color: var(--ink-faint);
 }
 
 .section {
-  margin-bottom: 18px;
+  margin-bottom: var(--space-4-5);
 }
 
 .sectionLabel {
@@ -15,7 +15,7 @@
   letter-spacing: var(--tr-footnote);
   font-weight: 600;
   color: var(--ink-faint);
-  margin: 0 0 8px 4px;
+  margin: var(--space-0) var(--space-0) var(--space-2) var(--space-1);
 }
 
 .list {
@@ -27,10 +27,10 @@
 .row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
-  padding: 12px 14px;
-  min-height: 52px;
+  padding: var(--space-3) var(--space-3-5);
+  min-height: var(--h-action);
   border: none;
   background: none;
   cursor: pointer;
@@ -45,27 +45,27 @@
 }
 
 .row:disabled {
-  opacity: 0.5;
+  opacity: var(--op-50);
 }
 
 .icon {
   flex: none;
-  width: 22px;
-  height: 22px;
+  width: var(--space-5-5);
+  height: var(--space-5-5);
   color: var(--ink-2);
 }
 
 .name {
   flex: 1;
-  min-width: 0;
+  min-width: var(--space-0);
 }
 
 .radio {
   flex: none;
-  width: 22px;
-  height: 22px;
+  width: var(--space-5-5);
+  height: var(--space-5-5);
   border-radius: 50%;
-  border: 1.5px solid var(--ink-faint);
+  border: var(--border-md) solid var(--ink-faint);
   display: grid;
   place-items: center;
 }
@@ -73,12 +73,12 @@
 .radioOn {
   border-color: var(--ink);
   background: var(--ink);
-  box-shadow: inset 0 0 0 3px var(--paper-warm);
+  box-shadow: inset var(--space-0) var(--space-0) var(--space-0) var(--space-0-75) var(--paper-warm);
 }
 
 .actions {
   display: flex;
-  gap: 10px;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  gap: var(--space-2-5);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
 }

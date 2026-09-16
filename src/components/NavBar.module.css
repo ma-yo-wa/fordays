@@ -1,9 +1,9 @@
 .nav {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 40;
+  top: var(--space-0);
+  left: var(--space-0);
+  right: var(--space-0);
+  z-index: var(--z-navbar);
   padding-top: var(--safe-t);
   background: transparent;
 }
@@ -11,31 +11,31 @@
 /* The curved frosted shelf only exists once content has scrolled under the bar. */
 .material {
   position: absolute;
-  inset: 0;
+  inset: var(--space-0);
   background: var(--mat-regular-bg);
   -webkit-backdrop-filter: var(--mat-regular);
   backdrop-filter: var(--mat-regular);
-  border-bottom-left-radius: 24px;
-  border-bottom-right-radius: 24px;
-  box-shadow: 0 4px 16px var(--fill-quaternary);
-  opacity: 0;
+  border-bottom-left-radius: var(--space-6);
+  border-bottom-right-radius: var(--space-6);
+  box-shadow: var(--space-0) var(--space-1) var(--space-4) var(--fill-quaternary);
+  opacity: var(--op-0);
   transition: opacity 0.22s var(--ease-ios);
   pointer-events: none;
 }
 
 .materialOn {
-  opacity: 1;
+  opacity: var(--op-100);
 }
 
 /* 56pt bar with generous breathing room below the Orb capsule */
 .bar {
   position: relative;
-  min-height: 56px;
+  min-height: var(--h-navbar);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 8px;
-  padding: 6px max(16px, var(--safe-l)) 14px max(16px, var(--safe-r));
+  gap: var(--space-2);
+  padding: var(--space-1-5) max(var(--space-4), var(--safe-l)) var(--space-3-5) max(var(--space-4), var(--safe-r));
 }
 
 .leading {
@@ -47,7 +47,7 @@
 .trailing {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-0-5);
   justify-self: end;
 }
 
@@ -62,9 +62,9 @@
 /* ---- bar buttons ---- */
 
 .action {
-  min-width: 34px;
-  height: 34px;
-  padding: 0 6px;
+  min-width: var(--space-8-5);
+  height: var(--space-8-5);
+  padding: var(--space-0) var(--space-1-5);
   border: none;
   background: none;
   color: var(--rose-ink);
@@ -76,21 +76,21 @@
 }
 
 .action:active {
-  opacity: 0.4;
+  opacity: var(--op-40);
 }
 
 .action svg {
-  width: 20px;
-  height: 20px;
+  width: var(--space-5);
+  height: var(--space-5);
 }
 
 .action:disabled {
-  opacity: 0.3;
+  opacity: var(--op-30);
 }
 
 .todayPill {
-  height: 30px;
-  padding: 0 12px;
+  height: var(--space-7-5);
+  padding: var(--space-0) var(--space-3);
   border: none;
   border-radius: var(--r-capsule);
   background: var(--fill-tertiary);
@@ -102,52 +102,52 @@
 }
 
 .todayPill:active {
-  opacity: 0.5;
+  opacity: var(--op-50);
 }
 
 /* ---- avatars ---- */
 
 .who {
   position: relative;
-  height: 36px;
+  height: var(--space-9);
   background: var(--fill-tertiary);
-  -webkit-backdrop-filter: blur(8px) saturate(1.05);
-  backdrop-filter: blur(8px) saturate(1.05);
+  -webkit-backdrop-filter: blur(var(--space-2)) saturate(1.05);
+  backdrop-filter: blur(var(--space-2)) saturate(1.05);
   border: var(--hairline-w) solid var(--hairline);
   border-radius: var(--r-capsule);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   transition:
-    transform 0.14s var(--ease-ios),
-    opacity 0.14s var(--ease-ios);
+    transform var(--duration-press) var(--ease-ios),
+    opacity var(--duration-press) var(--ease-ios);
 }
 
 .whoAvatars {
-  padding: 2px 8px 2px 2px;
-  gap: 6px;
+  padding: var(--space-0-5) var(--space-2) var(--space-0-5) var(--space-0-5);
+  gap: var(--space-1-5);
 }
 
 .whoNamed {
-  padding: 2px 10px 2px 12px;
-  gap: 7px;
-  max-width: min(34vw, 120px);
+  padding: var(--space-0-5) var(--space-2-5) var(--space-0-5) var(--space-3);
+  gap: var(--space-1-75);
+  max-width: min(34vw, var(--h-cover-empty));
 }
 
 .who:active {
-  transform: scale(0.97);
-  opacity: 0.72;
+  transform: scale(var(--scale-press));
+  opacity: var(--op-72);
 }
 
 .faceStack {
   position: relative;
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  flex-shrink: var(--space-0);
 }
 
 .whoTitle {
-  min-width: 0;
+  min-width: var(--space-0);
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -157,44 +157,44 @@
 }
 
 .whoChevron {
-  width: 14px;
-  height: 14px;
+  width: var(--space-3-5);
+  height: var(--space-3-5);
   color: var(--ink-soft);
   display: grid;
   place-items: center;
-  flex-shrink: 0;
+  flex-shrink: var(--space-0);
 }
 
 .whoChevron svg {
-  width: 14px;
-  height: 14px;
+  width: var(--space-3-5);
+  height: var(--space-3-5);
 }
 
 .face {
-  width: 30px;
-  height: 30px;
+  width: var(--space-7-5);
+  height: var(--space-7-5);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font: var(--t-caption);
   font-weight: 600;
-  line-height: 1;
-  color: #fffdfb;
-  border: 2px solid var(--paper);
-  padding-bottom: 1px;
+  line-height: var(--lh-solid);
+  color: var(--paper-warm);
+  border: var(--border-thick) solid var(--paper);
+  padding-bottom: var(--space-px);
 }
 
 .more {
   background: var(--ink-soft);
-  color: #fffdfb;
+  color: var(--paper-warm);
   font: var(--t-caption2);
   font-weight: 700;
-  padding-bottom: 0;
+  padding-bottom: var(--space-0);
 }
 
 .face + .face {
-  margin-left: -11px;
+  margin-left: calc(-1 * var(--space-2-75));
 }
 
 .dim {
@@ -203,11 +203,11 @@
 
 .bulb {
   position: absolute;
-  right: -1px;
-  bottom: 0;
-  width: 9px;
-  height: 9px;
+  right: calc(-1 * var(--space-px));
+  bottom: var(--space-0);
+  width: var(--space-2-25);
+  height: var(--space-2-25);
   border-radius: 50%;
-  background: #c9852e;
-  border: 2px solid var(--paper);
+  background: var(--gold);
+  border: var(--border-thick) solid var(--paper);
 }

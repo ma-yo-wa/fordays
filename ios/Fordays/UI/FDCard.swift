@@ -16,10 +16,10 @@ enum FDCardPadding {
 
   var insets: CGFloat {
     switch self {
-    case .none: return 0
-    case .sm: return 12
-    case .md: return 16
-    case .lg: return 20
+    case .none: return Theme.Spacing.none
+    case .sm: return Theme.Spacing.md
+    case .md: return Theme.Spacing.base
+    case .lg: return Theme.Spacing.lg
     }
   }
 }
@@ -46,13 +46,13 @@ struct FDCard<Content: View>: View {
       .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
       .overlay(
         RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous)
-          .stroke(variant == .paper ? Theme.rule : Color.clear, lineWidth: 1)
+          .stroke(variant == .paper ? Theme.rule : Color.clear, lineWidth: Theme.TouchTarget.borderWidth)
       )
       .shadow(
         color: variant == .warm ? Theme.fillQuaternary : Color.clear,
-        radius: 10,
-        x: 0,
-        y: 4
+        radius: Theme.Shadow.cardRadius,
+        x: Theme.Spacing.none,
+        y: Theme.Shadow.cardY
       )
   }
 }

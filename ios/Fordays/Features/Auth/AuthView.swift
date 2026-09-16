@@ -14,12 +14,12 @@ struct AuthView: View {
     ZStack {
       Theme.paper.ignoresSafeArea()
       ScrollView {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.none) {
           Text(Theme.brandName)
-            .font(.system(size: 40, weight: .semibold, design: .rounded))
+            .font(.fdBrand)
             .foregroundStyle(Theme.ink)
-            .padding(.top, 48)
-            .padding(.bottom, 8)
+            .padding(.top, Theme.Spacing.s48)
+            .padding(.bottom, Theme.Spacing.sm)
 
           if let peek = app.pendingInvitePeek {
             if mode == .signUp {
@@ -27,42 +27,42 @@ struct AuthView: View {
                 Text(Copy.Auth.invitedToNamedOrb(inviter: peek.inviterName, orb: spaceName))
                   .font(.title3.weight(.medium))
                   .foregroundStyle(Theme.inkSoft)
-                  .padding(.bottom, 20)
+                  .padding(.bottom, Theme.Spacing.lg)
               } else {
                 Text(Copy.Auth.invitedToOrb(peek.inviterName))
                   .font(.title3.weight(.medium))
                   .foregroundStyle(Theme.inkSoft)
-                  .padding(.bottom, 20)
+                  .padding(.bottom, Theme.Spacing.lg)
               }
             } else {
               if let spaceName = peek.spaceName, !spaceName.isEmpty {
                 Text("\(peek.inviterName) invited you to “\(spaceName)” — sign in to join")
                   .font(.title3.weight(.medium))
                   .foregroundStyle(Theme.inkSoft)
-                  .padding(.bottom, 20)
+                  .padding(.bottom, Theme.Spacing.lg)
               } else {
                 Text("\(peek.inviterName) invited you — sign in to join")
                   .font(.title3.weight(.medium))
                   .foregroundStyle(Theme.inkSoft)
-                  .padding(.bottom, 20)
+                  .padding(.bottom, Theme.Spacing.lg)
               }
             }
           } else {
             Text("Plans, Bucket lists and Memories")
               .font(.title3.weight(.medium))
               .foregroundStyle(Theme.inkSoft)
-              .padding(.bottom, 20)
+              .padding(.bottom, Theme.Spacing.lg)
           }
 
           if mode == .signUp {
             FDTextField(label: "Your name", placeholder: "Aline", text: $name)
-              .padding(.bottom, 12)
+              .padding(.bottom, Theme.Spacing.md)
           }
 
           FDTextField(label: "Email", placeholder: "you@example.com", text: $email)
             .textInputAutocapitalization(.never)
             .keyboardType(.emailAddress)
-            .padding(.bottom, 12)
+            .padding(.bottom, Theme.Spacing.md)
 
           FDTextField(label: "Password", placeholder: "••••••••", text: $password, isSecure: true)
 
@@ -82,7 +82,7 @@ struct AuthView: View {
               await app.signUp(email: email, password: password, displayName: name)
             }
           }
-          .padding(.top, 20)
+          .padding(.top, Theme.Spacing.lg)
 
           Button {
             mode = mode == .signIn ? .signUp : .signIn
@@ -96,16 +96,16 @@ struct AuthView: View {
           }
           .buttonStyle(.plain)
           .font(.footnote)
-          .padding(.top, 18)
+          .padding(.top, Theme.Spacing.s18)
 
           if let err = app.errorMessage {
             Text(err)
               .font(.footnote)
               .foregroundStyle(Theme.roseInk)
-              .padding(.top, 8)
+              .padding(.top, Theme.Spacing.sm)
           }
         }
-        .padding(24)
+        .padding(Theme.Spacing.xl)
       }
     }
   }

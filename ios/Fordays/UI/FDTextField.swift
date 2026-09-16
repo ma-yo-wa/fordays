@@ -12,9 +12,9 @@ struct FDTextField: View {
   var isSecure: Bool = false
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 6) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.s6) {
       if label != nil || hint != nil {
-        HStack(spacing: 6) {
+        HStack(spacing: Theme.Spacing.s6) {
           if let label {
             Text(label)
               .font(.fdFootnote.weight(.semibold))
@@ -28,7 +28,7 @@ struct FDTextField: View {
         }
       }
 
-      HStack(spacing: 8) {
+      HStack(spacing: Theme.Spacing.sm) {
         if isSecure {
           SecureField(placeholder, text: $text)
             .font(.fdBody)
@@ -55,13 +55,13 @@ struct FDTextField: View {
           .buttonStyle(.plain)
         }
       }
-      .padding(.horizontal, 14)
-      .padding(.vertical, 12)
+      .padding(.horizontal, Theme.Spacing.row)
+      .padding(.vertical, Theme.Spacing.md)
       .background(Theme.fillQuaternary)
       .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
       .overlay(
         RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous)
-          .stroke(error != nil ? Theme.roseInk : Color.clear, lineWidth: 1.5)
+          .stroke(error != nil ? Theme.roseInk : Color.clear, lineWidth: Theme.TouchTarget.ringWidth)
       )
 
       if let error, !error.isEmpty {

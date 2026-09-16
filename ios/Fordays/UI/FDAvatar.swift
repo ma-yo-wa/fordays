@@ -7,9 +7,9 @@ enum FDAvatarSize {
 
   var dimension: CGFloat {
     switch self {
-    case .sm: return 24
-    case .md: return 32
-    case .lg: return 42
+    case .sm: return Theme.TouchTarget.avatarSm
+    case .md: return Theme.TouchTarget.avatarMd
+    case .lg: return Theme.TouchTarget.avatarLg
     }
   }
 
@@ -57,7 +57,7 @@ struct FDAvatar: View {
     .clipShape(Circle())
     .overlay(
       Circle()
-        .stroke(Theme.paper, lineWidth: ring ? 2 : 0)
+        .stroke(Theme.paper, lineWidth: ring ? Theme.Spacing.xxs : Theme.Spacing.none)
     )
   }
 }

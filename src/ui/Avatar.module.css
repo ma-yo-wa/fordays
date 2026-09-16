@@ -5,39 +5,39 @@
   justify-content: center;
   overflow: hidden;
   position: relative;
-  flex-shrink: 0;
+  flex-shrink: var(--space-0);
   user-select: none;
   font-family: var(--ui);
   font-weight: 700;
-  color: #ffffff;
+  color: var(--paper-card);
 }
 
 .sizeXs {
-  width: 18px;
-  height: 18px;
-  font-size: 9px;
+  width: var(--space-4-5);
+  height: var(--space-4-5);
+  font-size: var(--fs-micro);
 }
 
 .sizeSm {
-  width: 24px;
-  height: 24px;
-  font-size: 11px;
+  width: var(--space-6);
+  height: var(--space-6);
+  font-size: var(--fs-caption2);
 }
 
 .sizeMd {
-  width: 32px;
-  height: 32px;
-  font-size: 14px;
+  width: var(--space-8);
+  height: var(--space-8);
+  font-size: var(--fs-compact);
 }
 
 .sizeLg {
-  width: 42px;
-  height: 42px;
-  font-size: 17px;
+  width: var(--space-10-5);
+  height: var(--space-10-5);
+  font-size: var(--fs-body);
 }
 
 .ring {
-  box-shadow: 0 0 0 2px var(--paper);
+  box-shadow: var(--space-0) var(--space-0) var(--space-0) var(--space-0-5) var(--paper);
 }
 
 .img {

@@ -42,8 +42,8 @@ struct LocationInputView: View {
   @State private var showSuggestions = false
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 6) {
-      HStack(spacing: 8) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.s6) {
+      HStack(spacing: Theme.Spacing.sm) {
         Text("📍")
           .font(.footnote)
           .foregroundStyle(Theme.inkFaint)
@@ -73,14 +73,14 @@ struct LocationInputView: View {
           .buttonStyle(.plain)
         }
       }
-      .padding(.horizontal, 14)
-      .padding(.vertical, 12)
+      .padding(.horizontal, Theme.Spacing.row)
+      .padding(.vertical, Theme.Spacing.md)
       .background(Theme.fillQuaternary)
       .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
 
       if showSuggestions && isFocused && !searcher.results.isEmpty {
         FDCard(variant: .warm, padding: .sm) {
-          VStack(alignment: .leading, spacing: 0) {
+          VStack(alignment: .leading, spacing: Theme.Spacing.none) {
             ForEach(searcher.results, id: \.self) { item in
               Button {
                 let full = item.subtitle.isEmpty ? item.title : "\(item.title), \(item.subtitle)"
@@ -88,7 +88,7 @@ struct LocationInputView: View {
                 showSuggestions = false
                 isFocused = false
               } label: {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
                   Text(item.title)
                     .font(.fdSubhead.weight(.medium))
                     .foregroundStyle(Theme.ink)
@@ -102,14 +102,14 @@ struct LocationInputView: View {
                   }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 10)
+                .padding(.vertical, Theme.Spacing.sm)
+                .padding(.horizontal, Theme.Spacing.s10)
               }
               .buttonStyle(.plain)
 
               if item != searcher.results.last {
                 Divider()
-                  .padding(.horizontal, 8)
+                  .padding(.horizontal, Theme.Spacing.sm)
               }
             }
           }

@@ -310,13 +310,13 @@ Fordays operates local-first on the client so the notebook feels like paper — 
 
 Fordays feels like a warm personal capsule and stationery, never a corporate calendar or spreadsheet.
 
-- **Razor-Thin Plans Divider**: A crisp, delicate 0.5pt hairline subtly divides the calendar month grid from the daily agenda section on both PWA and iOS (`border-top: var(--hairline-w) solid var(--hairline)` on PWA, `0.5pt Theme.ink.opacity(0.08)` on iOS), providing clear visual grounding without visual clutter.
+- **Razor-Thin Plans Divider**: A crisp, delicate hairline subtly divides the calendar month grid from the daily agenda section on both PWA and iOS (`border-top: var(--hairline-w) solid var(--hairline)` on PWA, `Theme.hairline` on iOS), providing clear visual grounding without visual clutter.
 - **Curved Sticky Top Shelf on Scroll**:
   - *At rest (scroll offset = 0)*: The top bar is 100% transparent. The ambient Orb background gradient flows uninterrupted from top to bottom.
-  - *On scroll (scroll offset > 0)*: A frosted sticky shelf (`.ultraThinMaterial` / `backdrop-filter`) smoothly fades in with a continuous 24pt bottom curved corner radius (`UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24)` on iOS, `border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;` on PWA) and subtle elevation.
+  - *On scroll (scroll offset > 0)*: A frosted sticky shelf (`.ultraThinMaterial` / `backdrop-filter`) smoothly fades in with a continuous bottom curved corner radius (`UnevenRoundedRectangle(bottomLeadingRadius: Theme.Spacing.xl, bottomTrailingRadius: Theme.Spacing.xl)` on iOS, `border-bottom-left-radius: var(--space-6); border-bottom-right-radius: var(--space-6);` on PWA) and subtle elevation.
   - No straight horizontal bottom edge across the screen; the curved corners give the sticky canopy an organic, stationery-like contour.
 - **Identical Top Padding Rhythm across Plans, Bucket, and Memories**:
-  - The navbar height (56pt) and content top margin (14pt) are completely uniform across all three views (Plans, Someday, Memories).
+  - The navbar height (`Theme.TouchTarget.navBar` / 56px) and content top margin (`Theme.Spacing.row` / 14px) are completely uniform across all three views (Plans, Someday, Memories).
   - No bloated large-title headers or mismatched offsets in Bucket or Memories; content in all tabs starts at the exact same vertical baseline.
 - **Static, Rock-Solid Top Bar Controls (No Animations)**:
   - The top bar title is centered and static (no opacity/offset animations when switching tabs, scrolling, or navigating months).
@@ -332,5 +332,34 @@ Fordays feels like a warm personal capsule and stationery, never a corporate cal
     4. Peach bloom pooling at bottom center.
   - The background is never flat beige.
 - **Tactile Cards for Plans & Agenda**:
-  - On both clients, plans and external events in the agenda are presented as individual floating tactile cards (`background: var(--paper-warm)`, `border-radius: 14px`, `padding: 14px`, 10px spacing, subtle elevation) rather than flat divider-separated rows.
+  - On both clients, plans and external events in the agenda are presented as individual floating tactile cards (`background: var(--paper-warm)`, `border-radius: var(--r-md)`, `padding: var(--space-3-5)`, `var(--space-2-5)` spacing, subtle elevation) rather than flat divider-separated rows.
+
+---
+
+## Design System Tokens & Zero Dangling Numbers
+
+Hard requirement across Fordays (PWA and iOS). Agents must follow this; do not ship a literal and “tokenise later.”
+
+**Zero magic numbers in views.** Never hardcode padding, margin, gap, width, height, corner radius, font size, color opacity, border width, scale, or animation duration in a screen, component, or stylesheet. The only files that may contain those literals are the token sources:
+
+- PWA: `src/styles/tokens.css`, `src/ui/motion.ts`
+- iOS: `ios/Fordays/Theme/Theme.swift`
+
+If a value does not exist yet, add the token on **both** clients first, then reference it. Prefer the 4pt aliases for new work. Do not invent a one-off pixel in a view to make something “look right on this monitor.”
+
+### Scale (named aliases)
+
+- **Concentric radii**: `Theme.radiusXs` (4), `Theme.radiusSm` (8), `Theme.controlRadius` (12), `Theme.radiusMd` (14), `Theme.cardRadius` (20), `Theme.sheetRadius` (38), `Theme.capsuleRadius` (999) / `--r-xs` … `--r-capsule`.
+- **Harmonic spacing** (4pt base, Weber expansion). Named aliases: `xxs` 2, `xs` 4, `sm` 8, `md` 12, `row` 14, `base` 16, `lg` 20, `xl` 24, `xxl` 32, `xxxl` 40, `huge` 56. Half-steps (`s6` / `--space-1-5`, etc.) exist only for shipped UI — new work snaps to the aliases or gets a semantic name (`--h-cover`, `Theme.TouchTarget.thumb`).
+- **Type**: Apple ramp via `Font.fd*` / `--t-*`. Never `.font(.system(size: 12))` or `font-size: 15px` in a view. SwiftUI Dynamic Type (`.headline`, `.body`, `.caption`) is allowed because it is a system token.
+- **Tints**: `Theme.hairline`, `Theme.separator`, `Theme.fillQuaternary` / `Tertiary` / `Secondary`, `Theme.veil`, `Theme.scrim`, `Theme.paperTranslucent`, `Theme.roseGlow` — never `Theme.ink.opacity(0.05)`.
+- **Touch / chrome**: `Theme.TouchTarget.min` 44, `control` 36, `navBar` 56, `pill` 28, plus avatars, covers, thumbs in that enum / `--h-*` `--size-*`.
+- **Motion**: `Theme.Motion.*` / `src/ui/motion.ts` / `--scale-press` `--duration-*`.
+
+### Exceptions
+
+Vector glyph paths (`TabIcons.swift`, SVG `d`), CSS `@media` (must match `--bp-gate`), product counts (7 days, 5-minute picker, 3-face cap), and z-index derived from a list index. Ambient orb washes live inside `OrbBackground` / `tokens.css` as the token itself.
+
+Agent rule: `.cursor/rules/no-dangling-numbers.mdc`.
+
 

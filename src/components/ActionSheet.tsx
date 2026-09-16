@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect } from 'react';
+import { durationShelf, springActionSheet, yActionSheet } from '../ui/motion';
 import s from './ActionSheet.module.css';
 
 export interface ActionSheetAction {
@@ -58,17 +59,17 @@ export default function ActionSheet({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
+          transition={{ duration: durationShelf, ease: 'easeOut' }}
           onClick={(e) => {
             if (e.target === e.currentTarget) onCancel();
           }}
         >
           <motion.div
             className={s.wrap}
-            initial={{ y: 80, opacity: 0 }}
+            initial={{ y: yActionSheet, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 80, opacity: 0 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 380 }}
+            exit={{ y: yActionSheet, opacity: 0 }}
+            transition={springActionSheet}
           >
             <div className={s.card}>
               {(title || message) && (

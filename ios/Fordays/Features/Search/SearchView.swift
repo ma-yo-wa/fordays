@@ -78,10 +78,10 @@ struct SearchView: View {
   }
 
   var body: some View {
-    VStack(spacing: 0) {
+    VStack(spacing: Theme.Spacing.none) {
       topSearchBar
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+        .padding(.horizontal, Theme.Spacing.base)
+        .padding(.vertical, Theme.Spacing.sm)
         .background(Theme.paper)
 
       Divider()
@@ -99,20 +99,20 @@ struct SearchView: View {
   }
 
   private var topSearchBar: some View {
-    HStack(spacing: 8) {
+    HStack(spacing: Theme.Spacing.sm) {
       Button {
         onClose()
       } label: {
         Image(systemName: "chevron.left")
           .font(.subheadline.weight(.semibold))
           .foregroundStyle(Theme.roseInk)
-          .frame(width: 32, height: 32)
+          .frame(width: Theme.TouchTarget.avatarMd, height: Theme.TouchTarget.avatarMd)
           .contentShape(Rectangle())
       }
       .buttonStyle(.plain)
       .accessibilityLabel(Copy.Search.cancel)
 
-      HStack(spacing: 8) {
+      HStack(spacing: Theme.Spacing.sm) {
         Image(systemName: "magnifyingglass")
           .font(.subheadline)
           .foregroundStyle(Theme.inkFaint)
@@ -136,12 +136,12 @@ struct SearchView: View {
           .buttonStyle(.plain)
         }
       }
-      .padding(.horizontal, 10)
-      .padding(.vertical, 8)
+      .padding(.horizontal, Theme.Spacing.s10)
+      .padding(.vertical, Theme.Spacing.sm)
       .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
       .overlay(
         RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous)
-          .stroke(Theme.hairline, lineWidth: 0.5)
+          .stroke(Theme.hairline, lineWidth: Theme.TouchTarget.hairlineWidth)
       )
 
       Button(Copy.Search.cancel) {
@@ -161,9 +161,9 @@ struct SearchView: View {
     if q.isEmpty {
       let recents = recentActivities
       if recents.plans.isEmpty && recents.someday.isEmpty {
-        VStack(spacing: 12) {
+        VStack(spacing: Theme.Spacing.md) {
           Image(systemName: "magnifyingglass")
-            .font(.system(size: 36))
+            .font(.fdGlyph)
             .foregroundStyle(Theme.inkFaint)
           Text(Copy.Search.emptyPrompt)
             .font(.subheadline)
@@ -172,14 +172,14 @@ struct SearchView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
         ScrollView {
-          LazyVStack(alignment: .leading, spacing: 20) {
+          LazyVStack(alignment: .leading, spacing: Theme.Spacing.lg) {
             if !recents.plans.isEmpty {
-              VStack(alignment: .leading, spacing: 12) {
+              VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                 Text("Upcoming Plans")
                   .font(.caption.weight(.semibold))
                   .foregroundStyle(Theme.inkSoft)
                   .textCase(.uppercase)
-                  .padding(.horizontal, 4)
+                  .padding(.horizontal, Theme.Spacing.xs)
 
                 ForEach(recents.plans) { item in
                   activityRow(item, accentColor: Theme.rose, trailingTime: DateLocal.formatItemTime(dateTime: item.dateTime, endsAt: item.endsAt))
@@ -188,12 +188,12 @@ struct SearchView: View {
             }
 
             if !recents.someday.isEmpty {
-              VStack(alignment: .leading, spacing: 12) {
+              VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                 Text("Recent in Someday")
                   .font(.caption.weight(.semibold))
                   .foregroundStyle(Theme.inkSoft)
                   .textCase(.uppercase)
-                  .padding(.horizontal, 4)
+                  .padding(.horizontal, Theme.Spacing.xs)
 
                 ForEach(recents.someday) { item in
                   activityRow(item, accentColor: Theme.inkFaint, badge: Copy.Search.someday)
@@ -201,13 +201,13 @@ struct SearchView: View {
               }
             }
           }
-          .padding(.horizontal, 16)
-          .padding(.top, 14)
-          .padding(.bottom, 40)
+          .padding(.horizontal, Theme.Spacing.base)
+          .padding(.top, Theme.Spacing.row)
+          .padding(.bottom, Theme.Spacing.xxxl)
         }
       }
     } else if results.totalCount == 0 {
-      VStack(spacing: 12) {
+      VStack(spacing: Theme.Spacing.md) {
         Text(Copy.Search.noResults(q))
           .font(.subheadline)
           .foregroundStyle(Theme.inkSoft)
@@ -215,22 +215,22 @@ struct SearchView: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity)
     } else {
       ScrollView {
-        LazyVStack(alignment: .leading, spacing: 20) {
+        LazyVStack(alignment: .leading, spacing: Theme.Spacing.lg) {
           if !results.plans.isEmpty {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.md) {
               Text("\(Copy.Search.plans) (\(results.plans.reduce(0) { $0 + $1.items.count }))")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(Theme.inkSoft)
                 .textCase(.uppercase)
-                .padding(.horizontal, 4)
+                .padding(.horizontal, Theme.Spacing.xs)
 
               ForEach(results.plans) { group in
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: Theme.Spacing.s6) {
                   if !group.dayLabel.isEmpty {
                     Text(group.dayLabel)
                       .font(.subheadline.weight(.semibold))
                       .foregroundStyle(Theme.ink)
-                      .padding(.horizontal, 4)
+                      .padding(.horizontal, Theme.Spacing.xs)
                   }
 
                   ForEach(group.items) { item in
@@ -242,12 +242,12 @@ struct SearchView: View {
           }
 
           if !results.someday.isEmpty {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.md) {
               Text("\(Copy.Search.someday) (\(results.someday.count))")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(Theme.inkSoft)
                 .textCase(.uppercase)
-                .padding(.horizontal, 4)
+                .padding(.horizontal, Theme.Spacing.xs)
 
               ForEach(results.someday) { item in
                 activityRow(item, accentColor: Theme.inkFaint, badge: Copy.Search.someday)
@@ -256,20 +256,20 @@ struct SearchView: View {
           }
 
           if !results.memories.isEmpty {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.md) {
               Text("\(Copy.Search.memories) (\(results.memories.reduce(0) { $0 + $1.items.count }))")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(Theme.inkSoft)
                 .textCase(.uppercase)
-                .padding(.horizontal, 4)
+                .padding(.horizontal, Theme.Spacing.xs)
 
               ForEach(results.memories) { group in
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: Theme.Spacing.s6) {
                   if !group.dayLabel.isEmpty {
                     Text(group.dayLabel)
                       .font(.subheadline.weight(.semibold))
                       .foregroundStyle(Theme.ink)
-                      .padding(.horizontal, 4)
+                      .padding(.horizontal, Theme.Spacing.xs)
                   }
 
                   ForEach(group.items) { item in
@@ -280,8 +280,8 @@ struct SearchView: View {
             }
           }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
+        .padding(.horizontal, Theme.Spacing.base)
+        .padding(.vertical, Theme.Spacing.row)
       }
     }
   }
@@ -295,20 +295,20 @@ struct SearchView: View {
     Button {
       onSelect(item)
     } label: {
-      HStack(spacing: 12) {
+      HStack(spacing: Theme.Spacing.md) {
         RoundedRectangle(cornerRadius: Theme.radiusXs, style: .continuous)
           .fill(accentColor)
-          .frame(width: 3.5)
+          .frame(width: Theme.Spacing.s3)
           .frame(maxHeight: .infinity)
 
-        VStack(alignment: .leading, spacing: 3) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.s3) {
           Text(item.title)
             .font(.headline.weight(.medium))
             .foregroundStyle(Theme.ink)
             .lineLimit(1)
 
           if let loc = item.location, !loc.isEmpty {
-            HStack(spacing: 4) {
+            HStack(spacing: Theme.Spacing.xs) {
               Text("📍").font(.caption2)
               Text(loc)
                 .font(.footnote)
@@ -325,7 +325,7 @@ struct SearchView: View {
           }
         }
 
-        Spacer(minLength: 4)
+        Spacer(minLength: Theme.Spacing.xs)
 
         if let trailingTime, !trailingTime.isEmpty {
           Text(trailingTime)
@@ -337,12 +337,12 @@ struct SearchView: View {
           FDPill(title: badge, variant: .neutral, size: .sm)
         }
       }
-      .padding(12)
+      .padding(Theme.Spacing.md)
       .frame(maxWidth: .infinity, alignment: .leading)
       .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
       .overlay(
         RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous)
-          .stroke(Theme.hairline, lineWidth: 0.5)
+          .stroke(Theme.hairline, lineWidth: Theme.TouchTarget.hairlineWidth)
       )
     }
     .buttonStyle(.plain)

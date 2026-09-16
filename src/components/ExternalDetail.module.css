@@ -1,23 +1,23 @@
 .body {
-  padding-bottom: 8px;
+  padding-bottom: var(--space-2);
 }
 
 .head {
   display: grid;
-  grid-template-columns: 46px 1fr;
-  gap: 12px;
+  grid-template-columns: var(--h-form-row) 1fr;
+  gap: var(--space-3);
   align-items: start;
-  margin-bottom: 14px;
+  margin-bottom: var(--space-3-5);
 }
 
 .headWash {
-  width: 46px;
-  height: 46px;
+  width: var(--h-form-row);
+  height: var(--h-form-row);
   border-radius: var(--r-md);
 }
 
 .headMeta {
-  min-width: 0;
+  min-width: var(--space-0);
 }
 
 .title {
@@ -28,7 +28,7 @@
 }
 
 .range {
-  margin-top: 3px;
+  margin-top: var(--space-0-75);
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   color: var(--ink-soft);
@@ -37,8 +37,8 @@
 .locationLink {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  margin-top: 4px;
+  gap: var(--space-1-25);
+  margin-top: var(--space-1);
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   color: var(--ink-soft);
@@ -53,20 +53,20 @@
 }
 
 .locationPin {
-  font-size: 13px;
-  line-height: 1;
+  font-size: var(--fs-footnote);
+  line-height: var(--lh-solid);
 }
 
 .locationArrow {
-  font-size: 11px;
-  opacity: 0.6;
+  font-size: var(--fs-caption2);
+  opacity: var(--op-60);
 }
 
 .rows {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 14px 0;
+  gap: var(--space-3);
+  padding: var(--space-3-5) var(--space-0);
   border-top: var(--hairline-w) solid var(--rule);
   border-bottom: var(--hairline-w) solid var(--rule);
 }
@@ -74,47 +74,47 @@
 .row {
   display: flex;
   align-items: center;
-  gap: 9px;
-  font-size: 14px;
+  gap: var(--space-2-25);
+  font-size: var(--fs-compact);
   color: var(--ink-2);
-  letter-spacing: -0.005em;
+  letter-spacing: var(--tr-hair);
 }
 
 .row svg {
-  width: 17px;
-  height: 17px;
+  width: var(--space-4-25);
+  height: var(--space-4-25);
   flex: none;
   color: var(--ink-soft);
 }
 
 .avatar {
-  width: 17px;
-  height: 17px;
+  width: var(--space-4-25);
+  height: var(--space-4-25);
   flex: none;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
+  font-size: var(--fs-micro);
   font-weight: 700;
-  line-height: 1;
+  line-height: var(--lh-solid);
   color: var(--paper-warm);
-  padding-bottom: 1px;
+  padding-bottom: var(--space-px);
 }
 
 .sourcePill {
   font: var(--t-caption2);
   letter-spacing: var(--tr-caption2);
   font-weight: 500;
-  padding: 1px 6px;
+  padding: var(--space-px) var(--space-1-5);
   border-radius: var(--r-capsule);
   background: var(--paper-sunk);
   color: var(--ink-soft);
-  margin-left: 4px;
+  margin-left: var(--space-1);
 }
 
 .actions {
-  margin-top: 18px;
+  margin-top: var(--space-4-5);
   background: var(--fill-quaternary);
   border-radius: var(--r-control);
   overflow: hidden;
@@ -123,9 +123,9 @@
 .action {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
-  padding: 13px 14px;
+  padding: var(--space-3-25) var(--space-3-5);
   border: none;
   background: none;
   text-align: left;
@@ -141,21 +141,21 @@
 }
 
 .action:disabled {
-  opacity: 0.5;
+  opacity: var(--op-50);
   cursor: default;
 }
 
 .action svg {
-  width: 19px;
-  height: 19px;
+  width: var(--space-4-75);
+  height: var(--space-4-75);
   flex: none;
   color: var(--ink-soft);
 }
 
 .foot {
-  margin-top: 16px;
-  font-size: 13px;
-  line-height: 1.5;
+  margin-top: var(--space-4);
+  font-size: var(--fs-footnote);
+  line-height: var(--lh-prose);
   color: var(--ink-soft);
-  letter-spacing: -0.005em;
+  letter-spacing: var(--tr-hair);
 }

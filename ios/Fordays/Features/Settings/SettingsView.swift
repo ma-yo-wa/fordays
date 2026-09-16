@@ -50,7 +50,7 @@ private enum SettingsConfirm: Identifiable, Hashable {
 }
 
 struct SettingsView: View {
-  private static let orbSize: CGFloat = 72
+  private static let orbSize: CGFloat = Theme.TouchTarget.orbFace
 
   @EnvironmentObject private var app: AppModel
   @Environment(\.dismiss) private var dismiss
@@ -95,7 +95,7 @@ struct SettingsView: View {
   var body: some View {
     NavigationStack {
       ScrollView {
-        VStack(alignment: .leading, spacing: 22) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.s22) {
           if let space = app.space {
             if space.frozen {
               frozenBanner
@@ -111,8 +111,8 @@ struct SettingsView: View {
             signOutSection
           }
         }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 30)
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.bottom, Theme.Spacing.s30)
       }
       .background(Theme.paper.ignoresSafeArea())
       .navigationTitle("Settings")
@@ -174,7 +174,7 @@ struct SettingsView: View {
 
   private var frozenBanner: some View {
     FDCard(variant: .sunk, padding: .md) {
-      VStack(alignment: .leading, spacing: 8) {
+      VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
         Text(Copy.Orbs.viewingFrozenBanner)
           .font(.fdFootnote)
           .foregroundStyle(Theme.inkSoft)
@@ -189,32 +189,32 @@ struct SettingsView: View {
   }
 
   private func profileSection(space: SpaceInfo) -> some View {
-    VStack(alignment: .leading, spacing: 8) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
       sectionLabel("Your profile")
-      HStack(spacing: 12) {
+      HStack(spacing: Theme.Spacing.md) {
         FDAvatar(name: space.myName, seat: 0, size: .md)
         Text(space.myName)
           .font(.fdBody)
           .foregroundStyle(Theme.ink)
       }
       .frame(maxWidth: .infinity, alignment: .leading)
-      .padding(.horizontal, 14)
-      .padding(.vertical, 12)
+      .padding(.horizontal, Theme.Spacing.row)
+      .padding(.vertical, Theme.Spacing.md)
       .background(Theme.fillQuaternary)
       .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
     }
   }
 
   private var orbsSection: some View {
-    VStack(alignment: .leading, spacing: 8) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
       sectionLabel(Copy.Orbs.yourOrbs)
-      LazyVGrid(columns: [GridItem(.adaptive(minimum: Self.orbSize), spacing: 16)], alignment: .leading, spacing: 14) {
+      LazyVGrid(columns: [GridItem(.adaptive(minimum: Self.orbSize), spacing: Theme.Spacing.base)], alignment: .leading, spacing: Theme.Spacing.row) {
         plusTile
         ForEach(activeOrbs, id: \.id) { orb in
           orbTile(orb)
         }
       }
-      .padding(12)
+      .padding(Theme.Spacing.md)
       .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
 
       if !pastOrbs.isEmpty {
@@ -224,7 +224,7 @@ struct SettingsView: View {
             note: Copy.Orbs.pastOrbsSub,
             action: { showPastOrbs = true },
             rightContent: {
-              HStack(spacing: 6) {
+              HStack(spacing: Theme.Spacing.s6) {
                 FDPill(title: "\(pastOrbs.count)", variant: .neutral, size: .sm)
                 Image(systemName: "chevron.right")
                   .font(.caption.weight(.semibold))
@@ -281,7 +281,7 @@ struct SettingsView: View {
     return Button {
       switchOrb(orb.id)
     } label: {
-      VStack(spacing: 6) {
+      VStack(spacing: Theme.Spacing.s6) {
         ZStack {
           Circle()
             .fill(Theme.fillTertiary)
@@ -315,14 +315,14 @@ struct SettingsView: View {
     Button {
       showAnotherOrb = true
     } label: {
-      VStack(spacing: 6) {
+      VStack(spacing: Theme.Spacing.s6) {
         ZStack {
           Circle()
             .fill(Theme.fillTertiary)
           Text("+")
             .font(.title2.weight(.medium))
             .foregroundStyle(Theme.ink)
-            .offset(y: -0.5)
+            .offset(y: Theme.Spacing.opticalNudge)
         }
         .frame(width: Self.orbSize, height: Self.orbSize)
         Text("\u{00a0}")
@@ -336,18 +336,18 @@ struct SettingsView: View {
   }
 
   private func orbFaceStack(_ faces: [OrbFaceChip]) -> some View {
-    HStack(spacing: -6) {
+    HStack(spacing: Theme.Spacing.overlapSm) {
       ForEach(faces.prefix(3)) { f in
         ZStack {
           Circle()
             .fill(f.them ? Theme.faceRose : Theme.faceSage)
           Text(f.letter)
-            .font(.system(size: 12, weight: .bold))
+            .font(.fdCaption.weight(.bold))
             .foregroundStyle(.white)
-            .offset(y: -0.5)
+            .offset(y: Theme.Spacing.opticalNudge)
         }
-        .frame(width: 26, height: 26)
-        .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
+        .frame(width: Theme.TouchTarget.avatarFace, height: Theme.TouchTarget.avatarFace)
+        .overlay(Circle().stroke(Theme.paperWarm, lineWidth: Theme.TouchTarget.ringWidth))
         .fixedSize()
       }
       if faces.count > 3 {
@@ -355,23 +355,23 @@ struct SettingsView: View {
           Circle()
             .fill(Theme.inkSoft)
           Text("+\(faces.count - 3)")
-            .font(.system(size: 10, weight: .semibold))
+            .font(.fdTiny)
             .foregroundStyle(.white)
-            .offset(y: -0.5)
+            .offset(y: Theme.Spacing.opticalNudge)
         }
-        .frame(width: 26, height: 26)
-        .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
+        .frame(width: Theme.TouchTarget.avatarFace, height: Theme.TouchTarget.avatarFace)
+        .overlay(Circle().stroke(Theme.paperWarm, lineWidth: Theme.TouchTarget.ringWidth))
         .fixedSize()
       }
     }
   }
 
   private var anotherOrbSheet: some View {
-    VStack(alignment: .leading, spacing: 0) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.none) {
       Text(Copy.Orbs.anotherOrb)
         .font(.title2.weight(.semibold))
         .foregroundStyle(Theme.ink)
-        .padding(.bottom, 16)
+        .padding(.bottom, Theme.Spacing.base)
 
       FDActionRow(
         title: Copy.Orbs.startNew,
@@ -380,14 +380,14 @@ struct SettingsView: View {
       ) {
         showAnotherOrb = false
         orbSetupWithPeople = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Motion.sheetHandoff) {
           showOrbSetup = true
         }
       }
 
       Rectangle()
         .fill(Theme.hairline)
-        .frame(height: 0.5)
+        .frame(height: Theme.TouchTarget.hairlineWidth)
 
       FDActionRow(
         title: Copy.Orbs.joinWithCode,
@@ -396,15 +396,15 @@ struct SettingsView: View {
       ) {
         showAnotherOrb = false
         dismiss()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Motion.sheetHandoffLong) {
           app.showJoinOrb = true
         }
       }
     }
-    .padding(20)
-    .padding(.bottom, 8)
+    .padding(Theme.Spacing.lg)
+    .padding(.bottom, Theme.Spacing.sm)
     .background(Theme.paper)
-    .presentationDetents([.height(280)])
+    .presentationDetents([.height(Theme.TouchTarget.sheetDetentCompact)])
     .presentationDragIndicator(.visible)
   }
 
@@ -414,8 +414,8 @@ struct SettingsView: View {
     let isPersonalOrb = soloOrb && (space.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "personal" || soloOrbs.count <= 1)
     let leaveLabel = soloOrb ? Copy.Orbs.deleteSoloAction : Copy.Orbs.leaveAction
     let placeholder = soloOrb ? Copy.Orbs.personalPlaceholder : Copy.Orbs.crewPlaceholder
-    return VStack(alignment: .leading, spacing: 8) {
-      HStack(alignment: .firstTextBaseline, spacing: 6) {
+    return VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+      HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.s6) {
         sectionLabel(Copy.Orbs.thisOrb)
         if !space.peopleLabel.isEmpty {
           Text(space.peopleLabel)
@@ -435,24 +435,24 @@ struct SettingsView: View {
       Text(Copy.Orbs.people)
         .font(.footnote.weight(.semibold))
         .foregroundStyle(Theme.inkFaint)
-        .padding(.top, 8)
-      VStack(alignment: .leading, spacing: 8) {
+        .padding(.top, Theme.Spacing.sm)
+      VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
         ScrollView(.horizontal, showsIndicators: false) {
-          HStack(spacing: 10) {
+          HStack(spacing: Theme.Spacing.s10) {
             if !space.frozen && !isPersonalOrb {
               Button {
                 showInvite = true
               } label: {
-                VStack(spacing: 4) {
+                VStack(spacing: Theme.Spacing.xs) {
                   ZStack {
                     Circle()
                       .fill(Theme.fillTertiary)
                     Text("+")
-                      .font(.system(size: 16, weight: .semibold))
+                      .font(.fdCallout.weight(.semibold))
                       .foregroundStyle(Theme.ink)
-                      .offset(y: -0.5)
+                      .offset(y: Theme.Spacing.opticalNudge)
                   }
-                  .frame(width: 32, height: 32)
+                  .frame(width: Theme.TouchTarget.avatarMd, height: Theme.TouchTarget.avatarMd)
                   .fixedSize()
 
                   Text("Invite")
@@ -461,9 +461,9 @@ struct SettingsView: View {
                   Text("More")
                     .font(.caption2)
                     .foregroundStyle(Theme.inkFaint)
-                    .frame(height: 13)
+                    .frame(height: Theme.Spacing.s13)
                 }
-                .frame(width: 64)
+                .frame(width: Theme.TouchTarget.orbTile)
               }
               .buttonStyle(.plain)
             }
@@ -471,47 +471,47 @@ struct SettingsView: View {
             ForEach(space.members, id: \.id) { member in
               let removable = !space.frozen && space.myRole == "admin" && space.members.count >= 3 && member.id != space.myId
               ZStack(alignment: .topLeading) {
-                VStack(spacing: 4) {
-                  face(member.name, mine: member.id == space.myId, size: 32)
+                VStack(spacing: Theme.Spacing.xs) {
+                  face(member.name, mine: member.id == space.myId, size: Theme.TouchTarget.avatarMd)
                   Text(member.name)
                     .font(.caption)
                     .foregroundStyle(Theme.ink)
                     .lineLimit(1)
-                    .frame(width: 64)
+                    .frame(width: Theme.TouchTarget.orbTile)
                   Text(member.id == space.myId ? "You" : " ")
                     .font(.caption2)
                     .foregroundStyle(Theme.inkFaint)
-                    .frame(height: 13)
+                    .frame(height: Theme.Spacing.s13)
                 }
-                .frame(width: 64)
+                .frame(width: Theme.TouchTarget.orbTile)
 
                 if removable {
                   Button {
                     confirm = .remove(id: member.id, name: member.name)
                   } label: {
                     Image(systemName: "minus")
-                      .font(.system(size: 9, weight: .bold))
+                      .font(.fdMicro)
                       .foregroundStyle(Theme.inkSoft)
-                      .frame(width: 16, height: 16)
+                      .frame(width: Theme.Spacing.base, height: Theme.Spacing.base)
                       .background(Theme.paperWarm, in: Circle())
-                      .overlay(Circle().stroke(Theme.hairline, lineWidth: 0.5))
-                      .shadow(color: Theme.fillSecondary, radius: 2, y: 1)
+                      .overlay(Circle().stroke(Theme.hairline, lineWidth: Theme.TouchTarget.hairlineWidth))
+                      .shadow(color: Theme.fillSecondary, radius: Theme.Shadow.badgeRadius, y: Theme.Shadow.badgeY)
                   }
                   .buttonStyle(.plain)
-                  .offset(x: 10, y: -2)
+                  .offset(x: Theme.Spacing.removeBadgeX, y: Theme.Spacing.removeBadgeY)
                 }
               }
             }
           }
-          .padding(.horizontal, 2)
-          .padding(.bottom, 4)
+          .padding(.horizontal, Theme.Spacing.xxs)
+          .padding(.bottom, Theme.Spacing.xs)
         }
 
         if isPersonalOrb {
-          VStack(alignment: .leading, spacing: 8) {
+          VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
             Rectangle()
               .fill(Theme.hairline)
-              .frame(height: 0.5)
+              .frame(height: Theme.TouchTarget.hairlineWidth)
 
             Text(Copy.Orbs.personalPrivateNote)
               .font(.footnote)
@@ -524,28 +524,28 @@ struct SettingsView: View {
               Text("+ \(Copy.Orbs.startSharedOrb)")
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(Theme.ink)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
+                .padding(.horizontal, Theme.Spacing.md)
+                .padding(.vertical, Theme.Spacing.s7)
                 .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
             }
             .buttonStyle(.plain)
           }
-          .padding(.top, 4)
+          .padding(.top, Theme.Spacing.xs)
         }
       }
-      .padding(10)
+      .padding(Theme.Spacing.s10)
       .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
 
       Text(Copy.Orbs.descriptor)
         .font(.footnote)
         .foregroundStyle(Theme.inkFaint)
-        .padding(.horizontal, 4)
+        .padding(.horizontal, Theme.Spacing.xs)
 
       if space.frozen {
         Text(Copy.Orbs.frozenNotice)
           .font(.footnote)
           .foregroundStyle(Theme.inkFaint)
-          .padding(.horizontal, 4)
+          .padding(.horizontal, Theme.Spacing.xs)
       }
 
       if !space.frozen, space.myRole == "admin", space.members.count >= 3 {
@@ -556,8 +556,8 @@ struct SettingsView: View {
           .buttonStyle(.plain)
           .font(.subheadline.weight(.semibold))
           .foregroundStyle(Theme.roseInk)
-          .padding(.horizontal, 4)
-          .padding(.top, 2)
+          .padding(.horizontal, Theme.Spacing.xs)
+          .padding(.top, Theme.Spacing.xxs)
           .disabled(spaceBusy)
         }
       }
@@ -569,8 +569,8 @@ struct SettingsView: View {
         .buttonStyle(.plain)
         .font(.subheadline.weight(.semibold))
         .foregroundStyle(Theme.roseInk)
-        .padding(.horizontal, 4)
-        .padding(.top, 4)
+        .padding(.horizontal, Theme.Spacing.xs)
+        .padding(.top, Theme.Spacing.xs)
         .disabled(spaceBusy)
       } else if space.frozen {
         Button(Copy.Orbs.deletePermanent) {
@@ -579,8 +579,8 @@ struct SettingsView: View {
         .buttonStyle(.plain)
         .font(.subheadline.weight(.semibold))
         .foregroundStyle(Theme.roseInk)
-        .padding(.horizontal, 4)
-        .padding(.top, 4)
+        .padding(.horizontal, Theme.Spacing.xs)
+        .padding(.top, Theme.Spacing.xs)
         .disabled(spaceBusy)
       }
     }
@@ -589,13 +589,13 @@ struct SettingsView: View {
   private var pastOrbsSheet: some View {
     NavigationStack {
       ScrollView {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.base) {
           ForEach(pastOrbs, id: \.id) { pOrb in
             let isCurrent = pOrb.id == app.space?.id
             let faces = orbFaceChips(for: pOrb)
 
             FDCard(variant: .sunk, padding: .md) {
-              VStack(alignment: .leading, spacing: 12) {
+              VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                 HStack(alignment: .center) {
                   Text(pOrb.peopleLabel.isEmpty ? " " : pOrb.peopleLabel)
                     .font(.fdHeadline)
@@ -603,18 +603,18 @@ struct SettingsView: View {
 
                   Spacer()
 
-                  HStack(spacing: -6) {
+                  HStack(spacing: Theme.Spacing.overlapSm) {
                     ForEach(faces.prefix(3)) { f in
                       ZStack {
                         Circle()
                           .fill(f.them ? Theme.faceRose : Theme.faceSage)
                         Text(f.letter)
-                          .font(.system(size: 11, weight: .bold))
+                          .font(.fdCaption2.weight(.bold))
                           .foregroundStyle(.white)
-                          .offset(y: -0.5)
+                          .offset(y: Theme.Spacing.opticalNudge)
                       }
-                      .frame(width: 22, height: 22)
-                      .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
+                      .frame(width: Theme.TouchTarget.avatarChip, height: Theme.TouchTarget.avatarChip)
+                      .overlay(Circle().stroke(Theme.paperWarm, lineWidth: Theme.TouchTarget.ringWidth))
                       .fixedSize()
                     }
                   }
@@ -622,7 +622,7 @@ struct SettingsView: View {
 
                 Divider()
 
-                HStack(spacing: 10) {
+                HStack(spacing: Theme.Spacing.s10) {
                   if isCurrent {
                     FDButton(title: "Currently viewing", variant: .primary, size: .sm) {}
                       .disabled(true)
@@ -643,7 +643,7 @@ struct SettingsView: View {
             }
           }
         }
-        .padding(20)
+        .padding(Theme.Spacing.lg)
       }
       .background(Theme.paper.ignoresSafeArea())
       .navigationTitle(Copy.Orbs.pastOrbs)
@@ -659,7 +659,7 @@ struct SettingsView: View {
   }
 
   private var calendarsSection: some View {
-    VStack(alignment: .leading, spacing: 8) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
       sectionLabel("External calendars")
       FDFormGroup {
         FDFormRow(label: Copy.Availability.appleCalendar) {
@@ -809,7 +809,7 @@ struct SettingsView: View {
   private var applePickerSheet: some View {
     NavigationStack {
       ScrollView {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.base) {
           Text(Copy.Availability.pickerLead)
             .font(.subheadline)
             .foregroundStyle(Theme.inkSoft)
@@ -822,7 +822,7 @@ struct SettingsView: View {
             applePickerSection(title: "Other", items: other)
           }
         }
-        .padding(20)
+        .padding(Theme.Spacing.lg)
       }
       .background(Theme.paper.ignoresSafeArea())
       .navigationTitle("Import calendars")
@@ -857,16 +857,16 @@ struct SettingsView: View {
   }
 
   private func applePickerSection(title: String, items: [DeviceCalendar]) -> some View {
-    VStack(alignment: .leading, spacing: 8) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
       Text(title)
         .font(.footnote.weight(.semibold))
         .foregroundStyle(Theme.inkFaint)
-      VStack(spacing: 0) {
+      VStack(spacing: Theme.Spacing.none) {
         ForEach(items) { cal in
           Button {
             pendingAppleId = cal.id
           } label: {
-            HStack(spacing: 12) {
+            HStack(spacing: Theme.Spacing.md) {
               Image(systemName: "calendar")
                 .foregroundStyle(Theme.inkSoft)
               Text(cal.primary ? "\(cal.summary) · Primary" : cal.summary)
@@ -876,7 +876,7 @@ struct SettingsView: View {
               Image(systemName: pendingAppleId == cal.id ? "checkmark.circle.fill" : "circle")
                 .foregroundStyle(pendingAppleId == cal.id ? Theme.roseInk : Theme.inkFaint)
             }
-            .padding(.vertical, 10)
+            .padding(.vertical, Theme.Spacing.s10)
           }
           .buttonStyle(.plain)
         }
@@ -885,7 +885,7 @@ struct SettingsView: View {
   }
 
   private var signOutSection: some View {
-    VStack(alignment: .leading, spacing: 8) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
       sectionLabel("Session")
       FDButton("Sign out", variant: .destructive, disabled: spaceBusy) {
         await app.signOut()
@@ -900,7 +900,7 @@ struct SettingsView: View {
       .foregroundStyle(Theme.inkFaint)
   }
 
-  private func face(_ name: String, mine: Bool, size: CGFloat = 32) -> some View {
+  private func face(_ name: String, mine: Bool, size: CGFloat = Theme.TouchTarget.avatarMd) -> some View {
     FDAvatar(name: name, seat: mine ? 0 : 1, size: size <= 24 ? .sm : .md)
   }
 

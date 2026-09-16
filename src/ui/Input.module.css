@@ -7,8 +7,8 @@
 .labelRow {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: var(--space-1-5);
+  margin-bottom: var(--space-1-5);
 }
 
 .label {
@@ -30,23 +30,23 @@
   background: var(--fill-quaternary);
   border-radius: var(--r-control);
   position: relative;
-  transition: box-shadow 0.14s var(--ease-ios);
+  transition: box-shadow var(--duration-press) var(--ease-ios);
 }
 
 .containerFocus {
-  box-shadow: 0 0 0 1.5px var(--ink-soft);
+  box-shadow: var(--space-0) var(--space-0) var(--space-0) var(--border-md) var(--ink-soft);
 }
 
 .containerError {
-  box-shadow: 0 0 0 1.5px var(--rose-ink);
+  box-shadow: var(--space-0) var(--space-0) var(--space-0) var(--border-md) var(--rose-ink);
 }
 
 .input {
   flex: 1;
-  min-width: 0;
+  min-width: var(--space-0);
   border: none;
   background: transparent;
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-3-5);
   font: var(--t-body);
   letter-spacing: var(--tr-body);
   color: var(--ink);
@@ -60,15 +60,15 @@
 
 textarea.input {
   resize: none;
-  min-height: 80px;
-  line-height: 1.4;
+  min-height: var(--space-20);
+  line-height: var(--lh-relaxed);
 }
 
 .clearBtn {
   border: none;
   background: transparent;
-  padding: 10px 14px;
-  font-size: 15px;
+  padding: var(--space-2-5) var(--space-3-5);
+  font-size: var(--fs-subhead);
   font-weight: 600;
   color: var(--ink-faint);
   cursor: pointer;
@@ -84,7 +84,7 @@ textarea.input {
 }
 
 .errorText {
-  margin-top: 5px;
+  margin-top: var(--space-1-25);
   font: var(--t-footnote);
   letter-spacing: var(--tr-footnote);
   color: var(--rose-ink);

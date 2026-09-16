@@ -22,6 +22,6 @@ struct RootView: View {
         }
       }
     }
-    .animation(.easeInOut(duration: 0.2), value: app.authPhase)
+    .animation(.easeInOut(duration: Theme.Motion.shelf), value: app.authPhase)
   }
 }

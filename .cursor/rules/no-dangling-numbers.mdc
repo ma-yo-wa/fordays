@@ -1,0 +1,64 @@
+---
+description: Hard requirement: zero dangling numbers in PWA and iOS UI
+alwaysApply: true
+---
+
+# Zero dangling numbers
+
+Hard requirement. Both clients. Every session.
+
+Never write a literal number for visual styling in PWA views (`src/` except token modules) or iOS views (`ios/Fordays/` except `Theme.swift` / `TabIcons.swift` glyph paths).
+
+If a value is not already a token, **stop**. Add it to `src/styles/tokens.css` **and** `ios/Fordays/Theme/Theme.swift` (motion JS: `src/ui/motion.ts`) first, then reference the token. Never add a token on only one client.
+
+## Forbidden in views
+
+```text
+padding: 12px          .padding(12)           .padding(.horizontal, 16)
+gap: 8px               spacing: 8
+margin-top: 14         .padding(.top, 14)
+border-radius: 14px    cornerRadius: 14
+rgba(23, 20, 15, 0.05) Theme.ink.opacity(0.05)
+font-size: 15px        .font(.system(size: 12))
+width: 32px            .frame(width: 32, height: 32)
+opacity: 0.5           .opacity(0.5)
+scale(0.97)            .scaleEffect(0.97)
+duration: 0.18         withAnimation(.easeInOut(duration: 0.18))
+```
+
+Use tokens instead: `var(--space-3)`, `Theme.Spacing.md`, `Theme.radiusMd`, `Theme.fillQuaternary`, `.fdSubhead`, `Theme.Motion.fade`, `springSelect`.
+
+Prefer the **named 4pt aliases** (`xs/sm/md/row/base/lg/xl`) for new work. Half-steps already in the scale (`s6`, `--space-1-5`, …) exist to preserve shipped UI — do not invent new half-steps; snap to the 4pt grid or add a **named semantic** token (`--h-cover`, `Theme.TouchTarget.thumb`).
+
+## Where literals are allowed
+
+These files **are** the source of truth. Numbers belong here, nowhere else:
+
+- `src/styles/tokens.css`
+- `ios/Fordays/Theme/Theme.swift` (token enums and `OrbBackground`, which **is** the ambient wash token)
+- `src/ui/motion.ts` (spring stiffness/damping, durations, dismiss thresholds)
+
+## Exceptions (not styling tokens)
+
+1. **Vector glyph geometry** — SVG `viewBox` / path `d`, `TabIcons.swift` coordinates scaled by `s`. Stroke widths inside those glyphs stay with the drawing.
+2. **CSS `@media` queries** — custom properties cannot be used. Keep the px value matching `--bp-gate` (900px) with a comment.
+3. **Product/data counts** — 7 weekdays, `minuteInterval = 5`, `prefix(3)` faces, `members.count >= 3`. These are product rules, not pixels.
+4. **On/off identity** — `opacity: 0` / `1` for presence, `y: 0`, `scale: 1` as rest state is allowed via `--op-0` / `--op-100` / `1.0` rest. Prefer tokens when a named rest token exists.
+5. **z-index from index** — `zIndex: 4 - idx` stacking overlapping faces.
+6. **Safe-area env()** and `maxWidth: .infinity`.
+
+If unsure, add a token. Do not ship the literal.
+
+## Token homes
+
+| Kind | PWA | iOS |
+|---|---|---|
+| Space / pad / gap | `var(--space-*)` | `Theme.Spacing.*` |
+| Radii | `var(--r-*)` | `Theme.radiusXs` … `capsuleRadius` |
+| Type | `var(--t-*)` / `var(--fs-*)` | `Font.fd*` or SwiftUI Dynamic Type (`.headline`, `.body`, …) — never `.system(size: N)` |
+| Fills / lines | `var(--fill-*)` `var(--hairline)` | `Theme.fill*` `Theme.hairline` |
+| Heights / avatars | `var(--h-*)` `var(--size-*)` | `Theme.TouchTarget.*` |
+| Motion | `src/ui/motion.ts` + `--scale-*` `--duration-*` | `Theme.Motion.*` |
+| Borders | `var(--border-w)` `var(--hairline-w)` | `Theme.TouchTarget.borderWidth` / `ringWidth` / `hairlineWidth` |
+
+Product law: `PRODUCT.md` → **Design System Tokens & Zero Dangling Numbers**.

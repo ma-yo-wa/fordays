@@ -1,5 +1,15 @@
 import { AnimatePresence, motion, useDragControls } from 'motion/react';
 import { useEffect, type ReactNode } from 'react';
+import {
+  durationSheet,
+  durationSheetFade,
+  durationSheetSlide,
+  easeIos,
+  easeSheet,
+  sheetDismissVelocity,
+  sheetDismissY,
+  sheetDragElastic,
+} from '../ui/motion';
 import s from './Sheet.module.css';
 
 interface Props {
@@ -43,7 +53,7 @@ export default function Sheet({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{ duration: durationSheet, ease: easeIos }}
           onClick={(e) => {
             if (e.target === e.currentTarget) onClose();
           }}
@@ -54,17 +64,17 @@ export default function Sheet({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{
-              y: { type: 'tween', duration: 0.38, ease: [0.32, 0.72, 0, 1] },
-              opacity: { duration: 0.22, ease: [0.25, 0.1, 0.25, 1] },
+              y: { type: 'tween', duration: durationSheetSlide, ease: easeSheet },
+              opacity: { duration: durationSheetFade, ease: easeIos },
             }}
             drag="y"
             dragControls={dragControls}
             dragListener={false}
             dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.5 }}
+            dragElastic={{ top: 0, bottom: sheetDragElastic }}
             onDragEnd={(_, info) => {
               // Flick down, or drag more than a third of the way: dismiss.
-              if (info.offset.y > 140 || info.velocity.y > 700) onClose();
+              if (info.offset.y > sheetDismissY || info.velocity.y > sheetDismissVelocity) onClose();
             }}
           >
             {/* Only the grabber starts a dismiss drag — scrolling the

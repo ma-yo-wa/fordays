@@ -448,7 +448,7 @@ export default function Detail() {
 
       {mode === 'edit' && (
         <>
-          <div style={{ marginTop: 14 }}>
+          <div style={{ marginTop: 'var(--space-3-5)' }}>
             <Input
               label="Name"
               value={title}
@@ -464,7 +464,7 @@ export default function Detail() {
             onChange={setLocation}
             placeholder="Where is this?"
           />
-          <div style={{ marginTop: 14 }}>
+          <div style={{ marginTop: 'var(--space-3-5)' }}>
             <Input
               label="Notes"
               hint="— optional"
@@ -510,7 +510,7 @@ export default function Detail() {
           />
 
           {mode === 'suggest' && (
-            <div style={{ marginTop: 14 }}>
+            <div style={{ marginTop: 'var(--space-3-5)' }}>
               <Input
                 label="Why"
                 hint="— optional, but helpful"
@@ -546,7 +546,7 @@ export default function Detail() {
           <p className={s.confirmText}>
             Delete “{item.title}”? This removes it for everyone in this Orb.
           </p>
-          <div className={f.row} style={{ marginTop: 12 }}>
+          <div className={f.row} style={{ marginTop: 'var(--space-3)' }}>
             <Button
               variant="secondary"
               onClick={() => setMode('view')}
@@ -568,7 +568,7 @@ export default function Detail() {
       )}
 
       {mode === 'view' && frozen && (
-        <p className={f.rowNote} style={{ marginTop: 14 }}>
+        <p className={f.rowNote} style={{ marginTop: 'var(--space-3-5)' }}>
           This is a copy from when you left — you can look, not change
         </p>
       )}

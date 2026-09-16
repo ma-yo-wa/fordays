@@ -77,7 +77,7 @@ export default function InviteShare({ open, code, onClose }: Props) {
 
   return (
     <Sheet open={open} onClose={onClose} heading={Copy.invite.title}>
-      <p className={f.rowNote} style={{ marginTop: 8 }}>
+      <p className={f.rowNote} style={{ marginTop: 'var(--space-2)' }}>
         {Copy.invite.subtitle}
       </p>
 
@@ -93,7 +93,7 @@ export default function InviteShare({ open, code, onClose }: Props) {
         </div>
       )}
 
-      <div style={{ marginTop: 16 }}>
+      <div style={{ marginTop: 'var(--space-4)' }}>
         <Input
           label={Copy.invite.ideaLabel}
           hint={Copy.invite.ideaHint}

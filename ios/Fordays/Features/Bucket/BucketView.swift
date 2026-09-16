@@ -12,8 +12,8 @@ struct BucketView: View {
   }
 
   private let columns = [
-    GridItem(.flexible(), spacing: 14),
-    GridItem(.flexible(), spacing: 14),
+    GridItem(.flexible(), spacing: Theme.Spacing.row),
+    GridItem(.flexible(), spacing: Theme.Spacing.row),
   ]
 
   var body: some View {
@@ -23,21 +23,21 @@ struct BucketView: View {
       if items.isEmpty {
         empty
       } else {
-        LazyVGrid(columns: columns, spacing: 14) {
+        LazyVGrid(columns: columns, spacing: Theme.Spacing.row) {
           ForEach(items) { a in
             ActivityCard(activity: a) { onSelect(a) }
           }
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 132)
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.top, Theme.Spacing.row)
+        .padding(.bottom, Theme.Spacing.scrollBottomClearance)
       }
     }
     .coordinateSpace(name: "homeScroll")
     .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
-      let scrolled = minY < -6
+      let scrolled = minY < -Theme.Spacing.s6
       if app.isScrolled != scrolled {
-        withAnimation(.easeInOut(duration: 0.18)) {
+        withAnimation(.easeInOut(duration: Theme.Motion.fade)) {
           app.isScrolled = scrolled
         }
       }
@@ -57,7 +57,7 @@ struct BucketView: View {
     .multilineTextAlignment(.center)
     .frame(maxWidth: 260)
     .frame(maxWidth: .infinity)
-    .padding(.top, 56)
+    .padding(.top, Theme.TouchTarget.navBar)
   }
 }
 
@@ -68,8 +68,8 @@ struct MemoriesView: View {
   private var today: String { DateLocal.todayISO() }
 
   private let columns = [
-    GridItem(.flexible(), spacing: 14),
-    GridItem(.flexible(), spacing: 14),
+    GridItem(.flexible(), spacing: Theme.Spacing.row),
+    GridItem(.flexible(), spacing: Theme.Spacing.row),
   ]
 
   private var sections: [(key: String, label: String, items: [Activity])] {
@@ -103,17 +103,17 @@ struct MemoriesView: View {
         .multilineTextAlignment(.center)
         .frame(maxWidth: 280)
         .frame(maxWidth: .infinity)
-        .padding(.top, 56)
+        .padding(.top, Theme.TouchTarget.navBar)
       } else {
         // VStack (not LazyVStack) so each month grid lays out with real widths.
-        VStack(alignment: .leading, spacing: 22) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.s22) {
           ForEach(sections, id: \.key) { section in
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.s10) {
               Text(section.label)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Theme.inkSoft)
-                .padding(.horizontal, 2)
-              LazyVGrid(columns: columns, spacing: 14) {
+                .padding(.horizontal, Theme.Spacing.xxs)
+              LazyVGrid(columns: columns, spacing: Theme.Spacing.row) {
                 ForEach(section.items) { a in
                   ActivityCard(activity: a) { onSelect(a) }
                 }
@@ -121,16 +121,16 @@ struct MemoriesView: View {
             }
           }
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 132)
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.top, Theme.Spacing.row)
+        .padding(.bottom, Theme.Spacing.scrollBottomClearance)
       }
     }
     .coordinateSpace(name: "homeScroll")
     .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
-      let scrolled = minY < -6
+      let scrolled = minY < -Theme.Spacing.s6
       if app.isScrolled != scrolled {
-        withAnimation(.easeInOut(duration: 0.18)) {
+        withAnimation(.easeInOut(duration: Theme.Motion.fade)) {
           app.isScrolled = scrolled
         }
       }
@@ -168,7 +168,7 @@ struct ActivityCard: View {
           endPoint: .bottom
         )
 
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.s6) {
           Text(activity.title)
             .font(.headline)
             .foregroundStyle(Color(hex: 0xFFFDFB))
@@ -179,13 +179,13 @@ struct ActivityCard: View {
             .foregroundStyle(Theme.paperTranslucent)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
+        .padding(Theme.Spacing.row)
       }
       .frame(maxWidth: .infinity)
       .aspectRatio(3 / 4, contentMode: .fit)
       .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
       .contentShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
-      .shadow(color: Theme.shadowCard, radius: 8, y: 6)
+      .shadow(color: Theme.shadowCard, radius: Theme.Spacing.sm, y: Theme.Spacing.s6)
     }
     .buttonStyle(.plain)
   }

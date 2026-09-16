@@ -2,14 +2,14 @@
    place you go, so it doesn't belong in the bar that says where you are. */
 .dock {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 45;
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 0 max(16px, var(--safe-l))
-    calc(8px + var(--safe-b)) max(16px, var(--safe-r));
+  left: var(--space-0);
+  right: var(--space-0);
+  bottom: var(--space-0);
+  z-index: var(--z-tabbar);
+  max-width: var(--w-content);
+  margin: var(--space-0) auto;
+  padding: var(--space-0) max(var(--space-4), var(--safe-l))
+    calc(var(--space-2) + var(--safe-b)) max(var(--space-4), var(--safe-r));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,16 +21,16 @@
   flex: none;
   display: flex;
   align-items: center;
-  gap: 0;
-  padding: 5px;
+  gap: var(--space-0);
+  padding: var(--space-1-25);
   border-radius: var(--r-capsule);
   background: var(--mat-regular-bg);
   -webkit-backdrop-filter: var(--mat-regular);
   backdrop-filter: var(--mat-regular);
   border: var(--hairline-w) solid var(--hairline);
   box-shadow:
-    0 1px 1px var(--fill-quaternary),
-    0 12px 32px -14px var(--veil);
+    var(--space-0) var(--space-px) var(--space-px) var(--fill-quaternary),
+    var(--space-0) var(--space-3) var(--space-8) calc(-1 * var(--space-3-5)) var(--veil);
 }
 
 .tab {
@@ -39,24 +39,24 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  width: 84px;
-  height: 56px;
-  padding: 6px 10px;
+  gap: var(--space-1);
+  width: var(--space-21);
+  height: var(--h-navbar);
+  padding: var(--space-1-5) var(--space-2-5);
   background: none;
   border: none;
   cursor: pointer;
   color: var(--ink-soft);
-  transition: color 0.2s var(--ease-ios);
+  transition: color var(--duration-shelf) var(--ease-ios);
 }
 
 .tab:active {
-  opacity: 0.55;
+  opacity: var(--op-55);
 }
 
 .pill {
   position: absolute;
-  inset: 0;
+  inset: var(--space-0);
   border-radius: var(--r-capsule);
   background: var(--fill-tertiary);
 }
@@ -64,22 +64,22 @@
 .icon {
   position: relative;
   display: block;
-  height: 24px;
-  z-index: 1;
+  height: var(--space-6);
+  z-index: var(--z-base);
 }
 
 .caption {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-base);
   font: var(--t-caption);
   letter-spacing: var(--tr-caption);
   font-weight: 400;
-  line-height: 1.15;
+  line-height: var(--lh-tight);
 }
 
 .tab svg {
-  width: 24px;
-  height: 24px;
+  width: var(--space-6);
+  height: var(--space-6);
   display: block;
 }
 
@@ -93,56 +93,56 @@
 .make {
   pointer-events: auto;
   position: absolute;
-  right: max(16px, var(--safe-r));
-  bottom: calc(8px + var(--safe-b) + 80px);
-  width: 56px;
-  height: 56px;
+  right: max(var(--space-4), var(--safe-r));
+  bottom: calc(var(--space-2) + var(--safe-b) + var(--space-20));
+  width: var(--h-navbar);
+  height: var(--h-navbar);
   border-radius: 50%;
   border: none;
-  padding: 0;
+  padding: var(--space-0);
   cursor: pointer;
   display: grid;
   place-items: center;
   background: radial-gradient(
     circle at 50% 44%,
-    #ff7396 0%,
+    var(--orb-rose) 0%,
     var(--orb-rose) 22%,
     var(--orb-coral) 46%,
     var(--orb-peach) 66%,
     var(--orb-green) 100%
   );
   box-shadow:
-    0 1px 2px var(--shadow-card),
-    0 14px 32px -10px var(--rose-glow),
-    inset 0 -1px 2px var(--hairline);
+    var(--space-0) var(--space-px) var(--space-0-5) var(--shadow-card),
+    var(--space-0) var(--space-3-5) var(--space-8) calc(-1 * var(--space-2-5)) var(--rose-glow),
+    inset var(--space-0) calc(-1 * var(--space-px)) var(--space-0-5) var(--hairline);
 }
 
 .plus {
   position: relative;
-  width: 18px;
-  height: 18px;
+  width: var(--space-4-5);
+  height: var(--space-4-5);
 }
 
 .plus::before,
 .plus::after {
   content: '';
   position: absolute;
-  background: #17140f;
+  background: var(--ink);
   border-radius: var(--r-xs);
 }
 
 .plus::before {
   left: 50%;
-  top: 0;
-  width: 2.6px;
+  top: var(--space-0);
+  width: var(--size-plus-pip);
   height: 100%;
   transform: translateX(-50%);
 }
 
 .plus::after {
   top: 50%;
-  left: 0;
-  height: 2.6px;
+  left: var(--space-0);
+  height: var(--size-plus-pip);
   width: 100%;
   transform: translateY(-50%);
 }

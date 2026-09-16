@@ -1,9 +1,9 @@
 .actionRow {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
-  padding: 14px 4px;
+  padding: var(--space-3-5) var(--space-1);
   border: none;
   background: transparent;
   font: var(--t-body);
@@ -15,13 +15,13 @@
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   transition:
-    transform 0.14s var(--ease-ios),
-    opacity 0.14s var(--ease-ios);
+    transform var(--duration-press) var(--ease-ios),
+    opacity var(--duration-press) var(--ease-ios);
 }
 
 .actionRow:active {
-  transform: scale(0.985);
-  opacity: 0.72;
+  transform: scale(var(--scale-press-hair));
+  opacity: var(--op-72);
 }
 
 .destructive {
@@ -29,18 +29,18 @@
 }
 
 .icon {
-  width: 22px;
+  width: var(--space-5-5);
   display: grid;
   place-items: center;
-  flex-shrink: 0;
+  flex-shrink: var(--space-0);
 }
 
 .textStack {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-0-5);
   flex: 1;
-  min-width: 0;
+  min-width: var(--space-0);
 }
 
 .label {

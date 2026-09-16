@@ -2,8 +2,8 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
 }
 
 .title {
@@ -13,8 +13,8 @@
 
 .close {
   flex: none;
-  width: 34px;
-  height: 34px;
+  width: var(--space-8-5);
+  height: var(--space-8-5);
   border-radius: 50%;
   border: none;
   cursor: pointer;
@@ -23,18 +23,18 @@
   background: var(--fill-tertiary);
   color: var(--ink-2);
   transition:
-    transform 0.14s var(--ease-ios),
-    opacity 0.14s var(--ease-ios);
+    transform var(--duration-press) var(--ease-ios),
+    opacity var(--duration-press) var(--ease-ios);
 }
 
 .close:active {
-  transform: scale(0.9);
-  opacity: 0.7;
+  transform: scale(var(--scale-icon));
+  opacity: var(--op-70);
 }
 
 .close svg {
-  width: 15px;
-  height: 15px;
+  width: var(--space-3-75);
+  height: var(--space-3-75);
 }
 
 /* Icon, title, one line of plain language saying what it's for. The
@@ -42,11 +42,11 @@
    that inferring the type from an empty date field created. */
 .option {
   display: grid;
-  grid-template-columns: 30px 1fr;
-  gap: 16px;
+  grid-template-columns: var(--space-7-5) 1fr;
+  gap: var(--space-4);
   align-items: start;
   width: 100%;
-  padding: 16px 2px;
+  padding: var(--space-4) var(--space-0-5);
   border: none;
   background: none;
   text-align: left;
@@ -56,7 +56,7 @@
 }
 
 .option:active {
-  opacity: 0.45;
+  opacity: var(--op-45);
 }
 
 .option + .option {
@@ -66,13 +66,13 @@
 .glyph {
   display: grid;
   place-items: center;
-  height: 24px;
+  height: var(--space-6);
   color: var(--ink);
 }
 
 .glyph svg {
-  width: 25px;
-  height: 25px;
+  width: var(--space-6-25);
+  height: var(--space-6-25);
 }
 
 .optionTitle {
@@ -82,7 +82,7 @@
 }
 
 .optionNote {
-  margin-top: 2px;
+  margin-top: var(--space-0-5);
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   color: var(--ink-soft);

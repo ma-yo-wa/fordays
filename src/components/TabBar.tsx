@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { useApp, canCompose, type Screen } from '../lib/store';
 import { Copy } from '../lib/copy';
+import { scalePressIcon, springTab, springTap } from '../ui/motion';
 import s from './TabBar.module.css';
 
 /* Outlined + ink-soft when idle, solid + ink when selected. Labels stay
@@ -78,7 +79,7 @@ export default function TabBar() {
           <motion.span
             layoutId="tab-pill"
             className={s.pill}
-            transition={{ type: 'spring', stiffness: 480, damping: 38 }}
+            transition={springTab}
           />
         )}
         <span className={s.icon}>{icon(on)}</span>
@@ -100,8 +101,8 @@ export default function TabBar() {
           type="button"
           className={s.make}
           onClick={() => setAddOpen(true)}
-          whileTap={{ scale: 0.9 }}
-          transition={{ type: 'spring', stiffness: 600, damping: 30 }}
+          whileTap={{ scale: scalePressIcon }}
+          transition={springTap}
           aria-label="Add something"
         >
           <span className={s.plus} aria-hidden />

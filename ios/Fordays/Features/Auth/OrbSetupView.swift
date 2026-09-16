@@ -38,48 +38,48 @@ struct OrbSetupView: View {
     ZStack {
       Theme.paper.ignoresSafeArea()
       ScrollView {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.none) {
           Text(Copy.Orbs.setupTitle)
-            .font(.system(size: 40, weight: .semibold, design: .rounded))
+            .font(.fdBrand)
             .foregroundStyle(Theme.ink)
-            .padding(.top, 48)
-            .padding(.bottom, 8)
+            .padding(.top, Theme.Spacing.s48)
+            .padding(.bottom, Theme.Spacing.sm)
 
           Text(Copy.Orbs.setupLead)
             .font(.title3.weight(.medium))
             .foregroundStyle(Theme.inkSoft)
-            .padding(.bottom, 20)
+            .padding(.bottom, Theme.Spacing.lg)
 
           formFields
         }
-        .padding(24)
+        .padding(Theme.Spacing.xl)
       }
     }
   }
 
   private var createBody: some View {
-    VStack(alignment: .leading, spacing: 0) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.none) {
       Text(Copy.Orbs.setupTitle)
         .font(.title2.weight(.semibold))
         .foregroundStyle(Theme.ink)
-        .padding(.bottom, 8)
+        .padding(.bottom, Theme.Spacing.sm)
 
       Text(Copy.Orbs.setupLead)
         .font(.subheadline.weight(.medium))
         .foregroundStyle(Theme.inkSoft)
-        .padding(.bottom, 20)
+        .padding(.bottom, Theme.Spacing.lg)
 
       formFields
       Spacer(minLength: 0)
     }
-    .padding(20)
-    .padding(.bottom, 8)
+    .padding(Theme.Spacing.lg)
+    .padding(.bottom, Theme.Spacing.sm)
     .background(Theme.paper)
   }
 
   private var formFields: some View {
-    VStack(alignment: .leading, spacing: 0) {
-      HStack(spacing: 8) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.none) {
+      HStack(spacing: Theme.Spacing.sm) {
         kindTab(Copy.Orbs.justYou, selected: !withPeople) {
           withPeople = false
         }
@@ -89,7 +89,7 @@ struct OrbSetupView: View {
       }
 
       FDTextField(label: Copy.Orbs.orbName, placeholder: placeholder, text: $name)
-        .padding(.top, 16)
+        .padding(.top, Theme.Spacing.base)
 
       FDButton(
         withPeople ? Copy.Orbs.invitePerson : Copy.Orbs.startPlanning,
@@ -99,7 +99,7 @@ struct OrbSetupView: View {
       ) {
         await submit()
       }
-      .padding(.top, 20)
+      .padding(.top, Theme.Spacing.lg)
     }
   }
 
@@ -122,11 +122,11 @@ struct OrbSetupView: View {
         .font(.subheadline.weight(selected ? .semibold : .medium))
         .foregroundStyle(selected ? Theme.ink : Theme.inkSoft)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
+        .padding(.vertical, Theme.Spacing.s10)
         .background {
           RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous)
             .fill(selected ? Theme.paper : Theme.fillTertiary)
-            .shadow(color: selected ? Theme.fillSecondary : .clear, radius: selected ? 2 : 0, y: 1)
+            .shadow(color: selected ? Theme.fillSecondary : .clear, radius: selected ? Theme.Spacing.xxs : Theme.Spacing.none, y: Theme.TouchTarget.borderWidth)
         }
     }
     .buttonStyle(.plain)

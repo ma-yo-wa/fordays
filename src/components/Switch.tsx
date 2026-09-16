@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import { springSwitch } from '../ui/motion';
 import f from './Form.module.css';
 
 interface Props {
@@ -23,7 +24,7 @@ export default function Switch({ on, onChange, label, disabled }: Props) {
       }}
       style={{
         justifyContent: on ? 'flex-end' : 'flex-start',
-        opacity: disabled ? 0.45 : 1,
+        opacity: disabled ? 'var(--op-45)' : 'var(--op-100)',
       }}
     >
       {/* layout animation slides the knob rather than tweening a transform,
@@ -31,7 +32,7 @@ export default function Switch({ on, onChange, label, disabled }: Props) {
       <motion.span
         layout
         className={f.switchKnob}
-        transition={{ type: 'spring', stiffness: 700, damping: 40 }}
+        transition={springSwitch}
       />
     </button>
   );

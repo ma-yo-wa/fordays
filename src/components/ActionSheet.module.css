@@ -1,7 +1,7 @@
 .veil {
   position: fixed;
-  inset: 0;
-  z-index: 90;
+  inset: var(--space-0);
+  z-index: var(--z-action-sheet);
   background: var(--scrim);
   display: flex;
   align-items: flex-end;
@@ -10,59 +10,59 @@
 
 .wrap {
   width: 100%;
-  max-width: 440px;
-  padding: 0 10px calc(10px + env(safe-area-inset-bottom, 10px));
+  max-width: var(--w-action-sheet);
+  padding: var(--space-0) var(--space-2-5) calc(var(--space-2-5) + env(safe-area-inset-bottom, var(--space-2-5)));
   display: flex;
   flex-direction: column;
 }
 
 .card {
   width: 100%;
-  background: var(--paper-card, #ffffff);
+  background: var(--paper-card);
   border-radius: var(--r-md);
   overflow: hidden;
-  box-shadow: 0 8px 32px var(--shadow-card);
+  box-shadow: var(--space-0) var(--space-2) var(--space-8) var(--shadow-card);
   display: flex;
   flex-direction: column;
 }
 
 .header {
-  padding: 14px 16px;
+  padding: var(--space-3-5) var(--space-4);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .title {
-  margin: 0;
-  font-size: 13px;
+  margin: var(--space-0);
+  font-size: var(--fs-footnote);
   font-weight: 600;
   color: var(--ink);
-  line-height: 1.35;
+  line-height: var(--lh-body);
 }
 
 .message {
-  margin: 0;
-  font-size: 12px;
+  margin: var(--space-0);
+  font-size: var(--fs-caption);
   font-weight: 400;
   color: var(--ink-faint);
-  line-height: 1.35;
+  line-height: var(--lh-body);
 }
 
 .divider {
   width: 100%;
-  height: 0.5px;
+  height: var(--hairline-w);
   background: var(--hairline);
 }
 
 .actionBtn {
   width: 100%;
-  min-height: 52px;
+  min-height: var(--h-action);
   border: none;
   background: transparent;
-  font-size: 17px;
+  font-size: var(--fs-body);
   font-family: inherit;
   font-weight: 400;
   color: var(--ink);
@@ -70,7 +70,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  padding: 0 16px;
+  padding: var(--space-0) var(--space-4);
   transition: background 0.12s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -80,23 +80,23 @@
 }
 
 .actionBtn:disabled {
-  opacity: 0.45;
+  opacity: var(--op-45);
   cursor: default;
 }
 
 .danger {
-  color: var(--rose-ink, #bd2147);
+  color: var(--rose-ink);
   font-weight: 500;
 }
 
 .cancelBtn {
-  margin-top: 8px;
+  margin-top: var(--space-2);
   width: 100%;
-  min-height: 52px;
+  min-height: var(--h-action);
   border: none;
-  background: var(--paper-card, #ffffff);
+  background: var(--paper-card);
   border-radius: var(--r-md);
-  font-size: 17px;
+  font-size: var(--fs-body);
   font-family: inherit;
   font-weight: 600;
   color: var(--ink);
@@ -104,7 +104,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 8px 32px var(--shadow-card);
+  box-shadow: var(--space-0) var(--space-2) var(--space-8) var(--shadow-card);
   transition: background 0.12s ease;
   -webkit-tap-highlight-color: transparent;
 }

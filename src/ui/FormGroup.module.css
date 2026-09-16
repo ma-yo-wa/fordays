@@ -1,7 +1,7 @@
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-1-5);
   width: 100%;
 }
 
@@ -10,14 +10,14 @@
   letter-spacing: var(--tr-footnote);
   font-weight: 600;
   color: var(--ink-soft);
-  padding: 0 4px;
+  padding: var(--space-0) var(--space-1);
 }
 
 .footer {
   font: var(--t-footnote);
   letter-spacing: var(--tr-footnote);
   color: var(--ink-faint);
-  padding: 0 4px;
+  padding: var(--space-0) var(--space-1);
 }
 
 .group {
@@ -34,9 +34,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 11px 14px;
-  min-height: 46px;
+  gap: var(--space-3-5);
+  padding: var(--space-2-75) var(--space-3-5);
+  min-height: var(--h-form-row);
 }
 
 .rowInteractive {
@@ -52,8 +52,8 @@
 .left {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+  gap: var(--space-0-5);
+  min-width: var(--space-0);
 }
 
 .label {
@@ -71,6 +71,6 @@
 .right {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+  gap: var(--space-2);
+  flex-shrink: var(--space-0);
 }

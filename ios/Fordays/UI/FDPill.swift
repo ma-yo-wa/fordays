@@ -14,8 +14,8 @@ enum FDPillSize {
 
   var minHeight: CGFloat {
     switch self {
-    case .sm: return 24
-    case .md: return 32
+    case .sm: return Theme.Spacing.xl
+    case .md: return Theme.TouchTarget.avatarMd
     }
   }
 
@@ -28,8 +28,8 @@ enum FDPillSize {
 
   var horizontalPadding: CGFloat {
     switch self {
-    case .sm: return 9
-    case .md: return 13
+    case .sm: return Theme.Spacing.s9
+    case .md: return Theme.Spacing.s13
     }
   }
 }
@@ -62,7 +62,7 @@ struct FDPill: View {
   }
 
   var body: some View {
-    let content = HStack(spacing: 5) {
+    let content = HStack(spacing: Theme.Spacing.s5) {
       if let systemImage {
         Image(systemName: systemImage)
           .font(size.font)
@@ -76,7 +76,7 @@ struct FDPill: View {
     .background(backgroundColor, in: Capsule())
     .overlay(
       Capsule()
-        .stroke(variant == .rule ? Theme.rule : Color.clear, lineWidth: 1)
+        .stroke(variant == .rule ? Theme.rule : Color.clear, lineWidth: Theme.TouchTarget.borderWidth)
     )
 
     if let action {

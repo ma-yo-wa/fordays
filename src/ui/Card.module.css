@@ -29,17 +29,17 @@
 
 /* Padding presets */
 .padNone {
-  padding: 0;
+  padding: var(--space-0);
 }
 
 .padSm {
-  padding: 12px;
+  padding: var(--space-3);
 }
 
 .padMd {
-  padding: 16px;
+  padding: var(--space-4);
 }
 
 .padLg {
-  padding: 20px;
+  padding: var(--space-5);
 }

@@ -20,22 +20,22 @@
   background-position: center;
   display: grid;
   place-items: center;
-  background: linear-gradient(155deg, #ffe8ef 0%, #fff3e0 55%, #eaf5df 100%);
+  background: var(--cover-fallback);
 }
 
 .emoji span {
-  line-height: 1;
-  filter: drop-shadow(0 2px 6px var(--hairline));
+  line-height: var(--lh-solid);
+  filter: drop-shadow(var(--space-0) var(--space-0-5) var(--space-1-5) var(--hairline));
 }
 
 .card.emoji span {
-  font-size: 56px;
+  font-size: var(--fs-glyph-md);
 }
 
 .hero.emoji span {
-  font-size: 72px;
+  font-size: var(--fs-glyph-lg);
 }
 
 .thumb.emoji span {
-  font-size: 36px;
+  font-size: var(--fs-glyph);
 }

@@ -185,7 +185,7 @@ export default function Composer() {
       onClose={close}
       heading={isPlan ? Copy.composer.newPlan : Copy.composer.newIdea}
     >
-      <div style={{ marginTop: 14 }}>
+      <div style={{ marginTop: 'var(--space-3-5)' }}>
         <Input
           label={isPlan ? 'Plan' : undefined}
           value={title}
@@ -208,7 +208,7 @@ export default function Composer() {
         placeholder="Where is this?"
       />
 
-      <div style={{ marginTop: 14 }}>
+      <div style={{ marginTop: 'var(--space-3-5)' }}>
         <Input
           label="Notes"
           hint="— optional"
@@ -236,7 +236,7 @@ export default function Composer() {
             onMultiDay={setMultiDay}
           />
 
-          <p className={f.rowNote} style={{ marginTop: 12 }}>
+          <p className={f.rowNote} style={{ marginTop: 'var(--space-3)' }}>
             {describePlan(
               composeWhen({
                 date,

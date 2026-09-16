@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Copy } from '../lib/copy';
 import { Button, Input } from '../ui';
+import { springSelect } from '../ui/motion';
 import f from './Form.module.css';
 import s from './Auth.module.css';
 
@@ -44,7 +45,7 @@ export default function OrbKindForm({ knobId, initialWithPeople = false, onSubmi
             <motion.span
               layoutId={knobId}
               className={f.segmentKnob}
-              transition={{ type: 'spring', stiffness: 520, damping: 38 }}
+              transition={springSelect}
             />
           )}
           <span className={f.segmentLabel}>{Copy.orbs.justYou}</span>
@@ -60,14 +61,14 @@ export default function OrbKindForm({ knobId, initialWithPeople = false, onSubmi
             <motion.span
               layoutId={knobId}
               className={f.segmentKnob}
-              transition={{ type: 'spring', stiffness: 520, damping: 38 }}
+              transition={springSelect}
             />
           )}
           <span className={f.segmentLabel}>{Copy.orbs.withSomeone || Copy.orbs.withPeople}</span>
         </button>
       </div>
 
-      <div style={{ marginTop: 20 }}>
+      <div style={{ marginTop: 'var(--space-5)' }}>
         <Input
           label={Copy.orbs.orbName}
           type="text"

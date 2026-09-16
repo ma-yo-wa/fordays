@@ -139,13 +139,13 @@ struct DetailView: View {
   @ViewBuilder
   private func content(_ item: Activity) -> some View {
     ScrollView {
-      VStack(alignment: .leading, spacing: 16) {
+      VStack(alignment: .leading, spacing: Theme.Spacing.base) {
         header(item)
 
         if mode == .view, let urlStr = item.imageUrl, !urlStr.isEmpty {
           RemoteOrDataImage(urlString: urlStr, contentMode: .fill)
             .frame(maxWidth: .infinity)
-            .frame(height: 200)
+            .frame(height: Theme.TouchTarget.coverHero)
             .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
         }
 
@@ -171,29 +171,29 @@ struct DetailView: View {
             Text("This is a copy from when you left — you can look, not change")
               .font(.footnote)
               .foregroundStyle(Theme.inkFaint)
-              .padding(.top, 8)
+              .padding(.top, Theme.Spacing.sm)
           } else {
             actionList(item)
           }
         }
       }
-      .padding(20)
-      .padding(.bottom, 24)
+      .padding(Theme.Spacing.lg)
+      .padding(.bottom, Theme.Spacing.xl)
     }
   }
 
   private func header(_ item: Activity) -> some View {
-    HStack(alignment: .top, spacing: 12) {
+    HStack(alignment: .top, spacing: Theme.Spacing.md) {
       if item.imageUrl == nil || item.imageUrl?.isEmpty == true {
         LinearGradient(
           colors: Theme.orbColors(for: item.id, title: item.title),
           startPoint: .topLeading,
           endPoint: .bottomTrailing
         )
-        .frame(width: 46, height: 46)
+        .frame(width: Theme.TouchTarget.formRow, height: Theme.TouchTarget.formRow)
         .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
       }
-      VStack(alignment: .leading, spacing: 4) {
+      VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
         Text(item.title)
           .font(.title2.weight(.semibold))
           .foregroundStyle(Theme.ink)
@@ -203,7 +203,7 @@ struct DetailView: View {
         if let loc = item.location, !loc.isEmpty {
           if let url = URL(string: "https://maps.apple.com/?q=\(loc.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? loc)") {
             Link(destination: url) {
-              HStack(spacing: 4) {
+              HStack(spacing: Theme.Spacing.xs) {
                 Text("📍")
                   .font(.caption)
                 Text(loc)
@@ -218,7 +218,7 @@ struct DetailView: View {
           }
         }
       }
-      Spacer(minLength: 8)
+      Spacer(minLength: Theme.Spacing.sm)
       if mode == .view, app.space?.frozen != true {
         Button {
           title = item.title
@@ -229,7 +229,7 @@ struct DetailView: View {
           Image(systemName: "pencil")
             .font(.body.weight(.semibold))
             .foregroundStyle(Theme.ink)
-            .frame(width: 40, height: 40)
+            .frame(width: Theme.TouchTarget.avatarLg, height: Theme.TouchTarget.avatarLg)
             .background(Theme.fillTertiary, in: Circle())
         }
         .accessibilityLabel("Edit")
@@ -256,8 +256,8 @@ struct DetailView: View {
     } ?? ""
 
     return FDCard(variant: .sageWash, padding: .sm) {
-      VStack(alignment: .leading, spacing: 12) {
-        HStack(spacing: 10) {
+      VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+        HStack(spacing: Theme.Spacing.s10) {
           FDAvatar(name: who, seat: faceSeat(for: item.suggestedBy), size: .sm)
           (
             Text(mine ? "You suggested " : "\(who) suggests ")
@@ -274,7 +274,7 @@ struct DetailView: View {
         }
 
         if app.space?.frozen != true {
-          HStack(spacing: 8) {
+          HStack(spacing: Theme.Spacing.sm) {
             if mine {
               FDButton("Cancel", variant: .secondary, size: .sm, disabled: busy) {
                 await dismissSuggestion(item, mine: true)
@@ -300,7 +300,7 @@ struct DetailView: View {
   }
 
   private var editForm: some View {
-    VStack(alignment: .leading, spacing: 12) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.md) {
       FDTextField(label: "Name", placeholder: "Name", text: $title)
 
       fieldLabel("Location", hint: "— optional")
@@ -318,7 +318,7 @@ struct DetailView: View {
       fieldLabel("Cover", hint: "— optional")
       CoverPickerView(cover: $cover, titleHint: { title })
 
-      HStack(spacing: 10) {
+      HStack(spacing: Theme.Spacing.s10) {
         FDButton("Cancel", variant: .secondary) { mode = .view }
         FDButton("Save", variant: .primary, disabled: busy) { await saveEdits() }
       }
@@ -355,10 +355,10 @@ struct DetailView: View {
   }
 
   private func whenForm(suggest: Bool) -> some View {
-    VStack(alignment: .leading, spacing: 12) {
+    VStack(alignment: .leading, spacing: Theme.Spacing.md) {
       fieldLabel("When")
 
-      VStack(spacing: 0) {
+      VStack(spacing: Theme.Spacing.none) {
         // Starts / When row
         HStack {
           Text(multiDay ? "Starts" : "When")
@@ -367,7 +367,7 @@ struct DetailView: View {
 
           Spacer()
 
-          HStack(spacing: 8) {
+          HStack(spacing: Theme.Spacing.sm) {
             DatePicker("", selection: $day, displayedComponents: .date)
               .datePickerStyle(.compact)
               .labelsHidden()
@@ -378,13 +378,13 @@ struct DetailView: View {
                 Text("+ Add time")
                   .font(.subheadline.weight(.medium))
                   .foregroundStyle(Theme.inkSoft)
-                  .padding(.horizontal, 10)
-                  .padding(.vertical, 6)
+                  .padding(.horizontal, Theme.Spacing.s10)
+                  .padding(.vertical, Theme.Spacing.s6)
                   .background(Theme.fillTertiary, in: RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
               }
               .buttonStyle(.plain)
             } else {
-              HStack(spacing: 6) {
+              HStack(spacing: Theme.Spacing.s6) {
                 CompactTimePicker(
                   selection: Binding(
                     get: { parseTime(fromTime) },
@@ -406,13 +406,13 @@ struct DetailView: View {
             }
           }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, Theme.Spacing.row)
+        .padding(.vertical, Theme.Spacing.s10)
 
         // Multi-day Ends row
         if multiDay {
           Divider()
-            .padding(.leading, 14)
+            .padding(.leading, Theme.Spacing.row)
 
           HStack {
             Text("Ends")
@@ -421,7 +421,7 @@ struct DetailView: View {
 
             Spacer()
 
-            HStack(spacing: 8) {
+            HStack(spacing: Theme.Spacing.sm) {
               DatePicker(
                 "",
                 selection: Binding(
@@ -441,13 +441,13 @@ struct DetailView: View {
                     Text("+ End time")
                       .font(.subheadline.weight(.medium))
                       .foregroundStyle(Theme.inkSoft)
-                      .padding(.horizontal, 10)
-                      .padding(.vertical, 6)
+                      .padding(.horizontal, Theme.Spacing.s10)
+                      .padding(.vertical, Theme.Spacing.s6)
                       .background(Theme.fillTertiary, in: RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
                   }
                   .buttonStyle(.plain)
                 } else {
-                  HStack(spacing: 6) {
+                  HStack(spacing: Theme.Spacing.s6) {
                     CompactTimePicker(
                       selection: Binding(
                         get: { parseTime(untilTime) },
@@ -469,12 +469,12 @@ struct DetailView: View {
               }
             }
           }
-          .padding(.horizontal, 14)
-          .padding(.vertical, 10)
+          .padding(.horizontal, Theme.Spacing.row)
+          .padding(.vertical, Theme.Spacing.s10)
         } else if !fromTime.isEmpty && !untilTime.isEmpty {
           // Single-day Until row
           Divider()
-            .padding(.leading, 14)
+            .padding(.leading, Theme.Spacing.row)
 
           HStack {
             Text("Until")
@@ -483,7 +483,7 @@ struct DetailView: View {
 
             Spacer()
 
-          HStack(spacing: 6) {
+          HStack(spacing: Theme.Spacing.s6) {
             CompactTimePicker(
               selection: Binding(
                 get: { parseTime(untilTime) },
@@ -502,8 +502,8 @@ struct DetailView: View {
             .buttonStyle(.plain)
           }
           }
-          .padding(.horizontal, 14)
-          .padding(.vertical, 10)
+          .padding(.horizontal, Theme.Spacing.row)
+          .padding(.vertical, Theme.Spacing.s10)
         }
       }
       .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
@@ -535,7 +535,7 @@ struct DetailView: View {
           Spacer()
         }
       }
-      .padding(.top, 4)
+      .padding(.top, Theme.Spacing.xs)
 
       if suggest {
         FDTextField(
@@ -548,7 +548,7 @@ struct DetailView: View {
         )
       }
 
-      HStack(spacing: 10) {
+      HStack(spacing: Theme.Spacing.s10) {
         FDButton("Cancel", variant: .secondary) { mode = .view }
         FDButton(
           suggest ? "Suggest" : (item?.isPlan == true ? "Save" : "Make it a plan"),
@@ -567,11 +567,11 @@ struct DetailView: View {
 
   private func confirmDelete(_ item: Activity) -> some View {
     FDCard(variant: .roseWash, padding: .sm) {
-      VStack(alignment: .leading, spacing: 12) {
+      VStack(alignment: .leading, spacing: Theme.Spacing.md) {
         Text("Delete “\(item.title)”? This removes it for everyone in this Orb.")
           .font(.fdBody)
           .foregroundStyle(Theme.ink2)
-        HStack(spacing: 10) {
+        HStack(spacing: Theme.Spacing.s10) {
           FDButton("Keep it", variant: .secondary) { mode = .view }
           FDButton("Delete", variant: .destructive) {
             await app.deleteActivity(item.id)
@@ -584,7 +584,7 @@ struct DetailView: View {
   }
 
   private func actionList(_ item: Activity) -> some View {
-    VStack(spacing: 4) {
+    VStack(spacing: Theme.Spacing.xs) {
       if item.isMemory() {
         FDActionRow(title: Copy.Memories.doAgain, systemImage: "arrow.triangle.2.circlepath") {
           showDoAgainDialog = true
@@ -632,7 +632,7 @@ struct DetailView: View {
         mode = .confirmDelete
       }
     }
-    .padding(.top, 8)
+    .padding(.top, Theme.Spacing.sm)
   }
 
   private func handleDoWith(_ targetSpace: SpaceInfo) async {
@@ -646,7 +646,7 @@ struct DetailView: View {
   }
 
   private func fieldLabel(_ text: String, hint: String? = nil) -> some View {
-    HStack(spacing: 4) {
+    HStack(spacing: Theme.Spacing.xs) {
       Text(text)
         .font(.caption.weight(.semibold))
         .foregroundStyle(Theme.inkSoft)

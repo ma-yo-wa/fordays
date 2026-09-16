@@ -1,7 +1,7 @@
 .overlay {
   position: fixed;
-  inset: 0;
-  z-index: 120;
+  inset: var(--space-0);
+  z-index: var(--z-search);
   background: var(--paper);
   display: flex;
   flex-direction: column;
@@ -12,16 +12,16 @@
   flex: none;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: calc(var(--safe-t) + 10px) max(16px, var(--safe-r)) 10px max(16px, var(--safe-l));
+  gap: var(--space-2-5);
+  padding: calc(var(--safe-t) + var(--space-2-5)) max(var(--space-4), var(--safe-r)) var(--space-2-5) max(var(--space-4), var(--safe-l));
   background: var(--paper);
   border-bottom: var(--hairline-w) solid var(--separator);
 }
 
 .backBtn {
   flex: none;
-  width: 36px;
-  height: 36px;
+  width: var(--space-9);
+  height: var(--space-9);
   border: none;
   background: none;
   color: var(--rose-ink);
@@ -29,18 +29,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: var(--space-0);
   border-radius: 50%;
   transition: opacity 0.15s ease, background-color 0.15s ease;
 }
 
 .backBtn svg {
-  width: 20px;
-  height: 20px;
+  width: var(--space-5);
+  height: var(--space-5);
 }
 
 .backBtn:active {
-  opacity: 0.5;
+  opacity: var(--op-50);
   background: var(--fill-tertiary);
 }
 
@@ -48,9 +48,9 @@
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 38px;
-  padding: 0 10px 0 12px;
+  gap: var(--space-2);
+  height: var(--space-9-5);
+  padding: var(--space-0) var(--space-2-5) var(--space-0) var(--space-3);
   background: var(--paper-warm);
   border-radius: var(--r-control);
   border: var(--hairline-w) solid var(--hairline);
@@ -65,13 +65,13 @@
 }
 
 .searchIcon svg {
-  width: 17px;
-  height: 17px;
+  width: var(--space-4-25);
+  height: var(--space-4-25);
 }
 
 .input {
   flex: 1;
-  min-width: 0;
+  min-width: var(--space-0);
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
@@ -79,7 +79,7 @@
   font: var(--t-body);
   letter-spacing: var(--tr-body);
   color: var(--ink);
-  padding: 0;
+  padding: var(--space-0);
 }
 
 .input::placeholder {
@@ -89,8 +89,8 @@
 
 .clearBtn {
   flex: none;
-  width: 20px;
-  height: 20px;
+  width: var(--space-5);
+  height: var(--space-5);
   border: none;
   background: var(--ink-faint);
   color: var(--paper);
@@ -98,16 +98,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  line-height: 1;
+  font-size: var(--fs-footnote);
+  line-height: var(--lh-solid);
   cursor: pointer;
-  padding: 0;
-  opacity: 0.6;
+  padding: var(--space-0);
+  opacity: var(--op-60);
   transition: opacity 0.12s ease;
 }
 
 .clearBtn:active {
-  opacity: 1;
+  opacity: var(--op-100);
 }
 
 .cancelBtn {
@@ -117,8 +117,8 @@
   font: var(--t-body);
   color: var(--rose-ink);
   cursor: pointer;
-  padding: 6px 10px;
-  min-height: 40px;
+  padding: var(--space-1-5) var(--space-2-5);
+  min-height: var(--space-10);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,14 +126,14 @@
 }
 
 .cancelBtn:active {
-  opacity: 0.5;
+  opacity: var(--op-50);
 }
 
 .content {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 14px max(16px, var(--safe-r)) calc(var(--safe-b) + 32px) max(16px, var(--safe-l));
+  padding: var(--space-3-5) max(var(--space-4), var(--safe-r)) calc(var(--safe-b) + var(--space-8)) max(var(--space-4), var(--safe-l));
 }
 
 .recentWrap {
@@ -146,32 +146,32 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 260px;
+  min-height: var(--space-65);
   color: var(--ink-faint);
   text-align: center;
-  gap: 12px;
-  padding: 40px 20px;
+  gap: var(--space-3);
+  padding: var(--space-10) var(--space-5);
 }
 
 .emptyPromptIcon {
-  opacity: 0.35;
+  opacity: var(--op-35);
 }
 
 .emptyPromptIcon svg {
-  width: 38px;
-  height: 38px;
+  width: var(--space-9-5);
+  height: var(--space-9-5);
 }
 
 .emptyPromptText {
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   color: var(--ink-soft);
-  max-width: 260px;
-  margin: 0;
+  max-width: var(--space-65);
+  margin: var(--space-0);
 }
 
 .section {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
 .sectionHeader {
@@ -179,13 +179,13 @@
   font-weight: 600;
   color: var(--ink-soft);
   text-transform: uppercase;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  margin: 0 0 10px 4px;
+  font-size: var(--fs-caption2);
+  letter-spacing: var(--tr-wider);
+  margin: var(--space-0) var(--space-0) var(--space-2-5) var(--space-1);
 }
 
 .dayGroup {
-  margin-bottom: 14px;
+  margin-bottom: var(--space-3-5);
 }
 
 .dayHeader {
@@ -193,20 +193,20 @@
   font-weight: 600;
   color: var(--ink);
   letter-spacing: var(--tr-subhead);
-  margin: 0 0 6px 4px;
+  margin: var(--space-0) var(--space-0) var(--space-1-5) var(--space-1);
 }
 
 .rowsList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3-5);
   background: var(--paper-warm);
   border-radius: var(--r-md);
   border: var(--hairline-w) solid var(--hairline);
@@ -217,12 +217,12 @@
 }
 
 .row:active {
-  transform: scale(0.99);
-  opacity: 0.8;
+  transform: scale(var(--scale-press-99));
+  opacity: var(--op-80);
 }
 
 .accentBar {
-  width: 3.5px;
+  width: var(--size-result-mark);
   align-self: stretch;
   border-radius: var(--r-xs);
   background: var(--rose);
@@ -235,21 +235,21 @@
 
 .accentBarMemory {
   background: var(--rose-ink);
-  opacity: 0.6;
+  opacity: var(--op-60);
 }
 
 .rowMain {
   flex: 1;
-  min-width: 0;
+  min-width: var(--space-0);
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--space-0-75);
 }
 
 .rowTitle {
   font: var(--t-headline);
   font-weight: 500;
-  font-size: 16px;
+  font-size: var(--fs-callout);
   color: var(--ink);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -259,7 +259,7 @@
 .rowLoc {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   font: var(--t-footnote);
   color: var(--ink-soft);
   overflow: hidden;
@@ -268,9 +268,9 @@
 }
 
 .rowLocPin {
-  font-size: 12px;
-  line-height: 1;
-  opacity: 0.7;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-solid);
+  opacity: var(--op-70);
 }
 
 .rowNote {
@@ -291,9 +291,9 @@
 }
 
 .somedayBadge {
-  font-size: 11px;
+  font-size: var(--fs-caption2);
   font-weight: 600;
-  padding: 3px 8px;
+  padding: var(--space-0-75) var(--space-2);
   border-radius: var(--r-sm);
   background: var(--fill-tertiary);
   color: var(--ink-soft);

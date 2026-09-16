@@ -5,6 +5,7 @@ import { isMemory, type Activity } from '../lib/types';
 import { Copy, formatCopy } from '../lib/copy';
 import { dtDate, dtTime, formatSearchDate, pretty } from '../lib/date';
 import { Pill } from '../ui';
+import { durationFade, easeIos, ySearch } from '../ui/motion';
 import s from './SearchOverlay.module.css';
 
 function SearchIcon() {
@@ -147,10 +148,10 @@ export default function SearchOverlay() {
       {searchOpen && (
         <motion.div
           className={s.overlay}
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: ySearch }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 15 }}
-          transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+          exit={{ opacity: 0, y: ySearch }}
+          transition={{ duration: durationFade, ease: easeIos }}
         >
           <div className={s.topBar}>
             <button

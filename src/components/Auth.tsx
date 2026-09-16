@@ -222,7 +222,7 @@ export default function Auth({
       </p>
 
       {mode === 'signup' && (
-        <div style={{ marginBottom: 12 }}>
+        <div style={{ marginBottom: 'var(--space-3)' }}>
           <Input
             label="Your name"
             type="text"
@@ -235,7 +235,7 @@ export default function Auth({
         </div>
       )}
 
-      <div style={{ marginBottom: 12 }}>
+      <div style={{ marginBottom: 'var(--space-3)' }}>
         <Input
           label="Email"
           type="email"
@@ -249,7 +249,7 @@ export default function Auth({
         />
       </div>
 
-      <div style={{ marginBottom: 12 }}>
+      <div style={{ marginBottom: 'var(--space-3)' }}>
         <Input
           label="Password"
           type="password"

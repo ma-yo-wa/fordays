@@ -1,15 +1,15 @@
 .wrap {
-  padding: 14px max(20px, var(--safe-l))
-    calc(var(--safe-b) + 128px)
-    max(20px, var(--safe-r));
+  padding: var(--space-3-5) max(var(--space-5), var(--safe-l))
+    calc(var(--safe-b) + var(--h-dock-clearance))
+    max(var(--space-5), var(--safe-r));
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: var(--space-5-5);
 }
 
 .month {
-  margin: 0 0 10px;
-  padding: 0 2px;
+  margin: var(--space-0) var(--space-0) var(--space-2-5);
+  padding: var(--space-0) var(--space-0-5);
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   color: var(--ink-soft);
@@ -19,7 +19,7 @@
 .board {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
+  gap: var(--space-3-5);
 }
 
 .card {
@@ -31,9 +31,9 @@
   isolation: isolate;
   box-shadow: var(--shadow-card);
   border: none;
-  padding: 0;
+  padding: var(--space-0);
   text-align: left;
-  color: #fffdfb;
+  color: var(--paper-warm);
   width: 100%;
   transition:
     transform 0.16s var(--ease-ios),
@@ -41,18 +41,18 @@
 }
 
 .card:active {
-  transform: scale(0.96);
-  opacity: 0.9;
+  transform: scale(var(--scale-press-soft));
+  opacity: var(--op-90);
 }
 
 .art {
   position: absolute;
-  inset: 0;
+  inset: var(--space-0);
 }
 
 .veil {
   position: absolute;
-  inset: 0;
+  inset: var(--space-0);
   background: linear-gradient(
     178deg,
     transparent 34%,
@@ -62,10 +62,10 @@
 
 .body {
   position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: 13px;
-  z-index: 2;
+  left: var(--space-3-5);
+  right: var(--space-3-5);
+  bottom: var(--space-3-25);
+  z-index: var(--z-raised);
 }
 
 .title {
@@ -75,19 +75,19 @@
 }
 
 .foot {
-  margin-top: 5px;
+  margin-top: var(--space-1-25);
   font: var(--t-caption2);
   letter-spacing: var(--tr-caption2);
   color: var(--paper-translucent);
 }
 
 .blank {
-  padding: 56px 20px;
+  padding: var(--h-navbar) var(--space-5);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .blank p {

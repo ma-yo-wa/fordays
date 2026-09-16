@@ -122,13 +122,13 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
       }}
       heading={peek ? `${peek.inviterName} invited you` : Copy.invite.joinTitle}
     >
-      <p className={f.rowNote} style={{ marginTop: 8 }}>
+      <p className={f.rowNote} style={{ marginTop: 'var(--space-2)' }}>
         {peek
           ? `You’ll share this Orb with ${peek.inviterName}.`
           : Copy.invite.joinSubtitle}
       </p>
 
-      <div style={{ marginTop: 16 }}>
+      <div style={{ marginTop: 'var(--space-4)' }}>
         <Input
           label={Copy.invite.codeOrLink}
           value={input}
@@ -146,7 +146,7 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
             variant="ghost"
             size="sm"
             onClick={() => void handlePaste()}
-            style={{ marginTop: 8 }}
+            style={{ marginTop: 'var(--space-2)' }}
           >
             {Copy.invite.paste}
           </Button>
@@ -154,13 +154,13 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
       </div>
 
       {lookingUp && (
-        <p className={f.rowNote} style={{ marginTop: 8 }}>
+        <p className={f.rowNote} style={{ marginTop: 'var(--space-2)' }}>
           {Copy.invite.lookingUp}
         </p>
       )}
 
       {peek && peek.isOpen && (
-        <Card variant="sageWash" padding="sm" style={{ marginTop: 14 }}>
+        <Card variant="sageWash" padding="sm" style={{ marginTop: 'var(--space-3-5)' }}>
           <div className={f.peekTitle}>
             {peek.inviterName} invited you to {peek.spaceName ? `“${peek.spaceName}”` : 'their Orb'}
           </div>
@@ -171,12 +171,12 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
       )}
 
       {error && (
-        <p className={f.rowNote} style={{ color: 'var(--rose-ink)', marginTop: 10 }}>
+        <p className={f.rowNote} style={{ color: 'var(--rose-ink)', marginTop: 'var(--space-2-5)' }}>
           {error}
         </p>
       )}
 
-      <div className={f.row} style={{ marginTop: 20 }}>
+      <div className={f.row} style={{ marginTop: 'var(--space-5)' }}>
         <Button
           variant="secondary"
           onClick={() => {

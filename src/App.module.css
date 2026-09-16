@@ -1,8 +1,8 @@
 .app {
   height: 100%;
   min-height: 100%;
-  max-width: 480px;
-  margin: 0 auto;
+  max-width: var(--w-content);
+  margin: var(--space-0) auto;
   position: relative;
   overflow: hidden;
 }
@@ -17,7 +17,7 @@
   overscroll-behavior: contain;
   scrollbar-width: none;
   /* 56pt bar across all tabs */
-  padding-top: calc(var(--safe-t) + 56px);
+  padding-top: calc(var(--safe-t) + var(--h-navbar));
 }
 
 .main::-webkit-scrollbar {

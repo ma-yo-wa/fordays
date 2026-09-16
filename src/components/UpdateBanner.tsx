@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { registerSW } from 'virtual:pwa-register';
 import { AnimatePresence, motion } from 'motion/react';
+import { scaleToast, springToast, yToast, yToastExit } from '../ui/motion';
 import s from './UpdateBanner.module.css';
 
 /** When a new deploy is waiting after a launch, offer a one-tap reload.
@@ -26,10 +27,10 @@ export default function UpdateBanner() {
           <motion.button
             type="button"
             className={s.banner}
-            initial={{ opacity: 0, y: 12, scale: 0.96 }}
+            initial={{ opacity: 0, y: yToast, scale: scaleToast }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.96 }}
-            transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+            exit={{ opacity: 0, y: yToastExit, scale: scaleToast }}
+            transition={springToast}
             onClick={() => apply()}
           >
             Update available — tap to refresh
