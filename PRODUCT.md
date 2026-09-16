@@ -12,7 +12,7 @@ An Orb is **the notebook for a specific we** (including a we of one). Plans belo
 
 Someday / Plans / Memories **are** that notebook. Everyone has at least one **live** Orb.
 
-**Notebook isolation**: Plans stay strictly in the notebook where they were created. No cross-Orb bleeding. Plans from your Personal Orb or another Orb never appear as phantom availability lines or ghost dots in your other Orbs. To see your personal plans, switch to Personal.
+**Notebook isolation**: Plans stay strictly in the notebook where they were created. No cross-Orb bleeding. Plans from your Personal Orb or another Orb never appear as phantom availability lines or ghost dots in your other Orbs. To see your personal plans, switch to Personal. External calendar events (Google / Apple / Outlook) live only in Personal and never appear in shared Orbs.
 
 **Enforced Personal Orb**: Every user always has a Personal Orb as their permanent anchor. You can rename it, but you cannot delete your Personal Orb. It is your home base.
 
@@ -114,11 +114,14 @@ The app **opens here**. Someday and Memories stay in the dock; this is the defau
 
 Empty: the line only. Plus adds. No empty CTA.
 
-- **Two dot categories (no black dots)**:
-  - **Solid Rose dot (`●`)**: Plans created in the active notebook (whether in Personal or in a shared Orb).
-  - **Hollow Ring dot (`○`)**: External calendar events (Google / Apple / Outlook).
-  - **Zero black dots**: The black selection pip is prohibited. Selected day is communicated cleanly through bold text (and the solid rose circle on Today).
-  - **Cap at 3 dots total**: If a day has 4 or more plans/events, it shows 3 dots (`...` heat map shorthand) without writing `3+` inside the cell, preserving clean typography.
+- **Single Dot Style (One Dot, Pink Solid `●`)**:
+  - Only one dot style exists in this app: the solid pink dot (`●`).
+  - There are no hollow ring dots (`○`) and no black selection dots. External events and app plans are all plans — just created differently.
+  - A dot simply means something is happening on that day.
+  - Capped at 3 dots total per day cell (`...` heat map shorthand) without numbers cluttering the cell.
+- **External Events & Shared Orb Isolation**:
+  - In a shared Orb (with a partner or group), external calendar events never appear. Shared Orbs are pure notebooks of what you plan together.
+  - External events (Google / Apple / Outlook) live only in your Personal Orb alongside personal plans, tagged simply with their source (`Google`, `Apple`, or `Outlook`).
 - **Frosted Shelf Header (Approach A)**:
   - The sticky top header provides a spacious frosted shelf (~56pt min-height) with a generous 14pt cushion directly below the Orb selector pill (`Alowa ∨`).
   - At rest, weekday headers (`S M T W T F S`) sit 16pt below the bar for calm, unhurried breathing room.

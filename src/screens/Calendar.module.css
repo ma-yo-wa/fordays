@@ -129,18 +129,13 @@
   align-items: center;
 }
 
-/* Solid = something you two agreed to. Hollow = somebody's imported
-   event. Shape reads before colour at this size. */
+/* One single dot in this app: solid pink dot.
+   A dot simply means something is happening on that day. */
 .marks i {
   width: 5px;
   height: 5px;
   border-radius: 50%;
   background: var(--rose-ink);
-}
-
-.marks i.ext {
-  background: none;
-  border: 1.5px solid currentColor;
 }
 
 /* ---------------- agenda ---------------- */

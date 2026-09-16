@@ -83,14 +83,16 @@ export default function Calendar() {
     }
   }
 
-  /* Imported events land on every day they touch, so a four-night hotel
-     booking shows up across all four. Non-owners only see events if shared. */
+  /* Imported external events belong strictly to Personal / solo Orb.
+     In a shared Orb with a partner or group, external events do not appear. */
   const extByDate = new Map<string, ExternalEvent[]>();
-  for (const e of external) {
-    const isMine = e.ownerId === (space?.myId ?? String(space?.me ?? config.me));
-    if (!isMine && !e.sharedWithSpace) continue;
-    for (const day of spanDays(e.startsAt, e.endsAt)) {
-      extByDate.set(day, [...(extByDate.get(day) ?? []), e]);
+  if (!matched) {
+    const myId = space?.myId ?? String(space?.me ?? config.me);
+    for (const e of external) {
+      if (e.ownerId !== myId) continue;
+      for (const day of spanDays(e.startsAt, e.endsAt)) {
+        extByDate.set(day, [...(extByDate.get(day) ?? []), e]);
+      }
     }
   }
 
@@ -211,12 +213,14 @@ export default function Calendar() {
             };
           }
 
-          // Discrete marks on the month grid are strictly Fordays plans
+          // Discrete marks on the month grid are single plans + imported events (up to 3 solid pink dots)
           const singlePlans = mine.filter((p) => {
             const from = dtDate(p.date_time);
             const to = dtDate(p.ends_at) ?? from;
             return !from || !to || spanDays(from, to).length <= 1;
           });
+
+          const totalDots = Math.min(singlePlans.length + imported.length, 3);
 
           const classes: string[] = [];
           if (s.day) classes.push(s.day);
@@ -233,11 +237,8 @@ export default function Calendar() {
               {trackStyle && <span className={s.track} style={trackStyle} />}
               <span className={s.num}>{cell.label}</span>
               <span className={s.marks}>
-                {singlePlans.slice(0, 3).map((p) => (
-                  <i key={p.id} />
-                ))}
-                {imported.slice(0, Math.max(0, 3 - Math.min(singlePlans.length, 3))).map((e) => (
-                  <i key={e.id} className={s.ext} />
+                {Array.from({ length: totalDots }).map((_, idx) => (
+                  <i key={idx} />
                 ))}
               </span>
             </button>
@@ -393,9 +394,6 @@ export default function Calendar() {
                       </span>
                       {ownerName}
                       <span className={s.sourceTag}>{sourceTag(e.source)}</span>
-                      {isMine && !e.sharedWithSpace && (
-                        <span className={s.privateTag}>{Copy.availability.onlyYou}</span>
-                      )}
                     </div>
                   </span>
                 </button>

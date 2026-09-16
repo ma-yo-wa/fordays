@@ -23,11 +23,12 @@ struct PlansView: View {
   }
 
   private var dayExternal: [ExternalEvent] {
+    guard app.space?.isMatched != true else { return [] }
     let day = app.pickedDay
     let myId = app.space?.myId
     return app.externalEvents.filter { e in
       let isMine = myId == e.userId || e.userId == "0"
-      if !isMine && !e.sharedWithSpace { return false }
+      if !isMine { return false }
       let start = String(e.startsAt.prefix(10))
       let end = e.endsAt.isEmpty ? start : String(e.endsAt.prefix(10))
       return day >= start && day <= end
@@ -249,14 +250,6 @@ struct PlansView: View {
                         .padding(.horizontal, 6)
                         .padding(.vertical, 1)
                         .background(Theme.ink.opacity(0.06), in: Capsule())
-                      if isMine && !e.sharedWithSpace {
-                        Text(Copy.Availability.onlyYou)
-                          .font(.caption2.weight(.medium))
-                          .foregroundStyle(Theme.inkSoft)
-                          .padding(.horizontal, 6)
-                          .padding(.vertical, 1)
-                          .overlay(Capsule().stroke(Theme.ink.opacity(0.14), lineWidth: 0.5))
-                      }
                     }
                   }
                   Spacer(minLength: 0)
@@ -421,14 +414,10 @@ struct PlansView: View {
                     }
                   }
 
+                let totalDots = min(count + extCount, 3)
                 HStack(spacing: 2) {
-                  ForEach(0..<min(count, 3), id: \.self) { _ in
+                  ForEach(0..<totalDots, id: \.self) { _ in
                     Circle().fill(Theme.roseInk).frame(width: 4, height: 4)
-                  }
-                  ForEach(0..<min(extCount, max(0, 3 - min(count, 3))), id: \.self) { _ in
-                    Circle()
-                      .stroke(Theme.roseInk, lineWidth: 1)
-                      .frame(width: 4, height: 4)
                   }
                 }
                 .frame(height: 5)
@@ -491,10 +480,11 @@ struct PlansView: View {
   }
 
   private func visibleExternalCount(on day: String) -> Int {
+    guard app.space?.isMatched != true else { return 0 }
     let myId = app.space?.myId
     return app.externalEvents.filter { e in
       let isMine = myId == e.userId || e.userId == "0"
-      if !isMine && !e.sharedWithSpace { return false }
+      if !isMine { return false }
       let start = String(e.startsAt.prefix(10))
       let end = e.endsAt.isEmpty ? start : String(e.endsAt.prefix(10))
       return day >= start && day <= end
