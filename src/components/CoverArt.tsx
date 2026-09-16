@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { emojiFromCover, isEmojiCover } from '../lib/cover';
 import { tintFor } from '../lib/tint';
 import s from './CoverArt.module.css';
@@ -22,7 +23,12 @@ export default function CoverArt({
   size = 'card',
   eager = false,
 }: Props) {
-  if (!url) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+
+  const isFailed = Boolean(url && failedUrl === url);
+  const isMissing = !url || url === 'null' || url === 'undefined' || !url.trim();
+
+  if (isMissing || isFailed) {
     if (!washId) return null;
     return (
       <div
@@ -54,6 +60,7 @@ export default function CoverArt({
         loading={loadNow ? 'eager' : 'lazy'}
         decoding="async"
         draggable={false}
+        onError={() => setFailedUrl(url)}
       />
     </div>
   );
