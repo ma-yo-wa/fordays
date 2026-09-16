@@ -6,6 +6,7 @@ import Composer from './components/Composer';
 import Detail from './components/Detail';
 import Settings from './components/Settings';
 import ExternalDetail from './components/ExternalDetail';
+import SearchOverlay from './components/SearchOverlay';
 import InviteAccept from './components/InviteAccept';
 import InviteShare from './components/InviteShare';
 import Auth from './components/Auth';
@@ -255,6 +256,7 @@ function AppShell() {
       <Detail />
       <Settings />
       <ExternalDetail />
+      <SearchOverlay />
       <InviteShare
         open={inviteShareOpen}
         code={space?.inviteCode ?? ''}

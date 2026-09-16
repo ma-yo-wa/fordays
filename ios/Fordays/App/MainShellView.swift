@@ -9,6 +9,7 @@ struct MainShellView: View {
   @State private var showInvite = false
   @State private var showSettings = false
   @State private var selected: Activity?
+  @State private var showSearch = false
 
   var body: some View {
     ZStack(alignment: .bottom) {
@@ -91,6 +92,19 @@ struct MainShellView: View {
               withAnimation { app.toast = nil }
             }
           }
+      }
+
+      if showSearch {
+        SearchView(
+          onSelect: { activity in
+            selected = activity
+          },
+          onClose: {
+            showSearch = false
+          }
+        )
+        .environmentObject(app)
+        .transition(.opacity)
       }
     }
     .sheet(isPresented: $showAddChooser) {
@@ -223,6 +237,18 @@ struct MainShellView: View {
       if app.tab == .plans {
         trailingCalendarControls
       }
+
+      Button {
+        showSearch = true
+      } label: {
+        Image(systemName: "magnifyingglass")
+          .font(.subheadline.weight(.semibold))
+          .foregroundStyle(Theme.roseInk)
+          .frame(width: 32, height: 32)
+          .contentShape(Rectangle())
+      }
+      .buttonStyle(.plain)
+      .accessibilityLabel("Search")
     }
     .overlay {
       Text(title)

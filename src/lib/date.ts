@@ -315,3 +315,19 @@ export function monthGrid(cursor: Date): DayCell[] {
   while (cells.length % 7) cells.push({ label: '', date: null, outside: true });
   return cells;
 }
+
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+export function formatSearchDate(dayStr: string): string {
+  const d = parseISO(dayStr.slice(0, 10));
+  const weekday = WEEKDAYS[d.getDay()];
+  const month = MONTHS_SHORT[d.getMonth()];
+  const day = d.getDate();
+  const year = d.getFullYear();
+  const currentYear = new Date().getFullYear();
+  if (year !== currentYear) {
+    return `${weekday} – ${month} ${day}, ${year}`;
+  }
+  return `${weekday} – ${month} ${day}`;
+}

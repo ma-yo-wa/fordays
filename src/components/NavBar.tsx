@@ -25,6 +25,15 @@ function ChevronDown() {
   );
 }
 
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 /* Two bar styles, because iOS has two and uses them for different things:
    a list gets a large title that collapses as you scroll it, and a fixed
    view like a month grid gets a compact bar. Using the large title
@@ -40,6 +49,7 @@ export default function NavBar() {
   const setCursor = useApp((st) => st.setCursor);
   const setPicked = useApp((st) => st.setPicked);
   const setSettingsOpen = useApp((st) => st.setSettingsOpen);
+  const setSearchOpen = useApp((st) => st.setSearchOpen);
   const space = useApp((st) => st.space);
 
   const cursorDate = parseISO(cursor);
@@ -191,6 +201,15 @@ export default function NavBar() {
               </button>
             </>
           )}
+          <button
+            type="button"
+            className={s.action}
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search"
+            title="Search"
+          >
+            <SearchIcon />
+          </button>
         </div>
       </div>
 

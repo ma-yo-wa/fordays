@@ -149,5 +149,15 @@
     "invitedToNamedOrb": "{inviter} invited you to “{orb}”",
     "joinInviter": "Join {inviter}",
     "createAccountAndJoin": "Create account & join"
+  },
+  "search": {
+    "placeholder": "Search plans, someday & memories",
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "plans": "Plans",
+    "someday": "Someday",
+    "memories": "Memories",
+    "noResults": "No results for “{query}”",
+    "emptyPrompt": "Search by title, location, or notes"
   }
 }

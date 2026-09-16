@@ -140,6 +140,8 @@ interface AppState {
   setAddOpen: (v: boolean) => void;
   openComposer: (mode: Kind, draft?: PlanDraft | null) => void;
   closeComposer: () => void;
+  searchOpen: boolean;
+  setSearchOpen: (v: boolean) => void;
   setSettingsOpen: (v: boolean) => void;
   setInviteShareOpen: (v: boolean) => void;
   setInviteCode: (code: string | null) => void;
@@ -262,6 +264,7 @@ export const useApp = create<AppState>()((set, get) => {
     composerMode: null,
     composerDraft: null,
     addOpen: false,
+    searchOpen: false,
     settingsOpen: false,
     inviteShareOpen: false,
     inviteCode: pendingInvite(),
@@ -378,14 +381,15 @@ export const useApp = create<AppState>()((set, get) => {
           activities: snap.activities,
           external: [],
           detailId: null,
+          searchOpen: false,
         });
         prefetchBoardCovers(snap.activities);
       } else {
-        set({ activities: [], external: [], logs: [], detailId: null });
+        set({ activities: [], external: [], logs: [], detailId: null, searchOpen: false });
       }
       const space = await switchSpaceRemote(id);
       const spaces = await loadSpaces().catch(() => (space ? [space] : []));
-      set({ space, spaces, config: loadConfig(), detailId: null });
+      set({ space, spaces, config: loadConfig(), detailId: null, searchOpen: false });
       if (space?.frozen) get().toast('This is a copy from when you left');
       if (space) {
         await start(await supabaseBackend({ ...loadConfig(), spaceId: space.id }));
@@ -726,6 +730,7 @@ export const useApp = create<AppState>()((set, get) => {
       set({ composerMode, composerDraft: draft, addOpen: false });
     },
     closeComposer: () => set({ composerMode: null, composerDraft: null }),
+    setSearchOpen: (searchOpen) => set({ searchOpen }),
     setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
     setInviteShareOpen: (inviteShareOpen) => set({ inviteShareOpen }),
     setInviteCode: (inviteCode) => set({ inviteCode }),

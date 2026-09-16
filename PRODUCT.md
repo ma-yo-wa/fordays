@@ -229,3 +229,20 @@ Sign in first. Sign up is a link. Name placeholder **Aline**. No Mayowa in app c
   - Anchored to the bottom of the screen above the safe area / home indicator.
   - Zero grabber bars, completely non-draggable.
   - Two-capsule geometry: content capsule with title/message/action(s), separated by 8px from an independent Cancel capsule below.
+
+---
+
+## Unified Search
+
+A quiet search across the entire active notebook.
+
+- **Notebook-scoped**: Searching strictly respects Orb isolation. Searching in Personal only searches Personal; searching in Aline only searches that shared Orb.
+- **Unified across the three spaces**: Rather than separate search bars in each tab, one unified search checks **Plans**, **Someday**, and **Memories** simultaneously.
+- **Fields matched**: Searches `title`, `location`, and `description` (notes). Matches are case-insensitive.
+- **Top Bar Entry**: A magnifying glass `🔍` icon sits quietly on the trailing side of the top bar across all tabs (on Plans, alongside the month chevrons).
+- **Results Presentation**:
+  - Grouped into three calm sections if matches exist: **Plans** (with upcoming date, time, location), **Someday** (with notes preview, location), and **Memories** (with historical date, location).
+  - Tapping any result closes search and opens the card's **Detail sheet** directly.
+  - Empty query shows a quiet prompt (`Search plans, someday & memories`).
+  - No matches shows `No results for “{query}”`.
+- **Parity**: Identical design, groupings, and behavior on PWA and iOS.

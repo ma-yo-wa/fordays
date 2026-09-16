@@ -180,4 +180,15 @@ enum Copy {
     static func joinInviter(_ inviter: String) -> String { "Join \(inviter)" }
     static let createAccountAndJoin = "Create account & join"
   }
+
+  enum Search {
+    static let placeholder = "Search plans, someday & memories"
+    static let cancel = "Cancel"
+    static let clear = "Clear"
+    static let plans = "Plans"
+    static let someday = "Someday"
+    static let memories = "Memories"
+    static func noResults(_ query: String) -> String { "No results for “\(query)”" }
+    static let emptyPrompt = "Search by title, location, or notes"
+  }
 }

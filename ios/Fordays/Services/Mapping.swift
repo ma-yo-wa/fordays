@@ -308,6 +308,31 @@ enum DateLocal {
     if let d = f2.date(from: value) { return d }
     return nil
   }
+
+  static func searchDateTitle(_ dateISO: String) -> String {
+    guard let date = parseLocalDay(String(dateISO.prefix(10))) else {
+      return String(dateISO.prefix(10))
+    }
+    let f = DateFormatter()
+    let currentYear = Calendar.current.component(.year, from: Date())
+    let year = Calendar.current.component(.year, from: date)
+    if year == currentYear {
+      f.dateFormat = "EEEE – MMM d"
+    } else {
+      f.dateFormat = "EEEE – MMM d, yyyy"
+    }
+    return f.string(from: date)
+  }
+
+  static func formatItemTime(dateTime: String?, endsAt: String?) -> String {
+    guard let dt = dateTime else { return "" }
+    guard let sTime = dtTime(dt) else { return "All day" }
+    let eTime = endsAt.flatMap { dtTime($0) }
+    if let eTime, eTime != sTime {
+      return "\(prettyTime(sTime)) – \(prettyTime(eTime))"
+    }
+    return prettyTime(sTime)
+  }
 }
 
 extension ActivityRow {
