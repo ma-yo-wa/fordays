@@ -31,6 +31,13 @@ final class AppModel: ObservableObject {
     cursorMonth = Date()
   }
 
+  init() {
+    hydrateNotebook()
+    if space != nil {
+      authPhase = .signedIn
+    }
+  }
+
   private static let firstOrbSetupKey = "fordays.firstOrbSetupUserId"
 
   private var firstOrbSetupPending: Bool {
@@ -62,7 +69,7 @@ final class AppModel: ObservableObject {
     guard !clean.isEmpty else { return }
     if withPeople {
       if let current = space {
-        try? await sb.from("spaces")
+        _ = try? await sb.from("spaces")
           .update(SpaceNameUpdate(name: "Personal"))
           .eq("id", value: current.id)
           .execute()
@@ -395,11 +402,43 @@ final class AppModel: ObservableObject {
       toast = "Give it a name"
       return
     }
+
+    let isPlan = dateTime != nil
+    let desc = description?.trimmingCharacters(in: .whitespacesAndNewlines)
+    let loc = location?.trimmingCharacters(in: .whitespacesAndNewlines)
+    let cover = imageUrl?.trimmingCharacters(in: .whitespacesAndNewlines)
+    let myId = space.myId
+
+    // Optimistic activity with a local temporary ID
+    let tempId = "opt-\(UUID().uuidString.lowercased())"
+    let nowISO = ISO8601DateFormatter().string(from: Date())
+    let optimisticActivity = Activity(
+      id: tempId,
+      spaceId: space.id,
+      title: trimmed,
+      description: (desc?.isEmpty == false) ? desc : nil,
+      location: (loc?.isEmpty == false) ? loc : nil,
+      imageUrl: (cover?.isEmpty == false) ? cover : nil,
+      createdBy: myId,
+      dateTime: dateTime,
+      endsAt: endsAt,
+      allDay: !isPlan || (dateTime?.count ?? 0) <= 10,
+      suggestedDateTime: nil,
+      suggestedEndsAt: nil,
+      suggestedAllDay: false,
+      suggestedBy: nil,
+      suggestedAt: nil,
+      suggestedNote: nil,
+      createdAt: nowISO
+    )
+
+    activities.insert(optimisticActivity, at: 0)
+    persistNotebook()
+    tab = isPlan ? .plans : .bucket
+    toast = isPlan ? "Made it a plan" : Copy.Ideas.added
+
     do {
       let session = try await sb.auth.session
-      let desc = description?.trimmingCharacters(in: .whitespacesAndNewlines)
-      let loc = location?.trimmingCharacters(in: .whitespacesAndNewlines)
-      let cover = imageUrl?.trimmingCharacters(in: .whitespacesAndNewlines)
       let insert = NewActivityInsert(
         space_id: space.id,
         title: trimmed,
@@ -412,7 +451,16 @@ final class AppModel: ObservableObject {
         all_day: dateTime == nil || (dateTime?.count ?? 0) <= 10
       )
       do {
-        try await sb.from("activities").insert(insert).execute()
+        let inserted: ActivityRow = try await sb.from("activities")
+          .insert(insert)
+          .select()
+          .single()
+          .execute()
+          .value
+        if let idx = activities.firstIndex(where: { $0.id == tempId }) {
+          activities[idx] = inserted.asActivity()
+          persistNotebook()
+        }
       } catch {
         if insert.location != nil && error.localizedDescription.lowercased().contains("location") {
           let fallback = NewActivityInsert(
@@ -426,15 +474,23 @@ final class AppModel: ObservableObject {
             ends_at: endsAt.map(DateLocal.toTimestamptz),
             all_day: dateTime == nil || (dateTime?.count ?? 0) <= 10
           )
-          try await sb.from("activities").insert(fallback).execute()
+          let inserted: ActivityRow = try await sb.from("activities")
+            .insert(fallback)
+            .select()
+            .single()
+            .execute()
+            .value
+          if let idx = activities.firstIndex(where: { $0.id == tempId }) {
+            activities[idx] = inserted.asActivity()
+            persistNotebook()
+          }
         } else {
           throw error
         }
       }
-      await refreshActivities()
-      tab = dateTime == nil ? .bucket : .plans
-      toast = dateTime == nil ? Copy.Ideas.added : "Made it a plan"
     } catch {
+      activities.removeAll { $0.id == tempId }
+      persistNotebook()
       toast = error.localizedDescription
     }
   }
@@ -444,10 +500,14 @@ final class AppModel: ObservableObject {
       toast = "This is a copy from when you left"
       return
     }
+    let backup = activities
+    activities.removeAll { $0.id == id }
+    persistNotebook()
     do {
       try await sb.from("activities").delete().eq("id", value: id).execute()
-      activities.removeAll { $0.id == id }
     } catch {
+      activities = backup
+      persistNotebook()
       toast = error.localizedDescription
     }
   }
@@ -457,13 +517,20 @@ final class AppModel: ObservableObject {
       toast = "This is a copy from when you left"
       return
     }
+    struct MoveSpacePayload: Encodable {
+      let space_id: String
+    }
+    let backup = activities
+    activities.removeAll { $0.id == id }
+    persistNotebook()
     do {
       try await sb.from("activities")
-        .update(["space_id": .string(targetSpaceId)])
+        .update(MoveSpacePayload(space_id: targetSpaceId))
         .eq("id", value: id)
         .execute()
-      activities.removeAll { $0.id == id }
     } catch {
+      activities = backup
+      persistNotebook()
       toast = error.localizedDescription
     }
   }
@@ -483,6 +550,25 @@ final class AppModel: ObservableObject {
       toast = "This is a copy from when you left"
       return
     }
+    guard let idx = activities.firstIndex(where: { $0.id == id }) else { return }
+    let backup = activities[idx]
+
+    var updated = backup
+    if let title { updated.title = title }
+    if let description { updated.description = description.isEmpty ? nil : description }
+    if let location { updated.location = location.isEmpty ? nil : location }
+    if let imageUrl { updated.imageUrl = imageUrl.isEmpty ? nil : imageUrl }
+    if let dateOpt = dateTime {
+      updated.dateTime = dateOpt
+      updated.allDay = dateOpt == nil || (dateOpt?.count ?? 0) <= 10
+      if dateOpt == nil { updated.endsAt = nil }
+    }
+    if let endOpt = endsAt {
+      updated.endsAt = endOpt
+    }
+    activities[idx] = updated
+    persistNotebook()
+
     do {
       var patch: [String: AnyJSON] = [:]
       if let title { patch["title"] = .string(title) }
@@ -526,8 +612,11 @@ final class AppModel: ObservableObject {
           throw error
         }
       }
-      await refreshActivities()
     } catch {
+      if let currentIdx = activities.firstIndex(where: { $0.id == id }) {
+        activities[currentIdx] = backup
+        persistNotebook()
+      }
       toast = error.localizedDescription
     }
   }
@@ -769,7 +858,7 @@ final class AppModel: ObservableObject {
       return otherMembers.isEmpty && sp.partner2Id == nil && isDefaultName
     }
     if let genericSolo {
-      try? await sb.from("spaces")
+      _ = try? await sb.from("spaces")
         .update(SpaceNameUpdate(name: "Personal"))
         .eq("id", value: genericSolo.id)
         .execute()

@@ -90,7 +90,7 @@ Same questions as first signup, in a sheet. Cancel returns to Start / Join. Join
 
 Never expand Stay / Delete as grouped list rows in the page. That is not a confirm.
 
-Over a sheet, use a **stacked confirm sheet** (PWA) or iOS **confirmationDialog**: the question, one destructive action, Stay / Keep as cancel. Same pattern as Start a new one / Join — not a centered alert on a sheet, not a form group.
+Always use an **Action Sheet** (`<ActionSheet>` on PWA, `.confirmationDialog` on iOS): the question, one destructive action, and a separated Cancel capsule. Zero grabber bars, completely non-draggable. Same pattern as Leave / Delete Orb — not a centered alert on a sheet, not a form group.
 
 ---
 
@@ -273,3 +273,23 @@ A quiet search across the entire active notebook.
   - Empty query shows a quiet prompt (`Search plans, someday & memories`).
   - No matches shows `No results for “{query}”`.
 - **Parity**: Identical design, groupings, and behavior on PWA and iOS.
+
+---
+
+## Local-First & Optimistic UI (Phase 1)
+
+Fordays operates local-first on the client so the notebook feels like paper — instant, calm, and zero-wait.
+
+- **0ms Cold Start (Disk Snapshot)**:
+  - Both clients synchronously hydrate the last active Orb, spaces list, and activities from local snapshot storage (`localStorage` on PWA, atomic disk JSON in `Caches/` on iOS) at frame 0.
+  - Returning users never see a white screen or blocking loading spinner on launch. The notebook and month agenda render immediately.
+  - Auth verification and server sync run quietly in the background without layout shifts or jumpy refetches.
+- **Instant Optimistic Mutations**:
+  - *Create*: When saving a plan or Someday item, an optimistic card is created and placed into the notebook immediately (0ms). The composer sheet dismisses without waiting for the server roundtrip.
+  - *Edit / Patch*: Changing title, location, notes, date, or cover applies to the view and local cache in 0ms.
+  - *Move (`Do with...`)*: Moving a personal plan or Someday item removes it from the current Orb immediately and presents a confirmation toast.
+  - *Delete*: Tapping delete removes the card from view instantly with zero delay.
+- **Server Reconciliation & Rollback**:
+  - Mutations execute against Supabase in the background. On success, temporary optimistic IDs reconcile cleanly with server rows.
+  - If a network error or server constraint occurs, the local state and snapshot roll back to the previous backup, and a calm toast explains the issue.
+- **Parity**: Identical local hydration keys, optimistic lifecycle, and failure rollbacks across PWA and iOS.

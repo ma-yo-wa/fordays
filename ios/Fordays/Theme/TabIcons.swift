@@ -100,12 +100,12 @@ private struct CalendarGlyph: View {
       }
 
       if on {
-        var top = Path(
+        let top = Path(
           roundedRect: CGRect(x: 3 * s, y: 2 * s, width: 18 * s, height: 8 * s),
           cornerRadius: 3 * s
         )
         ctx.fill(top, with: .foreground)
-        var body = Path(
+        let body = Path(
           roundedRect: CGRect(x: 3 * s, y: 9 * s, width: 18 * s, height: 12 * s),
           cornerRadius: 3 * s
         )

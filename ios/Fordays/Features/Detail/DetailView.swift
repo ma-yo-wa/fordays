@@ -47,71 +47,93 @@ struct DetailView: View {
     return app.spaces.filter { !$0.frozen && $0.id != currentId }
   }
 
+  private func makeDraft(from item: Activity) -> PlanDraft {
+    PlanDraft(
+      title: item.title,
+      notes: item.description,
+      location: item.location,
+      cover: item.imageUrl
+    )
+  }
+
+  private func targetOrbLabel(_ target: SpaceInfo) -> String {
+    if let partner = target.partnerName {
+      return "\(partner) (\(target.name))"
+    }
+    return target.name
+  }
+
   var body: some View {
     NavigationStack {
-      Group {
-        if let item {
-          content(item)
-        } else {
-          ProgressView()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-      }
-      .background(Theme.paper.ignoresSafeArea())
-      .navigationBarTitleDisplayMode(.inline)
-      .toolbar {
-        ToolbarItem(placement: .topBarTrailing) {
-          Button("Done") { dismiss() }
-        }
-      }
-      .onAppear { seed(from: item) }
-      .onChange(of: item?.id) { _, _ in seed(from: item) }
-      .onChange(of: item?.title) { _, _ in
-        if mode == .view { seed(from: item) }
-      }
-      .confirmationDialog(
-        item.map { Copy.Memories.doAgainPrompt($0.title) } ?? "",
-        isPresented: $showDoAgainDialog,
-        titleVisibility: .visible
-      ) {
-        Button(Copy.Memories.makePlan) {
-          guard let item else { return }
-          let draft = PlanDraft(
-            title: item.title,
-            notes: item.description,
-            location: item.location,
-            cover: item.imageUrl
-          )
-          dismiss()
-          onDoAgain?(.plan, draft)
-        }
-        Button(Copy.Memories.addToSomeday) {
-          guard let item else { return }
-          let draft = PlanDraft(
-            title: item.title,
-            notes: item.description,
-            location: item.location,
-            cover: item.imageUrl
-          )
-          dismiss()
-          onDoAgain?(.idea, draft)
-        }
-        Button("Cancel", role: .cancel) { }
-      }
-      .confirmationDialog(
-        Copy.Orbs.doWithEllipsis,
-        isPresented: $showMoveDialog,
-        titleVisibility: .visible
-      ) {
-        ForEach(activeSharedOrbs, id: \.id) { target in
-          let label = target.partnerName != nil ? "\(target.partnerName!) (\(target.name))" : target.name
-          Button(label) {
-            Task { await handleDoWith(target) }
+      mainContainer
+        .background(Theme.paper.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+          ToolbarItem(placement: .topBarTrailing) {
+            Button("Done") { dismiss() }
           }
         }
-        Button("Cancel", role: .cancel) { }
+        .onAppear { seed(from: item) }
+        .onChange(of: item?.id) { _, _ in seed(from: item) }
+        .onChange(of: item?.title) { _, _ in
+          if mode == .view { seed(from: item) }
+        }
+        .confirmationDialog(
+          item.map { Copy.Memories.doAgainPrompt($0.title) } ?? "",
+          isPresented: $showDoAgainDialog,
+          titleVisibility: .visible
+        ) {
+          doAgainButtons
+        }
+        .confirmationDialog(
+          Copy.Orbs.doWithEllipsis,
+          isPresented: $showMoveDialog,
+          titleVisibility: .visible
+        ) {
+          moveButtons
+        }
+    }
+  }
+
+  @ViewBuilder
+  private var mainContainer: some View {
+    if let item {
+      content(item)
+    } else {
+      ProgressView()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+  }
+
+  private func doAgainAsPlan() {
+    guard let item else { return }
+    let draft = makeDraft(from: item)
+    dismiss()
+    onDoAgain?(.plan, draft)
+  }
+
+  private func doAgainAsIdea() {
+    guard let item else { return }
+    let draft = makeDraft(from: item)
+    dismiss()
+    onDoAgain?(.bucket, draft)
+  }
+
+  @ViewBuilder
+  private var doAgainButtons: some View {
+    Button(Copy.Memories.makePlan, action: doAgainAsPlan)
+    Button(Copy.Memories.addToSomeday, action: doAgainAsIdea)
+    Button("Cancel", role: .cancel) { }
+  }
+
+  @ViewBuilder
+  private var moveButtons: some View {
+    ForEach(activeSharedOrbs, id: \.id) { target in
+      Button(targetOrbLabel(target)) {
+        Task { await handleDoWith(target) }
       }
     }
+    Button("Cancel", role: .cancel) { }
   }
 
   @ViewBuilder

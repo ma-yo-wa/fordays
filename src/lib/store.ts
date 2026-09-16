@@ -240,20 +240,25 @@ export const useApp = create<AppState>()((set, get) => {
     return new SupabaseBackend(config);
   }
 
+  const snap = readSnap();
+  if (snap) {
+    prefetchBoardCovers(snap.activities);
+  }
+
   return {
-    ready: false,
-    authPhase: 'loading',
+    ready: Boolean(snap),
+    authPhase: snap ? 'signedIn' : 'loading',
     backendName: 'local',
     live: false,
     liveLabel: 'On this device',
 
-    activities: [],
+    activities: snap ? snap.activities : [],
     logs: [],
     external: [],
 
     config: loadConfig(),
-    space: null,
-    spaces: [],
+    space: snap ? snap.space : null,
+    spaces: snap ? (snap.spaces.length ? snap.spaces : [snap.space]) : [],
 
     screen: 'calendar',
     picked: todayISO(),

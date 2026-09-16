@@ -77,6 +77,7 @@ export class SupabaseBackend implements Backend {
   private handlers!: BackendHandlers;
   private spaceId: string;
   private uid = '';
+  private cachedActivities: Activity[] = [];
 
   constructor(private config: Config) {
     this.spaceId = config.spaceId;
@@ -171,6 +172,30 @@ export class SupabaseBackend implements Backend {
       throw new Error('No Orb yet — sign out and sign back in.');
     }
 
+    // 1. Optimistic insert: show in local state immediately at 0ms
+    const tempId = `opt-${crypto.randomUUID()}`;
+    const optimistic: Activity = {
+      id: tempId,
+      space_id: this.spaceId,
+      title: input.title,
+      description: input.description || null,
+      location: input.location?.trim() || null,
+      image_url: input.image_url || null,
+      created_by: this.uid,
+      created_at: new Date().toISOString(),
+      date_time: input.date_time ?? null,
+      ends_at: input.ends_at ?? null,
+      all_day: !input.date_time || input.date_time.length <= 10,
+      suggested_date_time: null,
+      suggested_ends_at: null,
+      suggested_all_day: false,
+      suggested_by: null,
+      suggested_at: null,
+      suggested_note: null,
+    };
+    this.cachedActivities = [optimistic, ...this.cachedActivities.filter((a) => a.id !== tempId)];
+    this.handlers.onActivities(this.cachedActivities);
+
     const row: Record<string, unknown> = {
       space_id: this.spaceId,
       title: input.title,
@@ -185,44 +210,87 @@ export class SupabaseBackend implements Backend {
     // and null spans don't need the field.
     if (input.ends_at) row.ends_at = toTimestamptz(input.ends_at);
 
-    let { data, error } = await this.client
-      .from('activities')
-      .insert(row)
-      .select('*')
-      .single();
-
-    if (error && 'location' in row && /location/i.test(error.message || '')) {
-      delete row.location;
-      const retry = await this.client
+    try {
+      let { data, error } = await this.client
         .from('activities')
         .insert(row)
         .select('*')
         .single();
-      data = retry.data;
-      error = retry.error;
-    }
 
-    if (error) {
-      const detail = [error.message, error.details, error.hint]
-        .filter(Boolean)
-        .join(' — ');
-      throw new Error(detail || 'Could not save');
-    }
-    if (!data) {
-      throw new Error(
-        'Save was blocked (no row returned). In Supabase, confirm schema.sql + migrations ran and you’re a member of the Orb.',
-      );
-    }
+      if (error && 'location' in row && /location/i.test(error.message || '')) {
+        delete row.location;
+        const retry = await this.client
+          .from('activities')
+          .insert(row)
+          .select('*')
+          .single();
+        data = retry.data;
+        error = retry.error;
+      }
 
-    // Show the new row immediately, then reconcile with a full refresh.
-    this.handlers.onActivities([
-      mapActivity(data as ActivityRow),
-      ...(await this.fetchActivities()).filter((a) => a.id !== data.id),
-    ]);
-    void this.refreshLogs();
+      if (error) {
+        const detail = [error.message, error.details, error.hint]
+          .filter(Boolean)
+          .join(' — ');
+        throw new Error(detail || 'Could not save');
+      }
+      if (!data) {
+        throw new Error(
+          'Save was blocked (no row returned). In Supabase, confirm schema.sql + migrations ran and you’re a member of the Orb.',
+        );
+      }
+
+      // Replace optimistic row with server row
+      const real = mapActivity(data as ActivityRow);
+      this.cachedActivities = [
+        real,
+        ...this.cachedActivities.filter((a) => a.id !== tempId && a.id !== real.id),
+      ];
+      this.handlers.onActivities(this.cachedActivities);
+      void this.refreshLogs();
+    } catch (err) {
+      // Revert optimistic insert on failure
+      this.cachedActivities = this.cachedActivities.filter((a) => a.id !== tempId);
+      this.handlers.onActivities(this.cachedActivities);
+      throw err;
+    }
   }
 
   async patch(id: string, changes: Partial<Activity>): Promise<void> {
+    const backup = [...this.cachedActivities];
+    const idx = this.cachedActivities.findIndex((a) => a.id === id);
+    if (idx !== -1) {
+      const existing = this.cachedActivities[idx]!;
+      const updated: Activity = {
+        ...existing,
+        ...changes,
+        id: existing.id,
+        title: changes.title ?? existing.title,
+        created_by: existing.created_by,
+        created_at: existing.created_at,
+        description: 'description' in changes ? (changes.description ?? null) : existing.description,
+        location: 'location' in changes ? (changes.location ?? null) : existing.location,
+        image_url: 'image_url' in changes ? (changes.image_url ?? null) : existing.image_url,
+        date_time: 'date_time' in changes ? (changes.date_time ?? null) : existing.date_time,
+        all_day:
+          'date_time' in changes
+            ? !changes.date_time || (changes.date_time?.length ?? 0) <= 10
+            : existing.all_day,
+        ends_at:
+          'date_time' in changes && !changes.date_time
+            ? null
+            : 'ends_at' in changes
+              ? (changes.ends_at ?? null)
+              : existing.ends_at,
+      };
+      this.cachedActivities = [
+        ...this.cachedActivities.slice(0, idx),
+        updated,
+        ...this.cachedActivities.slice(idx + 1),
+      ];
+      this.handlers.onActivities(this.cachedActivities);
+    }
+
     const patch: Record<string, unknown> = {};
     if ('title' in changes) patch.title = changes.title;
     if ('description' in changes) patch.description = changes.description;
@@ -242,23 +310,38 @@ export class SupabaseBackend implements Backend {
     if ('ends_at' in changes) {
       patch.ends_at = changes.ends_at ? toTimestamptz(changes.ends_at) : null;
     }
-    let { error } = await this.client.from('activities').update(patch).eq('id', id);
-    if (error && 'location' in patch && /location/i.test(error.message || '')) {
-      delete patch.location;
-      const retry = await this.client.from('activities').update(patch).eq('id', id);
-      error = retry.error;
+    try {
+      let { error } = await this.client.from('activities').update(patch).eq('id', id);
+      if (error && 'location' in patch && /location/i.test(error.message || '')) {
+        delete patch.location;
+        const retry = await this.client.from('activities').update(patch).eq('id', id);
+        error = retry.error;
+      }
+      if (error) throw error;
+      void this.refreshLogs();
+    } catch (err) {
+      this.cachedActivities = backup;
+      this.handlers.onActivities(this.cachedActivities);
+      throw err;
     }
-    if (error) throw error;
-    await this.refresh();
   }
 
   async moveToSpace(id: string, targetSpaceId: string): Promise<void> {
-    const { error } = await this.client
-      .from('activities')
-      .update({ space_id: targetSpaceId })
-      .eq('id', id);
-    if (error) throw error;
-    await this.refresh();
+    const backup = [...this.cachedActivities];
+    this.cachedActivities = this.cachedActivities.filter((a) => a.id !== id);
+    this.handlers.onActivities(this.cachedActivities);
+    try {
+      const { error } = await this.client
+        .from('activities')
+        .update({ space_id: targetSpaceId })
+        .eq('id', id);
+      if (error) throw error;
+      void this.refreshLogs();
+    } catch (err) {
+      this.cachedActivities = backup;
+      this.handlers.onActivities(this.cachedActivities);
+      throw err;
+    }
   }
 
   async suggestWhen(id: string, input: WhenSuggestion): Promise<void> {
@@ -316,9 +399,18 @@ export class SupabaseBackend implements Backend {
   }
 
   async remove(id: string): Promise<void> {
-    const { error } = await this.client.from('activities').delete().eq('id', id);
-    if (error) throw error;
-    await this.refresh();
+    const backup = [...this.cachedActivities];
+    this.cachedActivities = this.cachedActivities.filter((a) => a.id !== id);
+    this.handlers.onActivities(this.cachedActivities);
+    try {
+      const { error } = await this.client.from('activities').delete().eq('id', id);
+      if (error) throw error;
+      void this.refreshLogs();
+    } catch (err) {
+      this.cachedActivities = backup;
+      this.handlers.onActivities(this.cachedActivities);
+      throw err;
+    }
   }
 
   async replaceExternal(
@@ -438,7 +530,9 @@ export class SupabaseBackend implements Backend {
       .eq('space_id', this.spaceId)
       .order('created_at', { ascending: false });
     if (error) throw error;
-    return ((data ?? []) as ActivityRow[]).map(mapActivity);
+    const list = ((data ?? []) as ActivityRow[]).map(mapActivity);
+    this.cachedActivities = list;
+    return list;
   }
 
   private async refreshActivities(): Promise<void> {
