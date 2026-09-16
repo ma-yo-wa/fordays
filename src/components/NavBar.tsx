@@ -38,6 +38,7 @@ export default function NavBar() {
   const config = useApp((st) => st.config);
   const live = useApp((st) => st.live);
   const backendName = useApp((st) => st.backendName);
+  const navScroll = useApp((st) => st.navScroll);
   const cursor = useApp((st) => st.cursor);
   const setCursor = useApp((st) => st.setCursor);
   const setPicked = useApp((st) => st.setPicked);
@@ -97,6 +98,8 @@ export default function NavBar() {
     cursorDate.getMonth() !== now.getMonth() ||
     cursorDate.getFullYear() !== now.getFullYear();
 
+  const scrolled = navScroll > 2;
+
   const shiftMonth = (delta: number) =>
     setCursor(iso(new Date(cursorDate.getFullYear(), cursorDate.getMonth() + delta, 1)));
 
@@ -107,6 +110,8 @@ export default function NavBar() {
 
   return (
     <header className={s.nav}>
+      <div className={`${s.material} ${scrolled ? s.materialOn : ''}`} />
+
       <div className={s.bar}>
         <div className={s.leading}>
           <button

@@ -8,6 +8,25 @@
   background: transparent;
 }
 
+/* The curved frosted shelf only exists once content has scrolled under the bar. */
+.material {
+  position: absolute;
+  inset: 0;
+  background: var(--mat-regular-bg);
+  -webkit-backdrop-filter: var(--mat-regular);
+  backdrop-filter: var(--mat-regular);
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+  box-shadow: 0 4px 16px rgba(23, 20, 15, 0.04);
+  opacity: 0;
+  transition: opacity 0.22s var(--ease-ios);
+  pointer-events: none;
+}
+
+.materialOn {
+  opacity: 1;
+}
+
 /* 56pt bar with generous breathing room below the Orb capsule */
 .bar {
   position: relative;

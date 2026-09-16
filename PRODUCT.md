@@ -302,12 +302,13 @@ Fordays operates local-first on the client so the notebook feels like paper — 
 Fordays feels like a warm personal capsule and stationery, never a corporate calendar or spreadsheet.
 
 - **Razor-Thin Plans Divider**: A crisp, delicate 0.5pt hairline subtly divides the calendar month grid from the daily agenda section on both PWA and iOS (`border-top: var(--hairline-w) solid var(--hairline)` on PWA, `0.5pt Theme.ink.opacity(0.08)` on iOS), providing clear visual grounding without visual clutter.
-- **Clean, Transparent Top Bar (Zero Frostiness)**:
-  - The top bar floats 100% transparently over the ambient Orb background gradient on both iOS and PWA.
-  - Zero frostiness, zero blurry material backdrops, and zero heavy curved shelf overlays. The screen breathes naturally.
+- **Curved Sticky Top Shelf on Scroll**:
+  - *At rest (scroll offset = 0)*: The top bar is 100% transparent. The ambient Orb background gradient flows uninterrupted from top to bottom.
+  - *On scroll (scroll offset > 0)*: A frosted sticky shelf (`.ultraThinMaterial` / `backdrop-filter`) smoothly fades in with a continuous 24pt bottom curved corner radius (`UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24)` on iOS, `border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;` on PWA) and subtle elevation.
+  - No straight horizontal bottom edge across the screen; the curved corners give the sticky canopy an organic, stationery-like contour.
 - **Identical Top Padding Rhythm across Plans, Bucket, and Memories**:
-  - The navbar height (56pt) and content top margin are completely uniform across all three views (Plans, Someday, Memories).
-  - No bloated large-title headers or extra offsets in Bucket or Memories; content in all tabs starts at the exact same vertical baseline.
+  - The navbar height (56pt) and content top margin (14pt) are completely uniform across all three views (Plans, Someday, Memories).
+  - No bloated large-title headers or mismatched offsets in Bucket or Memories; content in all tabs starts at the exact same vertical baseline.
 - **Static, Rock-Solid Top Bar Controls (No Animations)**:
   - The top bar title is centered and static (no opacity/offset animations when switching tabs, scrolling, or navigating months).
   - Trailing calendar controls (`Today`, `<`, `>`) and the locked Search icon (`🔍`) sit reliably with zero jumping or sliding animations.

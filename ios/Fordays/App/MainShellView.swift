@@ -267,8 +267,14 @@ struct MainShellView: View {
     .padding(.horizontal, 16)
     .padding(.top, 6)
     .padding(.bottom, 14)
-    .background(Color.clear)
-    .transaction { $0.animation = nil }
+    .background {
+      Theme.paperWarm.opacity(app.isScrolled ? 0.85 : 0)
+        .background(.ultraThinMaterial.opacity(app.isScrolled ? 1 : 0))
+        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24, style: .continuous))
+        .shadow(color: Theme.ink.opacity(app.isScrolled ? 0.04 : 0), radius: 8, y: 4)
+        .animation(.easeInOut(duration: 0.2), value: app.isScrolled)
+        .ignoresSafeArea(edges: .top)
+    }
   }
 
   private var trailingCalendarControls: some View {

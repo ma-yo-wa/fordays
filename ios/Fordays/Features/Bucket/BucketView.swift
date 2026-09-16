@@ -18,6 +18,8 @@ struct BucketView: View {
 
   var body: some View {
     ScrollView {
+      ScrollOffsetTracker()
+
       if items.isEmpty {
         empty
       } else {
@@ -27,8 +29,17 @@ struct BucketView: View {
           }
         }
         .padding(.horizontal, 20)
-        .padding(.top, 4)
+        .padding(.top, 14)
         .padding(.bottom, 132)
+      }
+    }
+    .coordinateSpace(name: "homeScroll")
+    .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
+      let scrolled = minY < -6
+      if app.isScrolled != scrolled {
+        withAnimation(.easeInOut(duration: 0.18)) {
+          app.isScrolled = scrolled
+        }
       }
     }
   }
@@ -79,6 +90,8 @@ struct MemoriesView: View {
 
   var body: some View {
     ScrollView {
+      ScrollOffsetTracker()
+
       if sections.isEmpty {
         Text(
           app.space?.isMatched == true
@@ -109,8 +122,17 @@ struct MemoriesView: View {
           }
         }
         .padding(.horizontal, 20)
-        .padding(.top, 4)
+        .padding(.top, 14)
         .padding(.bottom, 132)
+      }
+    }
+    .coordinateSpace(name: "homeScroll")
+    .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
+      let scrolled = minY < -6
+      if app.isScrolled != scrolled {
+        withAnimation(.easeInOut(duration: 0.18)) {
+          app.isScrolled = scrolled
+        }
       }
     }
   }
