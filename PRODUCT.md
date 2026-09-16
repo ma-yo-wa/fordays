@@ -119,9 +119,13 @@ Empty: the line only. Plus adds. No empty CTA.
   - **Hollow Ring dot (`○`)**: External calendar events (Google / Apple / Outlook).
   - **Zero black dots**: The black selection pip is prohibited. Selected day is communicated cleanly through bold text (and the solid rose circle on Today).
   - **Cap at 3 dots total**: If a day has 4 or more plans/events, it shows 3 dots (`...` heat map shorthand) without writing `3+` inside the cell, preserving clean typography.
-- **Up Next (Anticipation Capsule)**:
-  - When **Today** has nothing planned, the screen doesn't stay dead air. Below the quiet note (`Nothing planned between you and Aline today`), surface an **Up next** capsule showing the next upcoming plan: `Up next · [Date] (in X days)`.
-  - Tapping the card opens its Detail sheet directly.
+- **Up Next (Anticipation)**:
+  - When **Today** has nothing planned, the screen doesn't stay dead air.
+  - The empty state message (`Nothing planned between you and Aline today`) is kept tight and compact rather than consuming half the screen.
+  - Below it, surface an **Up next** section showing the plans for the next upcoming date with events (and only that next day).
+  - The `Up next` header matches the typography of `Today` (clean ink title, zero pill/tag badges).
+  - Anticipation subhead: `[In X days / Tomorrow] · [Weekday, Month Day]`, with countdown prominent in rose ink, bullet separator `·`, and zero brackets.
+  - Tapping an upcoming card opens its Detail sheet directly.
   - Selecting any other future or past day on the grid displays only that specific day's agenda.
 - **No creating plans in the past**:
   - Creating a new plan strictly looks forward. The date picker in Composer locks to `>= today`, with past dates muted and disabled.

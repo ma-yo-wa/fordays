@@ -334,9 +334,9 @@ enum DateLocal {
     return prettyTime(sTime)
   }
 
-  static func formatUpNextLabel(_ dateISO: String, from: String = todayISO()) -> String {
+  static func formatUpNext(_ dateISO: String, from: String = todayISO()) -> (countdown: String, dateFormatted: String) {
     guard let start = parseLocalDay(from), let target = parseLocalDay(String(dateISO.prefix(10))) else {
-      return String(dateISO.prefix(10))
+      return ("Upcoming", String(dateISO.prefix(10)))
     }
     let days = Calendar.current.dateComponents([.day], from: start, to: target).day ?? 0
     let f = DateFormatter()
@@ -344,16 +344,18 @@ enum DateLocal {
     let year = Calendar.current.component(.year, from: target)
     let yearFormat = year == currentYear ? "" : ", yyyy"
 
-    if days == 1 {
-      f.dateFormat = "MMM d\(yearFormat)"
-      return "Tomorrow · \(f.string(from: target))"
-    }
     f.dateFormat = "EEEE, MMM d\(yearFormat)"
     let dateStr = f.string(from: target)
-    if days > 1 {
-      return "\(dateStr) (in \(days) days)"
+
+    let countdown: String
+    if days == 1 {
+      countdown = "Tomorrow"
+    } else if days > 1 {
+      countdown = "In \(days) days"
+    } else {
+      countdown = "Upcoming"
     }
-    return dateStr
+    return (countdown, dateStr)
   }
 }
 

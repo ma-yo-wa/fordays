@@ -61,7 +61,7 @@ struct PlansView: View {
     return (plans + imported).sorted { $0.sort < $1.sort }
   }
 
-  private var upNext: (date: String, label: String, plans: [Activity])? {
+  private var upNext: (date: String, countdown: String, dateFormatted: String, plans: [Activity])? {
     guard app.pickedDay == DateLocal.todayISO(),
           dayPlans.isEmpty && dayExternal.isEmpty else {
       return nil
@@ -74,9 +74,11 @@ struct PlansView: View {
       return nil
     }
     let targetPlans = futurePlans.filter { (DateLocal.dtDate($0.dateTime) ?? "") == firstDate }
+    let formatted = DateLocal.formatUpNext(firstDate, from: today)
     return (
       date: firstDate,
-      label: DateLocal.formatUpNextLabel(firstDate, from: today),
+      countdown: formatted.countdown,
+      dateFormatted: formatted.dateFormatted,
       plans: targetPlans
     )
   }
@@ -92,28 +94,35 @@ struct PlansView: View {
           .font(.title3.weight(.semibold))
           .foregroundStyle(Theme.ink)
         if dayPlans.isEmpty && dayExternal.isEmpty {
-          Text(emptyCopy)
-            .font(.subheadline)
-            .foregroundStyle(Theme.inkSoft)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
-            .padding(.top, 24)
-
           if let next = upNext {
-            VStack(alignment: .leading, spacing: 10) {
-              HStack(spacing: 8) {
-                Text(Copy.Plans.upNext)
-                  .font(.caption2.weight(.bold))
-                  .foregroundStyle(Theme.roseInk)
-                  .padding(.horizontal, 8)
-                  .padding(.vertical, 3)
-                  .background(Theme.rose, in: Capsule())
+            Text(emptyCopy)
+              .font(.subheadline)
+              .foregroundStyle(Theme.inkSoft)
+              .frame(maxWidth: .infinity, alignment: .leading)
+              .padding(.top, 2)
+              .padding(.bottom, 6)
 
-                Text(next.label)
-                  .font(.subheadline.weight(.semibold))
+            VStack(alignment: .leading, spacing: 10) {
+              VStack(alignment: .leading, spacing: 3) {
+                Text(Copy.Plans.upNext)
+                  .font(.title3.weight(.semibold))
                   .foregroundStyle(Theme.ink)
+
+                HStack(spacing: 6) {
+                  Text(next.countdown)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.roseInk)
+
+                  Text("·")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.inkSoft)
+
+                  Text(next.dateFormatted)
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.inkSoft)
+                }
               }
-              .padding(.top, 16)
+              .padding(.top, 4)
               .padding(.horizontal, 2)
 
               ForEach(next.plans) { a in
@@ -157,6 +166,13 @@ struct PlansView: View {
                 .buttonStyle(.plain)
               }
             }
+          } else {
+            Text(emptyCopy)
+              .font(.subheadline)
+              .foregroundStyle(Theme.inkSoft)
+              .multilineTextAlignment(.center)
+              .frame(maxWidth: .infinity)
+              .padding(.top, 24)
           }
         } else {
           ForEach(dayAgenda) { item in

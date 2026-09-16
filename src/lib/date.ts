@@ -332,7 +332,10 @@ export function formatSearchDate(dayStr: string): string {
   return `${weekday} – ${month} ${day}`;
 }
 
-export function formatUpNextLabel(dateISO: string, from = todayISO()): string {
+export function formatUpNext(
+  dateISO: string,
+  from = todayISO(),
+): { countdown: string; dateFormatted: string } {
   const target = parseISO(dateISO.slice(0, 10));
   const start = parseISO(from);
   const days = Math.round((target.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
@@ -342,7 +345,10 @@ export function formatUpNextLabel(dateISO: string, from = todayISO()): string {
   const year = target.getFullYear();
   const yearSuffix = year !== new Date().getFullYear() ? `, ${year}` : '';
 
-  if (days === 1) return `Tomorrow · ${month} ${day}${yearSuffix}`;
-  if (days > 1) return `${weekday}, ${month} ${day}${yearSuffix} (in ${days} days)`;
-  return `${weekday}, ${month} ${day}${yearSuffix}`;
+  let countdown = 'Upcoming';
+  if (days === 1) countdown = 'Tomorrow';
+  else if (days > 1) countdown = `In ${days} days`;
+
+  const dateFormatted = `${weekday}, ${month} ${day}${yearSuffix}`;
+  return { countdown, dateFormatted };
 }

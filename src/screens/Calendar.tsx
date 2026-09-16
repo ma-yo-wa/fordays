@@ -8,7 +8,7 @@ import {
   MONTHS,
   dtDate,
   dtTime,
-  formatUpNextLabel,
+  formatUpNext,
   monthGrid,
   parseISO,
   prettyLower,
@@ -142,9 +142,11 @@ export default function Calendar() {
     const targetPlans = futurePlans.filter(
       (a) => (dtDate(a.date_time) ?? '') === targetDate,
     );
+    const formatted = formatUpNext(targetDate, today);
     return {
       date: targetDate,
-      label: formatUpNextLabel(targetDate, today),
+      countdown: formatted.countdown,
+      dateFormatted: formatted.dateFormatted,
       plans: targetPlans,
     };
   }, [activities, picked, today, dayPlans.length, dayExternal.length]);
@@ -248,7 +250,7 @@ export default function Calendar() {
 
         {!dayPlans.length && !dayExternal.length ? (
           <>
-            <div className={s.blank}>
+            <div className={upNext ? s.blankCompact : s.blank}>
               <p>
                 {space?.frozen
                   ? Copy.plans.emptyFrozen
@@ -264,9 +266,11 @@ export default function Calendar() {
 
             {upNext && (
               <div className={s.upNextSection}>
-                <div className={s.upNextHeader}>
-                  <span className={s.upNextBadge}>{Copy.plans.upNext}</span>
-                  <span className={s.upNextDate}>{upNext.label}</span>
+                <div className={s.upNextHeading}>{Copy.plans.upNext}</div>
+                <div className={s.upNextSubhead}>
+                  <span className={s.upNextCountdown}>{upNext.countdown}</span>
+                  <span className={s.upNextDot}>·</span>
+                  <span className={s.upNextDate}>{upNext.dateFormatted}</span>
                 </div>
                 <div className={s.plansList}>
                   {upNext.plans.map((a) => {
