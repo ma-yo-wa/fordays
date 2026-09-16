@@ -297,11 +297,11 @@ Fordays operates local-first on the client so the notebook feels like paper — 
 
 ---
 
-## Visual Craft & No Straight Lines
+## Visual Craft & Rhythm
 
 Fordays feels like a warm personal capsule and stationery, never a corporate calendar or spreadsheet.
 
-- **No Straight Lines**: There are no razor-thin horizontal divider lines cutting across the interface. Content transitions organically using whitespace and generous margins.
+- **Razor-Thin Plans Divider**: A crisp, delicate 0.5pt hairline subtly divides the calendar month grid from the daily agenda section on both PWA and iOS (`border-top: var(--hairline-w) solid var(--hairline)` on PWA, `0.5pt Theme.ink.opacity(0.08)` on iOS), providing clear visual grounding without visual clutter.
 - **Clean, Transparent Top Bar (Zero Frostiness)**:
   - The top bar floats 100% transparently over the ambient Orb background gradient on both iOS and PWA.
   - Zero frostiness, zero blurry material backdrops, and zero heavy curved shelf overlays. The screen breathes naturally.

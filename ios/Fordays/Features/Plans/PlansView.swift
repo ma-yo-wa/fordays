@@ -271,6 +271,11 @@ struct PlansView: View {
       .padding(.horizontal, 20)
       .padding(.top, 18)
       .frame(maxWidth: .infinity, alignment: .topLeading)
+      .overlay(alignment: .top) {
+        Rectangle()
+          .fill(Theme.ink.opacity(0.08))
+          .frame(height: 0.5)
+      }
       .padding(.bottom, 132)
       }
     }

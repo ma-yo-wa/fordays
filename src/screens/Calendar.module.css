@@ -150,6 +150,7 @@
   padding: 18px max(20px, var(--safe-l))
     calc(var(--safe-b) + 128px)
     max(20px, var(--safe-r));
+  border-top: var(--hairline-w) solid var(--hairline);
   min-height: 0;
 }
 
