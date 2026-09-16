@@ -24,7 +24,7 @@ struct AddSheetView: View {
             .font(.footnote.weight(.bold))
             .foregroundStyle(Theme.inkSoft)
             .frame(width: 34, height: 34)
-            .background(Theme.ink.opacity(0.08), in: Circle())
+            .background(Theme.fillTertiary, in: Circle())
         }
         .accessibilityLabel("Close")
       }
@@ -37,7 +37,7 @@ struct AddSheetView: View {
         glyph: .calendar
       )
       Rectangle()
-        .fill(Theme.ink.opacity(0.08))
+        .fill(Theme.hairline)
         .frame(height: 0.5)
       option(
         kind: .bucket,
@@ -169,7 +169,7 @@ struct ComposerView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
             .padding(.top, 10)
           }
         }
@@ -262,7 +262,7 @@ struct ComposerView: View {
                 .foregroundStyle(Theme.inkSoft)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .background(Theme.fillTertiary, in: RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
             }
             .buttonStyle(.plain)
           } else {
@@ -325,7 +325,7 @@ struct ComposerView: View {
                     .foregroundStyle(Theme.inkSoft)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .background(Theme.fillTertiary, in: RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
                 }
                 .buttonStyle(.plain)
               } else {
@@ -388,7 +388,7 @@ struct ComposerView: View {
         .padding(.vertical, 10)
       }
     }
-    .background(Theme.ink.opacity(0.04), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+    .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
   }
 
   private var appleSubRow: some View {

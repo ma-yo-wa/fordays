@@ -55,8 +55,8 @@
   inset: 0;
   background: linear-gradient(
     178deg,
-    rgba(23, 20, 15, 0) 34%,
-    rgba(23, 20, 15, 0.42) 100%
+    transparent 34%,
+    var(--veil) 100%
   );
 }
 
@@ -78,7 +78,7 @@
   margin-top: 5px;
   font: var(--t-caption2);
   letter-spacing: var(--tr-caption2);
-  color: rgba(255, 253, 251, 0.74);
+  color: var(--paper-translucent);
 }
 
 .blank {

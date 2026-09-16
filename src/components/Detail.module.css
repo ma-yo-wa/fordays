@@ -13,7 +13,7 @@
 .headWash {
   width: 46px;
   height: 46px;
-  border-radius: 14px;
+  border-radius: var(--r-md);
 }
 
 .title {

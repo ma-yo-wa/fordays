@@ -124,9 +124,9 @@ struct OrbSetupView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
         .background {
-          RoundedRectangle(cornerRadius: 10, style: .continuous)
-            .fill(selected ? Theme.paper : Theme.ink.opacity(0.08))
-            .shadow(color: selected ? Theme.ink.opacity(0.14) : .clear, radius: selected ? 2 : 0, y: 1)
+          RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous)
+            .fill(selected ? Theme.paper : Theme.fillTertiary)
+            .shadow(color: selected ? Theme.fillSecondary : .clear, radius: selected ? 2 : 0, y: 1)
         }
     }
     .buttonStyle(.plain)

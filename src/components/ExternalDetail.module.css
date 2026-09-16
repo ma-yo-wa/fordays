@@ -13,7 +13,7 @@
 .headWash {
   width: 46px;
   height: 46px;
-  border-radius: 14px;
+  border-radius: var(--r-md);
 }
 
 .headMeta {
@@ -107,7 +107,7 @@
   letter-spacing: var(--tr-caption2);
   font-weight: 500;
   padding: 1px 6px;
-  border-radius: 999px;
+  border-radius: var(--r-capsule);
   background: var(--paper-sunk);
   color: var(--ink-soft);
   margin-left: 4px;

@@ -31,8 +31,8 @@
   font: var(--t-caption);
   letter-spacing: var(--tr-caption);
   font-weight: 600;
-  background: rgba(255, 253, 251, 0.92);
-  color: #17140f;
+  background: var(--mat-thick-bg);
+  color: var(--ink);
   cursor: pointer;
 }
 
@@ -103,7 +103,7 @@
 .iconCell {
   aspect-ratio: 1;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--r-control);
   background: var(--fill-quaternary);
   cursor: pointer;
   display: grid;
@@ -132,7 +132,7 @@
 .gifCell {
   border: none;
   padding: 0;
-  border-radius: 12px;
+  border-radius: var(--r-control);
   overflow: hidden;
   aspect-ratio: 1;
   cursor: pointer;

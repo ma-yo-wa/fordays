@@ -73,50 +73,47 @@ struct LocationInputView: View {
           .buttonStyle(.plain)
         }
       }
-      .padding(12)
-      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+      .padding(.horizontal, 14)
+      .padding(.vertical, 12)
+      .background(Theme.fillQuaternary)
+      .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
 
       if showSuggestions && isFocused && !searcher.results.isEmpty {
-        VStack(alignment: .leading, spacing: 0) {
-          ForEach(searcher.results, id: \.self) { item in
-            Button {
-              let full = item.subtitle.isEmpty ? item.title : "\(item.title), \(item.subtitle)"
-              text = full
-              showSuggestions = false
-              isFocused = false
-            } label: {
-              VStack(alignment: .leading, spacing: 2) {
-                Text(item.title)
-                  .font(.subheadline.weight(.medium))
-                  .foregroundStyle(Theme.ink)
-                  .lineLimit(1)
-
-                if !item.subtitle.isEmpty {
-                  Text(item.subtitle)
-                    .font(.caption)
-                    .foregroundStyle(Theme.inkFaint)
+        FDCard(variant: .warm, padding: .sm) {
+          VStack(alignment: .leading, spacing: 0) {
+            ForEach(searcher.results, id: \.self) { item in
+              Button {
+                let full = item.subtitle.isEmpty ? item.title : "\(item.title), \(item.subtitle)"
+                text = full
+                showSuggestions = false
+                isFocused = false
+              } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                  Text(item.title)
+                    .font(.fdSubhead.weight(.medium))
+                    .foregroundStyle(Theme.ink)
                     .lineLimit(1)
-                }
-              }
-              .frame(maxWidth: .infinity, alignment: .leading)
-              .padding(.vertical, 8)
-              .padding(.horizontal, 10)
-            }
-            .buttonStyle(.plain)
 
-            if item != searcher.results.last {
-              Divider()
-                .padding(.horizontal, 8)
+                  if !item.subtitle.isEmpty {
+                    Text(item.subtitle)
+                      .font(.fdCaption1)
+                      .foregroundStyle(Theme.inkFaint)
+                      .lineLimit(1)
+                  }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 10)
+              }
+              .buttonStyle(.plain)
+
+              if item != searcher.results.last {
+                Divider()
+                  .padding(.horizontal, 8)
+              }
             }
           }
         }
-        .padding(4)
-        .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(
-          RoundedRectangle(cornerRadius: 12, style: .continuous)
-            .stroke(Color.black.opacity(0.06), lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 3)
       }
     }
   }

@@ -49,7 +49,7 @@ struct FDCard<Content: View>: View {
           .stroke(variant == .paper ? Theme.rule : Color.clear, lineWidth: 1)
       )
       .shadow(
-        color: variant == .warm ? Color.black.opacity(0.04) : Color.clear,
+        color: variant == .warm ? Theme.fillQuaternary : Color.clear,
         radius: 10,
         x: 0,
         y: 4

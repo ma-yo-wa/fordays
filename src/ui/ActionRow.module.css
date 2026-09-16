@@ -35,6 +35,22 @@
   flex-shrink: 0;
 }
 
-.label {
+.textStack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   flex: 1;
+  min-width: 0;
+}
+
+.label {
+  font: var(--t-body);
+  letter-spacing: var(--tr-body);
+  font-weight: 500;
+}
+
+.note {
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-faint);
 }

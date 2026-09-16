@@ -163,7 +163,7 @@ struct ActivityCard: View {
         }
 
         LinearGradient(
-          colors: [.clear, Theme.ink.opacity(0.45)],
+          colors: [.clear, Theme.veil],
           startPoint: UnitPoint(x: 0.5, y: 0.4),
           endPoint: .bottom
         )
@@ -176,7 +176,7 @@ struct ActivityCard: View {
             .lineLimit(4)
           Text(who)
             .font(.footnote.weight(.medium))
-            .foregroundStyle(Color(hex: 0xFFFDFB).opacity(0.8))
+            .foregroundStyle(Theme.paperTranslucent)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
@@ -185,7 +185,7 @@ struct ActivityCard: View {
       .aspectRatio(3 / 4, contentMode: .fit)
       .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
       .contentShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
-      .shadow(color: Theme.ink.opacity(0.22), radius: 8, y: 6)
+      .shadow(color: Theme.shadowCard, radius: 8, y: 6)
     }
     .buttonStyle(.plain)
   }

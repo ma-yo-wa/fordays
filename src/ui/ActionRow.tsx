@@ -3,6 +3,7 @@ import s from './ActionRow.module.css';
 
 export interface ActionRowProps {
   label: string;
+  note?: string;
   icon?: React.ReactNode;
   destructive?: boolean;
   onClick: () => void;
@@ -11,6 +12,7 @@ export interface ActionRowProps {
 
 export const ActionRow: React.FC<ActionRowProps> = ({
   label,
+  note,
   icon,
   destructive = false,
   onClick,
@@ -23,7 +25,10 @@ export const ActionRow: React.FC<ActionRowProps> = ({
       onClick={onClick}
     >
       {icon && <span className={s.icon}>{icon}</span>}
-      <span className={s.label}>{label}</span>
+      <div className={s.textStack}>
+        <span className={s.label}>{label}</span>
+        {note && <span className={s.note}>{note}</span>}
+      </div>
     </button>
   );
 };

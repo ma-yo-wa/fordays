@@ -142,14 +142,14 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
           onClear={() => setInput('')}
         />
         {typeof navigator !== 'undefined' && 'clipboard' in navigator && !input && (
-          <button
-            type="button"
-            className={f.pasteBtn}
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => void handlePaste()}
             style={{ marginTop: 8 }}
           >
             {Copy.invite.paste}
-          </button>
+          </Button>
         )}
       </div>
 

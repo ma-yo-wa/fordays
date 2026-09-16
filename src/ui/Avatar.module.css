@@ -12,6 +12,12 @@
   color: #ffffff;
 }
 
+.sizeXs {
+  width: 18px;
+  height: 18px;
+  font-size: 9px;
+}
+
 .sizeSm {
   width: 24px;
   height: 24px;

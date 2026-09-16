@@ -1,3 +1,25 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.header {
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  font-weight: 600;
+  color: var(--ink-soft);
+  padding: 0 4px;
+}
+
+.footer {
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-faint);
+  padding: 0 4px;
+}
+
 .group {
   background: var(--fill-quaternary);
   border-radius: var(--r-control);

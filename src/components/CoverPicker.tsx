@@ -4,6 +4,7 @@ import { fetchGifs, type GifItem } from '../lib/giphy';
 import { fetchStills, trackStillDownload, type StillItem } from '../lib/unsplash';
 import { fileToCoverDataUrl, isEmojiCover } from '../lib/cover';
 import CoverArt from './CoverArt';
+import { Button } from '../ui';
 import f from './Form.module.css';
 import s from './CoverPicker.module.css';
 
@@ -260,13 +261,12 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
               })();
             }}
           />
-          <button
-            type="button"
-            className={s.photoBtn}
+          <Button
+            variant="secondary"
             onClick={() => fileRef.current?.click()}
           >
             Choose from library
-          </button>
+          </Button>
           <p className={s.photoNote}>
             Picks a photo from this phone. It’s saved with this.
           </p>

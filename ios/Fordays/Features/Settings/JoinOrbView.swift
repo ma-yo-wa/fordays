@@ -34,34 +34,25 @@ struct JoinOrbView: View {
           .foregroundStyle(Theme.inkFaint)
           .padding(.bottom, 16)
 
-        Text(Copy.Invite.codeOrLink)
-          .font(.caption.weight(.semibold))
-          .foregroundStyle(Theme.inkFaint)
-          .padding(.bottom, 8)
+        FDTextField(
+          label: Copy.Invite.codeOrLink,
+          placeholder: Copy.Invite.codePlaceholder,
+          text: $input,
+          clearable: true
+        )
+        .textInputAutocapitalization(.never)
+        .autocorrectionDisabled(true)
+        .onChange(of: input) { _, next in
+          triggerLookup(for: next)
+        }
 
-        HStack(spacing: 8) {
-          TextField(Copy.Invite.codePlaceholder, text: $input)
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled(true)
-            .font(.system(.body, design: .monospaced))
-            .padding(12)
-            .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .onChange(of: input) { _, next in
-              triggerLookup(for: next)
-            }
-
-          Button {
+        if input.isEmpty {
+          FDButton(title: Copy.Invite.paste, variant: .ghost, size: .sm) {
             if let paste = UIPasteboard.general.string, !paste.isEmpty {
               input = paste
             }
-          } label: {
-            Text(Copy.Invite.paste)
-              .font(.footnote.weight(.semibold))
-              .foregroundStyle(Theme.ink)
-              .padding(.horizontal, 14)
-              .padding(.vertical, 12)
-              .background(Theme.ink.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
           }
+          .padding(.top, 8)
         }
 
         if isLookingUp {

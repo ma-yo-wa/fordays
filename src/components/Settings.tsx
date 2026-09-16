@@ -37,9 +37,8 @@ import {
   type PushState,
 } from '../lib/push';
 import { Copy, formatCopy } from '../lib/copy';
-import { Button, Avatar } from '../ui';
+import { Button, Avatar, Card, Input, ActionRow, FormGroup, FormRow, Pill } from '../ui';
 import f from './Form.module.css';
-import add from './AddSheet.module.css';
 import ui from './Settings.module.css';
 import auth from './Auth.module.css';
 import OrbKindForm from './OrbKindForm';
@@ -539,22 +538,20 @@ export default function Settings() {
                 })}
               </div>
               {pastOrbs.length > 0 && (
-                <button
-                  type="button"
-                  className={ui.pastOrbsRow}
-                  onClick={() => setSubview('pastOrbs')}
-                >
-                  <div className={ui.pastOrbsLeft}>
-                    <span className={ui.pastOrbsTitle}>{Copy.orbs.pastOrbs}</span>
-                    <span className={ui.pastOrbsSub}>{Copy.orbs.pastOrbsSub}</span>
-                  </div>
-                  <div className={ui.pastOrbsRight}>
-                    <span className={ui.pastOrbsCount}>{pastOrbs.length}</span>
-                    <span className={ui.pastOrbsChevron} aria-hidden>
-                      ›
-                    </span>
-                  </div>
-                </button>
+                <div style={{ marginTop: 12 }}>
+                  <FormGroup>
+                    <FormRow
+                      label={Copy.orbs.pastOrbs}
+                      note={Copy.orbs.pastOrbsSub}
+                      onClick={() => setSubview('pastOrbs')}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Pill variant="neutral" size="sm">{pastOrbs.length}</Pill>
+                        <span style={{ color: 'var(--ink-faint)', fontSize: 13 }} aria-hidden>›</span>
+                      </div>
+                    </FormRow>
+                  </FormGroup>
+                </div>
               )}
             </section>
 
@@ -566,29 +563,26 @@ export default function Settings() {
                     <span className={ui.thisOrbName}>{spaceOrbName(space)}</span>
                   ) : null}
                 </span>
-                <div className={ui.profileCard}>
-                  <input
-                    className={ui.profileInput}
-                    value={orbDraft}
-                    disabled={space.frozen || spaceBusy}
-                    onChange={(e) => setOrbDraft(e.target.value)}
-                    onBlur={() => {
-                      void (async () => {
-                        try {
-                          await persistOrbName();
-                        } catch (err) {
-                          toast(err instanceof Error ? err.message : 'Couldn’t rename this Orb');
-                          setOrbDraft(isDefaultSpaceName(space.name) ? '' : space.name);
-                        }
-                      })();
-                    }}
-                    placeholder={
-                      soloOrb ? Copy.orbs.personalPlaceholder : Copy.orbs.crewPlaceholder
-                    }
-                    autoComplete="off"
-                    autoCapitalize="words"
-                  />
-                </div>
+                <Input
+                  value={orbDraft}
+                  disabled={space.frozen || spaceBusy}
+                  onChange={(e) => setOrbDraft(e.target.value)}
+                  onBlur={() => {
+                    void (async () => {
+                      try {
+                        await persistOrbName();
+                      } catch (err) {
+                        toast(err instanceof Error ? err.message : 'Couldn’t rename this Orb');
+                        setOrbDraft(isDefaultSpaceName(space.name) ? '' : space.name);
+                      }
+                    })();
+                  }}
+                  placeholder={
+                    soloOrb ? Copy.orbs.personalPlaceholder : Copy.orbs.crewPlaceholder
+                  }
+                  autoComplete="off"
+                  autoCapitalize="words"
+                />
 
                 <span className={`${ui.label} ${ui.subLabel}`}>{Copy.orbs.people}</span>
                 <div className={ui.peopleCard}>
@@ -699,10 +693,11 @@ export default function Settings() {
           </>
         )}
 
-        <span className={f.label}>External calendars</span>
-        <div className={f.group}>
-          <div className={f.listRow}>
-            <span className={f.rowLabel}>{Copy.availability.googleCalendar}</span>
+        <FormGroup
+          header="External calendars"
+          footer={Copy.availability.settingsNoteWeb}
+        >
+          <FormRow label={Copy.availability.googleCalendar}>
             <Switch
               on={gcalOn}
               disabled={calBusy}
@@ -743,13 +738,11 @@ export default function Settings() {
                 })();
               }}
             />
-          </div>
+          </FormRow>
           {gcalOn && (
-            <button
-              type="button"
-              className={f.listRow}
-              disabled={calBusy}
-              onClick={() => {
+            <FormRow
+              label={gcalName ?? 'Choose calendar'}
+              onClick={calBusy ? undefined : () => {
                 void (async () => {
                   const token = googleToken();
                   if (!token) {
@@ -772,23 +765,18 @@ export default function Settings() {
                 })();
               }}
             >
-              <span className={f.rowLabel}>{gcalName ?? 'Choose calendar'}</span>
               <span className={f.hint}>{gcalName ? 'Change ›' : '›'}</span>
-            </button>
+            </FormRow>
           )}
           {gcalOn && gcalName && (
-            <button
-              type="button"
-              className={f.listRow}
-              disabled={calBusy}
-              onClick={() => void refreshGoogleOverlay()}
+            <FormRow
+              label="Refresh overlay"
+              onClick={calBusy ? undefined : () => void refreshGoogleOverlay()}
             >
-              <span className={f.rowLabel}>Refresh overlay</span>
               <span className={f.hint}>{calBusy ? '…' : '›'}</span>
-            </button>
+            </FormRow>
           )}
-          <div className={f.listRow}>
-            <span className={f.rowLabel}>{Copy.availability.outlookCalendar}</span>
+          <FormRow label={Copy.availability.outlookCalendar}>
             <Switch
               on={outlookOn}
               disabled={calBusy}
@@ -833,13 +821,11 @@ export default function Settings() {
                 })();
               }}
             />
-          </div>
+          </FormRow>
           {outlookOn && (
-            <button
-              type="button"
-              className={f.listRow}
-              disabled={calBusy}
-              onClick={() => {
+            <FormRow
+              label={outlookName ?? 'Choose calendar'}
+              onClick={calBusy ? undefined : () => {
                 void (async () => {
                   const token = await ensureOutlookToken();
                   if (!token) {
@@ -862,50 +848,47 @@ export default function Settings() {
                 })();
               }}
             >
-              <span className={f.rowLabel}>{outlookName ?? 'Choose calendar'}</span>
               <span className={f.hint}>{outlookName ? 'Change ›' : '›'}</span>
-            </button>
+            </FormRow>
           )}
           {outlookOn && outlookName && (
-            <button
-              type="button"
-              className={f.listRow}
-              disabled={calBusy}
-              onClick={() => void refreshOutlookOverlay()}
+            <FormRow
+              label="Refresh overlay"
+              onClick={calBusy ? undefined : () => void refreshOutlookOverlay()}
             >
-              <span className={f.rowLabel}>Refresh overlay</span>
               <span className={f.hint}>{calBusy ? '…' : '›'}</span>
-            </button>
+            </FormRow>
           )}
-        </div>
-        <p className={f.rowNote}>{Copy.availability.settingsNoteWeb}</p>
+        </FormGroup>
 
-        <span className={f.label}>Notifications</span>
-        <div className={f.group}>
-          <div className={f.listRow}>
-            <span className={f.rowLabel}>Push</span>
-            <Switch
-              on={bell === 'on'}
-              disabled={bellBusy || bell === 'ios-install' || bell === 'unsupported'}
-              label="Notifications"
-              onChange={(on) => {
-                if (bellBusy) return;
-                void (async () => {
-                  setBellBusy(true);
-                  try {
-                    const msg = on ? await enablePush() : await disablePush();
-                    await registerPush();
-                    setBell(pushState());
-                    toast(msg);
-                  } finally {
-                    setBellBusy(false);
-                  }
-                })();
-              }}
-            />
-          </div>
+        <div style={{ marginTop: 16 }}>
+          <FormGroup
+            header="Notifications"
+            footer={bellBusy ? 'Working…' : pushCopy(bell, space?.partnerName)}
+          >
+            <FormRow label="Push">
+              <Switch
+                on={bell === 'on'}
+                disabled={bellBusy || bell === 'ios-install' || bell === 'unsupported'}
+                label="Notifications"
+                onChange={(on) => {
+                  if (bellBusy) return;
+                  void (async () => {
+                    setBellBusy(true);
+                    try {
+                      const msg = on ? await enablePush() : await disablePush();
+                      await registerPush();
+                      setBell(pushState());
+                      toast(msg);
+                    } finally {
+                      setBellBusy(false);
+                    }
+                  })();
+                }}
+              />
+            </FormRow>
+          </FormGroup>
         </div>
-        <p className={f.rowNote}>{bellBusy ? 'Working…' : pushCopy(bell, space?.partnerName)}</p>
 
         {signedIn && (
           <div className={f.row}>
@@ -929,40 +912,28 @@ export default function Settings() {
         >
           ← Settings
         </button>
-        <button
-          type="button"
-          className={add.option}
-          onClick={() => {
-            setCreateWithPeople(false);
-            setOrbSetupBackTo('anotherOrb');
-            setSubview('orbSetup');
-          }}
-        >
-          <span className={add.glyph} aria-hidden>
-            +
-          </span>
-          <span>
-            <span className={add.optionTitle}>{Copy.orbs.startNew}</span>
-            <span className={add.optionNote}>{Copy.orbs.startNewNote}</span>
-          </span>
-        </button>
-        <button
-          type="button"
-          className={add.option}
-          onClick={() => {
-            setSubview('main');
-            setOpen(false);
-            setJoinOrbOpen(true);
-          }}
-        >
-          <span className={add.glyph} aria-hidden>
-            →
-          </span>
-          <span>
-            <span className={add.optionTitle}>{Copy.orbs.joinWithCode}</span>
-            <span className={add.optionNote}>{Copy.orbs.joinWithCodeNote}</span>
-          </span>
-        </button>
+        <div style={{ marginTop: 8 }}>
+          <ActionRow
+            icon="+"
+            label={Copy.orbs.startNew}
+            note={Copy.orbs.startNewNote}
+            onClick={() => {
+              setCreateWithPeople(false);
+              setOrbSetupBackTo('anotherOrb');
+              setSubview('orbSetup');
+            }}
+          />
+          <ActionRow
+            icon="→"
+            label={Copy.orbs.joinWithCode}
+            note={Copy.orbs.joinWithCodeNote}
+            onClick={() => {
+              setSubview('main');
+              setOpen(false);
+              setJoinOrbOpen(true);
+            }}
+          />
+        </div>
       </div>
     )}
 
@@ -994,12 +965,12 @@ export default function Settings() {
         >
           ← Settings
         </button>
-        <div className={ui.pastOrbList}>
+        <div className={ui.pastOrbList} style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
           {pastOrbs.map((pOrb) => {
             const pFaces = orbFaceChips(pOrb);
             const isCurrent = pOrb.id === space?.id;
             return (
-              <div key={pOrb.id} className={ui.pastOrbCard}>
+              <Card key={pOrb.id} variant="sunk" padding="md">
                 <div className={ui.pastOrbTop}>
                   <div className={ui.pastOrbInfo}>
                     <span className={ui.pastOrbName}>{spacePeopleLabel(pOrb) || '\u00a0'}</span>
@@ -1018,15 +989,15 @@ export default function Settings() {
                   </div>
                 </div>
 
-                <div className={ui.pastOrbActions}>
+                <div className={ui.pastOrbActions} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
                   {isCurrent ? (
-                    <span className={`${ui.pastOrbBtn} ${ui.pastOrbBtnActive}`}>
+                    <Button variant="primary" size="sm" disabled>
                       Currently viewing
-                    </span>
+                    </Button>
                   ) : (
-                    <button
-                      type="button"
-                      className={ui.pastOrbBtn}
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       disabled={spaceBusy}
                       onClick={() => {
                         setSubview('main');
@@ -1034,19 +1005,19 @@ export default function Settings() {
                       }}
                     >
                       View
-                    </button>
+                    </Button>
                   )}
 
-                  <button
-                    type="button"
-                    className={`${ui.pastOrbBtn} ${ui.pastOrbBtnDanger}`}
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     disabled={spaceBusy}
                     onClick={() => askPurge(pOrb.id)}
                   >
-                    {Copy.orbs.deletePermanent}
-                  </button>
+                    <span style={{ color: 'var(--rose-ink)' }}>{Copy.orbs.deletePermanent}</span>
+                  </Button>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>

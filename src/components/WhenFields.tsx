@@ -575,7 +575,7 @@ export default function WhenFields({
         {multiDay && (
           <div
             className={f.appleWhenRow}
-            style={{ borderTop: '1px solid rgba(0, 0, 0, 0.06)' }}
+            style={{ borderTop: '1px solid var(--separator)' }}
           >
             <span className={f.appleWhenLabel}>Ends</span>
             <div className={f.applePillGroup}>
@@ -637,7 +637,7 @@ export default function WhenFields({
         {!multiDay && from && until && (
           <div
             className={f.appleWhenRow}
-            style={{ borderTop: '1px solid rgba(0, 0, 0, 0.06)' }}
+            style={{ borderTop: '1px solid var(--separator)' }}
           >
             <span className={f.appleWhenLabel}>Until</span>
             <div className={f.applePillGroup}>

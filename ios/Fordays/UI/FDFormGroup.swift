@@ -1,14 +1,30 @@
 import SwiftUI
 
 struct FDFormGroup<Content: View>: View {
+  var header: String? = nil
+  var footer: String? = nil
   @ViewBuilder var content: () -> Content
 
   var body: some View {
-    VStack(spacing: 0) {
-      content()
+    VStack(alignment: .leading, spacing: 6) {
+      if let header {
+        Text(header)
+          .font(.fdFootnote.weight(.semibold))
+          .foregroundStyle(Theme.inkSoft)
+          .padding(.horizontal, 4)
+      }
+      VStack(spacing: 0) {
+        content()
+      }
+      .background(Theme.fillQuaternary)
+      .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
+      if let footer {
+        Text(footer)
+          .font(.fdFootnote)
+          .foregroundStyle(Theme.inkFaint)
+          .padding(.horizontal, 4)
+      }
     }
-    .background(Theme.fillQuaternary)
-    .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
   }
 }
 

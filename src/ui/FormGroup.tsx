@@ -2,17 +2,23 @@ import React from 'react';
 import s from './FormGroup.module.css';
 
 export interface FormGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+  header?: React.ReactNode;
+  footer?: React.ReactNode;
   children: React.ReactNode;
 }
 
 export const FormGroup: React.FC<FormGroupProps> = ({
+  header,
+  footer,
   children,
   className = '',
   ...rest
 }) => {
   return (
-    <div className={`${s.group} ${className}`.trim()} {...rest}>
-      {children}
+    <div className={`${s.wrapper} ${className}`.trim()} {...rest}>
+      {header && <div className={s.header}>{header}</div>}
+      <div className={s.group}>{children}</div>
+      {footer && <div className={s.footer}>{footer}</div>}
     </div>
   );
 };

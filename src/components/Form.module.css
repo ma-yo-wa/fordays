@@ -144,7 +144,7 @@ textarea.input {
   gap: 2px;
   padding: 2px;
   background: var(--fill-tertiary);
-  border-radius: 10px;
+  border-radius: var(--r-control);
 }
 
 .segment {
@@ -154,7 +154,7 @@ textarea.input {
   background: none;
   cursor: pointer;
   padding: 7px 12px;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   font-weight: 500;
@@ -170,11 +170,11 @@ textarea.input {
 .segmentKnob {
   position: absolute;
   inset: 0;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   background: var(--paper-warm);
   box-shadow:
-    0 1px 3px rgba(23, 20, 15, 0.14),
-    0 0 0 var(--hairline-w) rgba(23, 20, 15, 0.04);
+    0 1px 3px var(--hairline),
+    0 0 0 var(--hairline-w) var(--fill-quaternary);
 }
 
 /* Above the knob, which slides underneath it. */
@@ -206,8 +206,8 @@ textarea.input {
   border-radius: 50%;
   background: #fff;
   box-shadow:
-    0 3px 8px rgba(0, 0, 0, 0.15),
-    0 1px 1px rgba(0, 0, 0, 0.16);
+    0 3px 8px var(--shadow-card),
+    0 1px 1px var(--hairline);
 }
 
 .chips {
@@ -269,7 +269,7 @@ textarea.input {
 .appleWhenCard {
   margin-top: 8px;
   background: var(--paper-warm);
-  border-radius: 14px;
+  border-radius: var(--r-md);
   position: relative;
   overflow: visible;
   display: flex;
@@ -308,9 +308,9 @@ textarea.input {
 
 .applePill {
   border: none;
-  background: rgba(120, 120, 128, 0.12);
+  background: var(--fill-tertiary);
   color: var(--ink);
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   padding: 6px 11px;
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
@@ -328,15 +328,15 @@ textarea.input {
 }
 
 .applePillActive {
-  background: rgba(120, 120, 128, 0.22);
+  background: var(--fill-secondary);
   color: var(--ink);
   font-weight: 500;
 }
 
 .appleDateInput {
-  background: rgba(120, 120, 128, 0.12);
+  background: var(--fill-tertiary);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   padding: 6px 10px;
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
@@ -349,9 +349,9 @@ textarea.input {
 
 .appleCalendarBox {
   padding: 8px 14px 14px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-top: 1px solid var(--separator);
   background: var(--paper-warm);
-  border-radius: 0 0 14px 14px;
+  border-radius: 0 0 var(--r-md) var(--r-md);
 }
 
 /* Inline Calendar Header and Grid (matches Plans page) */
@@ -486,9 +486,9 @@ textarea.input {
   width: 220px;
   max-width: 90vw;
   background: var(--paper);
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: var(--r-control);
+  box-shadow: var(--shadow-lift);
+  border: var(--hairline-w) solid var(--hairline);
   z-index: 100;
   overflow: hidden;
   display: flex;
@@ -512,7 +512,7 @@ textarea.input {
   align-items: center;
   justify-content: flex-end;
   padding: 4px 10px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: var(--hairline-w) solid var(--separator);
 }
 
 .timeDropdownClearBtn {
@@ -525,7 +525,7 @@ textarea.input {
   font-weight: 500;
   cursor: pointer;
   padding: 2px 4px;
-  border-radius: 4px;
+  border-radius: var(--r-xs);
   transition: color 0.12s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -550,7 +550,7 @@ textarea.input {
   padding: 8px 10px;
   border: none;
   background: transparent;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   cursor: pointer;
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
@@ -561,11 +561,11 @@ textarea.input {
 
 .timeDropdownItem:active,
 .timeDropdownItem:hover {
-  background: rgba(120, 120, 128, 0.1);
+  background: var(--fill-tertiary);
 }
 
 .timeDropdownItemActive {
-  background: rgba(120, 120, 128, 0.12);
+  background: var(--fill-secondary);
   font-weight: 600;
 }
 
@@ -587,7 +587,7 @@ textarea.input {
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-top: var(--hairline-w) solid var(--separator);
   background: var(--paper-warm);
 }
 
@@ -611,8 +611,8 @@ textarea.input {
 .timeDropdownMinuteInput {
   width: 36px;
   height: 26px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 6px;
+  border: var(--hairline-w) solid var(--hairline);
+  border-radius: var(--r-sm);
   background: var(--paper);
   outline: none;
   font: var(--t-subhead);
@@ -627,8 +627,8 @@ textarea.input {
 }
 
 .timeDropdownMinuteInput:focus {
-  border-color: rgba(0, 0, 0, 0.32);
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+  border-color: var(--hairline);
+  box-shadow: 0 0 0 2px var(--fill-quaternary);
 }
 
 .timeDropdownAmPmToggle {
@@ -639,23 +639,23 @@ textarea.input {
   color: var(--ink-2);
   cursor: pointer;
   padding: 2px 4px;
-  border-radius: 4px;
+  border-radius: var(--r-xs);
   transition: background 0.12s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .timeDropdownAmPmToggle:hover {
-  background: rgba(120, 120, 128, 0.1);
+  background: var(--fill-tertiary);
 }
 
 .timeDropdownDoneBtn {
   border: none;
-  background: rgba(120, 120, 128, 0.14);
+  background: var(--fill-secondary);
   color: var(--ink);
   font: var(--t-footnote);
   font-weight: 500;
   padding: 4px 12px;
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   cursor: pointer;
   transition: background 0.12s ease, transform 0.08s ease;
   white-space: nowrap;
@@ -664,7 +664,7 @@ textarea.input {
 
 .timeDropdownDoneBtn:active {
   transform: scale(0.97);
-  background: rgba(120, 120, 128, 0.24);
+  background: var(--fill-secondary);
 }
 
 .appleSubRow {
@@ -894,7 +894,7 @@ textarea.input {
   margin-top: 10px;
   padding: 8px 12px;
   background: var(--paper-warm);
-  border-radius: 10px;
+  border-radius: var(--r-sm);
   font: var(--t-footnote);
   letter-spacing: var(--tr-footnote);
   color: var(--ink-2);
@@ -927,7 +927,7 @@ textarea.input {
   gap: 12px;
   padding: 12px 14px;
   background: var(--paper-warm);
-  border-radius: 12px;
+  border-radius: var(--r-control);
   border: 1px solid var(--border-soft);
   margin-top: 10px;
 }
@@ -958,7 +958,7 @@ textarea.input {
   padding: 6px 12px;
   font: var(--t-footnote);
   font-weight: 600;
-  border-radius: 999px;
+  border-radius: var(--r-capsule);
   background: var(--fill-secondary);
   color: var(--ink);
   border: none;
@@ -973,15 +973,15 @@ textarea.input {
 .peekCard {
   margin-top: 14px;
   padding: 14px 16px;
-  border-radius: 14px;
+  border-radius: var(--r-md);
   background:
     radial-gradient(
       100% 100% at 14% 12%,
-      rgba(242, 100, 139, 0.12) 0%,
-      rgba(168, 206, 133, 0.14) 85%
+      var(--rose-wash) 0%,
+      var(--sage-wash) 85%
     ),
     var(--paper-warm);
-  border: 1px solid rgba(168, 206, 133, 0.3);
+  border: 1px solid var(--separator);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -1012,7 +1012,7 @@ textarea.input {
   font-weight: 600;
   background: var(--fill-tertiary);
   color: var(--ink);
-  border-radius: 12px;
+  border-radius: var(--r-control);
   border: none;
   cursor: pointer;
 }
@@ -1067,9 +1067,9 @@ textarea.input {
   max-height: 220px;
   overflow-y: auto;
   background: var(--paper);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: var(--hairline-w) solid var(--hairline);
+  border-radius: var(--r-control);
+  box-shadow: var(--shadow-lift);
   z-index: 100;
   padding: 6px;
   display: flex;
@@ -1083,7 +1083,7 @@ textarea.input {
   align-items: flex-start;
   text-align: left;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   border: none;
   outline: none;
   background: transparent;
@@ -1099,7 +1099,7 @@ textarea.input {
 
 .locationItem:hover,
 .locationItemActive {
-  background: rgba(120, 120, 128, 0.08);
+  background: var(--fill-tertiary);
 }
 
 .locationItemTitle {

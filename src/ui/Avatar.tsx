@@ -2,7 +2,7 @@ import React from 'react';
 import s from './Avatar.module.css';
 import { faceColor } from '../lib/tint';
 
-export type AvatarSize = 'sm' | 'md' | 'lg';
+export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg';
 
 export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   name?: string;

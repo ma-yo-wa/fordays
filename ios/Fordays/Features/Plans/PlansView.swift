@@ -166,7 +166,7 @@ struct PlansView: View {
                     Spacer(minLength: 0)
                   }
                   .padding(14)
-                  .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                  .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
                 }
                 .buttonStyle(.plain)
               }
@@ -218,7 +218,7 @@ struct PlansView: View {
                   Spacer(minLength: 0)
                 }
                 .padding(14)
-                .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
               }
               .buttonStyle(.plain)
             case .external(let e):
@@ -256,13 +256,13 @@ struct PlansView: View {
                         .foregroundStyle(Theme.inkSoft)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 1)
-                        .background(Theme.ink.opacity(0.06), in: Capsule())
+                        .background(Theme.fillTertiary, in: Capsule())
                     }
                   }
                   Spacer(minLength: 0)
                 }
                 .padding(14)
-                .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
               }
               .buttonStyle(.plain)
             }
@@ -275,7 +275,7 @@ struct PlansView: View {
       .frame(maxWidth: .infinity, alignment: .topLeading)
       .overlay(alignment: .top) {
         Rectangle()
-          .fill(Theme.ink.opacity(0.08))
+          .fill(Theme.hairline)
           .frame(height: 0.5)
       }
       .padding(.bottom, 132)
@@ -309,7 +309,7 @@ struct PlansView: View {
       }
     }
     .frame(width: 42, height: 42)
-    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
   }
 
   @ViewBuilder
@@ -320,7 +320,7 @@ struct PlansView: View {
       endPoint: .bottomTrailing
     )
     .frame(width: 42, height: 42)
-    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
   }
 
   private var dayTitle: String {
@@ -490,7 +490,7 @@ struct PlansView: View {
           chevronStart: isContinuationFromPrev,
           chevronEnd: isContinuationToNext
         )
-        .fill(Theme.sage.opacity(0.26))
+        .fill(Theme.sageWash)
         .frame(width: width, height: 30)
         .offset(x: left, y: 4)
       }

@@ -22,7 +22,7 @@
   font-weight: 600;
   padding: 12px 18px;
   border-radius: var(--r-capsule);
-  box-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-lift);
   cursor: pointer;
   max-width: 100%;
 }

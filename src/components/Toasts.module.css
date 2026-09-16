@@ -25,6 +25,6 @@
   font-weight: 500;
   padding: 11px 18px;
   border-radius: var(--r-capsule);
-  box-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-lift);
   max-width: 100%;
 }

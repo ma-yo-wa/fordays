@@ -173,28 +173,19 @@ struct SettingsView: View {
   }
 
   private var frozenBanner: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      Text(Copy.Orbs.viewingFrozenBanner)
-        .font(.footnote)
-        .foregroundStyle(Theme.inkSoft)
-      if let firstActive = activeOrbs.first {
-        Button {
-          switchOrb(firstActive.id)
-        } label: {
-          Text(Copy.Orbs.switchBackToActive)
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(Theme.ink)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(Theme.paperWarm, in: Capsule())
-            .overlay(Capsule().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
+    FDCard(variant: .sunk, padding: .md) {
+      VStack(alignment: .leading, spacing: 8) {
+        Text(Copy.Orbs.viewingFrozenBanner)
+          .font(.fdFootnote)
+          .foregroundStyle(Theme.inkSoft)
+        if let firstActive = activeOrbs.first {
+          FDButton(title: Copy.Orbs.switchBackToActive, variant: .secondary, size: .sm) {
+            switchOrb(firstActive.id)
+          }
         }
-        .buttonStyle(.plain)
       }
+      .frame(maxWidth: .infinity, alignment: .leading)
     }
-    .padding(14)
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
   }
 
   private func profileSection(space: SpaceInfo) -> some View {
@@ -224,36 +215,24 @@ struct SettingsView: View {
         }
       }
       .padding(12)
-      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+      .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
 
       if !pastOrbs.isEmpty {
-        Button {
-          showPastOrbs = true
-        } label: {
-          HStack {
-            VStack(alignment: .leading, spacing: 2) {
-              Text(Copy.Orbs.pastOrbs)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Theme.ink)
-              Text(Copy.Orbs.pastOrbsSub)
-                .font(.caption)
-                .foregroundStyle(Theme.inkFaint)
+        FDFormGroup {
+          FDFormRow(
+            label: Copy.Orbs.pastOrbs,
+            note: Copy.Orbs.pastOrbsSub,
+            action: { showPastOrbs = true },
+            rightContent: {
+              HStack(spacing: 6) {
+                FDPill(title: "\(pastOrbs.count)", variant: .neutral, size: .sm)
+                Image(systemName: "chevron.right")
+                  .font(.caption.weight(.semibold))
+                  .foregroundStyle(Theme.inkFaint)
+              }
             }
-            Spacer()
-            Text("\(pastOrbs.count)")
-              .font(.footnote.weight(.semibold))
-              .foregroundStyle(Theme.inkSoft)
-              .padding(.horizontal, 8)
-              .padding(.vertical, 2)
-              .background(Theme.ink.opacity(0.06), in: Capsule())
-            Image(systemName: "chevron.right")
-              .font(.caption.weight(.semibold))
-              .foregroundStyle(Theme.inkFaint)
-          }
-          .padding(14)
-          .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+          )
         }
-        .buttonStyle(.plain)
       }
     }
   }
@@ -305,12 +284,12 @@ struct SettingsView: View {
       VStack(spacing: 6) {
         ZStack {
           Circle()
-            .fill(Theme.ink.opacity(0.08))
+            .fill(Theme.fillTertiary)
           if active {
             Circle()
               .fill(
                 LinearGradient(
-                  colors: [Theme.rose.opacity(0.55), Theme.sage.opacity(0.4)],
+                  colors: [Theme.roseWash, Theme.sageWash],
                   startPoint: .topLeading,
                   endPoint: .bottomTrailing
                 )
@@ -339,7 +318,7 @@ struct SettingsView: View {
       VStack(spacing: 6) {
         ZStack {
           Circle()
-            .fill(Theme.ink.opacity(0.08))
+            .fill(Theme.fillTertiary)
           Text("+")
             .font(.title2.weight(.medium))
             .foregroundStyle(Theme.ink)
@@ -392,53 +371,35 @@ struct SettingsView: View {
       Text(Copy.Orbs.anotherOrb)
         .font(.title2.weight(.semibold))
         .foregroundStyle(Theme.ink)
-        .padding(.bottom, 20)
+        .padding(.bottom, 16)
 
-      Button {
+      FDActionRow(
+        title: Copy.Orbs.startNew,
+        note: Copy.Orbs.startNewNote,
+        glyph: "+"
+      ) {
         showAnotherOrb = false
         orbSetupWithPeople = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
           showOrbSetup = true
         }
-      } label: {
-        VStack(alignment: .leading, spacing: 2) {
-          Text(Copy.Orbs.startNew)
-            .font(.headline)
-            .foregroundStyle(Theme.ink)
-          Text(Copy.Orbs.startNewNote)
-            .font(.subheadline)
-            .foregroundStyle(Theme.inkSoft)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 16)
-        .contentShape(Rectangle())
       }
-      .buttonStyle(.plain)
 
       Rectangle()
-        .fill(Theme.ink.opacity(0.08))
+        .fill(Theme.hairline)
         .frame(height: 0.5)
 
-      Button {
+      FDActionRow(
+        title: Copy.Orbs.joinWithCode,
+        note: Copy.Orbs.joinWithCodeNote,
+        glyph: "→"
+      ) {
         showAnotherOrb = false
         dismiss()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
           app.showJoinOrb = true
         }
-      } label: {
-        VStack(alignment: .leading, spacing: 2) {
-          Text(Copy.Orbs.joinWithCode)
-            .font(.headline)
-            .foregroundStyle(Theme.ink)
-          Text(Copy.Orbs.joinWithCodeNote)
-            .font(.subheadline)
-            .foregroundStyle(Theme.inkSoft)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 16)
-        .contentShape(Rectangle())
       }
-      .buttonStyle(.plain)
     }
     .padding(20)
     .padding(.bottom, 8)
@@ -464,12 +425,12 @@ struct SettingsView: View {
         }
       }
 
-      TextField(placeholder, text: $orbDraft)
-        .disabled(space.frozen || spaceBusy)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .onSubmit { Task { await persistOrbName() } }
+      FDTextField(
+        placeholder: placeholder,
+        text: $orbDraft
+      )
+      .disabled(space.frozen || spaceBusy)
+      .onSubmit { Task { await persistOrbName() } }
 
       Text(Copy.Orbs.people)
         .font(.footnote.weight(.semibold))
@@ -485,7 +446,7 @@ struct SettingsView: View {
                 VStack(spacing: 4) {
                   ZStack {
                     Circle()
-                      .fill(Theme.ink.opacity(0.08))
+                      .fill(Theme.fillTertiary)
                     Text("+")
                       .font(.system(size: 16, weight: .semibold))
                       .foregroundStyle(Theme.ink)
@@ -533,8 +494,8 @@ struct SettingsView: View {
                       .foregroundStyle(Theme.inkSoft)
                       .frame(width: 16, height: 16)
                       .background(Theme.paperWarm, in: Circle())
-                      .overlay(Circle().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
-                      .shadow(color: Color.black.opacity(0.1), radius: 2, y: 1)
+                      .overlay(Circle().stroke(Theme.hairline, lineWidth: 0.5))
+                      .shadow(color: Theme.fillSecondary, radius: 2, y: 1)
                   }
                   .buttonStyle(.plain)
                   .offset(x: 10, y: -2)
@@ -549,7 +510,7 @@ struct SettingsView: View {
         if isPersonalOrb {
           VStack(alignment: .leading, spacing: 8) {
             Rectangle()
-              .fill(Theme.ink.opacity(0.08))
+              .fill(Theme.hairline)
               .frame(height: 0.5)
 
             Text(Copy.Orbs.personalPrivateNote)
@@ -565,7 +526,7 @@ struct SettingsView: View {
                 .foregroundStyle(Theme.ink)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 7)
-                .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
             }
             .buttonStyle(.plain)
           }
@@ -573,7 +534,7 @@ struct SettingsView: View {
         }
       }
       .padding(10)
-      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+      .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
 
       Text(Copy.Orbs.descriptor)
         .font(.footnote)
@@ -633,67 +594,53 @@ struct SettingsView: View {
             let isCurrent = pOrb.id == app.space?.id
             let faces = orbFaceChips(for: pOrb)
 
-            VStack(alignment: .leading, spacing: 12) {
-              HStack(alignment: .center) {
-                Text(pOrb.peopleLabel.isEmpty ? " " : pOrb.peopleLabel)
-                  .font(.headline)
-                  .foregroundStyle(Theme.ink)
+            FDCard(variant: .sunk, padding: .md) {
+              VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .center) {
+                  Text(pOrb.peopleLabel.isEmpty ? " " : pOrb.peopleLabel)
+                    .font(.fdHeadline)
+                    .foregroundStyle(Theme.ink)
 
-                Spacer()
+                  Spacer()
 
-                HStack(spacing: -6) {
-                  ForEach(faces.prefix(3)) { f in
-                    ZStack {
-                      Circle()
-                        .fill(f.them ? Theme.faceRose : Theme.faceSage)
-                      Text(f.letter)
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(.white)
-                        .offset(y: -0.5)
+                  HStack(spacing: -6) {
+                    ForEach(faces.prefix(3)) { f in
+                      ZStack {
+                        Circle()
+                          .fill(f.them ? Theme.faceRose : Theme.faceSage)
+                        Text(f.letter)
+                          .font(.system(size: 11, weight: .bold))
+                          .foregroundStyle(.white)
+                          .offset(y: -0.5)
+                      }
+                      .frame(width: 22, height: 22)
+                      .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
+                      .fixedSize()
                     }
-                    .frame(width: 22, height: 22)
-                    .overlay(Circle().stroke(Theme.paperWarm, lineWidth: 1.5))
-                    .fixedSize()
                   }
                 }
-              }
 
-              Divider()
+                Divider()
 
-              HStack(spacing: 10) {
-                if isCurrent {
-                  Text("Currently viewing")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Theme.ink, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                } else {
-                  Button("View") {
-                    showPastOrbs = false
-                    switchOrb(pOrb.id)
+                HStack(spacing: 10) {
+                  if isCurrent {
+                    FDButton(title: "Currently viewing", variant: .primary, size: .sm) {}
+                      .disabled(true)
+                  } else {
+                    FDButton(title: "View", variant: .secondary, size: .sm) {
+                      showPastOrbs = false
+                      switchOrb(pOrb.id)
+                    }
                   }
-                  .buttonStyle(.plain)
-                  .font(.caption.weight(.semibold))
-                  .foregroundStyle(Theme.ink)
-                  .padding(.horizontal, 12)
-                  .padding(.vertical, 6)
-                  .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                  .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
-                }
 
-                Spacer()
+                  Spacer()
 
-                Button(Copy.Orbs.deletePermanent) {
-                  confirm = .purge(pOrb.id)
+                  FDButton(title: Copy.Orbs.deletePermanent, variant: .ghost, size: .sm) {
+                    confirm = .purge(pOrb.id)
+                  }
                 }
-                .buttonStyle(.plain)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Theme.roseInk)
               }
             }
-            .padding(14)
-            .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
           }
         }
         .padding(20)
@@ -723,7 +670,7 @@ struct SettingsView: View {
         }
 
         if appleOn {
-          Divider().opacity(0.12)
+          Divider().overlay(Theme.separator)
           FDFormRow(
             label: appleName ?? "Choose calendar",
             note: appleBusy ? "…" : nil,
@@ -735,7 +682,7 @@ struct SettingsView: View {
           }
 
           if appleName != nil {
-            Divider().opacity(0.12)
+            Divider().overlay(Theme.separator)
             FDFormRow(
               label: "Refresh overlay",
               note: appleBusy ? "…" : nil,
@@ -748,7 +695,7 @@ struct SettingsView: View {
           }
         }
 
-        Divider().opacity(0.12)
+        Divider().overlay(Theme.separator)
 
         FDFormRow(label: Copy.Availability.outlookCalendar) {
           Toggle("Connect Outlook Calendar", isOn: outlookToggle)

@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 90;
-  background: rgba(0, 0, 0, 0.38);
+  background: var(--scrim);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -19,9 +19,9 @@
 .card {
   width: 100%;
   background: var(--paper-card, #ffffff);
-  border-radius: 14px;
+  border-radius: var(--r-md);
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 8px 32px var(--shadow-card);
   display: flex;
   flex-direction: column;
 }
@@ -54,7 +54,7 @@
 .divider {
   width: 100%;
   height: 0.5px;
-  background: var(--hairline, rgba(0, 0, 0, 0.1));
+  background: var(--hairline);
 }
 
 .actionBtn {
@@ -76,7 +76,7 @@
 }
 
 .actionBtn:active {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--fill-quaternary);
 }
 
 .actionBtn:disabled {
@@ -95,7 +95,7 @@
   min-height: 52px;
   border: none;
   background: var(--paper-card, #ffffff);
-  border-radius: 14px;
+  border-radius: var(--r-md);
   font-size: 17px;
   font-family: inherit;
   font-weight: 600;
@@ -104,11 +104,11 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 8px 32px var(--shadow-card);
   transition: background 0.12s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .cancelBtn:active {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--fill-quaternary);
 }

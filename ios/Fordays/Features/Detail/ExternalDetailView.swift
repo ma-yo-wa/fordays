@@ -85,7 +85,7 @@ struct ExternalDetailView: View {
             endPoint: .bottomTrailing
           )
           .frame(width: 46, height: 46)
-          .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+          .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
 
           VStack(alignment: .leading, spacing: 4) {
             Text(event.title ?? Copy.Availability.busy)
@@ -116,7 +116,7 @@ struct ExternalDetailView: View {
         .padding(.bottom, 20)
 
         Divider()
-          .overlay(Theme.ink.opacity(0.08))
+          .overlay(Theme.hairline)
 
         // Rows
         VStack(alignment: .leading, spacing: 14) {

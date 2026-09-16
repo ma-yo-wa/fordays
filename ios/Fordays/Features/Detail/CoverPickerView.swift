@@ -32,7 +32,7 @@ struct RemoteOrDataImage: View {
           .aspectRatio(contentMode: contentMode)
       } else {
         LinearGradient(
-          colors: [Theme.rose.opacity(0.3), Theme.sage.opacity(0.3)],
+          colors: [Theme.roseWash, Theme.sageWash],
           startPoint: .topLeading,
           endPoint: .bottomTrailing
         )
@@ -206,7 +206,7 @@ struct CoverPickerView: View {
       RemoteOrDataImage(urlString: cover, contentMode: .fill)
         .frame(maxWidth: .infinity)
         .frame(height: 140)
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
 
       Button {
         withAnimation(.spring(response: 0.3)) {
@@ -218,7 +218,7 @@ struct CoverPickerView: View {
           .foregroundStyle(.white)
           .padding(.horizontal, 10)
           .padding(.vertical, 5)
-          .background(Color.black.opacity(0.65), in: Capsule())
+          .background(Theme.ink, in: Capsule())
           .padding(8)
       }
       .buttonStyle(.plain)
@@ -243,7 +243,7 @@ struct CoverPickerView: View {
             .background {
               if tab == t {
                 Capsule().fill(Theme.paperWarm)
-                  .shadow(color: Theme.ink.opacity(0.08), radius: 4, y: 1)
+                  .shadow(color: Theme.fillSecondary, radius: 4, y: 1)
               }
             }
         }
@@ -251,7 +251,7 @@ struct CoverPickerView: View {
       }
     }
     .padding(3)
-    .background(Theme.ink.opacity(0.06), in: Capsule())
+    .background(Theme.fillTertiary, in: Capsule())
   }
 
   // MARK: - Search & Grid
@@ -280,7 +280,8 @@ struct CoverPickerView: View {
       }
       .padding(.horizontal, 12)
       .padding(.vertical, 8)
-      .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+      .background(Theme.fillQuaternary)
+      .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
 
       if items.isEmpty {
         Text("No pictures found for “\(query)”. Try another word.")
@@ -298,10 +299,10 @@ struct CoverPickerView: View {
               RemoteOrDataImage(urlString: item.previewUrl, contentMode: .fill)
                 .frame(height: 74)
                 .frame(maxWidth: .infinity)
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
                 .overlay {
                   if cover == item.fullUrl {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous)
                       .stroke(Theme.roseInk, lineWidth: 2.5)
                   }
                 }
@@ -332,7 +333,8 @@ struct CoverPickerView: View {
         .foregroundStyle(Theme.ink)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
-        .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Theme.fillQuaternary)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
       }
       .buttonStyle(.plain)
       .disabled(isProcessingPhoto)
@@ -403,11 +405,7 @@ struct CoverPickerView: View {
       .buttonStyle(.plain)
 
       if showCustomUrl {
-        TextField("https://…", text: $cover)
-          .font(.subheadline)
-          .textFieldStyle(.plain)
-          .padding(10)
-          .background(Theme.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        FDTextField(placeholder: "https://…", text: $cover)
           .textInputAutocapitalization(.never)
           .keyboardType(.URL)
       }

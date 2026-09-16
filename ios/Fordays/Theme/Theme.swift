@@ -16,6 +16,12 @@ enum Theme {
   static let fillTertiary = Color(hex: 0x17140F).opacity(0.07)
   static let fillSecondary = Color(hex: 0x17140F).opacity(0.11)
 
+  static let veil = Color(hex: 0x17140F).opacity(0.42)
+  static let paperTranslucent = Color(hex: 0xFFFDFB).opacity(0.74)
+  static let shadowCard = Color(hex: 0x17140F).opacity(0.18)
+  static let roseGlow = Color(hex: 0xF2648B).opacity(0.45)
+  static let scrim = Color(hex: 0x17140F).opacity(0.32)
+
   static let rose = Color(hex: 0xF2648B)
   static let roseInk = Color(hex: 0xC4285A)
   static let roseWash = Color(hex: 0xFFEAEE)
@@ -31,6 +37,7 @@ enum Theme {
   static let faceRose = Color(hex: 0xC4285A)
 
   // Concentric corner radii
+  static let radiusXs: CGFloat = 4
   static let radiusSm: CGFloat = 8
   static let controlRadius: CGFloat = 12
   static let radiusMd: CGFloat = 14

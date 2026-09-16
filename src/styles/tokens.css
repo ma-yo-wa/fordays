@@ -69,9 +69,10 @@
 
   --paper-card: #ffffff;
 
-  --radius-lg: 22px;
+  --radius-lg: 20px;
   --radius-md: 14px;
-  --radius-sm: 9px;
+  --radius-sm: 8px;
+  --radius-xs: 4px;
 
   --shadow-card: 0 1px 0 rgba(23, 20, 15, 0.05),
     0 10px 26px -14px rgba(23, 20, 15, 0.35);
@@ -159,13 +160,22 @@
   /* Corner radii are concentric: a control inside a container is rounded
      so the gap between the two curves stays even. */
   --r-sheet: 38px;
+  --r-device: 46px;
   --r-card: 20px;
+  --r-md: 14px;
   --r-control: 12px;
+  --r-sm: 8px;
+  --r-xs: 4px;
   --r-capsule: 999px;
 
   --fill-quaternary: rgba(23, 20, 15, 0.045);
   --fill-tertiary: rgba(23, 20, 15, 0.07);
   --fill-secondary: rgba(23, 20, 15, 0.11);
+
+  --veil: rgba(23, 20, 15, 0.42);
+  --paper-translucent: rgba(255, 253, 251, 0.74);
+  --rose-glow: rgba(242, 100, 139, 0.45);
+  --scrim: rgba(23, 20, 15, 0.32);
 }
 
 /* Paper only — Fordays does not follow system dark mode. */

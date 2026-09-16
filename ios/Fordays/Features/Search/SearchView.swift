@@ -138,10 +138,10 @@ struct SearchView: View {
       }
       .padding(.horizontal, 10)
       .padding(.vertical, 8)
-      .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+      .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
       .overlay(
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
-          .stroke(Theme.ink.opacity(0.06), lineWidth: 0.5)
+        RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous)
+          .stroke(Theme.hairline, lineWidth: 0.5)
       )
 
       Button(Copy.Search.cancel) {
@@ -164,7 +164,7 @@ struct SearchView: View {
         VStack(spacing: 12) {
           Image(systemName: "magnifyingglass")
             .font(.system(size: 36))
-            .foregroundStyle(Theme.inkFaint.opacity(0.4))
+            .foregroundStyle(Theme.inkFaint)
           Text(Copy.Search.emptyPrompt)
             .font(.subheadline)
             .foregroundStyle(Theme.inkSoft)
@@ -273,7 +273,7 @@ struct SearchView: View {
                   }
 
                   ForEach(group.items) { item in
-                    activityRow(item, accentColor: Theme.roseInk.opacity(0.6), trailingTime: DateLocal.formatItemTime(dateTime: item.dateTime, endsAt: item.endsAt))
+                    activityRow(item, accentColor: Theme.rose, trailingTime: DateLocal.formatItemTime(dateTime: item.dateTime, endsAt: item.endsAt))
                   }
                 }
               }
@@ -296,7 +296,7 @@ struct SearchView: View {
       onSelect(item)
     } label: {
       HStack(spacing: 12) {
-        RoundedRectangle(cornerRadius: 2, style: .continuous)
+        RoundedRectangle(cornerRadius: Theme.radiusXs, style: .continuous)
           .fill(accentColor)
           .frame(width: 3.5)
           .frame(maxHeight: .infinity)
@@ -339,10 +339,10 @@ struct SearchView: View {
       }
       .padding(12)
       .frame(maxWidth: .infinity, alignment: .leading)
-      .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+      .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
       .overlay(
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
-          .stroke(Theme.ink.opacity(0.06), lineWidth: 0.5)
+        RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous)
+          .stroke(Theme.hairline, lineWidth: 0.5)
       )
     }
     .buttonStyle(.plain)

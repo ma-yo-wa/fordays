@@ -68,7 +68,7 @@ struct MainShellView: View {
                 ),
                 in: Circle()
               )
-              .shadow(color: Theme.rose.opacity(0.45), radius: 12, y: 6)
+              .shadow(color: Theme.roseGlow, radius: 12, y: 6)
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
         .padding(.trailing, 20)
@@ -237,7 +237,7 @@ struct MainShellView: View {
           .padding(.trailing, customOrbName != nil ? 10 : 8)
           .frame(height: 36)
           .background(.ultraThinMaterial, in: Capsule())
-          .overlay(Capsule().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
+          .overlay(Capsule().stroke(Theme.hairline, lineWidth: 0.5))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(customOrbName.map { "Open settings for \($0)" } ?? "Open Orb settings")
@@ -271,7 +271,7 @@ struct MainShellView: View {
       Theme.paperWarm.opacity(app.isScrolled ? 0.85 : 0)
         .background(.ultraThinMaterial.opacity(app.isScrolled ? 1 : 0))
         .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24, style: .continuous))
-        .shadow(color: Theme.ink.opacity(app.isScrolled ? 0.04 : 0), radius: 8, y: 4)
+        .shadow(color: app.isScrolled ? Theme.fillQuaternary : Color.clear, radius: 8, y: 4)
         .animation(.easeInOut(duration: 0.2), value: app.isScrolled)
         .ignoresSafeArea(edges: .top)
     }
@@ -288,7 +288,7 @@ struct MainShellView: View {
             .foregroundStyle(Theme.roseInk)
             .padding(.horizontal, 10)
             .frame(height: 30)
-            .background(Theme.ink.opacity(0.07), in: Capsule())
+            .background(Theme.fillTertiary, in: Capsule())
         }
         .buttonStyle(.plain)
       }
@@ -372,8 +372,8 @@ struct TabDock: View {
     }
     .padding(5)
     .background(.ultraThinMaterial, in: Capsule())
-    .overlay(Capsule().stroke(Theme.ink.opacity(0.12), lineWidth: 0.5))
-    .shadow(color: Theme.ink.opacity(0.18), radius: 16, y: 8)
+    .overlay(Capsule().stroke(Theme.hairline, lineWidth: 0.5))
+    .shadow(color: Theme.shadowCard, radius: 16, y: 8)
   }
 
   private func tabButton(_ value: HomeTab, glyph: TabGlyph) -> some View {
@@ -393,7 +393,7 @@ struct TabDock: View {
       .frame(width: 84, height: 56)
       .background {
         if on {
-          Capsule().fill(Theme.ink.opacity(0.07))
+          Capsule().fill(Theme.fillTertiary)
         }
       }
     }

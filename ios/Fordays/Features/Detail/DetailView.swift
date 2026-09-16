@@ -146,7 +146,7 @@ struct DetailView: View {
           RemoteOrDataImage(urlString: urlStr, contentMode: .fill)
             .frame(maxWidth: .infinity)
             .frame(height: 200)
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
         }
 
         if mode == .view, let description = item.description, !description.isEmpty {
@@ -191,7 +191,7 @@ struct DetailView: View {
           endPoint: .bottomTrailing
         )
         .frame(width: 46, height: 46)
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
       }
       VStack(alignment: .leading, spacing: 4) {
         Text(item.title)
@@ -230,7 +230,7 @@ struct DetailView: View {
             .font(.body.weight(.semibold))
             .foregroundStyle(Theme.ink)
             .frame(width: 40, height: 40)
-            .background(Theme.ink.opacity(0.06), in: Circle())
+            .background(Theme.fillTertiary, in: Circle())
         }
         .accessibilityLabel("Edit")
       }
@@ -380,7 +380,7 @@ struct DetailView: View {
                   .foregroundStyle(Theme.inkSoft)
                   .padding(.horizontal, 10)
                   .padding(.vertical, 6)
-                  .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                  .background(Theme.fillTertiary, in: RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
               }
               .buttonStyle(.plain)
             } else {
@@ -443,7 +443,7 @@ struct DetailView: View {
                       .foregroundStyle(Theme.inkSoft)
                       .padding(.horizontal, 10)
                       .padding(.vertical, 6)
-                      .background(Theme.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                      .background(Theme.fillTertiary, in: RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
                   }
                   .buttonStyle(.plain)
                 } else {
@@ -506,7 +506,7 @@ struct DetailView: View {
           .padding(.vertical, 10)
         }
       }
-      .background(Theme.ink.opacity(0.04), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+      .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
 
       // Sub-row
       HStack {

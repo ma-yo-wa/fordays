@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(0, 0, 0, 0.28);
+  background: var(--scrim);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -62,7 +62,7 @@
 .grip {
   width: 36px;
   height: 5px;
-  border-radius: 3px;
+  border-radius: var(--r-capsule);
   background: var(--fill-secondary);
 }
 
