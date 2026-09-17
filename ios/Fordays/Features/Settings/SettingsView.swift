@@ -179,7 +179,7 @@ struct SettingsView: View {
           .font(.fdFootnote)
           .foregroundStyle(Theme.inkSoft)
         if let firstActive = activeOrbs.first {
-          FDButton(title: Copy.Orbs.switchBackToActive, variant: .secondary, size: .sm) {
+          FDButton(Copy.Orbs.switchBackToActive, variant: .secondary, size: .sm) {
             switchOrb(firstActive.id)
           }
         }
@@ -624,10 +624,10 @@ struct SettingsView: View {
 
                 HStack(spacing: Theme.Spacing.s10) {
                   if isCurrent {
-                    FDButton(title: "Currently viewing", variant: .primary, size: .sm) {}
+                    FDButton("Currently viewing", variant: .primary, size: .sm) {}
                       .disabled(true)
                   } else {
-                    FDButton(title: "View", variant: .secondary, size: .sm) {
+                    FDButton("View", variant: .secondary, size: .sm) {
                       showPastOrbs = false
                       switchOrb(pOrb.id)
                     }
@@ -635,7 +635,7 @@ struct SettingsView: View {
 
                   Spacer()
 
-                  FDButton(title: Copy.Orbs.deletePermanent, variant: .ghost, size: .sm) {
+                  FDButton(Copy.Orbs.deletePermanent, variant: .ghost, size: .sm) {
                     confirm = .purge(pOrb.id)
                   }
                 }

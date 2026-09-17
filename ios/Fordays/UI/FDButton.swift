@@ -70,6 +70,26 @@ struct FDButton: View {
   }
 
   init(
+    title: String,
+    variant: FDButtonVariant = .primary,
+    size: FDButtonSize = .md,
+    fullWidth: Bool = true,
+    loading: Bool = false,
+    disabled: Bool = false,
+    action: @escaping () -> Void
+  ) {
+    self.init(
+      title,
+      variant: variant,
+      size: size,
+      fullWidth: fullWidth,
+      loading: loading,
+      disabled: disabled,
+      action: action
+    )
+  }
+
+  init(
     _ title: String,
     variant: FDButtonVariant = .primary,
     size: FDButtonSize = .md,
@@ -87,6 +107,26 @@ struct FDButton: View {
     self.action = {
       Task { await asyncAction() }
     }
+  }
+
+  init(
+    title: String,
+    variant: FDButtonVariant = .primary,
+    size: FDButtonSize = .md,
+    fullWidth: Bool = true,
+    loading: Bool = false,
+    disabled: Bool = false,
+    asyncAction: @escaping () async -> Void
+  ) {
+    self.init(
+      title,
+      variant: variant,
+      size: size,
+      fullWidth: fullWidth,
+      loading: loading,
+      disabled: disabled,
+      asyncAction: asyncAction
+    )
   }
 
   private var foregroundColor: Color {

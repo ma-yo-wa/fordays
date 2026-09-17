@@ -47,7 +47,7 @@ struct JoinOrbView: View {
         }
 
         if input.isEmpty {
-          FDButton(title: Copy.Invite.paste, variant: .ghost, size: .sm) {
+          FDButton(Copy.Invite.paste, variant: .ghost, size: .sm) {
             if let paste = UIPasteboard.general.string, !paste.isEmpty {
               input = paste
             }
