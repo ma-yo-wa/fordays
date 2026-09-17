@@ -164,6 +164,9 @@ final class AppModel: ObservableObject {
     let uid = session.user.id.uuidString.lowercased()
     let now = ISO8601DateFormatter().string(from: Date())
 
+    var seen = Set<String>()
+    let uniqueEvents = events.filter { seen.insert($0.sourceId).inserted }
+
     struct ExistingExt: Decodable {
       let id: String
       let source_id: String
@@ -177,7 +180,7 @@ final class AppModel: ObservableObject {
       .execute()
       .value
 
-    let keep = Set(events.map(\.sourceId))
+    let keep = Set(uniqueEvents.map(\.sourceId))
     let stale = existing.filter { !keep.contains($0.source_id) }.map(\.id)
     if !stale.isEmpty {
       for chunk in stale.chunked(into: 80) {
@@ -188,7 +191,7 @@ final class AppModel: ObservableObject {
       }
     }
 
-    if !events.isEmpty {
+    if !uniqueEvents.isEmpty {
       struct ExternalEventWrite: Encodable {
         let space_id: String
         let owner_id: String
@@ -203,7 +206,7 @@ final class AppModel: ObservableObject {
         let updated_at: String
       }
 
-      let rows = events.map { e in
+      let rows = uniqueEvents.map { e in
         ExternalEventWrite(
           space_id: space.id,
           owner_id: uid,

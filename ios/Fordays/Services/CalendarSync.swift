@@ -95,9 +95,9 @@ enum CalendarSync {
     let events = store.events(matching: predicate)
     let label = selectedName ?? calendars.first?.title ?? "Apple"
 
-    return events.compactMap { ev in
-      let sourceId = ev.eventIdentifier ?? ev.calendarItemIdentifier
-      guard !sourceId.isEmpty else { return nil }
+    let drafts: [ImportedEventDraft] = events.compactMap { ev in
+      let baseId = ev.eventIdentifier ?? ev.calendarItemIdentifier
+      guard !baseId.isEmpty else { return nil }
       let allDay = ev.isAllDay
       var endsAt = localStamp(ev.endDate, allDay: allDay)
       let startsAt = localStamp(ev.startDate, allDay: allDay)
@@ -106,6 +106,9 @@ enum CalendarSync {
           endsAt = localStamp(pulled, allDay: true)
         }
       }
+      // Recurring events share the same base event identifier in EventKit.
+      // Attach startsAt to ensure each recurring instance has a unique sourceId in Supabase.
+      let sourceId = (ev.hasRecurrenceRules || ev.isDetached) ? "\(baseId)_\(startsAt)" : "\(baseId)_\(startsAt)"
       let place = ev.location?.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
         .trimmingCharacters(in: .whitespacesAndNewlines)
       return ImportedEventDraft(
@@ -120,6 +123,15 @@ enum CalendarSync {
         calendar: ev.calendar?.title ?? label
       )
     }
+
+    var seen = Set<String>()
+    var unique: [ImportedEventDraft] = []
+    for draft in drafts {
+      if seen.insert(draft.sourceId).inserted {
+        unique.append(draft)
+      }
+    }
+    return unique
   }
 
   private static func localStamp(_ date: Date, allDay: Bool) -> String {

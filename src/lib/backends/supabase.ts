@@ -439,7 +439,14 @@ export class SupabaseBackend implements Backend {
       throw mapExternalError(readErr);
     }
 
-    const keep = new Set(events.map((e) => e.sourceId));
+    const seen = new Set<string>();
+    const uniqueEvents = events.filter((e) => {
+      if (seen.has(e.sourceId)) return false;
+      seen.add(e.sourceId);
+      return true;
+    });
+
+    const keep = new Set(uniqueEvents.map((e) => e.sourceId));
     const staleIds = (existing ?? [])
       .filter((r: { id: string; source_id: string }) => !keep.has(r.source_id))
       .map((r: { id: string }) => r.id);
@@ -455,8 +462,8 @@ export class SupabaseBackend implements Backend {
       }
     }
 
-    if (events.length) {
-      const rows = events.map((e) => ({
+    if (uniqueEvents.length) {
+      const rows = uniqueEvents.map((e) => ({
         space_id: this.spaceId,
         owner_id: this.uid,
         source_id: e.sourceId,
