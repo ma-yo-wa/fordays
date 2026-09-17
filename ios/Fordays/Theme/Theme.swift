@@ -136,6 +136,7 @@ enum Theme {
     static let tabSpring: Double = 0.35
     static let tabDamping: Double = 0.85
     static let sheetHandoff: Double = 0.15
+    static let sheetHandoffLong: Double = 0.25
     static let disabledOpacity: Double = 0.38
   }
 

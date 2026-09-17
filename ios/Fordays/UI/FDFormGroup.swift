@@ -37,6 +37,17 @@ struct FDFormRow<RightContent: View>: View {
   init(
     label: String,
     note: String? = nil,
+    @ViewBuilder rightContent: @escaping () -> RightContent
+  ) {
+    self.label = label
+    self.note = note
+    self.action = nil
+    self.rightContent = rightContent
+  }
+
+  init(
+    label: String,
+    note: String? = nil,
     action: (() -> Void)? = nil,
     @ViewBuilder rightContent: @escaping () -> RightContent = { EmptyView() }
   ) {

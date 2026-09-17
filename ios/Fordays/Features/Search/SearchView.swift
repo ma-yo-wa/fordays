@@ -32,7 +32,7 @@ struct SearchView: View {
       .sorted { ($0.dateTime ?? "") < ($1.dateTime ?? "") }
 
     let someday = matches.filter { !$0.isPlan }
-      .sorted { ($0.createdAt ?? "") > ($1.createdAt ?? "") }
+      .sorted { $0.createdAt > $1.createdAt }
 
     let memories = matches.filter { $0.isPlan && $0.isMemory() }
       .sorted { ($0.dateTime ?? "") > ($1.dateTime ?? "") }
@@ -52,7 +52,7 @@ struct SearchView: View {
       .prefix(4)
     let recentSomeday = app.activities
       .filter { !$0.isPlan }
-      .sorted { ($0.createdAt ?? "") > ($1.createdAt ?? "") }
+      .sorted { $0.createdAt > $1.createdAt }
       .prefix(4)
     return (Array(upcomingPlans), Array(recentSomeday))
   }
