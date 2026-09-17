@@ -801,7 +801,7 @@ struct SettingsView: View {
         ? "\(chosen.summary) — nothing in the next few months"
         : "\(chosen.summary) — \(n) events"
     } catch {
-      app.toast = error.localizedDescription
+      app.toast = app.userFriendlyCalendarError(error)
     }
     appleBusy = false
   }

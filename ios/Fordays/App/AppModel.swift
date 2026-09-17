@@ -136,8 +136,25 @@ final class AppModel: ObservableObject {
     do {
       try await replaceExternal(CalendarSync.fetchEvents(), source: "apple")
     } catch {
-      toast = error.localizedDescription
+      toast = userFriendlyCalendarError(error)
     }
+  }
+
+  func userFriendlyCalendarError(_ error: Error) -> String {
+    let msg = error.localizedDescription
+    if msg.localizedCaseInsensitiveContains("location") && (msg.localizedCaseInsensitiveContains("schema cache") || msg.localizedCaseInsensitiveContains("does not exist") || msg.localizedCaseInsensitiveContains("could not find")) {
+      return "Location column missing — run migrations/005_external_event_details.sql in Supabase"
+    }
+    if msg.localizedCaseInsensitiveContains("calendar_source") || msg.localizedCaseInsensitiveContains("external_events_source_uniq") {
+      return "Calendar sources not set up — run migrations/014_calendar_source.sql in Supabase"
+    }
+    if msg.localizedCaseInsensitiveContains("external_events") || msg.localizedCaseInsensitiveContains("schema cache") || msg.localizedCaseInsensitiveContains("does not exist") {
+      return "Calendar sharing not set up — run migrations/003_external_events.sql in Supabase"
+    }
+    if msg.localizedCaseInsensitiveContains("permission denied") || msg.localizedCaseInsensitiveContains("42501") {
+      return "No permission to save calendar overlays — re-run migrations/003_external_events.sql (includes grants)"
+    }
+    return msg
   }
 
   func replaceExternal(_ events: [ImportedEventDraft], source: String) async throws {
