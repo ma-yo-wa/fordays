@@ -18,6 +18,7 @@ struct TabIcon: View {
         BucketGlyph(on: on)
       case .calendar:
         CalendarGlyph(on: on)
+          .transaction { $0.animation = nil }
       case .memories:
         MemoriesGlyph(on: on)
       }
