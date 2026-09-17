@@ -34,7 +34,6 @@
 		E12A4B8C7D9E1F0A6C3D2110 /* JoinOrbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23B5C9D8E0F2A1B7D4E3211 /* JoinOrbView.swift */; };
 		E4F5A6B7C8D9E0F1A2B30406 /* CalendarSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F5A6B7C8D9E0F1A2B30405 /* CalendarSync.swift */; };
 		FCF823D1FA959CF01E14B81B /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06275BDB4475A336F2D09A3 /* SupabaseService.swift */; };
-		FFF2EC3B34025F324B2EFA3C /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E2CF128B98BD9C0207520F /* AppModel.swift */; };
 		FD0000000000000000000021 /* FDButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000011 /* FDButton.swift */; };
 		FD0000000000000000000022 /* FDCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000012 /* FDCard.swift */; };
 		FD0000000000000000000023 /* FDTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000013 /* FDTextField.swift */; };
@@ -42,6 +41,7 @@
 		FD0000000000000000000025 /* FDPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000015 /* FDPill.swift */; };
 		FD0000000000000000000026 /* FDActionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000016 /* FDActionRow.swift */; };
 		FD0000000000000000000027 /* FDFormGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0000000000000000000017 /* FDFormGroup.swift */; };
+		FFF2EC3B34025F324B2EFA3C /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E2CF128B98BD9C0207520F /* AppModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -171,20 +171,6 @@
 			path = Theme;
 			sourceTree = "<group>";
 		};
-		FD0000000000000000000001 /* UI */ = {
-			isa = PBXGroup;
-			children = (
-				FD0000000000000000000011 /* FDButton.swift */,
-				FD0000000000000000000012 /* FDCard.swift */,
-				FD0000000000000000000013 /* FDTextField.swift */,
-				FD0000000000000000000014 /* FDAvatar.swift */,
-				FD0000000000000000000015 /* FDPill.swift */,
-				FD0000000000000000000016 /* FDActionRow.swift */,
-				FD0000000000000000000017 /* FDFormGroup.swift */,
-			);
-			path = UI;
-			sourceTree = "<group>";
-		};
 		92B6367F625A8ED803431753 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
@@ -205,14 +191,6 @@
 				28D5CDFAD69D8A1B86C2C730 /* Settings */,
 			);
 			path = Features;
-			sourceTree = "<group>";
-		};
-		C92F1A0B2C3D4E5F6A7B8C96 /* Search */ = {
-			isa = PBXGroup;
-			children = (
-				C92F1A0B2C3D4E5F6A7B8C94 /* SearchView.swift */,
-			);
-			path = Search;
 			sourceTree = "<group>";
 		};
 		98D866978C97424A524991DD /* App */ = {
@@ -255,6 +233,28 @@
 				472B49EF886BAF4F0DE4D928 /* Assets.xcassets */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		C92F1A0B2C3D4E5F6A7B8C96 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				C92F1A0B2C3D4E5F6A7B8C94 /* SearchView.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
+		FD0000000000000000000001 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				FD0000000000000000000011 /* FDButton.swift */,
+				FD0000000000000000000012 /* FDCard.swift */,
+				FD0000000000000000000013 /* FDTextField.swift */,
+				FD0000000000000000000014 /* FDAvatar.swift */,
+				FD0000000000000000000015 /* FDPill.swift */,
+				FD0000000000000000000016 /* FDActionRow.swift */,
+				FD0000000000000000000017 /* FDFormGroup.swift */,
+			);
+			path = UI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -371,6 +371,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = FRATJ8753V;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Fordays/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -517,6 +518,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = FRATJ8753V;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Fordays/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

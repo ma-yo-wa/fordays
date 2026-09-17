@@ -96,7 +96,7 @@ struct LocationInputView: View {
 
                   if !item.subtitle.isEmpty {
                     Text(item.subtitle)
-                      .font(.fdCaption1)
+                      .font(.fdCaption)
                       .foregroundStyle(Theme.inkFaint)
                       .lineLimit(1)
                   }
