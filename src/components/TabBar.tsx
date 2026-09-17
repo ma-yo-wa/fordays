@@ -7,20 +7,17 @@ import s from './TabBar.module.css';
 /* Outlined + ink-soft when idle, solid + ink when selected. Labels stay
    Regular — color and fill say where you are, not extra weight. */
 function CalendarIcon({ on }: { on: boolean }) {
-  return (
-    <span className={s.calendarIcon}>
-      {on ? (
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-          <path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1.1A4 4 0 0 1 21 8v1H3V8a4 4 0 0 1 3-3.9V3a1 1 0 0 1 1-1Z" />
-          <path d="M3 11h18v6a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-6Z" fillOpacity="0.55" />
-        </svg>
-      ) : (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
-          <rect x="3" y="5" width="18" height="16" rx="4" />
-          <path d="M3 10h18M8 3v3M16 3v3" strokeLinecap="round" />
-        </svg>
-      )}
-    </span>
+  return on ? (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <rect x="3" y="5" width="18" height="16" rx="4" />
+      <path d="M8 2.5v3M16 2.5v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M4 10h16" stroke="#fffdfb" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+      <rect x="3" y="5" width="18" height="16" rx="4" />
+      <path d="M3 10h18M8 3v3M16 3v3" strokeLinecap="round" />
+    </svg>
   );
 }
 
@@ -74,7 +71,6 @@ export default function TabBar() {
     return (
       <button
         type="button"
-        data-tab={id}
         className={`${s.tab} ${on ? s.on : ''}`}
         onClick={() => setScreen(id)}
         aria-current={on ? 'page' : undefined}

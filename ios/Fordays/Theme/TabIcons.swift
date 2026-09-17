@@ -18,7 +18,6 @@ struct TabIcon: View {
         BucketGlyph(on: on)
       case .calendar:
         CalendarGlyph(on: on)
-          .transaction { $0.animation = nil }
       case .memories:
         MemoriesGlyph(on: on)
       }
@@ -101,16 +100,22 @@ private struct CalendarGlyph: View {
       }
 
       if on {
-        let top = Path(
-          roundedRect: CGRect(x: 3 * s, y: 2 * s, width: 18 * s, height: 8 * s),
-          cornerRadius: 3 * s
+        ctx.fill(r(3, 5, 18, 16, 4), with: .foreground)
+        ctx.stroke(
+          line(8, 2.5, 8, 5.5),
+          with: .foreground,
+          style: StrokeStyle(lineWidth: 1.8 * s, lineCap: .round)
         )
-        ctx.fill(top, with: .foreground)
-        let body = Path(
-          roundedRect: CGRect(x: 3 * s, y: 9 * s, width: 18 * s, height: 12 * s),
-          cornerRadius: 3 * s
+        ctx.stroke(
+          line(16, 2.5, 16, 5.5),
+          with: .foreground,
+          style: StrokeStyle(lineWidth: 1.8 * s, lineCap: .round)
         )
-        ctx.fill(body, with: .color(.primary.opacity(0.55)))
+        ctx.stroke(
+          line(4, 10, 20, 10),
+          with: .color(Theme.paperWarm),
+          style: StrokeStyle(lineWidth: 1.6 * s, lineCap: .round)
+        )
       } else {
         ctx.stroke(
           r(3, 5, 18, 16, 4),

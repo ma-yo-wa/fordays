@@ -50,17 +50,6 @@
   transition: color var(--duration-shelf) var(--ease-ios);
 }
 
-.tab[data-tab='calendar'],
-.tab[data-tab='calendar'] .icon,
-.tab[data-tab='calendar'] svg,
-.calendarIcon,
-.calendarIcon svg,
-.calendarIcon path,
-.calendarIcon rect {
-  transition: none !important;
-  animation: none !important;
-}
-
 .tab:active {
   opacity: var(--op-55);
 }
