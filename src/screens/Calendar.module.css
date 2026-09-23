@@ -233,10 +233,19 @@
   overflow: hidden;
 }
 
+.entryText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .title {
   font: var(--t-headline);
   letter-spacing: var(--tr-headline);
   display: block;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .range {
@@ -252,8 +261,19 @@
   letter-spacing: var(--tr-footnote);
   color: var(--ink-soft);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-1);
+}
+
+.locIcon {
+  flex-shrink: 0;
+}
+
+.locText {
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .note {
@@ -261,6 +281,9 @@
   font: var(--t-footnote);
   letter-spacing: var(--tr-footnote);
   color: var(--ink-soft);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .meta {

@@ -17,6 +17,7 @@ import {
 } from '../lib/date';
 import { Copy, formatCopy } from '../lib/copy';
 import type { CalendarSource } from '../lib/calendars';
+import Linkify from '../components/Linkify';
 import s from './Calendar.module.css';
 
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -277,9 +278,10 @@ export default function Calendar() {
                     const time = dtTime(a.date_time);
                     const timing = time ? prettyLower(time) : 'All day';
                     return (
-                      <button
+                      <div
                         key={a.id}
-                        type="button"
+                        role="button"
+                        tabIndex={0}
                         className={s.entry}
                         onClick={() => openDetail(a.id)}
                       >
@@ -290,15 +292,15 @@ export default function Calendar() {
                           size="thumb"
                           className={s.thumb}
                         />
-                        <span>
+                        <span className={s.entryText}>
                           <span className={s.title}>{a.title}</span>
                           <div className={s.range}>{timing}</div>
                           {a.location && (
                             <div className={s.loc}>
-                              <span>📍</span> {a.location}
+                              <span className={s.locIcon}>📍</span> <span className={s.locText}>{a.location}</span>
                             </div>
                           )}
-                          {a.description && <div className={s.note}>{a.description}</div>}
+                          {a.description && <div className={s.note}><Linkify text={a.description} /></div>}
                           <div className={s.meta}>
                             <span
                               className={s.avatar}
@@ -311,7 +313,7 @@ export default function Calendar() {
                             {partnerName(config, a.created_by)}
                           </div>
                         </span>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
@@ -327,9 +329,10 @@ export default function Calendar() {
                 const time = dtTime(a.date_time);
                 const timing = time ? `${when} · ${prettyLower(time)}` : `${when} · All day`;
                 return (
-                  <button
+                  <div
                     key={a.id}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     className={s.entry}
                     onClick={() => openDetail(a.id)}
                   >
@@ -340,15 +343,15 @@ export default function Calendar() {
                       size="thumb"
                       className={s.thumb}
                     />
-                    <span>
+                    <span className={s.entryText}>
                       <span className={s.title}>{a.title}</span>
                       <div className={s.range}>{timing}</div>
                       {a.location && (
                         <div className={s.loc}>
-                          <span>📍</span> {a.location}
+                          <span className={s.locIcon}>📍</span> <span className={s.locText}>{a.location}</span>
                         </div>
                       )}
-                      {a.description && <div className={s.note}>{a.description}</div>}
+                      {a.description && <div className={s.note}><Linkify text={a.description} /></div>}
                       <div className={s.meta}>
                         <span
                           className={s.avatar}
@@ -361,7 +364,7 @@ export default function Calendar() {
                         {partnerName(config, a.created_by)}
                       </div>
                     </span>
-                  </button>
+                  </div>
                 );
               }
 
@@ -375,9 +378,10 @@ export default function Calendar() {
               const when = relativeDay(dtDate(e.startsAt) ?? picked);
               const timing = `${when} · ${pillWhen(e, picked)}`;
               return (
-                <button
+                <div
                   key={e.id}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
                   className={s.entry}
                   onClick={() => openExternal(e.id)}
                 >
@@ -387,12 +391,12 @@ export default function Calendar() {
                     size="thumb"
                     className={s.thumb}
                   />
-                  <span>
+                  <span className={s.entryText}>
                     <span className={s.title}>{e.title || Copy.availability.busy}</span>
                     <div className={s.range}>{timing}</div>
                     {e.location && (
                       <div className={s.loc}>
-                        <span>📍</span> {e.location}
+                        <span className={s.locIcon}>📍</span> <span className={s.locText}>{e.location}</span>
                       </div>
                     )}
                     <div className={s.meta}>
@@ -403,7 +407,7 @@ export default function Calendar() {
                       <span className={s.sourceTag}>{sourceTag(e.source)}</span>
                     </div>
                   </span>
-                </button>
+                </div>
               );
             })}
           </div>

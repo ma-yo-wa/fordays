@@ -22,6 +22,7 @@ import {
   timeAgo,
   todayISO,
 } from '../lib/date';
+import Linkify from './Linkify';
 import s from './Detail.module.css';
 import f from './Form.module.css';
 
@@ -381,7 +382,7 @@ export default function Detail() {
       )}
 
       {mode === 'view' && item.description && (
-        <p className={`${s.notes} selectable`}>{item.description}</p>
+        <p className={`${s.notes} selectable`}><Linkify text={item.description} /></p>
       )}
 
       {mode === 'view' && pending && item.suggested_date_time && (
@@ -400,7 +401,7 @@ export default function Detail() {
             </span>
           </div>
           {item.suggested_note && (
-            <p className={s.suggestNote}>{item.suggested_note}</p>
+            <p className={s.suggestNote}><Linkify text={item.suggested_note} /></p>
           )}
           {!frozen && (
           <div className={s.suggestActions}>
