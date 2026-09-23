@@ -444,10 +444,9 @@ export class SupabaseBackend implements Backend {
     // Keep the last occurrence of any duplicate sourceId
     for (let i = events.length - 1; i >= 0; i--) {
       const e = events[i];
-      if (!seen.has(e.sourceId)) {
-        seen.add(e.sourceId);
-        uniqueEvents.push(e);
-      }
+      if (!e || seen.has(e.sourceId)) continue;
+      seen.add(e.sourceId);
+      uniqueEvents.push(e);
     }
     uniqueEvents.reverse();
 

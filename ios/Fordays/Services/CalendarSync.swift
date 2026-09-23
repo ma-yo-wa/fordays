@@ -133,7 +133,7 @@ enum CalendarSync {
         unique.append(draft)
       }
     }
-    return unique.reversed()
+    return Array(unique.reversed())
   }
 
   private static func localStamp(_ date: Date, allDay: Bool) -> String {
