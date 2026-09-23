@@ -347,6 +347,21 @@ final class AppModel: ObservableObject {
     authPhase = .signedOut
   }
 
+  func updateDisplayName(_ name: String) async throws {
+    let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !clean.isEmpty else { return }
+    let session = try await sb.auth.session
+    let uid = session.user.id.uuidString.lowercased()
+    struct ProfileNameUpdate: Encodable {
+      let display_name: String
+    }
+    try await sb.from("profiles")
+      .update(ProfileNameUpdate(display_name: clean))
+      .eq("id", value: uid)
+      .execute()
+    try await refreshSpaceAndData()
+  }
+
   func refreshActivities() async {
     guard let space else {
       activities = []

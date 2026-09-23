@@ -61,6 +61,7 @@ struct SettingsView: View {
   @State private var orbSetupWithPeople = false
   @State private var confirm: SettingsConfirm?
   @State private var orbDraft = ""
+  @State private var profileNameDraft = ""
   @State private var skipPersistOnDisappear = false
   @State private var spaceBusy = false
   @State private var appleOn = CalendarSync.isConnected
@@ -100,12 +101,12 @@ struct SettingsView: View {
             if space.frozen {
               frozenBanner
             }
-            profileSection(space: space)
             orbsSection
             thisOrbSection(space: space)
+            accountSection(space: space)
           }
 
-          calendarsSection
+          preferencesSection
 
           if app.authPhase == .signedIn {
             signOutSection
@@ -129,11 +130,18 @@ struct SettingsView: View {
       .onChange(of: app.space?.id) { _, _ in
         confirm = nil
         syncOrbDraft()
+        syncProfileDraft()
       }
-      .onAppear { syncOrbDraft() }
+      .onAppear {
+        syncOrbDraft()
+        syncProfileDraft()
+      }
       .onDisappear {
         if skipPersistOnDisappear { return }
-        Task { await persistOrbName() }
+        Task {
+          await persistOrbName()
+          await persistProfileName()
+        }
       }
     }
     .settingsConfirm($confirm) { item in
@@ -188,23 +196,6 @@ struct SettingsView: View {
     }
   }
 
-  private func profileSection(space: SpaceInfo) -> some View {
-    VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-      sectionLabel("Your profile")
-      HStack(spacing: Theme.Spacing.md) {
-        FDAvatar(name: space.myName, seat: 0, size: .md)
-        Text(space.myName)
-          .font(.fdBody)
-          .foregroundStyle(Theme.ink)
-      }
-      .frame(maxWidth: .infinity, alignment: .leading)
-      .padding(.horizontal, Theme.Spacing.row)
-      .padding(.vertical, Theme.Spacing.md)
-      .background(Theme.fillQuaternary)
-      .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
-    }
-  }
-
   private var orbsSection: some View {
     VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
       sectionLabel(Copy.Orbs.yourOrbs)
@@ -216,24 +207,6 @@ struct SettingsView: View {
       }
       .padding(Theme.Spacing.md)
       .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
-
-      if !pastOrbs.isEmpty {
-        FDFormGroup {
-          FDFormRow(
-            label: Copy.Orbs.pastOrbs,
-            note: Copy.Orbs.pastOrbsSub,
-            action: { showPastOrbs = true },
-            rightContent: {
-              HStack(spacing: Theme.Spacing.s6) {
-                FDPill(title: "\(pastOrbs.count)", variant: .neutral, size: .sm)
-                Image(systemName: "chevron.right")
-                  .font(.caption.weight(.semibold))
-                  .foregroundStyle(Theme.inkFaint)
-              }
-            }
-          )
-        }
-      }
     }
   }
 
@@ -658,11 +631,50 @@ struct SettingsView: View {
     }
   }
 
-  private var calendarsSection: some View {
+  private func accountSection(space: SpaceInfo) -> some View {
     VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-      sectionLabel("External calendars")
+      sectionLabel("Account & History")
       FDFormGroup {
-        FDFormRow(label: Copy.Availability.appleCalendar) {
+        HStack(spacing: Theme.Spacing.md) {
+          FDAvatar(name: profileNameDraft.isEmpty ? space.myName : profileNameDraft, seat: 0, size: .md)
+          TextField("Aline", text: $profileNameDraft)
+            .font(.fdBody)
+            .foregroundStyle(Theme.ink)
+            .submitLabel(.done)
+            .onSubmit {
+              Task { await persistProfileName() }
+            }
+        }
+        .padding(.horizontal, Theme.Spacing.row)
+        .padding(.vertical, Theme.Spacing.s10)
+        .frame(minHeight: Theme.TouchTarget.formRow)
+        .contentShape(Rectangle())
+
+        if !pastOrbs.isEmpty {
+          Divider().overlay(Theme.separator)
+          FDFormRow(
+            label: Copy.Orbs.pastOrbs,
+            note: Copy.Orbs.pastOrbsSub,
+            systemImage: "clock.arrow.circlepath",
+            action: { showPastOrbs = true }
+          ) {
+            HStack(spacing: Theme.Spacing.s6) {
+              FDPill(title: "\(pastOrbs.count)", variant: .neutral, size: .sm)
+              Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Theme.inkFaint)
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private var preferencesSection: some View {
+    VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+      sectionLabel("Preferences")
+      FDFormGroup {
+        FDFormRow(label: Copy.Availability.appleCalendar, systemImage: "calendar") {
           Toggle("Connect Apple Calendar", isOn: appleToggle)
             .labelsHidden()
             .tint(Theme.roseInk)
@@ -697,7 +709,7 @@ struct SettingsView: View {
 
         Divider().overlay(Theme.separator)
 
-        FDFormRow(label: Copy.Availability.outlookCalendar) {
+        FDFormRow(label: Copy.Availability.outlookCalendar, systemImage: "calendar") {
           Toggle("Connect Outlook Calendar", isOn: outlookToggle)
             .labelsHidden()
             .tint(Theme.roseInk)
@@ -887,9 +899,13 @@ struct SettingsView: View {
   private var signOutSection: some View {
     VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
       sectionLabel("Session")
-      FDButton("Sign out", variant: .destructive, disabled: spaceBusy) {
-        await app.signOut()
-        dismiss()
+      FDFormGroup {
+        FDFormRow(label: "Sign out", systemImage: "rectangle.portrait.and.arrow.right", destructive: true) {
+          Task {
+            await app.signOut()
+            dismiss()
+          }
+        }
       }
     }
   }
@@ -916,6 +932,11 @@ struct SettingsView: View {
     orbDraft = isDefaultOrbName(space.name) ? "" : space.name
   }
 
+  private func syncProfileDraft() {
+    guard let space = app.space else { return }
+    profileNameDraft = space.myName
+  }
+
   private func persistOrbName() async {
     guard let space = app.space, !space.frozen else { return }
     let current = isDefaultOrbName(space.name) ? "" : space.name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -926,6 +947,22 @@ struct SettingsView: View {
     }
     guard next != current else { return }
     await app.renameCurrentSpace(orbDraft)
+  }
+
+  private func persistProfileName() async {
+    guard let space = app.space else { return }
+    let current = space.myName
+    let next = profileNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+    if next.isEmpty {
+      profileNameDraft = current
+      return
+    }
+    guard next != current else { return }
+    do {
+      try await app.updateDisplayName(next)
+    } catch {
+      app.toast = "Couldn't save name"
+    }
   }
 
   private func switchOrb(_ id: String) {

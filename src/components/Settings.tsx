@@ -92,6 +92,45 @@ function orbFaceChips(space: SpaceInfo): { key: string; letter: string; them: bo
   ];
 }
 
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  );
+}
+
+function BellIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  );
+}
+
+function HistoryIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
+
+function SignOutIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  );
+}
+
 export default function Settings() {
   const open = useApp((st) => st.settingsOpen);
   const setOpen = useApp((st) => st.setSettingsOpen);
@@ -456,36 +495,6 @@ export default function Settings() {
             )}
 
             <section className={ui.section}>
-              <span className={ui.label}>Your profile</span>
-              <div className={ui.profileCard}>
-                <Avatar
-                  name={myName || space?.myName || 'Me'}
-                  seat={0}
-                  size="md"
-                />
-                <input
-                  className={ui.profileInput}
-                  value={myName}
-                  onChange={(e) => setMyName(e.target.value)}
-                  onBlur={() => {
-                    void (async () => {
-                      const clean = myName.trim();
-                      if (!clean || clean === space?.myName) return;
-                      try {
-                        await updateDisplayName(clean);
-                        updateConfig({ names: loadNames(config.me, clean, config.names) });
-                        await refreshSpace();
-                      } catch (err) {
-                        toast(err instanceof Error ? err.message : 'Couldn’t save name');
-                      }
-                    })();
-                  }}
-                  placeholder="Aline"
-                />
-              </div>
-            </section>
-
-            <section className={ui.section}>
               <span className={ui.label}>{Copy.orbs.yourOrbs}</span>
               <div className={ui.orbGrid}>
                 <button
@@ -537,22 +546,6 @@ export default function Settings() {
                   );
                 })}
               </div>
-              {pastOrbs.length > 0 && (
-                <div style={{ marginTop: 'var(--space-3)' }}>
-                  <FormGroup>
-                    <FormRow
-                      label={Copy.orbs.pastOrbs}
-                      note={Copy.orbs.pastOrbsSub}
-                      onClick={() => setSubview('pastOrbs')}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1-5)' }}>
-                        <Pill variant="neutral" size="sm">{pastOrbs.length}</Pill>
-                        <span style={{ color: 'var(--ink-faint)', fontSize: 'var(--fs-footnote)' }} aria-hidden>›</span>
-                      </div>
-                    </FormRow>
-                  </FormGroup>
-                </div>
-              )}
             </section>
 
             {space && (
@@ -693,180 +686,218 @@ export default function Settings() {
           </>
         )}
 
-        <FormGroup
-          header="External calendars"
-          footer={Copy.availability.settingsNoteWeb}
-        >
-          <FormRow label={Copy.availability.googleCalendar}>
-            <Switch
-              on={gcalOn}
-              disabled={calBusy}
-              label="Connect Google Calendar"
-              onChange={(on) => {
-                void (async () => {
-                  if (!on) {
-                    clearGoogleToken();
-                    saveGoogleCalendar(null);
-                    setCalPicker(null);
-                    setGcalName(null);
-                    setGcalOn(false);
-                    void syncExternal([], 'google')
-                      .then(() => toast('Google Calendar disconnected'))
-                      .catch((err) =>
-                        toast(err instanceof Error ? err.message : 'Couldn’t clear overlay'),
-                      );
-                    return;
-                  }
-                  setCalBusy(true);
-                  try {
-                    const token = await connectGoogle();
-                    const calendars = await listGoogleCalendars(token);
-                    if (!calendars.length) {
-                      setGcalOn(false);
-                      toast('No calendars found on that Google account');
-                      return;
+        <div style={{ marginTop: 'var(--space-4)' }}>
+          <FormGroup header="Account & History">
+            <div className={ui.profileRow}>
+              <Avatar
+                name={myName || space?.myName || 'Me'}
+                seat={0}
+                size="md"
+              />
+              <input
+                className={ui.profileInput}
+                value={myName}
+                onChange={(e) => setMyName(e.target.value)}
+                onBlur={() => {
+                  void (async () => {
+                    const clean = myName.trim();
+                    if (!clean || clean === space?.myName) return;
+                    try {
+                      await updateDisplayName(clean);
+                      updateConfig({ names: loadNames(config.me, clean, config.names) });
+                      await refreshSpace();
+                    } catch (err) {
+                      toast(err instanceof Error ? err.message : 'Couldn’t save name');
                     }
-                    setGcalOn(true);
-                    setCalPicker({ source: 'google', items: calendars });
-                    setSubview('calPicker');
-                  } catch (err) {
-                    setGcalOn(false);
-                    toast(err instanceof Error ? err.message : 'Google connect failed');
-                  } finally {
-                    setCalBusy(false);
-                  }
-                })();
-              }}
-            />
-          </FormRow>
-          {gcalOn && (
-            <FormRow
-              label={gcalName ?? 'Choose calendar'}
-              onClick={calBusy ? undefined : () => {
-                void (async () => {
-                  const token = googleToken();
-                  if (!token) {
-                    toast('Connect Google again');
-                    setGcalOn(false);
-                    return;
-                  }
-                  setCalBusy(true);
-                  try {
-                    setCalPicker({
-                      source: 'google',
-                      items: await listGoogleCalendars(token),
-                    });
-                    setSubview('calPicker');
-                  } catch (err) {
-                    toast(err instanceof Error ? err.message : 'Couldn’t list calendars');
-                  } finally {
-                    setCalBusy(false);
-                  }
-                })();
-              }}
-            >
-              <span className={f.hint}>{gcalName ? 'Change ›' : '›'}</span>
-            </FormRow>
-          )}
-          {gcalOn && gcalName && (
-            <FormRow
-              label="Refresh overlay"
-              onClick={calBusy ? undefined : () => void refreshGoogleOverlay()}
-            >
-              <span className={f.hint}>{calBusy ? '…' : '›'}</span>
-            </FormRow>
-          )}
-          <FormRow label={Copy.availability.outlookCalendar}>
-            <Switch
-              on={outlookOn}
-              disabled={calBusy}
-              label="Connect Outlook Calendar"
-              onChange={(on) => {
-                void (async () => {
-                  if (!on) {
-                    clearOutlookTokens();
-                    saveOutlookCalendar(null);
-                    setCalPicker(null);
-                    setOutlookName(null);
-                    setOutlookOn(false);
-                    void syncExternal([], 'outlook')
-                      .then(() => toast('Outlook Calendar disconnected'))
-                      .catch((err) =>
-                        toast(err instanceof Error ? err.message : 'Couldn’t clear overlay'),
-                      );
-                    return;
-                  }
-                  if (!msClientId()) {
-                    toast('Outlook isn’t available yet');
-                    return;
-                  }
-                  setCalBusy(true);
-                  try {
-                    const token = await connectOutlook();
-                    const calendars = await listOutlookCalendars(token);
-                    if (!calendars.length) {
-                      setOutlookOn(false);
-                      toast('No calendars found on that Outlook account');
-                      return;
-                    }
-                    setOutlookOn(true);
-                    setCalPicker({ source: 'outlook', items: calendars });
-                    setSubview('calPicker');
-                  } catch (err) {
-                    setOutlookOn(false);
-                    toast(err instanceof Error ? err.message : 'Outlook connect failed');
-                  } finally {
-                    setCalBusy(false);
-                  }
-                })();
-              }}
-            />
-          </FormRow>
-          {outlookOn && (
-            <FormRow
-              label={outlookName ?? 'Choose calendar'}
-              onClick={calBusy ? undefined : () => {
-                void (async () => {
-                  const token = await ensureOutlookToken();
-                  if (!token) {
-                    toast('Connect Outlook again');
-                    setOutlookOn(false);
-                    return;
-                  }
-                  setCalBusy(true);
-                  try {
-                    setCalPicker({
-                      source: 'outlook',
-                      items: await listOutlookCalendars(token),
-                    });
-                    setSubview('calPicker');
-                  } catch (err) {
-                    toast(err instanceof Error ? err.message : 'Couldn’t list calendars');
-                  } finally {
-                    setCalBusy(false);
-                  }
-                })();
-              }}
-            >
-              <span className={f.hint}>{outlookName ? 'Change ›' : '›'}</span>
-            </FormRow>
-          )}
-          {outlookOn && outlookName && (
-            <FormRow
-              label="Refresh overlay"
-              onClick={calBusy ? undefined : () => void refreshOutlookOverlay()}
-            >
-              <span className={f.hint}>{calBusy ? '…' : '›'}</span>
-            </FormRow>
-          )}
-        </FormGroup>
+                  })();
+                }}
+                placeholder="Aline"
+              />
+            </div>
+            {pastOrbs.length > 0 && (
+              <FormRow
+                label={Copy.orbs.pastOrbs}
+                note={Copy.orbs.pastOrbsSub}
+                icon={<HistoryIcon />}
+                onClick={() => setSubview('pastOrbs')}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1-5)' }}>
+                  <Pill variant="neutral" size="sm">{pastOrbs.length}</Pill>
+                  <span style={{ color: 'var(--ink-faint)', fontSize: 'var(--fs-footnote)' }} aria-hidden>›</span>
+                </div>
+              </FormRow>
+            )}
+          </FormGroup>
+        </div>
 
         <div style={{ marginTop: 'var(--space-4)' }}>
           <FormGroup
-            header="Notifications"
-            footer={bellBusy ? 'Working…' : pushCopy(bell, space?.partnerName)}
+            header="Preferences"
+            footer={Copy.availability.settingsNoteWeb}
           >
-            <FormRow label="Push">
+            <FormRow label={Copy.availability.googleCalendar} icon={<CalendarIcon />}>
+              <Switch
+                on={gcalOn}
+                disabled={calBusy}
+                label="Connect Google Calendar"
+                onChange={(on) => {
+                  void (async () => {
+                    if (!on) {
+                      clearGoogleToken();
+                      saveGoogleCalendar(null);
+                      setCalPicker(null);
+                      setGcalName(null);
+                      setGcalOn(false);
+                      void syncExternal([], 'google')
+                        .then(() => toast('Google Calendar disconnected'))
+                        .catch((err) =>
+                          toast(err instanceof Error ? err.message : 'Couldn’t clear overlay'),
+                        );
+                      return;
+                    }
+                    setCalBusy(true);
+                    try {
+                      const token = await connectGoogle();
+                      const calendars = await listGoogleCalendars(token);
+                      if (!calendars.length) {
+                        setGcalOn(false);
+                        toast('No calendars found on that Google account');
+                        return;
+                      }
+                      setGcalOn(true);
+                      setCalPicker({ source: 'google', items: calendars });
+                      setSubview('calPicker');
+                    } catch (err) {
+                      setGcalOn(false);
+                      toast(err instanceof Error ? err.message : 'Google connect failed');
+                    } finally {
+                      setCalBusy(false);
+                    }
+                  })();
+                }}
+              />
+            </FormRow>
+            {gcalOn && (
+              <FormRow
+                label={gcalName ?? 'Choose calendar'}
+                onClick={calBusy ? undefined : () => {
+                  void (async () => {
+                    const token = googleToken();
+                    if (!token) {
+                      toast('Connect Google again');
+                      setGcalOn(false);
+                      return;
+                    }
+                    setCalBusy(true);
+                    try {
+                      setCalPicker({
+                        source: 'google',
+                        items: await listGoogleCalendars(token),
+                      });
+                      setSubview('calPicker');
+                    } catch (err) {
+                      toast(err instanceof Error ? err.message : 'Couldn’t list calendars');
+                    } finally {
+                      setCalBusy(false);
+                    }
+                  })();
+                }}
+              >
+                <span className={f.hint}>{gcalName ? 'Change ›' : '›'}</span>
+              </FormRow>
+            )}
+            {gcalOn && gcalName && (
+              <FormRow
+                label="Refresh overlay"
+                onClick={calBusy ? undefined : () => void refreshGoogleOverlay()}
+              >
+                <span className={f.hint}>{calBusy ? '…' : '›'}</span>
+              </FormRow>
+            )}
+            <FormRow label={Copy.availability.outlookCalendar} icon={<CalendarIcon />}>
+              <Switch
+                on={outlookOn}
+                disabled={calBusy}
+                label="Connect Outlook Calendar"
+                onChange={(on) => {
+                  void (async () => {
+                    if (!on) {
+                      clearOutlookTokens();
+                      saveOutlookCalendar(null);
+                      setCalPicker(null);
+                      setOutlookName(null);
+                      setOutlookOn(false);
+                      void syncExternal([], 'outlook')
+                        .then(() => toast('Outlook Calendar disconnected'))
+                        .catch((err) =>
+                          toast(err instanceof Error ? err.message : 'Couldn’t clear overlay'),
+                        );
+                      return;
+                    }
+                    if (!msClientId()) {
+                      toast('Outlook isn’t available yet');
+                      return;
+                    }
+                    setCalBusy(true);
+                    try {
+                      const token = await connectOutlook();
+                      const calendars = await listOutlookCalendars(token);
+                      if (!calendars.length) {
+                        setOutlookOn(false);
+                        toast('No calendars found on that Outlook account');
+                        return;
+                      }
+                      setOutlookOn(true);
+                      setCalPicker({ source: 'outlook', items: calendars });
+                      setSubview('calPicker');
+                    } catch (err) {
+                      setOutlookOn(false);
+                      toast(err instanceof Error ? err.message : 'Outlook connect failed');
+                    } finally {
+                      setCalBusy(false);
+                    }
+                  })();
+                }}
+              />
+            </FormRow>
+            {outlookOn && (
+              <FormRow
+                label={outlookName ?? 'Choose calendar'}
+                onClick={calBusy ? undefined : () => {
+                  void (async () => {
+                    const token = await ensureOutlookToken();
+                    if (!token) {
+                      toast('Connect Outlook again');
+                      setOutlookOn(false);
+                      return;
+                    }
+                    setCalBusy(true);
+                    try {
+                      setCalPicker({
+                        source: 'outlook',
+                        items: await listOutlookCalendars(token),
+                      });
+                      setSubview('calPicker');
+                    } catch (err) {
+                      toast(err instanceof Error ? err.message : 'Couldn’t list calendars');
+                    } finally {
+                      setCalBusy(false);
+                    }
+                  })();
+                }}
+              >
+                <span className={f.hint}>{outlookName ? 'Change ›' : '›'}</span>
+              </FormRow>
+            )}
+            {outlookOn && outlookName && (
+              <FormRow
+                label="Refresh overlay"
+                onClick={calBusy ? undefined : () => void refreshOutlookOverlay()}
+              >
+                <span className={f.hint}>{calBusy ? '…' : '›'}</span>
+              </FormRow>
+            )}
+            <FormRow label="Push notifications" icon={<BellIcon />}>
               <Switch
                 on={bell === 'on'}
                 disabled={bellBusy || bell === 'ios-install' || bell === 'unsupported'}
@@ -887,17 +918,29 @@ export default function Settings() {
                 }}
               />
             </FormRow>
+            {bellBusy && (
+              <div style={{ padding: '0 var(--space-row) var(--space-row)', color: 'var(--ink-faint)', fontSize: 'var(--fs-footnote)' }}>
+                Working…
+              </div>
+            )}
+            {!bellBusy && bell !== 'on' && (
+              <div style={{ padding: '0 var(--space-row) var(--space-row)', color: 'var(--ink-faint)', fontSize: 'var(--fs-footnote)' }}>
+                {pushCopy(bell, space?.partnerName)}
+              </div>
+            )}
           </FormGroup>
         </div>
 
         {signedIn && (
-          <div className={f.row}>
-            <Button
-              variant="destructive"
-              onClick={() => void signOutUser()}
-            >
-              Sign out
-            </Button>
+          <div style={{ marginTop: 'var(--space-4)' }}>
+            <FormGroup header="Session">
+              <FormRow
+                label="Sign out"
+                icon={<SignOutIcon />}
+                destructive
+                onClick={() => void signOutUser()}
+              />
+            </FormGroup>
           </div>
         )}
       </>

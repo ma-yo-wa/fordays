@@ -31,16 +31,22 @@ struct FDFormGroup<Content: View>: View {
 struct FDFormRow<RightContent: View>: View {
   let label: String
   var note: String? = nil
+  var systemImage: String? = nil
+  var destructive: Bool = false
   var action: (() -> Void)? = nil
   @ViewBuilder var rightContent: () -> RightContent
 
   init(
     label: String,
     note: String? = nil,
+    systemImage: String? = nil,
+    destructive: Bool = false,
     @ViewBuilder rightContent: @escaping () -> RightContent
   ) {
     self.label = label
     self.note = note
+    self.systemImage = systemImage
+    self.destructive = destructive
     self.action = nil
     self.rightContent = rightContent
   }
@@ -48,21 +54,31 @@ struct FDFormRow<RightContent: View>: View {
   init(
     label: String,
     note: String? = nil,
+    systemImage: String? = nil,
+    destructive: Bool = false,
     action: (() -> Void)? = nil,
     @ViewBuilder rightContent: @escaping () -> RightContent = { EmptyView() }
   ) {
     self.label = label
     self.note = note
+    self.systemImage = systemImage
+    self.destructive = destructive
     self.action = action
     self.rightContent = rightContent
   }
 
   var body: some View {
-    let rowContent = HStack(spacing: Theme.Spacing.row) {
+    let rowContent = HStack(spacing: Theme.Spacing.md) {
+      if let systemImage {
+        Image(systemName: systemImage)
+          .font(.fdBody.weight(.semibold))
+          .foregroundStyle(destructive ? Theme.roseInk : Theme.inkSoft)
+          .frame(width: Theme.Spacing.lg)
+      }
       VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
         Text(label)
           .font(.fdBody)
-          .foregroundStyle(Theme.ink)
+          .foregroundStyle(destructive ? Theme.roseInk : Theme.ink)
         if let note {
           Text(note)
             .font(.fdFootnote)

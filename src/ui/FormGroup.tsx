@@ -26,6 +26,8 @@ export const FormGroup: React.FC<FormGroupProps> = ({
 export interface FormRowProps extends React.HTMLAttributes<HTMLDivElement> {
   label: React.ReactNode;
   note?: React.ReactNode;
+  icon?: React.ReactNode;
+  destructive?: boolean;
   children?: React.ReactNode;
   onClick?: () => void;
 }
@@ -33,6 +35,8 @@ export interface FormRowProps extends React.HTMLAttributes<HTMLDivElement> {
 export const FormRow: React.FC<FormRowProps> = ({
   label,
   note,
+  icon,
+  destructive = false,
   children,
   onClick,
   className = '',
@@ -49,8 +53,15 @@ export const FormRow: React.FC<FormRowProps> = ({
       {...rest}
     >
       <div className={s.left}>
-        <div className={s.label}>{label}</div>
-        {note && <div className={s.note}>{note}</div>}
+        {icon && (
+          <div className={`${s.icon} ${destructive ? s.iconDestructive : ''}`}>
+            {icon}
+          </div>
+        )}
+        <div className={s.textStack}>
+          <div className={`${s.label} ${destructive ? s.labelDestructive : ''}`}>{label}</div>
+          {note && <div className={s.note}>{note}</div>}
+        </div>
       </div>
       {children && <div className={s.right}>{children}</div>}
     </div>
