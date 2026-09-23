@@ -440,11 +440,16 @@ export class SupabaseBackend implements Backend {
     }
 
     const seen = new Set<string>();
-    const uniqueEvents = events.filter((e) => {
-      if (seen.has(e.sourceId)) return false;
-      seen.add(e.sourceId);
-      return true;
-    });
+    const uniqueEvents: ExternalEventInput[] = [];
+    // Keep the last occurrence of any duplicate sourceId
+    for (let i = events.length - 1; i >= 0; i--) {
+      const e = events[i];
+      if (!seen.has(e.sourceId)) {
+        seen.add(e.sourceId);
+        uniqueEvents.push(e);
+      }
+    }
+    uniqueEvents.reverse();
 
     const keep = new Set(uniqueEvents.map((e) => e.sourceId));
     const staleIds = (existing ?? [])

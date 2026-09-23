@@ -165,7 +165,14 @@ final class AppModel: ObservableObject {
     let now = ISO8601DateFormatter().string(from: Date())
 
     var seen = Set<String>()
-    let uniqueEvents = events.filter { seen.insert($0.sourceId).inserted }
+    var uniqueEvents: [ImportedEventDraft] = []
+    // Keep the last occurrence of any duplicate sourceId
+    for ev in events.reversed() {
+      if seen.insert(ev.sourceId).inserted {
+        uniqueEvents.append(ev)
+      }
+    }
+    uniqueEvents.reverse()
 
     struct ExistingExt: Decodable {
       let id: String

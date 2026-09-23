@@ -107,8 +107,8 @@ enum CalendarSync {
         }
       }
       // Recurring events share the same base event identifier in EventKit.
-      // Attach startsAt to ensure each recurring instance has a unique sourceId in Supabase.
-      let sourceId = (ev.hasRecurrenceRules || ev.isDetached) ? "\(baseId)_\(startsAt)" : "\(baseId)_\(startsAt)"
+      // We append startsAt to ensure all occurrences get a unique ID, but we should make sure we always include it.
+      let sourceId = "\(baseId)_\(startsAt)"
       let place = ev.location?.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
         .trimmingCharacters(in: .whitespacesAndNewlines)
       return ImportedEventDraft(
@@ -126,12 +126,14 @@ enum CalendarSync {
 
     var seen = Set<String>()
     var unique: [ImportedEventDraft] = []
-    for draft in drafts {
+    // Reverse the drafts so that if there are duplicates with the exact same ID + StartsAt,
+    // we keep the later/more recently updated one, though they should be identical.
+    for draft in drafts.reversed() {
       if seen.insert(draft.sourceId).inserted {
         unique.append(draft)
       }
     }
-    return unique
+    return unique.reversed()
   }
 
   private static func localStamp(_ date: Date, allDay: Bool) -> String {
