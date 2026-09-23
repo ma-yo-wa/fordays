@@ -49,11 +49,19 @@ private enum SettingsConfirm: Identifiable, Hashable {
   }
 }
 
+private enum SettingsDestination: Hashable {
+  case orbDetails
+  case account
+  case calendars
+  case notifications
+}
+
 struct SettingsView: View {
   private static let orbSize: CGFloat = Theme.TouchTarget.orbFace
 
   @EnvironmentObject private var app: AppModel
   @Environment(\.dismiss) private var dismiss
+  @State private var navPath = NavigationPath()
   @State private var showInvite = false
   @State private var showPastOrbs = false
   @State private var showAnotherOrb = false
@@ -94,7 +102,7 @@ struct SettingsView: View {
   }
 
   var body: some View {
-    NavigationStack {
+    NavigationStack(path: $navPath) {
       ScrollView {
         VStack(alignment: .leading, spacing: Theme.Spacing.s22) {
           if let space = app.space {
@@ -102,14 +110,47 @@ struct SettingsView: View {
               frozenBanner
             }
             orbsSection
-            thisOrbSection(space: space)
-            accountSection(space: space)
-          }
-
-          preferencesSection
-
-          if app.authPhase == .signedIn {
-            signOutSection
+            
+            FDFormGroup {
+              NavigationLink(value: SettingsDestination.orbDetails) {
+                FDFormRow(label: space.name ?? "This Orb", systemImage: "circle.circle", action: nil) {
+                  Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.inkFaint)
+                }
+              }
+              .buttonStyle(.plain)
+              
+              Divider().overlay(Theme.separator)
+              NavigationLink(value: SettingsDestination.account) {
+                FDFormRow(label: "Account", systemImage: "person.crop.circle", action: nil) {
+                  Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.inkFaint)
+                }
+              }
+              .buttonStyle(.plain)
+              
+              Divider().overlay(Theme.separator)
+              NavigationLink(value: SettingsDestination.calendars) {
+                FDFormRow(label: "External calendars", systemImage: "calendar", action: nil) {
+                  Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.inkFaint)
+                }
+              }
+              .buttonStyle(.plain)
+              
+              Divider().overlay(Theme.separator)
+              NavigationLink(value: SettingsDestination.notifications) {
+                FDFormRow(label: "Notifications", systemImage: "bell", action: nil) {
+                  Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.inkFaint)
+                }
+              }
+              .buttonStyle(.plain)
+            }
           }
         }
         .padding(.horizontal, Theme.Spacing.lg)
@@ -117,6 +158,18 @@ struct SettingsView: View {
       }
       .background(Theme.paper.ignoresSafeArea())
       .navigationTitle("Settings")
+      .navigationDestination(for: SettingsDestination.self) { dest in
+        switch dest {
+        case .orbDetails:
+          if let space = app.space { orbDetailsView(space: space) }
+        case .account:
+          if let space = app.space { accountView(space: space) }
+        case .calendars:
+          calendarsView
+        case .notifications:
+          notificationsView
+        }
+      }
       .toolbar {
         ToolbarItem(placement: .topBarTrailing) {
           Button("Done") {
@@ -381,182 +434,180 @@ struct SettingsView: View {
     .presentationDragIndicator(.visible)
   }
 
-  private func thisOrbSection(space: SpaceInfo) -> some View {
+  private func orbDetailsView(space: SpaceInfo) -> some View {
     let soloOrb = space.members.count <= 1
     let soloOrbs = activeOrbs.filter { $0.members.count <= 1 }
     let isPersonalOrb = soloOrb && (space.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "personal" || soloOrbs.count <= 1)
     let leaveLabel = soloOrb ? Copy.Orbs.deleteSoloAction : Copy.Orbs.leaveAction
     let placeholder = soloOrb ? Copy.Orbs.personalPlaceholder : Copy.Orbs.crewPlaceholder
-    return VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-      HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.s6) {
-        sectionLabel(Copy.Orbs.thisOrb)
-        if !space.peopleLabel.isEmpty {
-          Text(space.peopleLabel)
-            .font(.footnote.weight(.regular))
-            .foregroundStyle(Theme.ink)
-            .lineLimit(1)
-        }
-      }
-
-      FDTextField(
-        placeholder: placeholder,
-        text: $orbDraft
-      )
-      .disabled(space.frozen || spaceBusy)
-      .onSubmit { Task { await persistOrbName() } }
-
-      Text(Copy.Orbs.people)
-        .font(.footnote.weight(.semibold))
-        .foregroundStyle(Theme.inkFaint)
-        .padding(.top, Theme.Spacing.sm)
+    
+    return ScrollView {
       VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-        ScrollView(.horizontal, showsIndicators: false) {
-          HStack(spacing: Theme.Spacing.s10) {
-            if !space.frozen && !isPersonalOrb {
-              Button {
-                showInvite = true
-              } label: {
-                VStack(spacing: Theme.Spacing.xs) {
-                  ZStack {
-                    Circle()
-                      .fill(Theme.fillTertiary)
-                    Text("+")
-                      .font(.fdCallout.weight(.semibold))
-                      .foregroundStyle(Theme.ink)
-                      .offset(y: Theme.Spacing.opticalNudge)
-                  }
-                  .frame(width: Theme.TouchTarget.avatarMd, height: Theme.TouchTarget.avatarMd)
-                  .fixedSize()
+        FDTextField(
+          placeholder: placeholder,
+          text: $orbDraft
+        )
+        .disabled(space.frozen || spaceBusy)
+        .onSubmit { Task { await persistOrbName() } }
 
-                  Text("Invite")
-                    .font(.caption)
-                    .foregroundStyle(Theme.ink)
-                  Text("More")
-                    .font(.caption2)
-                    .foregroundStyle(Theme.inkFaint)
-                    .frame(height: Theme.Spacing.s13)
+        Text(Copy.Orbs.people)
+          .font(.footnote.weight(.semibold))
+          .foregroundStyle(Theme.inkFaint)
+          .padding(.top, Theme.Spacing.sm)
+        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+          ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: Theme.Spacing.s10) {
+              if !space.frozen && !isPersonalOrb {
+                Button {
+                  showInvite = true
+                } label: {
+                  VStack(spacing: Theme.Spacing.xs) {
+                    ZStack {
+                      Circle()
+                        .fill(Theme.fillTertiary)
+                      Text("+")
+                        .font(.fdCallout.weight(.semibold))
+                        .foregroundStyle(Theme.ink)
+                        .offset(y: Theme.Spacing.opticalNudge)
+                    }
+                    .frame(width: Theme.TouchTarget.avatarMd, height: Theme.TouchTarget.avatarMd)
+                    .fixedSize()
+
+                    Text("Invite")
+                      .font(.caption)
+                      .foregroundStyle(Theme.ink)
+                    Text("More")
+                      .font(.caption2)
+                      .foregroundStyle(Theme.inkFaint)
+                      .frame(height: Theme.Spacing.s13)
+                  }
+                  .frame(width: Theme.TouchTarget.orbTile)
                 }
-                .frame(width: Theme.TouchTarget.orbTile)
+                .buttonStyle(.plain)
+              }
+
+              ForEach(space.members, id: \.id) { member in
+                let removable = !space.frozen && space.myRole == "admin" && space.members.count >= 3 && member.id != space.myId
+                ZStack(alignment: .topLeading) {
+                  VStack(spacing: Theme.Spacing.xs) {
+                    face(member.name, mine: member.id == space.myId, size: Theme.TouchTarget.avatarMd)
+                    Text(member.name)
+                      .font(.caption)
+                      .foregroundStyle(Theme.ink)
+                      .lineLimit(1)
+                      .frame(width: Theme.TouchTarget.orbTile)
+                    Text(member.id == space.myId ? "You" : " ")
+                      .font(.caption2)
+                      .foregroundStyle(Theme.inkFaint)
+                      .frame(height: Theme.Spacing.s13)
+                  }
+                  .frame(width: Theme.TouchTarget.orbTile)
+
+                  if removable {
+                    Button {
+                      confirm = .remove(id: member.id, name: member.name)
+                    } label: {
+                      Image(systemName: "minus")
+                        .font(.fdMicro)
+                        .foregroundStyle(Theme.inkSoft)
+                        .frame(width: Theme.Spacing.base, height: Theme.Spacing.base)
+                        .background(Theme.paperWarm, in: Circle())
+                        .overlay(Circle().stroke(Theme.hairline, lineWidth: Theme.TouchTarget.hairlineWidth))
+                        .shadow(color: Theme.fillSecondary, radius: Theme.Shadow.badgeRadius, y: Theme.Shadow.badgeY)
+                    }
+                    .buttonStyle(.plain)
+                    .offset(x: Theme.Spacing.removeBadgeX, y: Theme.Spacing.removeBadgeY)
+                  }
+                }
+              }
+            }
+            .padding(.horizontal, Theme.Spacing.xxs)
+            .padding(.bottom, Theme.Spacing.xs)
+          }
+
+          if isPersonalOrb {
+            VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+              Rectangle()
+                .fill(Theme.hairline)
+                .frame(height: Theme.TouchTarget.hairlineWidth)
+
+              Text(Copy.Orbs.personalPrivateNote)
+                .font(.footnote)
+                .foregroundStyle(Theme.inkFaint)
+
+              Button {
+                orbSetupWithPeople = true
+                showOrbSetup = true
+              } label: {
+                Text("+ \(Copy.Orbs.startSharedOrb)")
+                  .font(.footnote.weight(.semibold))
+                  .foregroundStyle(Theme.ink)
+                  .padding(.horizontal, Theme.Spacing.md)
+                  .padding(.vertical, Theme.Spacing.s7)
+                  .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
               }
               .buttonStyle(.plain)
             }
-
-            ForEach(space.members, id: \.id) { member in
-              let removable = !space.frozen && space.myRole == "admin" && space.members.count >= 3 && member.id != space.myId
-              ZStack(alignment: .topLeading) {
-                VStack(spacing: Theme.Spacing.xs) {
-                  face(member.name, mine: member.id == space.myId, size: Theme.TouchTarget.avatarMd)
-                  Text(member.name)
-                    .font(.caption)
-                    .foregroundStyle(Theme.ink)
-                    .lineLimit(1)
-                    .frame(width: Theme.TouchTarget.orbTile)
-                  Text(member.id == space.myId ? "You" : " ")
-                    .font(.caption2)
-                    .foregroundStyle(Theme.inkFaint)
-                    .frame(height: Theme.Spacing.s13)
-                }
-                .frame(width: Theme.TouchTarget.orbTile)
-
-                if removable {
-                  Button {
-                    confirm = .remove(id: member.id, name: member.name)
-                  } label: {
-                    Image(systemName: "minus")
-                      .font(.fdMicro)
-                      .foregroundStyle(Theme.inkSoft)
-                      .frame(width: Theme.Spacing.base, height: Theme.Spacing.base)
-                      .background(Theme.paperWarm, in: Circle())
-                      .overlay(Circle().stroke(Theme.hairline, lineWidth: Theme.TouchTarget.hairlineWidth))
-                      .shadow(color: Theme.fillSecondary, radius: Theme.Shadow.badgeRadius, y: Theme.Shadow.badgeY)
-                  }
-                  .buttonStyle(.plain)
-                  .offset(x: Theme.Spacing.removeBadgeX, y: Theme.Spacing.removeBadgeY)
-                }
-              }
-            }
+            .padding(.top, Theme.Spacing.xs)
           }
-          .padding(.horizontal, Theme.Spacing.xxs)
-          .padding(.bottom, Theme.Spacing.xs)
         }
+        .padding(Theme.Spacing.s10)
+        .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
 
-        if isPersonalOrb {
-          VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-            Rectangle()
-              .fill(Theme.hairline)
-              .frame(height: Theme.TouchTarget.hairlineWidth)
-
-            Text(Copy.Orbs.personalPrivateNote)
-              .font(.footnote)
-              .foregroundStyle(Theme.inkFaint)
-
-            Button {
-              orbSetupWithPeople = true
-              showOrbSetup = true
-            } label: {
-              Text("+ \(Copy.Orbs.startSharedOrb)")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(Theme.ink)
-                .padding(.horizontal, Theme.Spacing.md)
-                .padding(.vertical, Theme.Spacing.s7)
-                .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
-            }
-            .buttonStyle(.plain)
-          }
-          .padding(.top, Theme.Spacing.xs)
-        }
-      }
-      .padding(Theme.Spacing.s10)
-      .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
-
-      Text(Copy.Orbs.descriptor)
-        .font(.footnote)
-        .foregroundStyle(Theme.inkFaint)
-        .padding(.horizontal, Theme.Spacing.xs)
-
-      if space.frozen {
-        Text(Copy.Orbs.frozenNotice)
+        Text(Copy.Orbs.descriptor)
           .font(.footnote)
           .foregroundStyle(Theme.inkFaint)
           .padding(.horizontal, Theme.Spacing.xs)
-      }
 
-      if !space.frozen, space.myRole == "admin", space.members.count >= 3 {
-        ForEach(space.members.filter { $0.id != space.myId }, id: \.id) { member in
-          Button("Remove \(member.name)") {
-            confirm = .remove(id: member.id, name: member.name)
+        if space.frozen {
+          Text(Copy.Orbs.frozenNotice)
+            .font(.footnote)
+            .foregroundStyle(Theme.inkFaint)
+            .padding(.horizontal, Theme.Spacing.xs)
+        }
+
+        if !space.frozen, space.myRole == "admin", space.members.count >= 3 {
+          ForEach(space.members.filter { $0.id != space.myId }, id: \.id) { member in
+            Button("Remove \(member.name)") {
+              confirm = .remove(id: member.id, name: member.name)
+            }
+            .buttonStyle(.plain)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(Theme.roseInk)
+            .padding(.horizontal, Theme.Spacing.xs)
+            .padding(.top, Theme.Spacing.xxs)
+            .disabled(spaceBusy)
+          }
+        }
+
+        if !space.frozen && !isPersonalOrb {
+          Button(leaveLabel) {
+            confirm = .leave(solo: soloOrb)
           }
           .buttonStyle(.plain)
           .font(.subheadline.weight(.semibold))
           .foregroundStyle(Theme.roseInk)
           .padding(.horizontal, Theme.Spacing.xs)
-          .padding(.top, Theme.Spacing.xxs)
+          .padding(.top, Theme.Spacing.xs)
+          .disabled(spaceBusy)
+        } else if space.frozen {
+          Button(Copy.Orbs.deletePermanent) {
+            confirm = .purge(space.id)
+          }
+          .buttonStyle(.plain)
+          .font(.subheadline.weight(.semibold))
+          .foregroundStyle(Theme.roseInk)
+          .padding(.horizontal, Theme.Spacing.xs)
+          .padding(.top, Theme.Spacing.xs)
           .disabled(spaceBusy)
         }
       }
-
-      if !space.frozen && !isPersonalOrb {
-        Button(leaveLabel) {
-          confirm = .leave(solo: soloOrb)
-        }
-        .buttonStyle(.plain)
-        .font(.subheadline.weight(.semibold))
-        .foregroundStyle(Theme.roseInk)
-        .padding(.horizontal, Theme.Spacing.xs)
-        .padding(.top, Theme.Spacing.xs)
-        .disabled(spaceBusy)
-      } else if space.frozen {
-        Button(Copy.Orbs.deletePermanent) {
-          confirm = .purge(space.id)
-        }
-        .buttonStyle(.plain)
-        .font(.subheadline.weight(.semibold))
-        .foregroundStyle(Theme.roseInk)
-        .padding(.horizontal, Theme.Spacing.xs)
-        .padding(.top, Theme.Spacing.xs)
-        .disabled(spaceBusy)
-      }
+      .padding(.horizontal, Theme.Spacing.lg)
+      .padding(.vertical, Theme.Spacing.base)
     }
+    .background(Theme.paper.ignoresSafeArea())
+    .navigationTitle(space.name ?? "This Orb")
+    .navigationBarTitleDisplayMode(.inline)
   }
 
   private var pastOrbsSheet: some View {
@@ -631,95 +682,133 @@ struct SettingsView: View {
     }
   }
 
-  private func accountSection(space: SpaceInfo) -> some View {
-    VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-      sectionLabel("Account & History")
-      FDFormGroup {
-        HStack(spacing: Theme.Spacing.md) {
-          FDAvatar(name: profileNameDraft.isEmpty ? space.myName : profileNameDraft, seat: 0, size: .md)
-          TextField("Aline", text: $profileNameDraft)
-            .font(.fdBody)
-            .foregroundStyle(Theme.ink)
-            .submitLabel(.done)
-            .onSubmit {
-              Task { await persistProfileName() }
+  private func accountView(space: SpaceInfo) -> some View {
+    ScrollView {
+      VStack(alignment: .leading, spacing: Theme.Spacing.s22) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+          sectionLabel("Profile")
+          FDFormGroup {
+            HStack(spacing: Theme.Spacing.md) {
+              FDAvatar(name: profileNameDraft.isEmpty ? space.myName : profileNameDraft, seat: 0, size: .md)
+              TextField("Aline", text: $profileNameDraft)
+                .font(.fdBody)
+                .foregroundStyle(Theme.ink)
+                .submitLabel(.done)
+                .onSubmit {
+                  Task { await persistProfileName() }
+                }
             }
-        }
-        .padding(.horizontal, Theme.Spacing.row)
-        .padding(.vertical, Theme.Spacing.s10)
-        .frame(minHeight: Theme.TouchTarget.formRow)
-        .contentShape(Rectangle())
+            .padding(.horizontal, Theme.Spacing.row)
+            .padding(.vertical, Theme.Spacing.s10)
+            .frame(minHeight: Theme.TouchTarget.formRow)
+            .contentShape(Rectangle())
 
-        if !pastOrbs.isEmpty {
-          Divider().overlay(Theme.separator)
-          FDFormRow(
-            label: Copy.Orbs.pastOrbs,
-            note: Copy.Orbs.pastOrbsSub,
-            systemImage: "clock.arrow.circlepath",
-            action: { showPastOrbs = true }
-          ) {
-            HStack(spacing: Theme.Spacing.s6) {
-              FDPill(title: "\(pastOrbs.count)", variant: .neutral, size: .sm)
-              Image(systemName: "chevron.right")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Theme.inkFaint)
+            if !pastOrbs.isEmpty {
+              Divider().overlay(Theme.separator)
+              FDFormRow(
+                label: Copy.Orbs.pastOrbs,
+                note: Copy.Orbs.pastOrbsSub,
+                systemImage: "clock.arrow.circlepath",
+                action: { showPastOrbs = true }
+              ) {
+                HStack(spacing: Theme.Spacing.s6) {
+                  FDPill(title: "\(pastOrbs.count)", variant: .neutral, size: .sm)
+                  Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.inkFaint)
+                }
+              }
             }
           }
+        }
+        
+        if app.authPhase == .signedIn {
+          signOutSection
         }
       }
+      .padding(.horizontal, Theme.Spacing.lg)
+      .padding(.vertical, Theme.Spacing.base)
     }
+    .background(Theme.paper.ignoresSafeArea())
+    .navigationTitle("Account")
+    .navigationBarTitleDisplayMode(.inline)
   }
 
-  private var preferencesSection: some View {
-    VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-      sectionLabel("Preferences")
-      FDFormGroup {
-        FDFormRow(label: Copy.Availability.appleCalendar, systemImage: "calendar") {
-          Toggle("Connect Apple Calendar", isOn: appleToggle)
-            .labelsHidden()
-            .tint(Theme.roseInk)
-            .disabled(appleBusy)
-        }
-
-        if appleOn {
-          Divider().overlay(Theme.separator)
-          FDFormRow(
-            label: appleName ?? "Choose calendar",
-            note: appleBusy ? "…" : nil,
-            action: { Task { await openApplePicker() } }
-          ) {
-            Text(appleName == nil ? "›" : "Change ›")
-              .font(.fdSubhead)
-              .foregroundStyle(Theme.inkFaint)
+  private var calendarsView: some View {
+    ScrollView {
+      VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+        FDFormGroup {
+          FDFormRow(label: Copy.Availability.appleCalendar, systemImage: "calendar") {
+            Toggle("Connect Apple Calendar", isOn: appleToggle)
+              .labelsHidden()
+              .tint(Theme.roseInk)
+              .disabled(appleBusy)
           }
 
-          if appleName != nil {
+          if appleOn {
             Divider().overlay(Theme.separator)
             FDFormRow(
-              label: "Refresh overlay",
+              label: appleName ?? "Choose calendar",
               note: appleBusy ? "…" : nil,
-              action: { Task { await importApple() } }
+              action: { Task { await openApplePicker() } }
             ) {
-              Text(appleBusy ? "…" : "›")
+              Text(appleName == nil ? "›" : "Change ›")
                 .font(.fdSubhead)
                 .foregroundStyle(Theme.inkFaint)
             }
+
+            if appleName != nil {
+              Divider().overlay(Theme.separator)
+              FDFormRow(
+                label: "Refresh overlay",
+                note: appleBusy ? "…" : nil,
+                action: { Task { await importApple() } }
+              ) {
+                Text(appleBusy ? "…" : "›")
+                  .font(.fdSubhead)
+                  .foregroundStyle(Theme.inkFaint)
+              }
+            }
+          }
+
+          Divider().overlay(Theme.separator)
+
+          FDFormRow(label: Copy.Availability.outlookCalendar, systemImage: "calendar") {
+            Toggle("Connect Outlook Calendar", isOn: outlookToggle)
+              .labelsHidden()
+              .tint(Theme.roseInk)
           }
         }
 
-        Divider().overlay(Theme.separator)
+        Text(Copy.Availability.settingsNoteIos)
+          .font(.fdFootnote)
+          .foregroundStyle(Theme.inkSoft)
+      }
+      .padding(.horizontal, Theme.Spacing.lg)
+      .padding(.vertical, Theme.Spacing.base)
+    }
+    .background(Theme.paper.ignoresSafeArea())
+    .navigationTitle("External calendars")
+    .navigationBarTitleDisplayMode(.inline)
+  }
 
-        FDFormRow(label: Copy.Availability.outlookCalendar, systemImage: "calendar") {
-          Toggle("Connect Outlook Calendar", isOn: outlookToggle)
-            .labelsHidden()
-            .tint(Theme.roseInk)
+  private var notificationsView: some View {
+    ScrollView {
+      VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+        FDFormGroup {
+          FDFormRow(label: "Push notifications", systemImage: "bell") {
+            Toggle("Notifications", isOn: .constant(false)) // Setup proper binding when push is implemented on iOS
+              .labelsHidden()
+              .tint(Theme.roseInk)
+          }
         }
       }
-
-      Text(Copy.Availability.settingsNoteIos)
-        .font(.fdFootnote)
-        .foregroundStyle(Theme.inkSoft)
+      .padding(.horizontal, Theme.Spacing.lg)
+      .padding(.vertical, Theme.Spacing.base)
     }
+    .background(Theme.paper.ignoresSafeArea())
+    .navigationTitle("Notifications")
+    .navigationBarTitleDisplayMode(.inline)
   }
 
   private var outlookToggle: Binding<Bool> {
