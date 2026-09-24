@@ -253,7 +253,9 @@ final class AppModel: ObservableObject {
   }
 
   func boot() async {
-    authPhase = .loading
+    // init hydrated the snapshot: keep that notebook on screen while the
+    // session is checked, like the PWA (PRODUCT.md → 0ms Cold Start).
+    if space == nil { authPhase = .loading }
     do {
       _ = try await sb.auth.session
       hydrateNotebook()
@@ -267,7 +269,16 @@ final class AppModel: ObservableObject {
         await navigateToActivity(activityId: actId, spaceId: spId)
       }
     } catch {
-      authPhase = space != nil ? .signedIn : .signedOut
+      // No session on this device: signed out, like the PWA. A session we
+      // just couldn't refresh (offline) keeps the snapshot notebook.
+      if sb.auth.currentSession == nil {
+        space = nil
+        spaces = []
+        activities = []
+        authPhase = .signedOut
+      } else {
+        authPhase = space != nil ? .signedIn : .signedOut
+      }
     }
   }
 
@@ -1027,6 +1038,12 @@ final class AppModel: ObservableObject {
 
   func switchToSpace(_ id: String) async {
     storedSpaceId = id
+    // Show the target Orb's snapshot at once, then refresh — like the PWA.
+    detailActivityId = nil
+    if !hydrateNotebook() {
+      activities = []
+      logs = []
+    }
     do {
       try await refreshSpaceAndData()
       if space?.frozen == true {
@@ -1188,15 +1205,17 @@ final class AppModel: ObservableObject {
     CoverImageStore.shared.prefetch(Array(someday) + Array(memories))
   }
 
-  private func hydrateNotebook() {
-    guard let id = storedSpaceId else { return }
+  @discardableResult
+  private func hydrateNotebook() -> Bool {
+    guard let id = storedSpaceId else { return false }
     guard let data = try? Data(contentsOf: notebookCacheURL(spaceId: id)),
           let snap = try? JSONDecoder().decode(NotebookSnap.self, from: data)
-    else { return }
+    else { return false }
     space = snap.space
     spaces = snap.spaces.isEmpty ? [snap.space] : snap.spaces
     activities = snap.activities
     prefetchFirstBoardCovers(snap.activities)
+    return true
   }
 
   private func persistNotebook() {

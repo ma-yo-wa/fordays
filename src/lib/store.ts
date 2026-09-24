@@ -323,6 +323,13 @@ export const useApp = create<AppState>()((set, get) => {
           }
           return;
         } catch (err) {
+          // Offline (or the server hiccuped) with a session and a snapshot:
+          // keep the notebook, like iOS. Only a missing session signs out.
+          if (readSnap() && (await currentSession().catch(() => null))) {
+            get().toast('Can’t reach the server — showing what’s on this device');
+            set({ authPhase: 'signedIn', ready: true });
+            return;
+          }
           get().toast(err instanceof Error ? err.message : 'Could not sign in');
           set({ authPhase: 'signedOut', ready: true, space: null });
           return;
