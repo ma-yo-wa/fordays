@@ -52,7 +52,8 @@ struct DetailView: View {
       title: item.title,
       notes: item.description,
       location: item.location,
-      cover: item.imageUrl
+      cover: item.imageUrl,
+      fromSomeday: true
     )
   }
 

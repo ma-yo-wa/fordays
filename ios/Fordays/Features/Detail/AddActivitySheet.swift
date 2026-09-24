@@ -102,14 +102,25 @@ struct ComposerView: View {
   @State private var multiDay: Bool
   @State private var saving = false
 
-  init(kind: ComposerKind, draft: PlanDraft? = nil, onClose: @escaping () -> Void) {
+  init(
+    kind: ComposerKind,
+    draft: PlanDraft? = nil,
+    focusedDay: String? = nil,
+    onClose: @escaping () -> Void
+  ) {
     self.kind = kind
     self.draft = draft
     self.onClose = onClose
     let today = DateLocal.todayISO()
-    let initialDate = (draft?.date != nil && (draft?.date ?? "") >= today)
-      ? (draft?.date ?? today)
-      : today
+    // A plan opens on the draft date if provided, or the day you were already looking at (never in the past).
+    let initialDate: String
+    if let d = draft?.date, d >= today {
+      initialDate = d
+    } else if let d = focusedDay, d >= today {
+      initialDate = d
+    } else {
+      initialDate = today
+    }
     _title = State(initialValue: draft?.title ?? "")
     _location = State(initialValue: draft?.location ?? "")
     _notes = State(initialValue: draft?.notes ?? "")
@@ -136,6 +147,8 @@ struct ComposerView: View {
           placeholder: isPlan ? "Dinner at Alma" : "Kayak the Grand River",
           text: $title
         )
+        .submitLabel(.done)
+        .onSubmit { Task { await save() } }
 
         fieldLabel("Location", hint: "— optional")
         LocationInputView(text: $location)
@@ -458,6 +471,7 @@ struct ComposerView: View {
   }
 
   private func save() async {
+    guard !saving else { return }
     let clean = title.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !clean.isEmpty else {
       app.toast = "Give it a name"
@@ -478,15 +492,20 @@ struct ComposerView: View {
       )
       : nil
     let coverTrim = cover.trimmingCharacters(in: .whitespacesAndNewlines)
-    await app.createActivity(
+    let saved = await app.createActivity(
       title: clean,
       description: notes.trimmingCharacters(in: .whitespacesAndNewlines),
       location: location.trimmingCharacters(in: .whitespacesAndNewlines),
       imageUrl: coverTrim,
       dateTime: when?.dateTime,
       endsAt: when?.endsAt,
-      fromSomeday: !isPlan // Explicitly specify fromSomeday based on Composer mode
+      fromSomeday: !isPlan || draft?.fromSomeday == true
     )
+    // A failed save keeps the sheet open so nothing typed is lost.
+    guard saved else {
+      saving = false
+      return
+    }
     if isPlan {
       app.pickedDay = date
       if let d = DateLocal.parseLocalDay(date) {

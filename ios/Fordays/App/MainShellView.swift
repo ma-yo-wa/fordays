@@ -120,7 +120,7 @@ struct MainShellView: View {
       )
     }
     .sheet(item: $composer) { kind in
-      ComposerView(kind: kind, draft: composerDraft, onClose: {
+      ComposerView(kind: kind, draft: composerDraft, focusedDay: app.pickedDay, onClose: {
         composer = nil
         composerDraft = nil
       })

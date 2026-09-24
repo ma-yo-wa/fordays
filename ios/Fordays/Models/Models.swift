@@ -312,6 +312,8 @@ struct PlanDraft: Hashable {
   var until: String?
   var end: String?
   var multiDay: Bool?
+  /// Do again carries the memory's Someday origin into the new copy.
+  var fromSomeday: Bool? = nil
 
   static func from(external: ExternalEvent) -> PlanDraft {
     let startDate = String(external.startsAt.prefix(10))

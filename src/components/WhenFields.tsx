@@ -80,12 +80,14 @@ function generateStartSlots(currentValue: string): TimeSlot[] {
   return slots;
 }
 
-function generateEndSlots(currentValue: string, baseFrom: string): TimeSlot[] {
+function generateEndSlots(currentValue: string, baseFrom: string, sameDay: boolean): TimeSlot[] {
   const startMins = parseMinutes(baseFrom || defaultAppleStartTime());
   const slots: TimeSlot[] = [];
 
   for (let step = 1; step <= 24; step++) {
     const dur = step * 30;
+    // Same day: past midnight would read as a backwards window.
+    if (sameDay && startMins + dur >= 1440) break;
     const endT = formatMinutes(startMins + dur);
     slots.push({
       time: endT,
@@ -194,6 +196,7 @@ function TimeDropdownList({
   value,
   baseFrom,
   isUntil = false,
+  sameDay = false,
   onChange,
   onReset,
   onClose,
@@ -201,6 +204,7 @@ function TimeDropdownList({
   value: string;
   baseFrom?: string;
   isUntil?: boolean;
+  sameDay?: boolean;
   onChange: (time: string) => void;
   onReset?: () => void;
   onClose: () => void;
@@ -218,7 +222,7 @@ function TimeDropdownList({
   const [minuteText, setMinuteText] = useState(pad(initM));
 
   const slots = isUntil
-    ? generateEndSlots(value, baseFrom || '')
+    ? generateEndSlots(value, baseFrom || '', sameDay)
     : generateStartSlots(value);
 
   useEffect(() => {
@@ -659,6 +663,7 @@ export default function WhenFields({
                     value={until || (from ? defaultAppleEndTime(from) : defaultAppleStartTime())}
                     baseFrom={from}
                     isUntil
+                    sameDay
                     onChange={onUntil}
                     onReset={() => {
                       onUntil('');

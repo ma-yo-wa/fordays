@@ -102,6 +102,8 @@ export interface PlanDraft {
   until?: string;
   endDate?: string | null;
   multiDay?: boolean;
+  /* Do again carries the memory's Someday origin into the new copy. */
+  fromSomeday?: boolean;
 }
 
 export function planDraftFromExternal(e: ExternalEvent): PlanDraft {

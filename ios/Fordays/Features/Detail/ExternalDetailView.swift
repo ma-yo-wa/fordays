@@ -61,7 +61,7 @@ struct ExternalDetailView: View {
   private func handleDoWith(_ targetSpace: SpaceInfo) async {
     let title = event.title ?? "Plan"
     dismiss()
-    await app.createActivity(
+    let saved = await app.createActivity(
       title: title,
       description: nil,
       location: event.location,
@@ -70,6 +70,7 @@ struct ExternalDetailView: View {
       endsAt: event.endsAt.isEmpty ? nil : event.endsAt,
       spaceId: targetSpace.id
     )
+    guard saved else { return }
     let name = targetOrbName(targetSpace)
     app.toast = "Moved to \(name)’s Plans"
   }

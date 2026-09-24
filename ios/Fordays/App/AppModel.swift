@@ -457,6 +457,7 @@ final class AppModel: ObservableObject {
     }
   }
 
+  @discardableResult
   func createActivity(
     title: String,
     description: String? = nil,
@@ -466,17 +467,17 @@ final class AppModel: ObservableObject {
     endsAt: String? = nil,
     spaceId: String? = nil,
     fromSomeday: Bool? = nil
-  ) async {
+  ) async -> Bool {
     let targetSpaceId = spaceId ?? space?.id
-    guard let targetSpaceId else { return }
+    guard let targetSpaceId else { return false }
     guard space?.canCompose == true || spaceId != nil else {
       toast = "This is a copy from when you left — it can’t take new plans"
-      return
+      return false
     }
     let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !trimmed.isEmpty else {
       toast = "Give it a name"
-      return
+      return false
     }
 
     let isPlan = dateTime != nil
@@ -514,8 +515,6 @@ final class AppModel: ObservableObject {
 
       activities.insert(optimisticActivity, at: 0)
       persistNotebook()
-      tab = isPlan ? .plans : .bucket
-      toast = isPlan ? "Made it a plan" : Copy.Ideas.added
     }
 
     do {
@@ -577,7 +576,14 @@ final class AppModel: ObservableObject {
         persistNotebook()
       }
       toast = error.localizedDescription
+      return false
     }
+    // Confirm only once the server has it, so a failure never flashes success first.
+    if isCurrentSpace {
+      tab = isPlan ? .plans : .bucket
+      toast = isPlan ? "Made it a plan" : Copy.Ideas.added
+    }
+    return true
   }
 
   func deleteActivity(_ id: String) async {

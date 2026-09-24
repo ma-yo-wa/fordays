@@ -62,6 +62,7 @@ export default function Composer() {
   }, [mode, picked, draft]);
 
   async function save() {
+    if (saving) return;
     const clean = title.trim();
     if (!clean) {
       toast('Give it a name');
@@ -83,6 +84,7 @@ export default function Composer() {
         image_url: cover,
         date_time: when?.date_time ?? null,
         ends_at: when?.ends_at ?? null,
+        from_someday: draft?.fromSomeday || undefined,
       });
       close();
       if (isPlan) {

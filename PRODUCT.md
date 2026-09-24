@@ -152,6 +152,7 @@ Default when-flow:
    - *Native iOS*: `CompactTimePicker` (`UIDatePicker` in `.compact` style with `minuteInterval = 5`), giving the authentic 5-minute rolling wheel and numeric keypad for exact minutes.
    - *PWA*: Notion / Apple Web style clean scrollable list in 30-minute steps. Starts shows times; Ends shows times paired with human relative durations (`30 minutes`, `1 hour`, `1.5 hours`...). Auto-scrolls directly to the selected time on open. Custom minute input available on demand without visual noise.
    - *Calendar Grid*: Clean month grid matching the Plans page (borderless rose chevrons, no gray button circles, solid rose circle for selected day with zero border rings).
+   - *Native iOS exception*: The Composer date uses the system compact `DatePicker` tinted rose, not a custom grid. It reads the same in use; don't rebuild it for parity.
 4. **From & Until** — soft blanks are valid. `Until` is revealed on demand via `+ Add end time` without forcing a duration.
 5. **Multi-day** — only after **Runs more than one day?** Then **Ends** row appears with end date and optional until time. Never block save because Until or Ends is empty.
 6. **Fast Plan Creation (Composer Progressive Disclosure)**:

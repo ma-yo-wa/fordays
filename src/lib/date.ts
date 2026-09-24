@@ -89,9 +89,11 @@ export function defaultAppleStartTime(now = new Date()): string {
   if (currentM < 30) {
     m = 30;
   } else {
-    h = (h + 1) % 24;
+    h = h + 1;
     m = 0;
   }
+  // Past 11:30 pm the next half-hour is tomorrow; stay on this day.
+  if (h > 23) return '23:59';
   return `${pad(h)}:${pad(m)}`;
 }
 
@@ -104,7 +106,9 @@ export function defaultAppleEndTime(fromTime: string): string {
   const [hStr, mStr] = fromTime.split(':');
   const h = parseInt(hStr || '0', 10);
   const m = parseInt(mStr || '0', 10);
-  const endH = (h + 1) % 24;
+  const endH = h + 1;
+  // An hour past 11 pm would wrap to the small hours and read as backwards.
+  if (endH > 23) return '23:59';
   return `${pad(endH)}:${pad(m)}`;
 }
 

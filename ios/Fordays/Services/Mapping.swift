@@ -271,9 +271,11 @@ enum DateLocal {
     if m < 30 {
       targetM = 30
     } else {
-      targetH = (targetH + 1) % 24
+      targetH += 1
       targetM = 0
     }
+    // Past 11:30 pm the next half-hour is tomorrow; stay on this day.
+    if targetH > 23 { return "23:59" }
     return String(format: "%02d:%02d", targetH, targetM)
   }
 
@@ -285,7 +287,9 @@ enum DateLocal {
     guard parts.count >= 2 else { return from }
     let h = parts[0]
     let m = parts[1]
-    let endH = (h + 1) % 24
+    let endH = h + 1
+    // An hour past 11 pm would wrap to the small hours and read as backwards.
+    if endH > 23 { return "23:59" }
     return String(format: "%02d:%02d", endH, m)
   }
 
