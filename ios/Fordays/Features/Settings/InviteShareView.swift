@@ -93,14 +93,14 @@ struct InviteShareView: View {
     busy = true
     let idea = first.trimmingCharacters(in: .whitespacesAndNewlines)
     if !idea.isEmpty {
-      await app.createActivity(title: idea)
+      // Saved once: clearing the field means a second Share doesn't add it again.
+      if await app.createActivity(title: idea) { first = "" }
     }
     busy = false
 
     let text = idea.isEmpty
-      ? "\(Copy.Invite.shareSolo(link: link)) (or code: \(code))"
+      ? "\(Copy.Invite.shareSolo(link: link)) (code: \(code))"
       : "\(Copy.Invite.shareWithIdea(idea: idea, link: link)) (code: \(code))"
-    UIPasteboard.general.string = text
 
     presentShare(text: text)
   }
@@ -112,7 +112,9 @@ struct InviteShareView: View {
       .first(where: { $0.activationState == .foregroundActive }),
       let root = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController
     else {
-      app.toast = "Invite link copied"
+      // No share sheet to show — copy instead, like the PWA's fallback.
+      UIPasteboard.general.string = text
+      app.toast = Copy.Invite.linkCopied
       dismiss()
       return
     }
@@ -129,11 +131,9 @@ struct InviteShareView: View {
       popover.permittedArrowDirections = []
     }
 
+    // Shared: done. Cancelled: stay on the invite so they can try again.
     vc.completionWithItemsHandler = { _, completed, _, _ in
-      if completed {
-        app.toast = "Invite shared"
-      }
-      dismiss()
+      if completed { dismiss() }
     }
 
     top.present(vc, animated: true)

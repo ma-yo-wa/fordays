@@ -895,10 +895,14 @@ final class AppModel: ObservableObject {
   }
 
   func handleOpenURL(_ url: URL) async {
-    if url.absoluteString.contains("auth/callback")
-      || url.absoluteString.contains("access_token")
-      || url.absoluteString.contains("code=")
-    {
+    // Invites first: an invite link may carry ?code=, which isn't a sign-in callback.
+    let isInvite = URLComponents(url: url, resolvingAgainstBaseURL: true)?
+      .queryItems?.contains(where: { $0.name == "invite" }) == true
+    if !isInvite && (
+      url.absoluteString.contains("auth/callback")
+        || url.absoluteString.contains("access_token")
+        || url.absoluteString.contains("code=")
+    ) {
       do {
         try await sb.auth.session(from: url)
         try await refreshSpaceAndData()
@@ -985,8 +989,8 @@ final class AppModel: ObservableObject {
       let otherMembers = sp.members.filter { m in
         m.id.compare(sp.myId, options: .caseInsensitive) != .orderedSame
       }
-      let isDefaultName = sp.name.caseInsensitiveCompare("Fordays") == .orderedSame || sp.name.caseInsensitiveCompare("Someday") == .orderedSame
-      return otherMembers.isEmpty && sp.partner2Id == nil && isDefaultName
+      // Blank, "Fordays" or "Someday" — untitled, like the PWA's isDefaultSpaceName.
+      return otherMembers.isEmpty && sp.partner2Id == nil && sp.peopleLabel.isEmpty
     }
     if let genericSolo {
       let mine = SpaceInfo.soloTitle(from: genericSolo.myName)
@@ -1000,8 +1004,7 @@ final class AppModel: ObservableObject {
     try await refreshSpaceAndData()
     authPhase = .signedIn
     clearFirstOrbSetupPending()
-    let name = space?.peopleLabel.isEmpty == false ? space!.peopleLabel : "this Orb"
-    toast = Copy.Invite.joinedSuccess(name)
+    toast = Copy.Invite.joinedSuccess(space?.peopleLabel ?? "")
   }
 
   func switchToSpace(_ id: String) async {

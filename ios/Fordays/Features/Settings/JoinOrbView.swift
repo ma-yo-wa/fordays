@@ -141,7 +141,8 @@ struct JoinOrbView: View {
         guard !Task.isCancelled else { return }
         isLookingUp = false
         peek = nil
-        errorText = Copy.Invite.invalidCode
+        // The real reason, like the PWA — "no connection" is not "invalid code".
+        errorText = FordaysError.fromAuth(error).errorDescription ?? Copy.Invite.invalidCode
       }
     }
   }
@@ -155,7 +156,7 @@ struct JoinOrbView: View {
       dismiss()
     } catch {
       isBusy = false
-      errorText = error.localizedDescription
+      errorText = FordaysError.fromAuth(error).errorDescription ?? "Couldn’t join"
     }
   }
 }

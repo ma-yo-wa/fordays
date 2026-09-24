@@ -25,6 +25,8 @@ targets:
         SUPPORTS_XR_DESIGNED_FOR_IPAD: false
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: false
+        CODE_SIGN_ENTITLEMENTS: Fordays/Fordays.entitlements
+        DEVELOPMENT_TEAM: FRATJ8753V
     dependencies:
       - package: Supabase
         product: Supabase

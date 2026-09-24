@@ -115,7 +115,7 @@ enum Copy {
     static let lookingUp = "Looking up Orb…"
     static let invalidCode = "No open Orb found for that code or link."
     static func joinedSuccess(_ orb: String) -> String {
-      "Joined \(orb)"
+      orb.isEmpty ? "Joined this Orb" : "Joined “\(orb)”"
     }
     static let orbCodeLabel = "Orb code"
     static let copyCode = "Copy code"

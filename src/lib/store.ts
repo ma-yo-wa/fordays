@@ -764,7 +764,7 @@ export const useApp = create<AppState>()((set, get) => {
       await get().switchToSpace(spaceId);
       const space = get().space;
       const name = space ? spaceOrbName(space) : '';
-      get().toast(formatCopy(Copy.invite.joinedSuccess, { orb: name || 'this Orb' }));
+      get().toast(name ? formatCopy(Copy.invite.joinedSuccess, { orb: name }) : Copy.invite.joinedUnnamed);
       return space!;
     },
 

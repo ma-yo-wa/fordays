@@ -44,6 +44,8 @@ export default function InviteShare({ open, code, onClose }: Props) {
           date_time: null,
           ends_at: null,
         });
+        // Saved once: clearing the field means a second Share doesn't add it again.
+        setFirst('');
       }
 
       const text = idea

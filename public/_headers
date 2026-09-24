@@ -8,3 +8,7 @@
 
 /sw.js
   Cache-Control: no-store
+
+# iOS universal links: Apple fetches this without an extension and wants JSON.
+/.well-known/apple-app-site-association
+  Content-Type: application/json

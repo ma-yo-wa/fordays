@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["FRATJ8753V.app.fordays.ios"],
+        "components": [
+          { "?": { "invite": "*" }, "comment": "Invite links open the app and join the Orb" }
+        ]
+      }
+    ]
+  }
+}
