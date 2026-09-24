@@ -7,6 +7,7 @@ struct PlansView: View {
   var onMakePlanFromExternal: ((ExternalEvent) -> Void)? = nil
   var onInvite: () -> Void = {}
 
+  @State private var scrollRest: CGFloat?
   private var calendar: Calendar { Calendar.current }
 
   private var plans: [Activity] {
@@ -283,7 +284,8 @@ struct PlansView: View {
     }
     .coordinateSpace(name: "homeScroll")
     .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
-      let scrolled = minY < -6
+      if scrollRest == nil { scrollRest = minY }
+      let scrolled = minY < (scrollRest ?? minY) - Theme.Spacing.s6
       if app.isScrolled != scrolled {
         withAnimation(.easeInOut(duration: Theme.Motion.fade)) {
           app.isScrolled = scrolled

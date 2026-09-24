@@ -268,12 +268,21 @@ struct MainShellView: View {
     .padding(.top, Theme.Spacing.s6)
     .padding(.bottom, Theme.Spacing.row)
     .background {
-      Theme.paperWarm.opacity(app.isScrolled ? 0.85 : 0)
-        .background(.ultraThinMaterial.opacity(app.isScrolled ? 1 : 0))
-        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: Theme.Spacing.xl, bottomTrailingRadius: Theme.Spacing.xl, style: .continuous))
-        .shadow(color: app.isScrolled ? Theme.fillQuaternary : Color.clear, radius: Theme.Spacing.sm, y: Theme.Spacing.xs)
-        .animation(.easeInOut(duration: Theme.Motion.shelf), value: app.isScrolled)
-        .ignoresSafeArea(edges: .top)
+      ZStack {
+        Theme.paperWarm.opacity(app.isScrolled ? 1 : 0)
+          .background(.ultraThinMaterial.opacity(app.isScrolled ? 1 : 0))
+          .ignoresSafeArea(edges: .top)
+        UnevenRoundedRectangle(bottomLeadingRadius: Theme.Spacing.xl, bottomTrailingRadius: Theme.Spacing.xl, style: .continuous)
+          .fill(Theme.paperWarm.opacity(app.isScrolled ? 1 : 0))
+          .background {
+            UnevenRoundedRectangle(bottomLeadingRadius: Theme.Spacing.xl, bottomTrailingRadius: Theme.Spacing.xl, style: .continuous)
+              .fill(.ultraThinMaterial)
+              .opacity(app.isScrolled ? 1 : 0)
+          }
+          .shadow(color: app.isScrolled ? Theme.fillQuaternary : Color.clear, radius: Theme.Spacing.sm, y: Theme.Spacing.xs)
+          .ignoresSafeArea(edges: .top)
+      }
+      .animation(.easeInOut(duration: Theme.Motion.shelf), value: app.isScrolled)
     }
   }
 

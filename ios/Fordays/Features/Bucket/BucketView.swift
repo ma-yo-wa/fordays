@@ -2,6 +2,7 @@ import SwiftUI
 
 struct BucketView: View {
   @EnvironmentObject private var app: AppModel
+  @State private var scrollRest: CGFloat?
   var onSelect: (Activity) -> Void
   var onInvite: () -> Void = {}
 
@@ -35,7 +36,8 @@ struct BucketView: View {
     }
     .coordinateSpace(name: "homeScroll")
     .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
-      let scrolled = minY < -Theme.Spacing.s6
+      if scrollRest == nil { scrollRest = minY }
+      let scrolled = minY < (scrollRest ?? minY) - Theme.Spacing.s6
       if app.isScrolled != scrolled {
         withAnimation(.easeInOut(duration: Theme.Motion.fade)) {
           app.isScrolled = scrolled
@@ -63,6 +65,7 @@ struct BucketView: View {
 
 struct MemoriesView: View {
   @EnvironmentObject private var app: AppModel
+  @State private var scrollRest: CGFloat?
   var onSelect: (Activity) -> Void
 
   private var today: String { DateLocal.todayISO() }
@@ -128,7 +131,8 @@ struct MemoriesView: View {
     }
     .coordinateSpace(name: "homeScroll")
     .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
-      let scrolled = minY < -Theme.Spacing.s6
+      if scrollRest == nil { scrollRest = minY }
+      let scrolled = minY < (scrollRest ?? minY) - Theme.Spacing.s6
       if app.isScrolled != scrolled {
         withAnimation(.easeInOut(duration: Theme.Motion.fade)) {
           app.isScrolled = scrolled
