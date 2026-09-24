@@ -167,7 +167,7 @@ struct CoverPickerView: View {
   @State private var query = ""
   @State private var selectedPhotoItem: PhotosPickerItem? = nil
   @State private var isProcessingPhoto = false
-  @State private var showCustomUrl = false
+  @State private var photoError: String?
 
   private let gridColumns = [
     GridItem(.flexible(), spacing: Theme.Spacing.s10),
@@ -191,8 +191,6 @@ struct CoverPickerView: View {
       case .photos:
         photosSection
       }
-
-      customUrlSection
     }
     .onAppear {
       query = ""
@@ -327,7 +325,7 @@ struct CoverPickerView: View {
             Image(systemName: "photo.on.rectangle")
               .font(.subheadline)
           }
-          Text(isProcessingPhoto ? "Processing photo…" : "Choose from photo library")
+          Text(isProcessingPhoto ? "Processing photo…" : "Choose from library")
             .font(.subheadline.weight(.medium))
         }
         .foregroundStyle(Theme.ink)
@@ -345,72 +343,52 @@ struct CoverPickerView: View {
         }
       }
 
-      Text("Pick any photo from your camera roll. It syncs directly to your shared Orb.")
+      Text("Picks a photo from this phone. It’s saved with this.")
         .font(.caption)
         .foregroundStyle(Theme.inkFaint)
+
+      if let photoError {
+        Text(photoError)
+          .font(.caption)
+          .foregroundStyle(Theme.roseInk)
+      }
     }
     .padding(.top, Theme.Spacing.xs)
   }
 
   private func processPickedPhoto(_ item: PhotosPickerItem) async {
     isProcessingPhoto = true
+    photoError = nil
     defer { isProcessingPhoto = false }
-    do {
-      if let data = try await item.loadTransferable(type: Data.self) {
-        if let compressedDataUrl = compressPhoto(data: data) {
-          await MainActor.run {
-            withAnimation(.spring(response: Theme.Motion.spring)) {
-              cover = compressedDataUrl
-            }
-          }
-        }
-      }
-    } catch {
-      // Photo loading error - ignore silently
+    guard let data = try? await item.loadTransferable(type: Data.self),
+          let compressedDataUrl = compressPhoto(data: data)
+    else {
+      photoError = "Couldn’t use that photo"
+      return
+    }
+    withAnimation(.spring(response: Theme.Motion.spring)) {
+      cover = compressedDataUrl
     }
   }
 
-  private func compressPhoto(data: Data, maxDimension: CGFloat = 1200, compressionQuality: CGFloat = 0.72) -> String? {
+  /// Same size and quality as the PWA's `fileToCoverDataUrl` — 960px long side, JPEG 0.82.
+  private func compressPhoto(data: Data, maxDimension: CGFloat = 960, compressionQuality: CGFloat = 0.82) -> String? {
     guard let image = UIImage(data: data) else { return nil }
     let size = image.size
     let ratio = min(maxDimension / max(size.width, size.height), 1.0)
     let targetSize = CGSize(width: size.width * ratio, height: size.height * ratio)
 
-    let renderer = UIGraphicsImageRenderer(size: targetSize)
+    // Scale 1: target size is pixels. The default is the screen scale, which
+    // would make a "960" photo 2880px on a 3× phone.
+    let format = UIGraphicsImageRendererFormat()
+    format.scale = 1
+    let renderer = UIGraphicsImageRenderer(size: targetSize, format: format)
     let resized = renderer.image { _ in
       image.draw(in: CGRect(origin: .zero, size: targetSize))
     }
 
     guard let compressedData = resized.jpegData(compressionQuality: compressionQuality) else { return nil }
     return "data:image/jpeg;base64," + compressedData.base64EncodedString()
-  }
-
-  // MARK: - Custom URL
-
-  private var customUrlSection: some View {
-    VStack(alignment: .leading, spacing: Theme.Spacing.s6) {
-      Button {
-        withAnimation(.easeInOut(duration: Theme.Motion.shelf)) {
-          showCustomUrl.toggle()
-        }
-      } label: {
-        HStack(spacing: Theme.Spacing.xs) {
-          Text(showCustomUrl ? "Hide link input" : "Or paste image link")
-          Image(systemName: showCustomUrl ? "chevron.up" : "chevron.down")
-            .font(.caption2)
-        }
-        .font(.caption)
-        .foregroundStyle(Theme.inkSoft)
-      }
-      .buttonStyle(.plain)
-
-      if showCustomUrl {
-        FDTextField(placeholder: "https://…", text: $cover)
-          .textInputAutocapitalization(.never)
-          .keyboardType(.URL)
-      }
-    }
-    .padding(.top, Theme.Spacing.xs)
   }
 
   // MARK: - Preset Catalogues
