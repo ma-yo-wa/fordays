@@ -11,11 +11,93 @@ enum CoverTab: String, CaseIterable, Identifiable {
   var id: String { rawValue }
 }
 
-struct CoverItem: Identifiable, Hashable {
+struct CoverItem: Identifiable, Hashable, Decodable {
   let id: String
   let title: String
   let previewUrl: String
   let fullUrl: String
+  /// Unsplash's download_location — pinged when a still is picked.
+  var download: String = ""
+
+  enum CodingKeys: String, CodingKey {
+    case id, title, preview, full, download
+  }
+
+  init(from decoder: Decoder) throws {
+    let c = try decoder.container(keyedBy: CodingKeys.self)
+    id = try c.decode(String.self, forKey: .id)
+    title = (try? c.decode(String.self, forKey: .title)) ?? ""
+    previewUrl = try c.decode(String.self, forKey: .preview)
+    fullUrl = try c.decode(String.self, forKey: .full)
+    download = (try? c.decode(String.self, forKey: .download)) ?? ""
+  }
+}
+
+/// Live GIFs and stills through the `giphy` / `unsplash` Edge Functions,
+/// so no API key ships in the app (PRODUCT.md → Covers).
+enum CoverSearch {
+  enum Failure: Error { case rate, notConfigured, http, network }
+
+  private static let limit = 15
+
+  static func gifs(_ query: String) async throws -> [CoverItem] {
+    try await fetch("giphy", action: query.isEmpty ? "trending" : "search", query: query)
+  }
+
+  static func stills(_ query: String) async throws -> [CoverItem] {
+    try await fetch("unsplash", action: query.isEmpty ? "list" : "search", query: query)
+  }
+
+  /// Unsplash asks for this ping when a photo is actually chosen.
+  static func trackDownload(_ download: String) {
+    guard !download.isEmpty, var url = functionURL("unsplash") else { return }
+    url.append(queryItems: [
+      URLQueryItem(name: "action", value: "track"),
+      URLQueryItem(name: "url", value: download),
+    ])
+    Task { _ = try? await URLSession.shared.data(for: request(url)) }
+  }
+
+  private static func fetch(_ function: String, action: String, query: String) async throws -> [CoverItem] {
+    guard var url = functionURL(function) else { throw Failure.notConfigured }
+    var items = [
+      URLQueryItem(name: "action", value: action),
+      URLQueryItem(name: "limit", value: String(limit)),
+    ]
+    if !query.isEmpty { items.append(URLQueryItem(name: "q", value: query)) }
+    url.append(queryItems: items)
+
+    let data: Data
+    let response: URLResponse
+    do {
+      (data, response) = try await URLSession.shared.data(for: request(url))
+    } catch is CancellationError {
+      throw CancellationError()
+    } catch let error as URLError where error.code == .cancelled {
+      throw CancellationError()
+    } catch {
+      throw Failure.network
+    }
+    switch (response as? HTTPURLResponse)?.statusCode ?? 0 {
+    case 200: break
+    case 429: throw Failure.rate
+    case 404, 501: throw Failure.notConfigured
+    default: throw Failure.http
+    }
+    struct Body: Decodable { let items: [CoverItem]? }
+    return (try? JSONDecoder().decode(Body.self, from: data).items) ?? []
+  }
+
+  private static func functionURL(_ name: String) -> URL? {
+    URL(string: "\(AppConfig.supabaseURL.absoluteString)/functions/v1/\(name)")
+  }
+
+  private static func request(_ url: URL) -> URLRequest {
+    var req = URLRequest(url: url, timeoutInterval: 10)
+    req.setValue("Bearer \(AppConfig.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+    req.setValue(AppConfig.supabaseAnonKey, forHTTPHeaderField: "apikey")
+    return req
+  }
 }
 
 /// Renders a Giphy/Unsplash `https` URL or a gallery `data:image/...` JPEG.
@@ -165,6 +247,12 @@ struct CoverPickerView: View {
 
   @State private var tab: CoverTab = .gifs
   @State private var query = ""
+  @State private var gifs: [CoverItem] = []
+  @State private var stills: [CoverItem] = []
+  @State private var loading = false
+  @State private var message: String?
+  @State private var loadTask: Task<Void, Never>?
+  @FocusState private var searchFocused: Bool
   @State private var selectedPhotoItem: PhotosPickerItem? = nil
   @State private var isProcessingPhoto = false
   @State private var photoError: String?
@@ -175,6 +263,14 @@ struct CoverPickerView: View {
     GridItem(.flexible(), spacing: Theme.Spacing.s10)
   ]
 
+  private var hits: [CoverItem] {
+    switch tab {
+    case .gifs: return gifs
+    case .stills: return stills
+    case .photos: return []
+    }
+  }
+
   var body: some View {
     VStack(alignment: .leading, spacing: Theme.Spacing.md) {
       if !cover.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -184,17 +280,18 @@ struct CoverPickerView: View {
       tabSelector
 
       switch tab {
-      case .gifs:
-        searchableGrid(placeholder: "Search GIFs…", items: filteredGifs)
-      case .stills:
-        searchableGrid(placeholder: "Search Stills…", items: filteredStills)
+      case .gifs, .stills:
+        searchSection
       case .photos:
         photosSection
       }
     }
     .onAppear {
+      // Trending GIFs on open, like the PWA.
       query = ""
+      load(.gifs, "")
     }
+    .onDisappear { loadTask?.cancel() }
   }
 
   // MARK: - Preview
@@ -232,6 +329,11 @@ struct CoverPickerView: View {
           withAnimation(.spring(response: Theme.Motion.snappy, dampingFraction: Theme.Motion.snappyDamping)) {
             tab = t
           }
+          if t == .photos {
+            message = nil
+          } else {
+            load(t, query.trimmingCharacters(in: .whitespacesAndNewlines))
+          }
         } label: {
           Text(t.rawValue)
             .font(.footnote.weight(tab == t ? .semibold : .regular))
@@ -254,16 +356,34 @@ struct CoverPickerView: View {
 
   // MARK: - Search & Grid
 
-  private func searchableGrid(placeholder: String, items: [CoverItem]) -> some View {
+  private var searchSection: some View {
     VStack(alignment: .leading, spacing: Theme.Spacing.s10) {
       HStack(spacing: Theme.Spacing.sm) {
-        Image(systemName: "magnifyingglass")
-          .font(.footnote)
-          .foregroundStyle(Theme.inkFaint)
+        if loading {
+          ProgressView()
+            .scaleEffect(Theme.Motion.photoSpinner)
+        } else {
+          Image(systemName: "magnifyingglass")
+            .font(.footnote)
+            .foregroundStyle(Theme.inkFaint)
+        }
 
-        TextField(placeholder, text: $query)
+        TextField(tab == .gifs ? "Search Giphy…" : "Search Unsplash…", text: $query)
           .font(.subheadline)
           .foregroundStyle(Theme.ink)
+          .focused($searchFocused)
+          .textInputAutocapitalization(.never)
+          .autocorrectionDisabled()
+          .submitLabel(.search)
+          .onChange(of: query) { _, next in
+            load(tab, next.trimmingCharacters(in: .whitespacesAndNewlines), debounce: true)
+          }
+          .onChange(of: searchFocused) { _, focused in
+            // Nothing to show yet: start from the plan's title, like the PWA.
+            guard focused, query.trimmingCharacters(in: .whitespaces).isEmpty, hits.isEmpty else { return }
+            let t = titleHint().trimmingCharacters(in: .whitespacesAndNewlines)
+            if t.isEmpty { load(tab, "") } else { query = t }
+          }
 
         if !query.isEmpty {
           Button {
@@ -281,34 +401,98 @@ struct CoverPickerView: View {
       .background(Theme.fillQuaternary)
       .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
 
-      if items.isEmpty {
-        Text("No pictures found for “\(query)”. Try another word.")
-          .font(.footnote)
-          .foregroundStyle(Theme.inkFaint)
-          .padding(.vertical, Theme.Spacing.md)
-      } else {
+      if !hits.isEmpty {
         LazyVGrid(columns: gridColumns, spacing: Theme.Spacing.sm) {
-          ForEach(items) { item in
+          ForEach(hits) { item in
             Button {
+              if tab == .stills { CoverSearch.trackDownload(item.download) }
               withAnimation(.spring(response: Theme.Motion.spring)) {
                 cover = item.fullUrl
               }
+              message = nil
             } label: {
-              RemoteOrDataImage(urlString: item.previewUrl, contentMode: .fill)
-                .frame(height: Theme.TouchTarget.coverTile)
-                .frame(maxWidth: .infinity)
-                .clipShape(RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
-                .overlay {
-                  if cover == item.fullUrl {
-                    RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous)
-                      .stroke(Theme.roseInk, lineWidth: Theme.TouchTarget.strokeFocus)
-                  }
+              // AsyncImage, not the six-cover store: picker tiles shouldn't
+              // push the board's warmed covers out of it.
+              AsyncImage(url: URL(string: item.previewUrl)) { phase in
+                if let image = phase.image {
+                  image.resizable().aspectRatio(contentMode: .fill)
+                } else {
+                  Theme.fillTertiary
                 }
+              }
+              .frame(height: Theme.TouchTarget.coverTile)
+              .frame(maxWidth: .infinity)
+              .clipShape(RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
+              .overlay {
+                if cover == item.fullUrl {
+                  RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous)
+                    .stroke(Theme.roseInk, lineWidth: Theme.TouchTarget.strokeFocus)
+                }
+              }
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(item.title.isEmpty ? "Cover" : String(item.title.prefix(60)))
           }
         }
+
+        if tab == .stills, let credit = URL(string: "https://unsplash.com/?utm_source=fordays&utm_medium=referral") {
+          Link("Photos via Unsplash", destination: credit)
+            .font(.caption)
+            .foregroundStyle(Theme.inkFaint)
+        }
       }
+
+      if let message {
+        HStack(spacing: Theme.Spacing.sm) {
+          Text(message)
+            .font(.footnote)
+            .foregroundStyle(Theme.inkSoft)
+          Spacer(minLength: 0)
+          Button("Retry") {
+            load(tab, query.trimmingCharacters(in: .whitespacesAndNewlines))
+          }
+          .font(.footnote.weight(.semibold))
+          .foregroundStyle(Theme.roseInk)
+        }
+      }
+    }
+  }
+
+  /// Same flow and messages as the PWA's `load`.
+  private func load(_ source: CoverTab, _ q: String, debounce: Bool = false) {
+    guard source != .photos else { return }
+    loadTask?.cancel()
+    loadTask = Task {
+      if debounce {
+        try? await Task.sleep(nanoseconds: 300_000_000)
+        if Task.isCancelled { return }
+      }
+      loading = true
+      message = nil
+      do {
+        let next = source == .gifs ? try await CoverSearch.gifs(q) : try await CoverSearch.stills(q)
+        if Task.isCancelled { return }
+        if source == .gifs { gifs = next } else { stills = next }
+        if next.isEmpty {
+          message = q.isEmpty
+            ? (source == .gifs ? "No GIFs came back." : "No stills came back.")
+            : "Nothing for “\(q)”. Try another word."
+        }
+      } catch is CancellationError {
+        return
+      } catch {
+        if Task.isCancelled { return }
+        if source == .gifs { gifs = [] } else { stills = [] }
+        let failure = error as? CoverSearch.Failure
+        let name = source == .gifs ? "Giphy" : "Unsplash"
+        switch failure {
+        case .rate: message = "\(name)'s rate limit is hit. Give it a minute."
+        case .notConfigured: message = source == .gifs ? "GIFs aren’t available right now." : "Stills aren’t available right now."
+        case .http: message = "\(name) returned an error."
+        default: message = "Couldn't reach \(name)."
+        }
+      }
+      loading = false
     }
   }
 
@@ -390,115 +574,4 @@ struct CoverPickerView: View {
     guard let compressedData = resized.jpegData(compressionQuality: compressionQuality) else { return nil }
     return "data:image/jpeg;base64," + compressedData.base64EncodedString()
   }
-
-  // MARK: - Preset Catalogues
-
-  private var filteredGifs: [CoverItem] {
-    let clean = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-    if clean.isEmpty { return Self.presetGifs }
-    return Self.presetGifs.filter { $0.title.lowercased().contains(clean) || clean.contains($0.title.lowercased()) }
-  }
-
-  private var filteredStills: [CoverItem] {
-    let clean = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-    if clean.isEmpty { return Self.presetStills }
-    return Self.presetStills.filter { $0.title.lowercased().contains(clean) || clean.contains($0.title.lowercased()) }
-  }
-
-  // Curated, fast-loading visual presets that match the Fordays romantic/life ethos
-  private static let presetGifs: [CoverItem] = [
-    CoverItem(
-      id: "g1",
-      title: "Dinner food drink restaurant toast celebration",
-      previewUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80"
-    ),
-    CoverItem(
-      id: "g2",
-      title: "Coffee cafe brunch morning pastry",
-      previewUrl: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=80"
-    ),
-    CoverItem(
-      id: "g3",
-      title: "Beach ocean sunset sea summer vacation trip",
-      previewUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80"
-    ),
-    CoverItem(
-      id: "g4",
-      title: "Camp campfire outdoors tent mountain stars",
-      previewUrl: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1200&q=80"
-    ),
-    CoverItem(
-      id: "g5",
-      title: "Road trip car drive travel highway",
-      previewUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1200&q=80"
-    ),
-    CoverItem(
-      id: "g6",
-      title: "Cinema movie film tickets popcorn",
-      previewUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80"
-    ),
-    CoverItem(
-      id: "g7",
-      title: "Kayak river boat water lake paddle",
-      previewUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80"
-    ),
-    CoverItem(
-      id: "g8",
-      title: "Museum art gallery walk culture",
-      previewUrl: "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=1200&q=80"
-    ),
-    CoverItem(
-      id: "g9",
-      title: "Cocktail drinks bar night party lounge",
-      previewUrl: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1200&q=80"
-    )
-  ]
-
-  private static let presetStills: [CoverItem] = [
-    CoverItem(
-      id: "s1",
-      title: "Sunset sky clouds pink orange evening dusk",
-      previewUrl: "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1200&q=80"
-    ),
-    CoverItem(
-      id: "s2",
-      title: "Cozy home book tea reading rainy window",
-      previewUrl: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1200&q=80"
-    ),
-    CoverItem(
-      id: "s3",
-      title: "Flower bouquet garden bloom flora roses",
-      previewUrl: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=1200&q=80"
-    ),
-    CoverItem(
-      id: "s4",
-      title: "Architecture city street travel europe paris",
-      previewUrl: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80"
-    ),
-    CoverItem(
-      id: "s5",
-      title: "Baking bread bakery kitchen cooking pasta",
-      previewUrl: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=80"
-    ),
-    CoverItem(
-      id: "s6",
-      title: "Snow winter cabin cozy mountains pine trees",
-      previewUrl: "https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?auto=format&fit=crop&w=300&q=80",
-      fullUrl: "https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?auto=format&fit=crop&w=1200&q=80"
-    )
-  ]
 }
