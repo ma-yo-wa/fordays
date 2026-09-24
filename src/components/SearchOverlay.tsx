@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useApp } from '../lib/store';
-import { isMemory, type Activity } from '../lib/types';
+import { isMemory, lastDayOf, type Activity } from '../lib/types';
 import { Copy, formatCopy } from '../lib/copy';
-import { dtDate, dtTime, formatSearchDate, pretty } from '../lib/date';
+import { dtDate, dtTime, formatSearchDate, pretty, todayISO } from '../lib/date';
 import { Pill } from '../ui';
 import { durationFade, easeIos, ySearch } from '../ui/motion';
 import s from './SearchOverlay.module.css';
@@ -122,8 +122,10 @@ export default function SearchOverlay() {
 
   const recentItems = useMemo(() => {
     if (q) return { plans: [], someday: [] };
+    // Upcoming means not over yet — a past routine plan isn't a memory, but it isn't upcoming either.
+    const today = todayISO();
     const upcomingPlans = activities
-      .filter((a) => Boolean(a.date_time) && !isMemory(a))
+      .filter((a) => (lastDayOf(a) ?? '') >= today)
       .sort((a, b) => (a.date_time ?? '').localeCompare(b.date_time ?? ''))
       .slice(0, 4);
     const recentSomeday = activities

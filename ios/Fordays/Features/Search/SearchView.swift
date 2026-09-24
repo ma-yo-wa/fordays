@@ -46,8 +46,10 @@ struct SearchView: View {
   }
 
   private var recentActivities: (plans: [Activity], someday: [Activity]) {
+    // Upcoming means not over yet — a past routine plan isn't a memory, but it isn't upcoming either.
+    let today = DateLocal.todayISO()
     let upcomingPlans = app.activities
-      .filter { $0.isPlan && !$0.isMemory() }
+      .filter { ($0.lastDay ?? "") >= today }
       .sorted { ($0.dateTime ?? "") < ($1.dateTime ?? "") }
       .prefix(4)
     let recentSomeday = app.activities
@@ -176,7 +178,7 @@ struct SearchView: View {
             if !recents.plans.isEmpty {
               VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                 Text("Upcoming Plans")
-                  .font(.caption.weight(.semibold))
+                  .font(.subheadline.weight(.semibold))
                   .foregroundStyle(Theme.inkSoft)
                   .textCase(.uppercase)
                   .padding(.horizontal, Theme.Spacing.xs)
@@ -190,7 +192,7 @@ struct SearchView: View {
             if !recents.someday.isEmpty {
               VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                 Text("Recent in Someday")
-                  .font(.caption.weight(.semibold))
+                  .font(.subheadline.weight(.semibold))
                   .foregroundStyle(Theme.inkSoft)
                   .textCase(.uppercase)
                   .padding(.horizontal, Theme.Spacing.xs)
@@ -219,7 +221,7 @@ struct SearchView: View {
           if !results.plans.isEmpty {
             VStack(alignment: .leading, spacing: Theme.Spacing.md) {
               Text("\(Copy.Search.plans) (\(results.plans.reduce(0) { $0 + $1.items.count }))")
-                .font(.caption.weight(.semibold))
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Theme.inkSoft)
                 .textCase(.uppercase)
                 .padding(.horizontal, Theme.Spacing.xs)
@@ -244,7 +246,7 @@ struct SearchView: View {
           if !results.someday.isEmpty {
             VStack(alignment: .leading, spacing: Theme.Spacing.md) {
               Text("\(Copy.Search.someday) (\(results.someday.count))")
-                .font(.caption.weight(.semibold))
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Theme.inkSoft)
                 .textCase(.uppercase)
                 .padding(.horizontal, Theme.Spacing.xs)
@@ -258,7 +260,7 @@ struct SearchView: View {
           if !results.memories.isEmpty {
             VStack(alignment: .leading, spacing: Theme.Spacing.md) {
               Text("\(Copy.Search.memories) (\(results.memories.reduce(0) { $0 + $1.items.count }))")
-                .font(.caption.weight(.semibold))
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Theme.inkSoft)
                 .textCase(.uppercase)
                 .padding(.horizontal, Theme.Spacing.xs)
@@ -273,7 +275,7 @@ struct SearchView: View {
                   }
 
                   ForEach(group.items) { item in
-                    activityRow(item, accentColor: Theme.rose, trailingTime: DateLocal.formatItemTime(dateTime: item.dateTime, endsAt: item.endsAt))
+                    activityRow(item, accentColor: Theme.roseInk, trailingTime: DateLocal.formatItemTime(dateTime: item.dateTime, endsAt: item.endsAt))
                   }
                 }
               }
