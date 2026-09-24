@@ -91,6 +91,9 @@ struct OrbSetupView: View {
       }
 
       FDTextField(label: Copy.Orbs.orbName, placeholder: placeholder, text: $name)
+        .textInputAutocapitalization(.words)
+        .submitLabel(.go)
+        .onSubmit { Task { await submit() } }
         .padding(.top, Theme.Spacing.base)
 
       FDButton(

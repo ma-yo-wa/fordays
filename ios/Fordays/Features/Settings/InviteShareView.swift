@@ -8,7 +8,7 @@ struct InviteShareView: View {
   @State private var busy = false
 
   private var code: String { app.space?.inviteCode ?? "" }
-  private var link: String { "https://fordays.app/?invite=\(code)" }
+  private var link: String { "\(AppConfig.webOrigin)/?invite=\(code)" }
 
   private var isPersonalOrb: Bool {
     guard let space = app.space else { return false }

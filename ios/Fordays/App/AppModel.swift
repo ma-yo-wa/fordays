@@ -301,6 +301,21 @@ final class AppModel: ObservableObject {
     }
   }
 
+  /// Emails a reset link. It opens the web app's new-password screen, like the PWA.
+  func requestPasswordReset(email: String) async -> Bool {
+    errorMessage = nil
+    do {
+      try await sb.auth.resetPasswordForEmail(
+        email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
+        redirectTo: URL(string: "\(AppConfig.webOrigin)/")
+      )
+      return true
+    } catch {
+      errorMessage = FordaysError.fromAuth(error).errorDescription
+      return false
+    }
+  }
+
   func signUp(email: String, password: String, displayName: String) async {
     errorMessage = nil
     let name = displayName.trimmingCharacters(in: .whitespacesAndNewlines)

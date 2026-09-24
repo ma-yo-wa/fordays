@@ -7,6 +7,8 @@ enum AppConfig {
   static let supabaseAnonKey =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtdXlnbmFjdWp3Y29kYmd1cGpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0MzQ5NTksImV4cCI6MjEwMTAxMDk1OX0.rlisz8hym_GOs3_4PWE32FpsO_unkWEHxR-TsBxkz4k"
   static let authCallback = URL(string: "fordays://auth/callback")!
+  /// The web app: invite links and password-reset links open here.
+  static let webOrigin = "https://fordays.app"
 }
 
 enum FordaysError: LocalizedError {
@@ -32,6 +34,12 @@ enum FordaysError: LocalizedError {
     }
     if msg.localizedCaseInsensitiveContains("rate") {
       return .message("Too many tries — wait a minute and try again")
+    }
+    if error is URLError
+      || msg.localizedCaseInsensitiveContains("network")
+      || msg.localizedCaseInsensitiveContains("offline")
+      || msg.localizedCaseInsensitiveContains("could not connect") {
+      return .message("Couldn’t reach the server — check your connection and try again")
     }
     return .message(msg.isEmpty ? "Couldn’t sign in" : msg)
   }
