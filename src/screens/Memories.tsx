@@ -2,14 +2,14 @@ import { useEffect, useMemo } from 'react';
 import CoverArt from '../components/CoverArt';
 import { useApp, isMatched } from '../lib/store';
 import type { Activity } from '../lib/types';
-import { isMemory } from '../lib/types';
+import { isMemory, lastDayOf } from '../lib/types';
 import { MON3, todayISO } from '../lib/date';
 import { tintsFor } from '../lib/tint';
 import { prefetchCovers, FIRST_BOARD_COVERS } from '../lib/coverCache';
 import s from './Memories.module.css';
 
 function monthKey(a: Activity): string {
-  return (a.ends_at ?? a.date_time)!.slice(0, 7);
+  return lastDayOf(a)!.slice(0, 7);
 }
 
 function monthLabel(key: string): string {
@@ -42,11 +42,7 @@ export default function Memories() {
       activities
         .filter((a) => isMemory(a, today))
         .slice()
-        .sort((a, b) => {
-          const ae = (a.ends_at ?? a.date_time)!.slice(0, 10);
-          const be = (b.ends_at ?? b.date_time)!.slice(0, 10);
-          return be.localeCompare(ae);
-        }),
+        .sort((a, b) => lastDayOf(b)!.localeCompare(lastDayOf(a)!)),
     [activities, today],
   );
 

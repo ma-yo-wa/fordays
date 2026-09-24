@@ -142,10 +142,16 @@ export const isMultiDay = (a: Activity): boolean =>
 /** A memory is a past plan that was either promoted from Someday (a bucket dream realized)
  *  or has a cover/photo attached. Mundane unsung plans (gym, doctor, grocery) stay on the
  *  calendar grid without cluttering the Memories keepsake tab. */
+/** The last day a plan covers: its end day when it has a real one, else its start. */
+export function lastDayOf(a: Activity): string | null {
+  if (!a.date_time) return null;
+  const end = a.ends_at && a.ends_at.trim().length >= 10 ? a.ends_at : a.date_time;
+  return end.slice(0, 10);
+}
+
 export function isMemory(a: Activity, today?: string): boolean {
-  if (!a.date_time) return false;
-  const day = today ?? todayISO();
-  const last = a.ends_at && a.ends_at.trim().length >= 10 ? a.ends_at : a.date_time;
-  if (last.slice(0, 10) >= day) return false;
+  const last = lastDayOf(a);
+  if (!last) return false;
+  if (last >= (today ?? todayISO())) return false;
   return Boolean(a.from_someday || (a.image_url && a.image_url.trim().length > 0));
 }

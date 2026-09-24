@@ -79,9 +79,13 @@ struct MemoriesView: View {
   private var memories: [Activity] {
     app.activities
       .filter { $0.isMemory(today: today) }
-      .sorted {
-        ($0.endsAt ?? $0.dateTime ?? "") > ($1.endsAt ?? $1.dateTime ?? "")
+      // Newest day first; same-day memories keep their order, like the PWA's stable sort.
+      .enumerated()
+      .sorted { a, b in
+        let (da, db) = (a.element.lastDay ?? "", b.element.lastDay ?? "")
+        return da != db ? da > db : a.offset < b.offset
       }
+      .map(\.element)
   }
 
   private var sections: [(key: String, label: String, items: [Activity])] {

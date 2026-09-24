@@ -40,17 +40,22 @@ struct Activity: Identifiable, Hashable, Codable {
   var isPlan: Bool { dateTime != nil }
   var isBucketItem: Bool { dateTime == nil }
 
+  /// The last day a plan covers: its end day when it has a real one, else its start.
+  var lastDay: String? {
+    guard let dateTime else { return nil }
+    let end = (endsAt?.trimmingCharacters(in: .whitespaces).count ?? 0) >= 10 ? endsAt! : dateTime
+    return String(end.prefix(10))
+  }
+
   func isMemory(today: String = DateLocal.todayISO()) -> Bool {
-    guard let dateTime else { return false }
-    let last = (endsAt ?? dateTime).prefix(10)
-    if String(last) >= today { return false }
+    guard let last = lastDay else { return false }
+    if last >= today { return false }
     let hasCover = !(imageUrl?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
     return (fromSomeday == true) || hasCover
   }
 
   var monthKey: String? {
-    guard let dateTime else { return nil }
-    return String((endsAt ?? dateTime).prefix(7))
+    lastDay.map { String($0.prefix(7)) }
   }
 }
 

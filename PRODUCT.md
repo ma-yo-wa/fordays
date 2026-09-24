@@ -180,6 +180,7 @@ Plans whose day has passed. Look back, not a third kind of object.
 - **Permanent lived history**: Memories cannot be moved back to Someday / bucket list. You cannot unlive an experience.
 - **Do again**: Tapping **Do again** lets you repeat a great experience without altering history. Prompts **Make it a plan** (opens Composer prefilled with the title, notes, location, and cover to pick an upcoming date) or **Add to Someday** (places a fresh copy into Someday). The original memory stays 100% frozen in history.
 - **Actions on a Memory**: Only **Do again**, **Change the day** (to fix typos in the past), and **Delete** (if an event never happened) are allowed. Never show **Back to Someday** or **Suggest a date** on a memory.
+- **Only what the tab shows is a Memory**: The same filter decides the actions. A past routine plan (no cover, not from Someday) stays an ordinary plan in Detail — it keeps **Back to Someday** and **Suggest a date** and gets no **Do again**.
 - **Audit history localization**: History entries stored in the database by server triggers must be localized to the user's device timezone so times like 9:00 PM EST never display as 01:00 AM UTC.
 
 ---
