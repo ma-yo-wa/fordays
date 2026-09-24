@@ -82,6 +82,9 @@ struct FordaysApp: App {
       RootView()
         .environmentObject(app)
         .preferredColorScheme(.light)
+        // Never smaller than the default size — the PWA's 17px ramp — but
+        // still larger for people who turn Text Size up.
+        .dynamicTypeSize(.large...)
         .task {
           appDelegate.appModel = app
           await app.boot()

@@ -255,10 +255,11 @@ struct DetailView: View {
           cover = item.imageUrl ?? ""
           mode = .edit
         } label: {
-          Image(systemName: "pencil")
-            .font(.body.weight(.semibold))
-            .foregroundStyle(Theme.ink)
-            .frame(width: Theme.TouchTarget.avatarLg, height: Theme.TouchTarget.avatarLg)
+          // The PWA's pencil (Detail.tsx PencilIcon): 16pt glyph in a 34pt circle.
+          PencilGlyph()
+            .stroke(Theme.ink2, style: StrokeStyle(lineWidth: Theme.TouchTarget.strokeThick * 16 / 24, lineJoin: .round))
+            .frame(width: Theme.Spacing.base, height: Theme.Spacing.base)
+            .frame(width: Theme.Spacing.s34, height: Theme.Spacing.s34)
             .background(Theme.fillTertiary, in: Circle())
         }
         .accessibilityLabel("Edit")
@@ -868,3 +869,26 @@ struct DetailView: View {
   }
 }
 
+/// The PWA's pencil path — `M4 20h4L20 8a2.8 2.8 0 0 0-4-4L4 16v4Z` on a 24-unit box.
+private struct PencilGlyph: Shape {
+  func path(in rect: CGRect) -> Path {
+    let k = min(rect.width, rect.height) / 24
+    func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: rect.minX + x * k, y: rect.minY + y * k) }
+    var p = Path()
+    p.move(to: pt(4, 20))
+    p.addLine(to: pt(8, 20))
+    p.addLine(to: pt(20, 8))
+    // `a2.8 2.8 0 0 0 -4 -4`: the endpoints are 2√2 from their midpoint, so
+    // SVG grows the radius to 2√2 — a half circle around (18, 6) bulging up-right.
+    p.addArc(
+      center: pt(18, 6),
+      radius: 2 * 2.squareRoot() * k,
+      startAngle: .degrees(45),
+      endAngle: .degrees(-135),
+      clockwise: true
+    )
+    p.addLine(to: pt(4, 16))
+    p.closeSubpath()
+    return p
+  }
+}
