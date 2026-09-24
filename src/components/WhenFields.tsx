@@ -485,6 +485,12 @@ export default function WhenFields({
 
   function addDefaultTime() {
     const def = defaultAppleStartTime();
+    // Late tonight the next half-hour is tomorrow's midnight, so the day follows it.
+    if (def === '00:00' && date === todayISO()) {
+      const next = addDays(1, parseISO(date));
+      onDate(next);
+      if (end && end <= next) onEnd(null);
+    }
     onFrom(def);
   }
 

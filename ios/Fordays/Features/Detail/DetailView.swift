@@ -349,7 +349,16 @@ struct DetailView: View {
   }
 
   private func addDefaultTime() {
-    fromTime = DateLocal.defaultAppleStartTime()
+    let def = DateLocal.defaultAppleStartTime()
+    // Late tonight the next half-hour is tomorrow's midnight, so the day follows it.
+    let cal = Calendar.current
+    if def == "00:00" && cal.isDateInToday(day) {
+      day = cal.date(byAdding: .day, value: 1, to: day) ?? day
+      if let endDay, cal.startOfDay(for: endDay) <= cal.startOfDay(for: day) {
+        self.endDay = nil
+      }
+    }
+    fromTime = def
   }
 
   private func addDefaultEndTime() {

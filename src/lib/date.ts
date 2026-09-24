@@ -92,8 +92,8 @@ export function defaultAppleStartTime(now = new Date()): string {
     h = h + 1;
     m = 0;
   }
-  // Past 11:30 pm the next half-hour is tomorrow; stay on this day.
-  if (h > 23) return '23:59';
+  // Past 11:30 pm the next half-hour is midnight; callers on today move to tomorrow.
+  if (h > 23) return '00:00';
   return `${pad(h)}:${pad(m)}`;
 }
 

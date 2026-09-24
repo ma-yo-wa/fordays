@@ -255,7 +255,14 @@ struct ComposerView: View {
   }
 
   private func addDefaultTime() {
-    from = DateLocal.defaultAppleStartTime()
+    let def = DateLocal.defaultAppleStartTime()
+    // Late tonight the next half-hour is tomorrow's midnight, so the day follows it.
+    if def == "00:00" && date == DateLocal.todayISO() {
+      let next = DateLocal.addDays(1, from: date)
+      date = next
+      if let end, end <= next { self.end = nil }
+    }
+    from = def
   }
 
   private func addDefaultEndTime() {

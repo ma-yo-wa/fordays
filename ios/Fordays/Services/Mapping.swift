@@ -274,8 +274,8 @@ enum DateLocal {
       targetH += 1
       targetM = 0
     }
-    // Past 11:30 pm the next half-hour is tomorrow; stay on this day.
-    if targetH > 23 { return "23:59" }
+    // Past 11:30 pm the next half-hour is midnight; callers on today move to tomorrow.
+    if targetH > 23 { return "00:00" }
     return String(format: "%02d:%02d", targetH, targetM)
   }
 
