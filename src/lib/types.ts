@@ -22,6 +22,8 @@ export interface Activity {
    *  same day, which is almost everything, so it stays out of the way. */
   ends_at: string | null;
   all_day: boolean;
+  /** True if the item originated as a Someday (bucket list) idea. */
+  from_someday?: boolean | null;
   /** Pending when-suggestion from one of you. Cleared on accept/dismiss
    *  / cancel / a direct date change. One at a time — not a thread. */
   suggested_date_time: string | null;
@@ -135,10 +137,13 @@ export const isBucketItem = (a: Activity): boolean => !a.date_time;
 export const isMultiDay = (a: Activity): boolean =>
   a.date_time !== null && a.ends_at !== null && a.ends_at.slice(0, 10) !== a.date_time.slice(0, 10);
 
-/** Plans whose last day is before today — lived, not upcoming. */
+/** A memory is a past plan that was either promoted from Someday (a bucket dream realized)
+ *  or has a cover/photo attached. Mundane unsung plans (gym, doctor, grocery) stay on the
+ *  calendar grid without cluttering the Memories keepsake tab. */
 export function isMemory(a: Activity, today?: string): boolean {
   if (!a.date_time) return false;
   const day = today ?? todayISO();
   const last = a.ends_at && a.ends_at.trim().length >= 10 ? a.ends_at : a.date_time;
-  return last.slice(0, 10) < day;
+  if (last.slice(0, 10) >= day) return false;
+  return Boolean(a.from_someday || (a.image_url && a.image_url.trim().length > 0));
 }

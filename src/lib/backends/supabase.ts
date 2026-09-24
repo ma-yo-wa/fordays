@@ -47,6 +47,7 @@ interface ActivityRow {
   date_time: string | null;
   ends_at?: string | null;
   all_day: boolean;
+  from_someday?: boolean | null;
   suggested_date_time?: string | null;
   suggested_ends_at?: string | null;
   suggested_all_day?: boolean | null;
@@ -175,6 +176,8 @@ export class SupabaseBackend implements Backend {
 
     // 1. Optimistic insert: show in local state immediately at 0ms (if target is current space)
     const tempId = `opt-${crypto.randomUUID()}`;
+    const fromSomeday = Boolean(input.from_someday ?? !input.date_time);
+
     if (targetSpaceId === this.spaceId) {
       const optimistic: Activity = {
         id: tempId,
@@ -188,6 +191,7 @@ export class SupabaseBackend implements Backend {
         date_time: input.date_time ?? null,
         ends_at: input.ends_at ?? null,
         all_day: !input.date_time || input.date_time.length <= 10,
+        from_someday: fromSomeday,
         suggested_date_time: null,
         suggested_ends_at: null,
         suggested_all_day: false,
@@ -207,6 +211,7 @@ export class SupabaseBackend implements Backend {
       created_by: this.uid,
       date_time: input.date_time ? toTimestamptz(input.date_time) : null,
       all_day: !input.date_time || input.date_time.length <= 10,
+      from_someday: fromSomeday,
     };
     if (input.location?.trim()) row.location = input.location.trim();
     // Only send ends_at when set — older DBs without the column still work,
@@ -264,6 +269,12 @@ export class SupabaseBackend implements Backend {
     const idx = this.cachedActivities.findIndex((a) => a.id === id);
     if (idx !== -1) {
       const existing = this.cachedActivities[idx]!;
+      const fromSomeday =
+        'from_someday' in changes
+          ? changes.from_someday
+          : ('date_time' in changes && changes.date_time && !existing.date_time)
+            ? true
+            : existing.from_someday;
       const updated: Activity = {
         ...existing,
         ...changes,
@@ -279,6 +290,7 @@ export class SupabaseBackend implements Backend {
           'date_time' in changes
             ? !changes.date_time || (changes.date_time?.length ?? 0) <= 10
             : existing.all_day,
+        from_someday: fromSomeday,
         ends_at:
           'date_time' in changes && !changes.date_time
             ? null
@@ -306,12 +318,18 @@ export class SupabaseBackend implements Backend {
       patch.date_time = changes.date_time ? toTimestamptz(changes.date_time) : null;
       patch.all_day = !changes.date_time || changes.date_time.length <= 10;
       // Unscheduling drops the end date too; a bucket-list item has no span.
-      if (!changes.date_time) patch.ends_at = null;
+      if (!changes.date_time) {
+        patch.ends_at = null;
+        patch.from_someday = true;
+      }
       // A direct date change supersedes any pending suggestion.
       Object.assign(patch, CLEAR_SUGGESTION);
     }
     if ('ends_at' in changes) {
       patch.ends_at = changes.ends_at ? toTimestamptz(changes.ends_at) : null;
+    }
+    if ('from_someday' in changes) {
+      patch.from_someday = changes.from_someday;
     }
     try {
       let { error } = await this.client.from('activities').update(patch).eq('id', id);
@@ -633,6 +651,7 @@ function mapActivity(r: ActivityRow): Activity {
     date_time: fromTimestamptz(r.date_time, r.all_day),
     ends_at: fromTimestamptz(r.ends_at ?? null, r.all_day),
     all_day: r.all_day,
+    from_someday: r.from_someday ?? (!r.date_time ? true : false),
     suggested_date_time: fromTimestamptz(r.suggested_date_time ?? null, suggestedAllDay),
     suggested_ends_at: fromTimestamptz(r.suggested_ends_at ?? null, suggestedAllDay),
     suggested_all_day: suggestedAllDay,

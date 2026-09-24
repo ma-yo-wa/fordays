@@ -75,7 +75,7 @@ final class AppModel: ObservableObject {
     if withPeople {
       if let current = space {
         _ = try? await sb.from("spaces")
-          .update(SpaceNameUpdate(name: "Personal"))
+          .update(["name": AnyJSON.string("Personal")])
           .eq("id", value: current.id)
           .execute()
       }
@@ -85,7 +85,7 @@ final class AppModel: ObservableObject {
       guard let id = space?.id else { return }
       do {
         try await sb.from("spaces")
-          .update(SpaceNameUpdate(name: clean))
+          .update(["name": AnyJSON.string(clean)])
           .eq("id", value: id)
           .execute()
         try await refreshSpaceAndData()
@@ -102,7 +102,7 @@ final class AppModel: ObservableObject {
     guard !clean.isEmpty else { return }
     do {
       try await sb.from("spaces")
-        .update(SpaceNameUpdate(name: clean))
+        .update(["name": AnyJSON.string(clean)])
         .eq("id", value: current.id)
         .execute()
       try await refreshSpaceAndData()
@@ -438,7 +438,8 @@ final class AppModel: ObservableObject {
     imageUrl: String? = nil,
     dateTime: String? = nil,
     endsAt: String? = nil,
-    spaceId: String? = nil
+    spaceId: String? = nil,
+    fromSomeday: Bool? = nil
   ) async {
     let targetSpaceId = spaceId ?? space?.id
     guard let targetSpaceId else { return }
@@ -457,6 +458,7 @@ final class AppModel: ObservableObject {
     let loc = location?.trimmingCharacters(in: .whitespacesAndNewlines)
     let cover = imageUrl?.trimmingCharacters(in: .whitespacesAndNewlines)
     let myId = space?.myId ?? ""
+    let resolvedFromSomeday = fromSomeday ?? !isPlan
 
     // Optimistic activity with a local temporary ID (if targeting active space)
     let tempId = "opt-\(UUID().uuidString.lowercased())"
@@ -474,6 +476,7 @@ final class AppModel: ObservableObject {
         dateTime: dateTime,
         endsAt: endsAt,
         allDay: !isPlan || (dateTime?.count ?? 0) <= 10,
+        fromSomeday: resolvedFromSomeday,
         suggestedDateTime: nil,
         suggestedEndsAt: nil,
         suggestedAllDay: false,
@@ -500,7 +503,8 @@ final class AppModel: ObservableObject {
         created_by: session.user.id.uuidString.lowercased(),
         date_time: dateTime.map(DateLocal.toTimestamptz),
         ends_at: endsAt.map(DateLocal.toTimestamptz),
-        all_day: dateTime == nil || (dateTime?.count ?? 0) <= 10
+        all_day: dateTime == nil || (dateTime?.count ?? 0) <= 10,
+        from_someday: resolvedFromSomeday
       )
       do {
         let inserted: ActivityRow = try await sb.from("activities")
@@ -524,7 +528,8 @@ final class AppModel: ObservableObject {
             created_by: session.user.id.uuidString.lowercased(),
             date_time: dateTime.map(DateLocal.toTimestamptz),
             ends_at: endsAt.map(DateLocal.toTimestamptz),
-            all_day: dateTime == nil || (dateTime?.count ?? 0) <= 10
+            all_day: dateTime == nil || (dateTime?.count ?? 0) <= 10,
+            from_someday: resolvedFromSomeday
           )
           let inserted: ActivityRow = try await sb.from("activities")
             .insert(fallback)
@@ -598,7 +603,8 @@ final class AppModel: ObservableObject {
     location: String? = nil,
     imageUrl: String? = nil,
     dateTime: String?? = nil,
-    endsAt: String?? = nil
+    endsAt: String?? = nil,
+    fromSomeday: Bool?? = nil
   ) async {
     guard space?.canCompose == true else {
       toast = "This is a copy from when you left"
@@ -615,10 +621,16 @@ final class AppModel: ObservableObject {
     if let dateOpt = dateTime {
       updated.dateTime = dateOpt
       updated.allDay = dateOpt == nil || (dateOpt?.count ?? 0) <= 10
-      if dateOpt == nil { updated.endsAt = nil }
+      if dateOpt == nil { 
+        updated.endsAt = nil
+        updated.fromSomeday = true
+      }
     }
     if let endOpt = endsAt {
       updated.endsAt = endOpt
+    }
+    if let fromSomedayOpt = fromSomeday {
+      updated.fromSomeday = fromSomedayOpt
     }
     activities[idx] = updated
     persistNotebook()
@@ -644,6 +656,7 @@ final class AppModel: ObservableObject {
           patch["date_time"] = .null
           patch["ends_at"] = .null
           patch["all_day"] = .bool(true)
+          patch["from_someday"] = .bool(true)
         }
       }
       if let endOpt = endsAt {
@@ -651,6 +664,13 @@ final class AppModel: ObservableObject {
           patch["ends_at"] = .string(DateLocal.toTimestamptz(value))
         } else {
           patch["ends_at"] = .null
+        }
+      }
+      if let fromSomedayOpt = fromSomeday {
+        if let value = fromSomedayOpt {
+          patch["from_someday"] = .bool(value)
+        } else {
+          patch["from_someday"] = .null
         }
       }
       guard !patch.isEmpty else { return }
@@ -685,7 +705,7 @@ final class AppModel: ObservableObject {
   }
 
   func moveToBucket(_ id: String) async {
-    await patchActivity(id, dateTime: .some(nil), endsAt: .some(nil))
+    await patchActivity(id, dateTime: .some(nil), endsAt: .some(nil), fromSomeday: .some(true))
     toast = Copy.Ideas.backIn
     tab = .bucket
   }
@@ -920,7 +940,7 @@ final class AppModel: ObservableObject {
     }
     if let genericSolo {
       _ = try? await sb.from("spaces")
-        .update(SpaceNameUpdate(name: "Personal"))
+        .update(["name": AnyJSON.string("Personal")])
         .eq("id", value: genericSolo.id)
         .execute()
     }

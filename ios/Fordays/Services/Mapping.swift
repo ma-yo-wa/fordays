@@ -32,6 +32,7 @@ struct ActivityRow: Decodable {
   let date_time: String?
   let ends_at: String?
   let all_day: Bool?
+  let from_someday: Bool?
   let suggested_date_time: String?
   let suggested_ends_at: String?
   let suggested_all_day: Bool?
@@ -373,6 +374,7 @@ extension ActivityRow {
       dateTime: DateLocal.fromTimestamptz(date_time, allDay: allDay),
       endsAt: DateLocal.fromTimestamptz(ends_at, allDay: allDay),
       allDay: allDay,
+      fromSomeday: from_someday ?? (date_time == nil ? true : false),
       suggestedDateTime: DateLocal.fromTimestamptz(suggested_date_time, allDay: suggestedAllDay),
       suggestedEndsAt: DateLocal.fromTimestamptz(suggested_ends_at, allDay: suggestedAllDay),
       suggestedAllDay: suggestedAllDay,

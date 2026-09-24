@@ -154,6 +154,10 @@ Default when-flow:
    - *Calendar Grid*: Clean month grid matching the Plans page (borderless rose chevrons, no gray button circles, solid rose circle for selected day with zero border rings).
 4. **From & Until** — soft blanks are valid. `Until` is revealed on demand via `+ Add end time` without forcing a duration.
 5. **Multi-day** — only after **Runs more than one day?** Then **Ends** row appears with end date and optional until time. Never block save because Until or Ends is empty.
+6. **Fast Plan Creation (Composer Progressive Disclosure)**:
+   - Creating a plan takes 3 seconds: Title, Location (optional), Notes (optional), When (date + time), and Save ("Make it a plan").
+   - Cover photos are **never expanded by default**. The media search engine (GIFs / Stills / Photos) is tucked quietly behind `+ Add cover` (`— photo or GIF`).
+   - The primary action button is always visible on the screen without scrolling. When tapped, `+ Add cover` expands in-place.
 
 Say plan / day — not event, schedule, or calendar.
 
@@ -163,6 +167,10 @@ Say plan / day — not event, schedule, or calendar.
 
 Plans whose day has passed. Look back, not a third kind of object.
 
+- **Curated Keepsake (Intentionality Filter)**: To protect the Memories scrapbook from becoming a junk drawer of routine tasks (e.g. "Dentist", "Upper body leg day", "Car inspection", "Pick up dry cleaning"), an expired plan only appears in the **Memories** tab if it:
+  1. **Originated from Someday** (`from_someday = true` — an aspirational bucket dream realized), **OR**
+  2. **Has a Cover / Photo attached** (`image_url` is present — visual intent anchored to the moment).
+- **Calendar History Preserved**: Routine unsung utility plans remain accessible in the past calendar on the **Plans** tab (selecting any past date shows what happened). They simply do not pollute the curated Memories scrapbook.
 - **Permanent lived history**: Memories cannot be moved back to Someday / bucket list. You cannot unlive an experience.
 - **Do again**: Tapping **Do again** lets you repeat a great experience without altering history. Prompts **Make it a plan** (opens Composer prefilled with the title, notes, location, and cover to pick an upcoming date) or **Add to Someday** (places a fresh copy into Someday). The original memory stays 100% frozen in history.
 - **Actions on a Memory**: Only **Do again**, **Change the day** (to fix typos in the past), and **Delete** (if an event never happened) are allowed. Never show **Back to Someday** or **Suggest a date** on a memory.

@@ -81,6 +81,7 @@ export default function CoverPicker({ value, onChange, titleHint }: Props) {
   }
 
   useEffect(() => {
+    // Only load if the cover picker is actually mounted and visible
     setQ('');
     void load('gifs', '');
     return () => ctrl.current?.abort();

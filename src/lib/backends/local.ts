@@ -81,6 +81,7 @@ export class LocalBackend implements Backend {
       date_time: input.date_time ?? null,
       ends_at: input.ends_at ?? null,
       all_day: !input.date_time || input.date_time.length <= 10,
+      from_someday: Boolean(input.from_someday ?? !input.date_time),
       suggested_date_time: null,
       suggested_ends_at: null,
       suggested_all_day: false,
@@ -149,7 +150,10 @@ export class LocalBackend implements Backend {
     if ('date_time' in changes) {
       a.all_day = !a.date_time || a.date_time.length <= 10;
       // Going back to the bucket list takes the end date with it.
-      if (!a.date_time) a.ends_at = null;
+      if (!a.date_time) {
+        a.ends_at = null;
+        a.from_someday = true;
+      }
       clearSuggestion(a);
     }
     this.commit();

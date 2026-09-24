@@ -9,6 +9,7 @@ export interface NewActivity {
   date_time?: string | null;
   ends_at?: string | null;
   space_id?: string | null;
+  from_someday?: boolean | null;
 }
 
 export type { WhenSuggestion };

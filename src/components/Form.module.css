@@ -1,3 +1,17 @@
+.coverAddBtn {
+  border: none;
+  background: none;
+  color: var(--ink);
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 500;
+  text-align: left;
+  padding: var(--space-4) var(--space-0) var(--space-0);
+  cursor: pointer;
+  display: block;
+  width: 100%;
+}
+
 /* A grouped-list header: small, quiet, and above the group
    rather than inside it. */
 .label {

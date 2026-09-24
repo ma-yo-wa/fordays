@@ -246,7 +246,8 @@ export default function Detail() {
       until,
       endDate: multiDay ? end : null,
     });
-    await patch(item!.id, { date_time, ends_at });
+    const from_someday = planned ? undefined : true;
+    await patch(item!.id, { date_time, ends_at, from_someday });
     setPicked(date);
     const d = parseISO(date);
     setCursor(iso(new Date(d.getFullYear(), d.getMonth(), 1)));
@@ -323,7 +324,7 @@ export default function Detail() {
   }
 
   async function toBucket() {
-    await patch(item!.id, { date_time: null, ends_at: null });
+    await patch(item!.id, { date_time: null, ends_at: null, from_someday: true });
     toast(Copy.ideas.backIn);
     close();
   }
@@ -666,6 +667,7 @@ export default function Detail() {
               notes: item.description ?? '',
               location: item.location ?? '',
               cover: item.image_url ?? null,
+              fromSomeday: true,
             };
             close();
             openComposer('plan', draft);
@@ -680,6 +682,7 @@ export default function Detail() {
               notes: item.description ?? '',
               location: item.location ?? '',
               cover: item.image_url ?? null,
+              fromSomeday: true,
             };
             close();
             openComposer('bucket', draft);

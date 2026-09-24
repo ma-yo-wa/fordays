@@ -12,6 +12,7 @@ struct Activity: Identifiable, Hashable, Codable {
   var dateTime: String?
   var endsAt: String?
   var allDay: Bool
+  var fromSomeday: Bool?
   var suggestedDateTime: String?
   var suggestedEndsAt: String?
   var suggestedAllDay: Bool
@@ -26,7 +27,9 @@ struct Activity: Identifiable, Hashable, Codable {
   func isMemory(today: String = DateLocal.todayISO()) -> Bool {
     guard let dateTime else { return false }
     let last = (endsAt ?? dateTime).prefix(10)
-    return String(last) < today
+    if String(last) >= today { return false }
+    let hasCover = !(imageUrl?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+    return (fromSomeday == true) || hasCover
   }
 
   var monthKey: String? {
@@ -113,6 +116,7 @@ struct NewActivityInsert: Encodable {
   let date_time: String?
   let ends_at: String?
   let all_day: Bool
+  let from_someday: Bool?
 }
 
 struct NewSpaceInsert: Encodable {

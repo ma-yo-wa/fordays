@@ -174,8 +174,30 @@ struct ComposerView: View {
           }
         }
 
-        fieldLabel("Cover", hint: "— optional")
-        CoverPickerView(cover: $cover, titleHint: { title })
+        if cover.isEmpty {
+          Button {
+            withAnimation(.spring(response: Theme.Motion.spring)) {
+              cover = " " // Non-empty string to trigger picker expansion
+            }
+          } label: {
+            HStack(spacing: Theme.Spacing.xxs) {
+              Text("+ Add cover")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(Theme.ink)
+              Text("— photo or GIF")
+                .font(.subheadline)
+                .foregroundStyle(Theme.inkFaint)
+              Spacer()
+            }
+            .padding(.top, Theme.Spacing.xl)
+            .contentShape(Rectangle())
+          }
+          .buttonStyle(.plain)
+        } else {
+          fieldLabel("Cover", hint: "")
+            .padding(.top, Theme.Spacing.sm)
+          CoverPickerView(cover: $cover, titleHint: { title })
+        }
 
         HStack(spacing: Theme.Spacing.s10) {
           FDButton("Cancel", variant: .secondary, action: onClose)
@@ -188,7 +210,7 @@ struct ComposerView: View {
             await save()
           }
         }
-        .padding(.top, Theme.Spacing.lg)
+        .padding(.top, cover.isEmpty ? Theme.Spacing.s22 : Theme.Spacing.sm)
       }
       .padding(Theme.Spacing.lg)
       .padding(.bottom, Theme.Spacing.s28)
@@ -458,7 +480,8 @@ struct ComposerView: View {
       location: location.trimmingCharacters(in: .whitespacesAndNewlines),
       imageUrl: coverTrim,
       dateTime: when?.dateTime,
-      endsAt: when?.endsAt
+      endsAt: when?.endsAt,
+      fromSomeday: !isPlan // Explicitly specify fromSomeday based on Composer mode
     )
     if isPlan {
       app.pickedDay = date

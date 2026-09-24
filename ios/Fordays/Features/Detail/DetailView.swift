@@ -744,7 +744,8 @@ struct DetailView: View {
     await app.patchActivity(
       activityId,
       dateTime: .some(when.dateTime),
-      endsAt: .some(when.endsAt)
+      endsAt: .some(when.endsAt),
+      fromSomeday: item?.isPlan == true ? nil : .some(true)
     )
     app.toast = item?.isPlan == true ? "Updated" : "Made it a plan"
     app.tab = .plans

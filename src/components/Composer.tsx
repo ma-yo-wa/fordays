@@ -262,12 +262,26 @@ export default function Composer() {
         </>
       )}
 
-      <span className={f.label}>
-        Cover <span className={f.hint}>— optional</span>
-      </span>
-      <CoverPicker key={sessionKey} value={cover} onChange={setCover} titleHint={() => title} />
+      {cover === null && (
+        <button
+          type="button"
+          className={f.coverAddBtn}
+          onClick={() => setCover('')}
+        >
+          + Add cover <span className={f.hint}>— photo or GIF</span>
+        </button>
+      )}
 
-      <div className={f.row}>
+      {cover !== null && (
+        <>
+          <span className={f.label} style={{ marginTop: 'var(--space-4)' }}>
+            Cover
+          </span>
+          <CoverPicker key={sessionKey} value={cover} onChange={setCover} titleHint={() => title} />
+        </>
+      )}
+
+      <div className={f.row} style={{ marginTop: cover !== null ? 'var(--space-2)' : 'var(--space-5)' }}>
         <Button variant="secondary" onClick={close}>
           Cancel
         </Button>
