@@ -474,3 +474,20 @@ extension Array {
     }
   }
 }
+
+extension AttributedString {
+  /// Notes with their web links made tappable — same rule as the PWA's Linkify.
+  static func linkified(_ text: String) -> AttributedString {
+    var out = AttributedString(text)
+    guard let regex = try? NSRegularExpression(pattern: #"https?://[^\s]+"#) else { return out }
+    let whole = NSRange(text.startIndex..., in: text)
+    for match in regex.matches(in: text, range: whole) {
+      guard let range = Range(match.range, in: text),
+            let url = URL(string: String(text[range])),
+            let styled = Range(range, in: out) else { continue }
+      out[styled].link = url
+      out[styled].underlineStyle = .single
+    }
+    return out
+  }
+}

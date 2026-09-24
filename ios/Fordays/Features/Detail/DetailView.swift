@@ -152,9 +152,11 @@ struct DetailView: View {
         }
 
         if mode == .view, let description = item.description, !description.isEmpty {
-          Text(description)
+          Text(AttributedString.linkified(description))
             .font(.body)
             .foregroundStyle(Theme.ink2)
+            .tint(Theme.ink2)
+            .textSelection(.enabled)
         }
 
         if mode == .view, pending(item) {

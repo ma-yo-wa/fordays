@@ -20,7 +20,13 @@ struct PlansView: View {
       let end = activity.endsAt.map { String($0.prefix(10)) } ?? start
       return app.pickedDay >= start && app.pickedDay <= end
     }
-    .sorted { ($0.dateTime ?? "") < ($1.dateTime ?? "") }
+    .sorted { Self.startKey($0.dateTime) < Self.startKey($1.dateTime) }
+  }
+
+  /// Ordered by when a plan actually began, not by clock time alone: a trip
+  /// that started yesterday sits above today's plans. All-day sorts last within its day.
+  private static func startKey(_ dateTime: String?) -> String {
+    "\(DateLocal.dtDate(dateTime) ?? "9999-99-99") \(DateLocal.dtTime(dateTime) ?? "99")"
   }
 
   private var dayExternal: [ExternalEvent] {
@@ -47,20 +53,23 @@ struct PlansView: View {
       }
     }
 
-    var sort: String {
+    func sort(on day: String) -> String {
       switch self {
-      case .plan(let a): return a.dateTime ?? ""
+      case .plan(let a): return PlansView.startKey(a.dateTime)
       case .external(let e):
-        if e.allDay { return "\(String(e.startsAt.prefix(10)))T99:00" }
-        return e.startsAt
+        if e.allDay { return "\(day) 99" }
+        return e.startsAt.contains("T")
+          ? e.startsAt.replacingOccurrences(of: "T", with: " ")
+          : "\(e.startsAt) 99"
       }
     }
   }
 
   private var dayAgenda: [AgendaItem] {
+    let day = app.pickedDay
     let plans = dayPlans.map { AgendaItem.plan($0) }
     let imported = dayExternal.map { AgendaItem.external($0) }
-    return (plans + imported).sorted { $0.sort < $1.sort }
+    return (plans + imported).sorted { $0.sort(on: day) < $1.sort(on: day) }
   }
 
   private var upNext: (date: String, countdown: String, dateFormatted: String, plans: [Activity])? {
@@ -132,44 +141,8 @@ struct PlansView: View {
               .padding(.horizontal, Theme.Spacing.xxs)
 
               ForEach(next.plans) { a in
-                Button {
-                  onSelect(a)
-                } label: {
-                  HStack(alignment: .top, spacing: Theme.Spacing.md) {
-                    planThumb(a)
-                    VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-                      Text(a.title)
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(Theme.ink)
-                      Text(planTiming(a))
-                        .font(.footnote)
-                        .foregroundStyle(Theme.inkSoft)
-                      if let loc = a.location, !loc.isEmpty {
-                        HStack(spacing: Theme.Spacing.xs) {
-                          Text("📍").font(.caption2)
-                          Text(loc)
-                            .font(.footnote)
-                            .foregroundStyle(Theme.inkSoft)
-                        }
-                      }
-                      if let note = a.description, !note.isEmpty {
-                        Text(note)
-                          .font(.footnote)
-                          .foregroundStyle(Theme.inkFaint)
-                      }
-                      HStack(spacing: Theme.Spacing.s6) {
-                        face(for: a.createdBy)
-                        Text(displayName(for: a.createdBy))
-                          .font(.footnote)
-                          .foregroundStyle(Theme.inkSoft)
-                      }
-                    }
-                    Spacer(minLength: 0)
-                  }
-                  .padding(Theme.Spacing.row)
-                  .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
-                }
-                .buttonStyle(.plain)
+                // The subhead already names the day, so the card gives only the time.
+                planCard(a, timing: upNextTiming(a))
               }
             }
           } else {
@@ -184,73 +157,30 @@ struct PlansView: View {
           ForEach(dayAgenda) { item in
             switch item {
             case .plan(let a):
-              Button {
-                onSelect(a)
-              } label: {
-                HStack(alignment: .top, spacing: Theme.Spacing.md) {
-                  planThumb(a)
-                  VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-                    Text(a.title)
-                      .font(.body.weight(.medium))
-                      .foregroundStyle(Theme.ink)
-                    Text(planTiming(a))
-                      .font(.footnote)
-                      .foregroundStyle(Theme.inkSoft)
-                    if let loc = a.location, !loc.isEmpty {
-                      HStack(spacing: Theme.Spacing.xs) {
-                        Text("📍").font(.caption2)
-                        Text(loc)
-                          .font(.footnote)
-                          .foregroundStyle(Theme.inkSoft)
-                      }
-                    }
-                    if let note = a.description, !note.isEmpty {
-                      Text(note)
-                        .font(.footnote)
-                        .foregroundStyle(Theme.inkFaint)
-                    }
-                    HStack(spacing: Theme.Spacing.s6) {
-                      face(for: a.createdBy)
-                      Text(displayName(for: a.createdBy))
-                        .font(.footnote)
-                        .foregroundStyle(Theme.inkSoft)
-                    }
-                  }
-                  Spacer(minLength: 0)
-                }
-                .padding(Theme.Spacing.row)
-                .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
-              }
-              .buttonStyle(.plain)
+              planCard(a, timing: planTiming(a))
             case .external(let e):
               let isMine = app.space?.myId == e.userId || e.userId == "0"
               let ownerName = isMine ? (app.space?.myName ?? "You") : displayName(for: e.userId)
+              let title = (e.title ?? "").isEmpty ? Copy.Availability.busy : (e.title ?? "")
               Button {
                 onSelectExternal?(e)
               } label: {
                 HStack(alignment: .top, spacing: Theme.Spacing.md) {
                   externalThumb(e)
                   VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-                    Text(e.title ?? Copy.Availability.busy)
-                      .font(.body.weight(.medium))
+                    Text(title)
+                      .font(.headline)
                       .foregroundStyle(Theme.ink)
                     Text(planExternalTiming(e))
-                      .font(.footnote)
+                      .font(.subheadline)
                       .foregroundStyle(Theme.inkSoft)
                     if let loc = e.location, !loc.isEmpty {
-                      HStack(spacing: Theme.Spacing.xs) {
-                        Text("📍")
-                          .font(.caption2)
-                        Text(loc)
-                          .font(.footnote)
-                          .foregroundStyle(Theme.inkSoft)
-                          .lineLimit(1)
-                      }
+                      locationLine(loc)
                     }
                     HStack(spacing: Theme.Spacing.s6) {
                       face(for: e.userId)
                       Text(ownerName)
-                        .font(.footnote)
+                        .font(.caption)
                         .foregroundStyle(Theme.inkSoft)
                       Text(e.sourceLabel)
                         .font(.caption2.weight(.medium))
@@ -294,6 +224,51 @@ struct PlansView: View {
     }
     .onAppear {
       Task { await app.syncAppleIfNeeded() }
+    }
+  }
+
+  /// A plan on the agenda. A tap gesture rather than a Button so links in the note stay tappable.
+  private func planCard(_ a: Activity, timing: String) -> some View {
+    HStack(alignment: .top, spacing: Theme.Spacing.md) {
+      planThumb(a)
+      VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
+        Text(a.title)
+          .font(.headline)
+          .foregroundStyle(Theme.ink)
+        Text(timing)
+          .font(.subheadline)
+          .foregroundStyle(Theme.inkSoft)
+        if let loc = a.location, !loc.isEmpty {
+          locationLine(loc)
+        }
+        if let note = a.description, !note.isEmpty {
+          Text(AttributedString.linkified(note))
+            .font(.footnote)
+            .foregroundStyle(Theme.inkSoft)
+            .tint(Theme.inkSoft)
+        }
+        HStack(spacing: Theme.Spacing.s6) {
+          face(for: a.createdBy)
+          Text(displayName(for: a.createdBy))
+            .font(.caption)
+            .foregroundStyle(Theme.inkSoft)
+        }
+      }
+      Spacer(minLength: 0)
+    }
+    .padding(Theme.Spacing.row)
+    .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
+    .contentShape(Rectangle())
+    .onTapGesture { onSelect(a) }
+    .accessibilityAddTraits(.isButton)
+  }
+
+  private func locationLine(_ loc: String) -> some View {
+    HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.xs) {
+      Text("📍").font(.caption2)
+      Text(loc)
+        .font(.footnote)
+        .foregroundStyle(Theme.inkSoft)
     }
   }
 
@@ -375,6 +350,10 @@ struct PlansView: View {
     let start = String(e.startsAt.prefix(10))
     let when = DateLocal.relativeDay(start)
     return "\(when) · \(externalTiming(e))"
+  }
+
+  private func upNextTiming(_ a: Activity) -> String {
+    DateLocal.dtTime(a.dateTime).map(DateLocal.prettyLower) ?? "All day"
   }
 
   private func planTiming(_ a: Activity) -> String {
