@@ -586,10 +586,11 @@ final class AppModel: ObservableObject {
     return true
   }
 
-  func deleteActivity(_ id: String) async {
+  @discardableResult
+  func deleteActivity(_ id: String) async -> Bool {
     guard space?.canCompose == true else {
       toast = "This is a copy from when you left"
-      return
+      return false
     }
     let backup = activities
     activities.removeAll { $0.id == id }
@@ -600,7 +601,9 @@ final class AppModel: ObservableObject {
       activities = backup
       persistNotebook()
       toast = error.localizedDescription
+      return false
     }
+    return true
   }
 
   func moveActivityToSpace(_ id: String, targetSpaceId: String) async {

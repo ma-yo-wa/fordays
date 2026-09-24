@@ -24,9 +24,10 @@ struct BucketView: View {
       if items.isEmpty {
         empty
       } else {
+        let colors = Theme.orbColors(forBoard: items.map { ($0.id, $0.title) })
         LazyVGrid(columns: columns, spacing: Theme.Spacing.row) {
-          ForEach(items) { a in
-            ActivityCard(activity: a) { onSelect(a) }
+          ForEach(Array(items.enumerated()), id: \.element.id) { i, a in
+            ActivityCard(activity: a, colors: colors[i]) { onSelect(a) }
           }
         }
         .padding(.horizontal, Theme.Spacing.lg)
@@ -75,12 +76,16 @@ struct MemoriesView: View {
     GridItem(.flexible(), spacing: Theme.Spacing.row),
   ]
 
-  private var sections: [(key: String, label: String, items: [Activity])] {
-    let items = app.activities
+  private var memories: [Activity] {
+    app.activities
       .filter { $0.isMemory(today: today) }
       .sorted {
         ($0.endsAt ?? $0.dateTime ?? "") > ($1.endsAt ?? $1.dateTime ?? "")
       }
+  }
+
+  private var sections: [(key: String, label: String, items: [Activity])] {
+    let items = memories
     var map: [String: [Activity]] = [:]
     for a in items {
       guard let key = a.monthKey else { continue }
@@ -108,6 +113,11 @@ struct MemoriesView: View {
         .frame(maxWidth: .infinity)
         .padding(.top, Theme.TouchTarget.navBar)
       } else {
+        // Colours run over the whole list in order, as the PWA's tintsFor does.
+        let list = memories
+        let tints = Dictionary(
+          uniqueKeysWithValues: zip(list.map(\.id), Theme.orbColors(forBoard: list.map { ($0.id, $0.title) }))
+        )
         // VStack (not LazyVStack) so each month grid lays out with real widths.
         VStack(alignment: .leading, spacing: Theme.Spacing.s22) {
           ForEach(sections, id: \.key) { section in
@@ -118,7 +128,8 @@ struct MemoriesView: View {
                 .padding(.horizontal, Theme.Spacing.xxs)
               LazyVGrid(columns: columns, spacing: Theme.Spacing.row) {
                 ForEach(section.items) { a in
-                  ActivityCard(activity: a) { onSelect(a) }
+                  // Memory cards carry the title only, like the PWA.
+                  ActivityCard(activity: a, colors: tints[a.id], showWho: false) { onSelect(a) }
                 }
               }
             }
@@ -145,6 +156,8 @@ struct MemoriesView: View {
 struct ActivityCard: View {
   @EnvironmentObject private var app: AppModel
   let activity: Activity
+  var colors: [Color]? = nil
+  var showWho = true
   var onTap: () -> Void
 
   private var who: String {
@@ -156,7 +169,7 @@ struct ActivityCard: View {
     Button(action: onTap) {
       ZStack(alignment: .bottomLeading) {
         LinearGradient(
-          colors: Theme.orbColors(for: activity.id, title: activity.title),
+          colors: colors ?? Theme.orbColors(for: activity.id, title: activity.title),
           startPoint: .topLeading,
           endPoint: .bottomTrailing
         )
@@ -177,10 +190,11 @@ struct ActivityCard: View {
             .font(.headline)
             .foregroundStyle(Color(hex: 0xFFFDFB))
             .multilineTextAlignment(.leading)
-            .lineLimit(4)
-          Text(who)
-            .font(.footnote.weight(.medium))
-            .foregroundStyle(Theme.paperTranslucent)
+          if showWho {
+            Text(who)
+              .font(.caption2)
+              .foregroundStyle(Theme.paperTranslucent)
+          }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Theme.Spacing.row)
@@ -191,6 +205,16 @@ struct ActivityCard: View {
       .contentShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
       .shadow(color: Theme.shadowCard, radius: Theme.Spacing.sm, y: Theme.Spacing.s6)
     }
-    .buttonStyle(.plain)
+    .buttonStyle(CardPressStyle())
+  }
+}
+
+/// Cards press in slightly under the finger, like the PWA's `.card:active`.
+private struct CardPressStyle: ButtonStyle {
+  func makeBody(configuration: Configuration) -> some View {
+    configuration.label
+      .scaleEffect(configuration.isPressed ? Theme.Motion.pressSoft : 1)
+      .opacity(configuration.isPressed ? Theme.Motion.pressOpacity : 1)
+      .animation(.easeOut(duration: Theme.Motion.pressDuration), value: configuration.isPressed)
   }
 }

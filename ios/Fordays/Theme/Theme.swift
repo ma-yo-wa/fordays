@@ -121,6 +121,7 @@ enum Theme {
   enum Motion {
     static let pressScale: CGFloat = 0.97
     static let pressSoft: CGFloat = 0.96
+    static let pressOpacity: Double = 0.9
     static let spinner: CGFloat = 0.85
     static let photoSpinner: CGFloat = 0.8
     static let pressDuration: Double = 0.14
@@ -145,28 +146,51 @@ enum Theme {
 
   static let brandName = "Fordays"
 
+  private static let orbPalette: [[Color]] = [
+    [Color(hex: 0xE0416F), Color(hex: 0x7A1F3D)],
+    [Color(hex: 0xDE5A3E), Color(hex: 0x7E2A28)],
+    [Color(hex: 0xD0842F), Color(hex: 0x6E3F22)],
+    [Color(hex: 0xA8901F), Color(hex: 0x55491F)],
+    [Color(hex: 0x6C9330), Color(hex: 0x35491F)],
+    [Color(hex: 0x34925A), Color(hex: 0x1B4A2E)],
+  ]
+
   /// Same orb washes as the web board. Title families pick a hue;
   /// no match falls back to the id so a card still keeps a colour.
   static func orbColors(for id: String, title: String? = nil) -> [Color] {
-    let palette: [[Color]] = [
-      [Color(hex: 0xE0416F), Color(hex: 0x7A1F3D)],
-      [Color(hex: 0xDE5A3E), Color(hex: 0x7E2A28)],
-      [Color(hex: 0xD0842F), Color(hex: 0x6E3F22)],
-      [Color(hex: 0xA8901F), Color(hex: 0x55491F)],
-      [Color(hex: 0x6C9330), Color(hex: 0x35491F)],
-      [Color(hex: 0x34925A), Color(hex: 0x1B4A2E)],
-    ]
-    if let title, let hue = Art.hue(for: title) {
-      return palette[hue]
+    orbPalette[orbHue(for: id, title: title)]
+  }
+
+  /// A board of cards, nudged so no card shares a colour with the one to its
+  /// left or the one above it in the two-column grid — the PWA's `tintsFor`.
+  static func orbColors(forBoard items: [(id: String, title: String?)]) -> [[Color]] {
+    var chosen: [Int] = []
+    for (i, item) in items.enumerated() {
+      var idx = orbHue(for: item.id, title: item.title)
+      var step = 0
+      while step < orbPalette.count
+        && ((i >= 1 && idx == chosen[i - 1]) || (i >= 2 && idx == chosen[i - 2])) {
+        idx = (idx + 1) % orbPalette.count
+        step += 1
+      }
+      chosen.append(idx)
     }
-    var h = 0
+    return chosen.map { orbPalette[$0] }
+  }
+
+  /// 32-bit, exactly like the PWA's `bucket()` (Math.imul, >>>), so a card
+  /// is the same colour on the phone as in the browser.
+  private static func orbHue(for id: String, title: String?) -> Int {
+    if let title, let hue = Art.hue(for: title) { return hue }
+    var h: Int32 = 0
     for u in id.utf16 {
-      h = (h &* 31 &+ Int(u))
+      h = h &* 31 &+ Int32(u)
     }
-    h ^= h &>> 16
-    h = h &* 0x45d9f3b
-    h ^= h &>> 16
-    return palette[abs(h) % palette.count]
+    var x = UInt32(bitPattern: h)
+    x ^= x >> 16
+    x = x &* 0x45d9f3b
+    x ^= x >> 16
+    return abs(Int(Int32(bitPattern: x))) % orbPalette.count
   }
 }
 

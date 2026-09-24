@@ -8,7 +8,7 @@ struct DetailView: View {
   var onDoAgain: ((ComposerKind, PlanDraft) -> Void)? = nil
 
   private enum Mode {
-    case view, edit, when, suggest, confirmDelete
+    case view, edit, when, suggest
   }
 
   @State private var mode: Mode = .view
@@ -26,6 +26,7 @@ struct DetailView: View {
   @State private var seededFor: String?
   @State private var showDoAgainDialog = false
   @State private var showMoveDialog = false
+  @State private var showDeleteDialog = false
 
   private var item: Activity? {
     app.activity(id: activityId)
@@ -93,6 +94,23 @@ struct DetailView: View {
           titleVisibility: .visible
         ) {
           moveButtons
+        }
+        // A confirm is an Action Sheet, never Keep / Delete expanded in the page.
+        .confirmationDialog(
+          item.map { "Delete “\($0.title)”?" } ?? "",
+          isPresented: $showDeleteDialog,
+          titleVisibility: .visible
+        ) {
+          Button("Delete", role: .destructive) {
+            guard let id = item?.id else { return }
+            dismiss()
+            Task {
+              if await app.deleteActivity(id) { app.toast = "Deleted" }
+            }
+          }
+          Button("Keep it", role: .cancel) { }
+        } message: {
+          Text("This removes it for everyone in this Orb.")
         }
     }
   }
@@ -168,8 +186,6 @@ struct DetailView: View {
           editForm
         case .when, .suggest:
           whenForm(suggest: mode == .suggest)
-        case .confirmDelete:
-          confirmDelete(item)
         case .view:
           if app.space?.frozen == true {
             Text("This is a copy from when you left — you can look, not change")
@@ -582,24 +598,6 @@ struct DetailView: View {
     }
   }
 
-  private func confirmDelete(_ item: Activity) -> some View {
-    FDCard(variant: .roseWash, padding: .sm) {
-      VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-        Text("Delete “\(item.title)”? This removes it for everyone in this Orb.")
-          .font(.fdBody)
-          .foregroundStyle(Theme.ink2)
-        HStack(spacing: Theme.Spacing.s10) {
-          FDButton("Keep it", variant: .secondary) { mode = .view }
-          FDButton("Delete", variant: .destructive) {
-            await app.deleteActivity(item.id)
-            app.toast = "Deleted"
-            dismiss()
-          }
-        }
-      }
-    }
-  }
-
   private func actionList(_ item: Activity) -> some View {
     let rows = actionRows(item)
     return VStack(spacing: Theme.Spacing.none) {
@@ -668,7 +666,7 @@ struct DetailView: View {
       })
     }
     rows.append(DetailAction(id: "delete", title: "Delete", icon: .trash, destructive: true) {
-      mode = .confirmDelete
+      showDeleteDialog = true
     })
     return rows
   }

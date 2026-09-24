@@ -99,7 +99,7 @@ function PeopleIcon() {
   );
 }
 
-type Mode = 'view' | 'edit' | 'when' | 'suggest' | 'confirmDelete';
+type Mode = 'view' | 'edit' | 'when' | 'suggest';
 
 function sameWhen(
   a: string | null,
@@ -156,6 +156,7 @@ export default function Detail() {
   const [suggestNote, setSuggestNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [doAgainOpen, setDoAgainOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [doWithOpen, setDoWithOpen] = useState(false);
 
   async function handleDoWith(targetSpace: SpaceInfo) {
@@ -544,32 +545,6 @@ export default function Detail() {
         </>
       )}
 
-      {mode === 'confirmDelete' && (
-        <Card variant="roseWash" padding="sm" className={s.confirm}>
-          <p className={s.confirmText}>
-            Delete “{item.title}”? This removes it for everyone in this Orb.
-          </p>
-          <div className={f.row} style={{ marginTop: 'var(--space-3)' }}>
-            <Button
-              variant="secondary"
-              onClick={() => setMode('view')}
-            >
-              Keep it
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                void remove(item.id);
-                close();
-                toast('Deleted');
-              }}
-            >
-              Delete
-            </Button>
-          </div>
-        </Card>
-      )}
-
       {mode === 'view' && frozen && (
         <p className={f.rowNote} style={{ marginTop: 'var(--space-3-5)' }}>
           This is a copy from when you left — you can look, not change
@@ -630,7 +605,7 @@ export default function Detail() {
             icon={<TrashIcon />}
             label="Delete"
             destructive
-            onClick={() => setMode('confirmDelete')}
+            onClick={() => setDeleteOpen(true)}
           />
         </div>
       )}
@@ -708,6 +683,28 @@ export default function Detail() {
       }))}
       cancelLabel="Cancel"
       onCancel={() => setDoWithOpen(false)}
+    />
+
+    {/* A confirm is an Action Sheet, never Keep / Delete expanded in the page. */}
+    <ActionSheet
+      open={deleteOpen}
+      title={`Delete “${item.title}”?`}
+      message="This removes it for everyone in this Orb."
+      actions={[
+        {
+          label: 'Delete',
+          danger: true,
+          onClick: () => {
+            setDeleteOpen(false);
+            close();
+            void remove(item.id).then((ok) => {
+              if (ok) toast('Deleted');
+            });
+          },
+        },
+      ]}
+      cancelLabel="Keep it"
+      onCancel={() => setDeleteOpen(false)}
     />
     </>
   );

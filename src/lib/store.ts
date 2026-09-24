@@ -127,7 +127,8 @@ interface AppState {
   create: (input: NewActivity) => Promise<void>;
   patch: (id: string, changes: Partial<Activity>) => Promise<void>;
   moveToSpace: (id: string, targetSpaceId: string) => Promise<void>;
-  remove: (id: string) => Promise<void>;
+  /** Resolves true once the server has it, false when it put the row back. */
+  remove: (id: string) => Promise<boolean>;
   suggestWhen: (id: string, input: WhenSuggestion) => Promise<void>;
   acceptSuggestion: (id: string) => Promise<void>;
   dismissSuggestion: (id: string) => Promise<void>;
@@ -621,12 +622,14 @@ export const useApp = create<AppState>()((set, get) => {
       if (!backend) throw new Error('Not connected — try signing out and back in');
       if (!canCompose(get().space)) {
         get().toast('This is a copy from when you left');
-        return;
+        return false;
       }
       try {
         await backend.remove(id);
+        return true;
       } catch (err) {
         get().toast(err instanceof Error ? err.message : 'Could not delete');
+        return false;
       }
     },
 
