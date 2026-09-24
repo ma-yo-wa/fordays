@@ -28,41 +28,36 @@ struct ExternalDetailView: View {
   }
 
   private func targetOrbName(_ target: SpaceInfo) -> String {
-    target.partnerName ?? target.name
+    if let partner = target.partnerName, !partner.isEmpty { return partner }
+    return target.name
   }
 
   private func targetOrbLabel(_ target: SpaceInfo) -> String {
-    if let partner = target.partnerName {
+    if let partner = target.partnerName, !partner.isEmpty {
       return "\(partner) (\(target.name))"
     }
     return target.name
   }
 
+  /// An imported event is a plan: its when reads like plan Detail's.
   private var rangeDescription: String {
-    let startDay = String(event.startsAt.prefix(10))
-    let endDay = event.endsAt.isEmpty ? startDay : String(event.endsAt.prefix(10))
-    if event.allDay {
-      if startDay == endDay {
-        return "\(DateLocal.relativeDay(startDay)) · All day"
-      }
-      return "\(DateLocal.relativeDay(startDay)) – \(DateLocal.relativeDay(endDay)) · All day"
+    guard event.allDay else {
+      return DateLocal.describePlan(event.startsAt, endsAt: event.endsAt.isEmpty ? nil : event.endsAt)
     }
-    let startTime = event.startsAt.count > 10 ? DateLocal.prettyLower(String(event.startsAt.dropFirst(11).prefix(5))) : ""
-    let endTime = event.endsAt.count > 10 ? DateLocal.prettyLower(String(event.endsAt.dropFirst(11).prefix(5))) : ""
-    if startDay == endDay {
-      if !startTime.isEmpty && !endTime.isEmpty {
-        return "\(DateLocal.relativeDay(startDay)) · \(startTime) – \(endTime)"
-      }
-      return "\(DateLocal.relativeDay(startDay)) · \(startTime)"
-    }
-    return "\(DateLocal.relativeDay(startDay)) \(startTime) – \(DateLocal.relativeDay(endDay)) \(endTime)"
+    let start = String(event.startsAt.prefix(10))
+    let end = event.endsAt.isEmpty ? start : String(event.endsAt.prefix(10))
+    return DateLocal.describePlan(start, endsAt: end != start ? end : nil)
+  }
+
+  private var title: String {
+    let t = event.title ?? ""
+    return t.isEmpty ? Copy.Availability.busy : t
   }
 
   private func handleDoWith(_ targetSpace: SpaceInfo) async {
-    let title = event.title ?? "Plan"
-    dismiss()
+    let planTitle = (event.title ?? "").isEmpty ? "Plan" : event.title!
     let saved = await app.createActivity(
-      title: title,
+      title: planTitle,
       description: nil,
       location: event.location,
       imageUrl: nil,
@@ -70,9 +65,11 @@ struct ExternalDetailView: View {
       endsAt: event.endsAt.isEmpty ? nil : event.endsAt,
       spaceId: targetSpace.id
     )
+    // Close only once it's saved, like the PWA — a failure keeps the sheet.
     guard saved else { return }
-    let name = targetOrbName(targetSpace)
-    app.toast = "Moved to \(name)’s Plans"
+    app.toast = Copy.Orbs.movedToPlans(targetOrbName(targetSpace))
+    dismiss()
+    onClose()
   }
 
   var body: some View {
@@ -89,7 +86,7 @@ struct ExternalDetailView: View {
           .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
 
           VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-            Text(event.title ?? Copy.Availability.busy)
+            Text(title)
               .font(.title2.weight(.bold))
               .foregroundStyle(Theme.ink)
             Text(rangeDescription)
@@ -104,7 +101,7 @@ struct ExternalDetailView: View {
                     Text(loc)
                       .font(.subheadline)
                       .foregroundStyle(Theme.inkSoft)
-                      .lineLimit(1)
+                      .multilineTextAlignment(.leading)
                     Image(systemName: "arrow.up.right")
                       .font(.caption2)
                       .foregroundStyle(Theme.inkFaint)

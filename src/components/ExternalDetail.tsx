@@ -4,7 +4,7 @@ import CoverArt from './CoverArt';
 import ActionSheet from './ActionSheet';
 import { useApp } from '../lib/store';
 import { Avatar, Pill, ActionRow } from '../ui';
-import { formatRange } from '../lib/date';
+import { describePlan, dtDate } from '../lib/date';
 import { Copy, formatCopy } from '../lib/copy';
 import type { SpaceInfo } from '../lib/auth';
 import s from './ExternalDetail.module.css';
@@ -59,11 +59,24 @@ export default function ExternalDetail() {
     return target.partnerName || target.name || 'Orb';
   }
 
+  /* Same label as plan Detail's Do with list. */
+  function targetOrbLabel(target: SpaceInfo): string {
+    return target.partnerName ? `${target.partnerName} (${target.name})` : target.name;
+  }
+
+  /* An imported event is a plan: its when reads like plan Detail's. */
+  function describeEvent(e: { startsAt: string; endsAt: string; allDay: boolean }): string {
+    if (!e.allDay) return describePlan(e.startsAt, e.endsAt || null);
+    const start = dtDate(e.startsAt) as string;
+    const end = dtDate(e.endsAt);
+    return describePlan(start, end && end !== start ? end : null);
+  }
+
   async function handleDoWith(targetSpace: SpaceInfo) {
     if (!event) return;
     try {
       await create({
-        title: event.title ?? 'Plan',
+        title: event.title || 'Plan',
         location: event.location,
         date_time: event.startsAt,
         ends_at: event.endsAt || null,
@@ -90,10 +103,8 @@ export default function ExternalDetail() {
                 className={s.headWash}
               />
               <div className={s.headMeta}>
-                <h3 className={s.title}>{event.title ?? 'Busy'}</h3>
-                <div className={s.range}>
-                  {formatRange(event.startsAt, event.endsAt, event.allDay)}
-                </div>
+                <h3 className={s.title}>{event.title || Copy.availability.busy}</h3>
+                <div className={s.range}>{describeEvent(event)}</div>
                 {event.location && (
                   <a
                     href={`https://maps.apple.com/?q=${encodeURIComponent(event.location)}`}
@@ -155,7 +166,7 @@ export default function ExternalDetail() {
         open={doWithOpen}
         title={Copy.orbs.doWithEllipsis}
         actions={activeSharedOrbs.map((target) => ({
-          label: targetOrbName(target),
+          label: targetOrbLabel(target),
           onClick: () => void handleDoWith(target),
         }))}
         onCancel={() => setDoWithOpen(false)}
