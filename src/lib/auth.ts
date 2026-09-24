@@ -29,6 +29,21 @@ export function isDefaultSpaceName(name: string): boolean {
   return !raw || /^(fordays|someday)$/i.test(raw);
 }
 
+/** Default title for the solo notebook: their name, first word only. */
+export function soloNotebookTitle(displayName: string | null | undefined): string {
+  const word = (displayName ?? '').trim().split(/\s+/)[0] ?? '';
+  if (!word || isPlaceholderName(word) || word.toLowerCase() === 'them') return '';
+  return word;
+}
+
+/** The solo home base, including the old "Personal" title and a rename to their name. */
+export function isHomeSoloName(name: string, displayName: string | null | undefined): boolean {
+  const raw = name.trim().toLowerCase();
+  if (raw === 'personal') return true;
+  const title = soloNotebookTitle(displayName).toLowerCase();
+  return Boolean(title) && raw === title;
+}
+
 const FIRST_ORB_SETUP_KEY = 'fordays:first-orb-setup';
 
 /** Only the account that just signed up should see Your Orb. Sign-in never sets this. */
@@ -319,6 +334,18 @@ export async function loadSpaces(): Promise<SpaceInfo[]> {
   const list = (spaces ?? []).map((space) =>
     hydrateSpace(space, uid, nameOf(uid), nameOf, allMembers ?? [], memberships ?? []),
   );
+
+  const title = soloNotebookTitle(nameOf(uid));
+  if (title) {
+    for (const space of list) {
+      const solo =
+        (space.members ?? []).filter((m) => m.id !== space.myId).length === 0 && !space.partner2Id;
+      if (!space.frozen && solo && space.name.trim().toLowerCase() === 'personal') {
+        await renameSpace(space.id, title);
+        space.name = title;
+      }
+    }
+  }
 
   const current = list.find((s) => s.id === loadConfig().spaceId) ?? list[0];
   if (current) persistSpaceConfig(current);

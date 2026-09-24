@@ -23,7 +23,9 @@ struct OrbSetupView: View {
   }
 
   private var placeholder: String {
-    withPeople ? Copy.Orbs.crewPlaceholder : Copy.Orbs.personalPlaceholder
+    if withPeople { return Copy.Orbs.crewPlaceholder }
+    let mine = SpaceInfo.soloTitle(from: app.space?.myName ?? "")
+    return mine.isEmpty ? Copy.Orbs.personalPlaceholder : mine
   }
 
   var body: some View {

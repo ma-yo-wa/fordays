@@ -17,6 +17,8 @@ import {
   removeSpaceMember as removeSpaceMemberRemote,
   renameSpace as renameSpaceRemote,
   isDefaultSpaceName,
+  soloNotebookTitle,
+  isHomeSoloName,
   clearFirstOrbSetupPending,
   pendingInvite,
   signOut,
@@ -52,7 +54,7 @@ export function canCompose(space: SpaceInfo | null | undefined): boolean {
 }
 
 /** The notebook’s name, or empty if they haven’t named it.
- *  Fordays / Someday leftovers are unnamed. Never invent Personal or Aline’s Crew. */
+ *  Fordays / Someday leftovers are unnamed. The solo notebook’s default title is their name. */
 export function spaceOrbName(space: SpaceInfo): string {
   const raw = space.name?.trim() ?? '';
   if (raw && !isDefaultSpaceName(raw)) return raw;
@@ -421,7 +423,8 @@ export const useApp = create<AppState>()((set, get) => {
       const clean = name.trim();
       if (!clean) return;
       if (withPeople) {
-        await renameSpaceRemote(current.id, 'Personal');
+        const mine = soloNotebookTitle(current.myName) || soloNotebookTitle(get().config.names[get().config.me]);
+        if (mine) await renameSpaceRemote(current.id, mine);
         const space = await createSpaceRemote(clean);
         clearFirstOrbSetupPending();
         const spaces = await loadSpaces().catch(() => (space ? [space] : []));
@@ -470,7 +473,7 @@ export const useApp = create<AppState>()((set, get) => {
       );
       const isPersonal =
         solo &&
-        (leaving?.name.trim().toLowerCase() === 'personal' || soloOrbs.length <= 1);
+        (isHomeSoloName(leaving?.name ?? '', leaving?.myName) || soloOrbs.length <= 1);
       if (isPersonal) {
         get().toast(Copy.orbs.cannotDeletePersonal);
         return;
@@ -752,7 +755,8 @@ export const useApp = create<AppState>()((set, get) => {
           isDefaultSpaceName(s.name),
       );
       if (genericSolo) {
-        await renameSpaceRemote(genericSolo.id, 'Personal');
+        const mine = soloNotebookTitle(genericSolo.myName);
+        if (mine) await renameSpaceRemote(genericSolo.id, mine);
       }
       await get().switchToSpace(spaceId);
       const space = get().space;

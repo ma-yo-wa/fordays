@@ -30,7 +30,7 @@ Someday / Plans / Memories **are** that notebook. Everyone has at least one **li
 
 **Orb** = the notebook. **Faces** = people in *this* space. Every face is the same warm stone (`ink-soft`) with a white initial — one color, like a group thread. The letter tells people apart. A photo can replace the initial later. Not a hue per person, and not rose / sage.
 
-A name is **required** for Just you and With people. Placeholder in the field (`Personal` / `Aline’s Crew`) is only an example — never saved, never shown as the title. Unnamed legacy Orbs (Fordays / Someday / blank) stay untitled: empty field, no caption on the tile, faces already say who. When they name it, that word sits **under the circle** and **beside This Orb** (label semibold faint, name regular ink). Never title an Orb with a person’s name.
+The solo notebook’s default title is **their name** — the first word of their display name (`Mayowa`, not Personal, not Mayowa’s Orb). They can rename it. A shared Orb is still not titled with one person’s name; that notebook belongs to the we. Placeholder in the field is their name for Just you, and an example (`Aline’s Crew`) for With someone — the shared example is never saved. Unnamed legacy Orbs (Fordays / Someday / blank) stay untitled until named. A solo Orb still titled `Personal` is renamed to their name the next time the app loads. When they name it, that word sits **under the circle** and **beside This Orb**.
 
 Several Orbs are normal: Personal, Portugal, siblings. Each is solo, two, or many.
 
@@ -40,11 +40,11 @@ Do **not** type Orbs as Work / Personal / Travel. Names are free. Categories are
 
 - Every user has a **Personal Orb**.
 - **Fresh sign-up**: Prompts `Your first Orb` with `[ Just you | With someone ]`.
-  - **Just you**: Names their personal space (placeholder example `Personal`). Button says **Start planning**. Lands in Plans.
-  - **With someone**: Names the shared space (placeholder example `Aline’s Crew`). Button says **Invite your person**. Pops the native share sheet immediately with the invite link. Behind the scenes, their permanent **Personal** notebook is already minted and waiting in their Orb switcher.
+  - **Just you**: Names their solo space (the field hints at their name). Button says **Start planning**. Lands in Plans.
+  - **With someone**: Names the shared space (placeholder example `Aline’s Crew`). Button says **Invite your person**. Pops the native share sheet immediately with the invite link. Behind the scenes, their solo notebook is titled with their name and waiting in the Orb switcher.
 - **Invite sign-up**: Someone arriving via an invite link signs up and lands **directly in the invited Orb**. No setup interstitial, no asking them to configure a personal space first. Behind the scenes, their Personal notebook is already minted and waiting in their Orb switcher.
 - Blank name is not allowed when creating an Orb. Continue stays off until they type one.
-- Placeholder is example only (`Personal` / `Aline’s Crew`). Do not write it into the row.
+- Placeholder for a shared Orb is an example only (`Aline’s Crew`). Do not write it into the row. The solo notebook’s default title is their name, and that one is written.
 - Sign-in lands in their last active Orb and never asks for setup again.
 
 ### Settings

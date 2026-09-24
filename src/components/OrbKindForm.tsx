@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Copy } from '../lib/copy';
+import { soloNotebookTitle } from '../lib/auth';
+import { useApp } from '../lib/store';
 import { Button, Input } from '../ui';
 import { springSelect } from '../ui/motion';
 import f from './Form.module.css';
@@ -13,13 +15,14 @@ interface Props {
 }
 
 export default function OrbKindForm({ knobId, initialWithPeople = false, onSubmit }: Props) {
+  const space = useApp((st) => st.space);
+  const config = useApp((st) => st.config);
   const [withPeople, setWithPeople] = useState(initialWithPeople);
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const placeholder = withPeople
-    ? Copy.orbs.crewPlaceholder
-    : Copy.orbs.personalPlaceholder;
+  const mine = soloNotebookTitle(space?.myName || config.names[config.me]);
+  const placeholder = withPeople ? Copy.orbs.crewPlaceholder : mine || Copy.orbs.personalPlaceholder;
 
   async function continueSetup() {
     if (busy || !name.trim()) return;

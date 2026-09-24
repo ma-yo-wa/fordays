@@ -14,7 +14,7 @@ struct InviteShareView: View {
     guard let space = app.space else { return false }
     let soloOrb = space.members.count <= 1
     let soloOrbs = app.spaces.filter { !$0.frozen && $0.members.count <= 1 }
-    return soloOrb && (space.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "personal" || soloOrbs.count <= 1)
+    return soloOrb && (space.isHomeSoloName() || soloOrbs.count <= 1)
   }
 
   var body: some View {

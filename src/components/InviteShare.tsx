@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Sheet from './Sheet';
-import { inviteUrl } from '../lib/auth';
+import { inviteUrl, isHomeSoloName } from '../lib/auth';
 import { useApp } from '../lib/store';
 import { Copy, formatCopy } from '../lib/copy';
 import { Button, Input, Pill } from '../ui';
@@ -26,7 +26,7 @@ export default function InviteShare({ open, code, onClose }: Props) {
   const isPersonal = Boolean(
     space &&
     (space.members ?? []).length <= 1 &&
-    (space.name.trim().toLowerCase() === 'personal' || soloOrbs.length <= 1)
+    (isHomeSoloName(space.name, space.myName) || soloOrbs.length <= 1)
   );
 
   if (isPersonal) {

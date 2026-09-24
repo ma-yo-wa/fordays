@@ -10,6 +10,7 @@ import { useApp, partnerName, isMatched } from '../lib/store';
 import { Copy, formatCopy } from '../lib/copy';
 import { isPlan, isMemory } from '../lib/types';
 import type { SpaceInfo } from '../lib/auth';
+import { isHomeSoloName } from '../lib/auth';
 import { faceIndexFor } from '../lib/tint';
 import {
   composeWhen,
@@ -138,7 +139,7 @@ export default function Detail() {
   const isPersonalOrb = Boolean(
     space &&
       (space.members ?? []).length <= 1 &&
-      (space.name.trim().toLowerCase() === 'personal' || soloOrbs.length <= 1),
+      (isHomeSoloName(space.name, space.myName) || soloOrbs.length <= 1),
   );
   const activeSharedOrbs = activeOrbs.filter((s) => s.id !== space?.id);
 

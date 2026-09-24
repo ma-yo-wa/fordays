@@ -98,7 +98,7 @@ struct SettingsView: View {
     guard let space = app.space else { return false }
     let soloOrb = space.members.count <= 1
     let soloOrbs = activeOrbs.filter { $0.members.count <= 1 }
-    return soloOrb && (space.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "personal" || soloOrbs.count <= 1)
+    return soloOrb && (space.isHomeSoloName() || soloOrbs.count <= 1)
   }
 
   private func spaceOrbLabel(_ space: SpaceInfo) -> String {
@@ -443,9 +443,10 @@ struct SettingsView: View {
   private func orbDetailsView(space: SpaceInfo) -> some View {
     let soloOrb = space.members.count <= 1
     let soloOrbs = activeOrbs.filter { $0.members.count <= 1 }
-    let isPersonalOrb = soloOrb && (space.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "personal" || soloOrbs.count <= 1)
+    let isPersonalOrb = soloOrb && (space.isHomeSoloName() || soloOrbs.count <= 1)
     let leaveLabel = soloOrb ? Copy.Orbs.deleteSoloAction : Copy.Orbs.leaveAction
-    let placeholder = soloOrb ? Copy.Orbs.personalPlaceholder : Copy.Orbs.crewPlaceholder
+    let justYou = SpaceInfo.soloTitle(from: space.myName)
+    let placeholder = soloOrb ? (justYou.isEmpty ? Copy.Orbs.personalPlaceholder : justYou) : Copy.Orbs.crewPlaceholder
     
     return ScrollView {
       VStack(alignment: .leading, spacing: Theme.Spacing.sm) {

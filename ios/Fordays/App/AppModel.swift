@@ -74,10 +74,13 @@ final class AppModel: ObservableObject {
     guard !clean.isEmpty else { return }
     if withPeople {
       if let current = space {
-        _ = try? await sb.from("spaces")
-          .update(["name": AnyJSON.string("Personal")])
-          .eq("id", value: current.id)
-          .execute()
+        let mine = SpaceInfo.soloTitle(from: current.myName)
+        if !mine.isEmpty {
+          _ = try? await sb.from("spaces")
+            .update(["name": AnyJSON.string(mine)])
+            .eq("id", value: current.id)
+            .execute()
+        }
       }
       clearFirstOrbSetupPending()
       await addSpace(name: clean, withPeople: true)
@@ -939,10 +942,13 @@ final class AppModel: ObservableObject {
       return otherMembers.isEmpty && sp.partner2Id == nil && isDefaultName
     }
     if let genericSolo {
-      _ = try? await sb.from("spaces")
-        .update(["name": AnyJSON.string("Personal")])
-        .eq("id", value: genericSolo.id)
-        .execute()
+      let mine = SpaceInfo.soloTitle(from: genericSolo.myName)
+      if !mine.isEmpty {
+        _ = try? await sb.from("spaces")
+          .update(["name": AnyJSON.string(mine)])
+          .eq("id", value: genericSolo.id)
+          .execute()
+      }
     }
     try await refreshSpaceAndData()
     authPhase = .signedIn
@@ -1004,7 +1010,7 @@ final class AppModel: ObservableObject {
       }
       return otherMembers.isEmpty && sp.partner2Id == nil
     }
-    let isPersonal = solo && (leaving?.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "personal" || soloOrbs.count <= 1)
+    let isPersonal = solo && ((leaving?.isHomeSoloName() ?? false) || soloOrbs.count <= 1)
     if isPersonal {
       toast = Copy.Orbs.cannotDeletePersonal
       return
@@ -1218,7 +1224,25 @@ final class AppModel: ObservableObject {
     let list = rows.map { row in
       hydrateSpace(row, uid: uid, myName: nameOf(uid), nameOf: nameOf, allMembers: allMembers, myMemberships: memberships)
     }
-    return list.sorted {
+    let title = SpaceInfo.soloTitle(from: nameOf(uid))
+    var named = list
+    if !title.isEmpty {
+      for index in named.indices {
+        let sp = named[index]
+        let others = sp.members.filter {
+          $0.id.compare(sp.myId, options: .caseInsensitive) != .orderedSame
+        }
+        let solo = others.isEmpty && sp.partner2Id == nil
+        if !sp.frozen && solo && sp.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "personal" {
+          _ = try? await sb.from("spaces")
+            .update(["name": AnyJSON.string(title)])
+            .eq("id", value: sp.id)
+            .execute()
+          named[index].name = title
+        }
+      }
+    }
+    return named.sorted {
       if $0.frozen != $1.frozen { return !$0.frozen && $1.frozen }
       return $0.peopleLabel.localizedCaseInsensitiveCompare($1.peopleLabel) == .orderedAscending
     }

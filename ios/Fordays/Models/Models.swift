@@ -66,7 +66,8 @@ struct SpaceInfo: Hashable, Codable {
 
   var canCompose: Bool { !frozen }
 
-  /// Notebook name, or empty if they haven’t named it. Never invent Personal / Aline’s Crew.
+  /// Notebook name, or empty if they haven’t named it.
+  /// Fordays / Someday leftovers stay untitled. The solo default is their name.
   var peopleLabel: String {
     let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
     let generic = trimmed.isEmpty
@@ -81,6 +82,21 @@ struct SpaceInfo: Hashable, Codable {
       return named.name
     }
     return partnerName ?? "Them"
+  }
+
+  /// Default title for the solo notebook: their name, first word only.
+  static func soloTitle(from displayName: String) -> String {
+    let word = displayName.split(whereSeparator: \.isWhitespace).first.map(String.init) ?? ""
+    let lower = word.lowercased()
+    if word.isEmpty || lower == "me" || lower == "you" || lower == "them" { return "" }
+    return word
+  }
+
+  func isHomeSoloName() -> Bool {
+    let raw = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    if raw == "personal" { return true }
+    let title = Self.soloTitle(from: myName).lowercased()
+    return !title.isEmpty && raw == title
   }
 }
 

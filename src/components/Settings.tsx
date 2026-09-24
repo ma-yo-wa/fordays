@@ -4,7 +4,7 @@ import ActionSheet from './ActionSheet';
 import Switch from './Switch';
 import GcalPicker from './GcalPicker';
 import { useApp, spaceOrbName, spacePeopleLabel } from '../lib/store';
-import { isDefaultSpaceName, updateDisplayName, type SpaceInfo } from '../lib/auth';
+import { isDefaultSpaceName, isHomeSoloName, soloNotebookTitle, updateDisplayName, type SpaceInfo } from '../lib/auth';
 import {
   clearGoogleToken,
   connectGoogle,
@@ -201,7 +201,7 @@ export default function Settings() {
   const isPersonalOrb =
     soloOrb &&
     Boolean(
-      (space && space.name.trim().toLowerCase() === 'personal') ||
+      (space && isHomeSoloName(space.name, space.myName)) ||
       soloOrbs.length <= 1,
     );
   const leaveLabel = soloOrb ? 'Delete this Orb' : 'Leave this Orb';
@@ -631,7 +631,9 @@ export default function Settings() {
                   })();
                 }}
                 placeholder={
-                  soloOrb ? Copy.orbs.personalPlaceholder : Copy.orbs.crewPlaceholder
+                  soloOrb
+                    ? soloNotebookTitle(space.myName) || Copy.orbs.personalPlaceholder
+                    : Copy.orbs.crewPlaceholder
                 }
                 autoComplete="off"
                 autoCapitalize="words"
