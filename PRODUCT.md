@@ -49,16 +49,21 @@ Do **not** type Orbs as Work / Personal / Travel. Names are free. Categories are
 
 ### Settings
 
-One sheet, two bands — not two Settings screens.
+One sheet. At the top, **Your Orbs**; below it, a short list of rows that each open a page inside the same sheet (`← Back`, never a second sheet).
 
-- **Your Orbs** — all notebooks. Grid, +, Past Orbs. Switch and create.
-- **This Orb** — the open notebook. If it has a name, that name sits beside the label in a lighter weight. The field is the name (placeholder still the example). People / invite / remove, Leave or Delete. No “Orb actions” heading.
+- **Your Orbs** — all live notebooks as a grid, with + first (Start a new one / Join with a code). Tap a tile to switch.
+- **This Orb** — the open notebook. The page reads **This Orb** with its name beside it in a lighter weight. The field is the name (placeholder still the example). People / invite / remove, Leave or Delete. No “Orb actions” heading.
+- **Account** — your name, Past Orbs, Sign out.
+- **External calendars** — PWA: Google and Outlook. iOS: Apple Calendar, which already carries any Google or Outlook account on the phone, so there is no separate Outlook switch.
+- **Notifications** — PWA only for now. iOS shows no row until native push ships; never a switch that can’t turn on.
 
-You / calendars / notifications / sign out are you, not a notebook.
+Account / calendars / notifications are you, not a notebook.
+
+Invite is its own sheet, so Settings closes before it opens.
 
 ### Start a new one
 
-Same questions as first signup, in a sheet. Cancel returns to Start / Join. Join with a code stays its own path (link or code for *this* Orb — no directory, no Contacts).
+Same questions as first signup, as a page inside Settings. Back returns to Start / Join. Join with a code stays its own path (link or code for *this* Orb — no directory, no Contacts).
 
 ### Admin and members
 

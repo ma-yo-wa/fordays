@@ -49,11 +49,15 @@ private enum SettingsConfirm: Identifiable, Hashable {
   }
 }
 
+/// Every sub-flow is a page in the one Settings stack — never a sheet on top.
 private enum SettingsDestination: Hashable {
   case orbDetails
   case account
   case calendars
-  case notifications
+  case anotherOrb
+  case orbSetup(withPeople: Bool)
+  case pastOrbs
+  case applePicker
 }
 
 struct SettingsView: View {
@@ -62,11 +66,6 @@ struct SettingsView: View {
   @EnvironmentObject private var app: AppModel
   @Environment(\.dismiss) private var dismiss
   @State private var navPath = NavigationPath()
-  @State private var showInvite = false
-  @State private var showPastOrbs = false
-  @State private var showAnotherOrb = false
-  @State private var showOrbSetup = false
-  @State private var orbSetupWithPeople = false
   @State private var confirm: SettingsConfirm?
   @State private var orbDraft = ""
   @State private var profileNameDraft = ""
@@ -76,9 +75,7 @@ struct SettingsView: View {
   @State private var appleName = CalendarSync.selectedName
   @State private var appleBusy = false
   @State private var appleCals: [DeviceCalendar] = []
-  @State private var showApplePicker = false
   @State private var pendingAppleId: String?
-  @State private var outlookOn = false
 
   private var allOrbs: [SpaceInfo] {
     if !app.spaces.isEmpty { return app.spaces }
@@ -92,13 +89,6 @@ struct SettingsView: View {
 
   private var pastOrbs: [SpaceInfo] {
     allOrbs.filter { $0.frozen }
-  }
-
-  private var isCurrentPersonalOrb: Bool {
-    guard let space = app.space else { return false }
-    let soloOrb = space.members.count <= 1
-    let soloOrbs = activeOrbs.filter { $0.members.count <= 1 }
-    return soloOrb && (space.isHomeSoloName() || soloOrbs.count <= 1)
   }
 
   private func spaceOrbLabel(_ space: SpaceInfo) -> String {
@@ -145,16 +135,6 @@ struct SettingsView: View {
                 }
               }
               .buttonStyle(.plain)
-              
-              Divider().overlay(Theme.separator)
-              NavigationLink(value: SettingsDestination.notifications) {
-                FDFormRow(label: "Notifications", glyph: .bell, action: nil) {
-                  Text("›")
-                    .font(.fdSubhead)
-                    .foregroundStyle(Theme.inkFaint)
-                }
-              }
-              .buttonStyle(.plain)
             }
           }
         }
@@ -172,8 +152,18 @@ struct SettingsView: View {
           if let space = app.space { accountView(space: space) }
         case .calendars:
           calendarsView
-        case .notifications:
-          notificationsView
+        case .anotherOrb:
+          anotherOrbView
+        case .orbSetup(let withPeople):
+          OrbSetupView(mode: .create, initialWithPeople: withPeople) {
+            dismiss()
+          }
+          .environmentObject(app)
+          .navigationBarTitleDisplayMode(.inline)
+        case .pastOrbs:
+          pastOrbsView
+        case .applePicker:
+          applePickerView
         }
       }
       .toolbar {
@@ -205,33 +195,6 @@ struct SettingsView: View {
     }
     .settingsConfirm($confirm) { item in
       runConfirm(item)
-    }
-    .sheet(isPresented: $showInvite) {
-      if !isCurrentPersonalOrb {
-        InviteShareView()
-          .environmentObject(app)
-      }
-    }
-    .sheet(isPresented: $showPastOrbs) {
-      pastOrbsSheet
-        .settingsConfirm($confirm) { item in
-          runConfirm(item)
-        }
-    }
-    .sheet(isPresented: $showAnotherOrb) {
-      anotherOrbSheet
-    }
-    .sheet(isPresented: $showOrbSetup) {
-      OrbSetupView(mode: .create, initialWithPeople: orbSetupWithPeople) {
-        showOrbSetup = false
-        dismiss()
-      }
-      .environmentObject(app)
-      .presentationDetents([.medium, .large])
-      .presentationDragIndicator(.visible)
-    }
-    .sheet(isPresented: $showApplePicker) {
-      applePickerSheet
     }
     .onAppear {
       appleOn = CalendarSync.isConnected
@@ -341,7 +304,7 @@ struct SettingsView: View {
 
   private var plusTile: some View {
     Button {
-      showAnotherOrb = true
+      navPath.append(SettingsDestination.anotherOrb)
     } label: {
       VStack(spacing: Theme.Spacing.s6) {
         ZStack {
@@ -394,23 +357,14 @@ struct SettingsView: View {
     }
   }
 
-  private var anotherOrbSheet: some View {
+  private var anotherOrbView: some View {
     VStack(alignment: .leading, spacing: Theme.Spacing.none) {
-      Text(Copy.Orbs.anotherOrb)
-        .font(.title2.weight(.semibold))
-        .foregroundStyle(Theme.ink)
-        .padding(.bottom, Theme.Spacing.base)
-
       FDActionRow(
         title: Copy.Orbs.startNew,
         note: Copy.Orbs.startNewNote,
         glyph: "+"
       ) {
-        showAnotherOrb = false
-        orbSetupWithPeople = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Motion.sheetHandoff) {
-          showOrbSetup = true
-        }
+        navPath.append(SettingsDestination.orbSetup(withPeople: false))
       }
 
       Rectangle()
@@ -422,18 +376,18 @@ struct SettingsView: View {
         note: Copy.Orbs.joinWithCodeNote,
         glyph: "→"
       ) {
-        showAnotherOrb = false
         dismiss()
         DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Motion.sheetHandoffLong) {
           app.showJoinOrb = true
         }
       }
+      Spacer(minLength: 0)
     }
     .padding(Theme.Spacing.lg)
-    .padding(.bottom, Theme.Spacing.sm)
-    .background(Theme.paper)
-    .presentationDetents([.height(Theme.TouchTarget.sheetDetentCompact)])
-    .presentationDragIndicator(.visible)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .background(Theme.paper.ignoresSafeArea())
+    .navigationTitle(Copy.Orbs.anotherOrb)
+    .navigationBarTitleDisplayMode(.inline)
   }
 
   private func orbDetailsView(space: SpaceInfo) -> some View {
@@ -462,7 +416,7 @@ struct SettingsView: View {
             HStack(spacing: Theme.Spacing.s10) {
               if !space.frozen && !isPersonalOrb {
                 Button {
-                  showInvite = true
+                  openInvite()
                 } label: {
                   VStack(spacing: Theme.Spacing.xs) {
                     ZStack {
@@ -539,8 +493,7 @@ struct SettingsView: View {
                 .foregroundStyle(Theme.inkFaint)
 
               Button {
-                orbSetupWithPeople = true
-                showOrbSetup = true
+                navPath.append(SettingsDestination.orbSetup(withPeople: true))
               } label: {
                 Text("+ \(Copy.Orbs.startSharedOrb)")
                   .font(.footnote.weight(.semibold))
@@ -609,13 +562,27 @@ struct SettingsView: View {
       .padding(.vertical, Theme.Spacing.base)
     }
     .background(Theme.paper.ignoresSafeArea())
-    .navigationTitle(space.name ?? "This Orb")
     .navigationBarTitleDisplayMode(.inline)
+    .toolbar {
+      // This Orb, with its name beside it in a lighter weight.
+      ToolbarItem(placement: .principal) {
+        HStack(spacing: Theme.Spacing.s6) {
+          Text(Copy.Orbs.thisOrb)
+            .font(.headline)
+            .foregroundStyle(Theme.ink)
+          if !space.peopleLabel.isEmpty {
+            Text(space.peopleLabel)
+              .font(.headline.weight(.regular))
+              .foregroundStyle(Theme.inkSoft)
+          }
+        }
+        .lineLimit(1)
+      }
+    }
   }
 
-  private var pastOrbsSheet: some View {
-    NavigationStack {
-      ScrollView {
+  private var pastOrbsView: some View {
+    ScrollView {
         VStack(alignment: .leading, spacing: Theme.Spacing.base) {
           ForEach(pastOrbs, id: \.id) { pOrb in
             let isCurrent = pOrb.id == app.space?.id
@@ -655,7 +622,6 @@ struct SettingsView: View {
                       .disabled(true)
                   } else {
                     FDButton("View", variant: .secondary, size: .sm) {
-                      showPastOrbs = false
                       switchOrb(pOrb.id)
                     }
                   }
@@ -671,18 +637,10 @@ struct SettingsView: View {
           }
         }
         .padding(Theme.Spacing.lg)
-      }
-      .background(Theme.paper.ignoresSafeArea())
-      .navigationTitle(Copy.Orbs.pastOrbs)
-      .navigationBarTitleDisplayMode(.inline)
-      .toolbar {
-        ToolbarItem(placement: .topBarTrailing) {
-          Button("Done") {
-            showPastOrbs = false
-          }
-        }
-      }
     }
+    .background(Theme.paper.ignoresSafeArea())
+    .navigationTitle(Copy.Orbs.pastOrbs)
+    .navigationBarTitleDisplayMode(.inline)
   }
 
   private func accountView(space: SpaceInfo) -> some View {
@@ -712,7 +670,7 @@ struct SettingsView: View {
                 label: Copy.Orbs.pastOrbs,
                 note: Copy.Orbs.pastOrbsSub,
                 glyph: .history,
-                action: { showPastOrbs = true }
+                action: { navPath.append(SettingsDestination.pastOrbs) }
               ) {
                 HStack(spacing: Theme.Spacing.s6) {
                   FDPill(title: "\(pastOrbs.count)", variant: .neutral, size: .sm)
@@ -773,14 +731,6 @@ struct SettingsView: View {
               }
             }
           }
-
-          Divider().overlay(Theme.separator)
-
-          FDFormRow(label: Copy.Availability.outlookCalendar, glyph: .calendar) {
-            Toggle("Connect Outlook Calendar", isOn: outlookToggle)
-              .labelsHidden()
-              .tint(Theme.roseInk)
-          }
         }
 
         Text(Copy.Availability.settingsNoteIos)
@@ -793,37 +743,6 @@ struct SettingsView: View {
     .background(Theme.paper.ignoresSafeArea())
     .navigationTitle("External calendars")
     .navigationBarTitleDisplayMode(.inline)
-  }
-
-  private var notificationsView: some View {
-    ScrollView {
-      VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-        FDFormGroup {
-          FDFormRow(label: "Push notifications", glyph: .bell) {
-            Toggle("Notifications", isOn: .constant(false)) // Setup proper binding when push is implemented on iOS
-              .labelsHidden()
-              .tint(Theme.roseInk)
-          }
-        }
-      }
-      .padding(.horizontal, Theme.Spacing.lg)
-      .padding(.vertical, Theme.Spacing.base)
-    }
-    .background(Theme.paper.ignoresSafeArea())
-    .navigationTitle("Notifications")
-    .navigationBarTitleDisplayMode(.inline)
-  }
-
-  private var outlookToggle: Binding<Bool> {
-    Binding(
-      get: { outlookOn },
-      set: { on in
-        if on {
-          app.toast = "Outlook isn’t available yet"
-        }
-        outlookOn = false
-      }
-    )
   }
 
   private var appleToggle: Binding<Bool> {
@@ -866,7 +785,7 @@ struct SettingsView: View {
     }
     appleOn = true
     appleCals = list
-    showApplePicker = true
+    navPath.append(SettingsDestination.applePicker)
   }
 
   private func openApplePicker() async {
@@ -883,7 +802,7 @@ struct SettingsView: View {
       return
     }
     appleCals = CalendarSync.listCalendars()
-    showApplePicker = true
+    navPath.append(SettingsDestination.applePicker)
   }
 
   private func importApple(_ cal: DeviceCalendar? = nil) async {
@@ -896,7 +815,6 @@ struct SettingsView: View {
     CalendarSync.saveCalendar(chosen)
     appleName = chosen.summary
     appleOn = true
-    showApplePicker = false
     do {
       try await app.replaceExternal(CalendarSync.fetchEvents(), source: "apple")
       app.watchDeviceCalendars()
@@ -910,9 +828,8 @@ struct SettingsView: View {
     appleBusy = false
   }
 
-  private var applePickerSheet: some View {
-    NavigationStack {
-      ScrollView {
+  private var applePickerView: some View {
+    ScrollView {
         VStack(alignment: .leading, spacing: Theme.Spacing.base) {
           Text(Copy.Availability.pickerLead)
             .font(.subheadline)
@@ -927,30 +844,30 @@ struct SettingsView: View {
           }
         }
         .padding(Theme.Spacing.lg)
+    }
+    .background(Theme.paper.ignoresSafeArea())
+    .navigationTitle("Import calendars")
+    .navigationBarTitleDisplayMode(.inline)
+    .toolbar {
+      ToolbarItem(placement: .confirmationAction) {
+        Button("Import") {
+          let chosen = appleCals.first(where: { $0.id == pendingAppleId })
+            ?? appleCals.first(where: \.primary)
+            ?? appleCals.first
+          Task {
+            await importApple(chosen)
+            if !navPath.isEmpty { navPath.removeLast() }
+          }
+        }
+        .fontWeight(.semibold)
+        .disabled(appleBusy || appleCals.isEmpty)
       }
-      .background(Theme.paper.ignoresSafeArea())
-      .navigationTitle("Import calendars")
-      .navigationBarTitleDisplayMode(.inline)
-      .toolbar {
-        ToolbarItem(placement: .cancellationAction) {
-          Button("Cancel") {
-            showApplePicker = false
-            if CalendarSync.selectedId == nil {
-              appleOn = false
-              CalendarSync.setConnected(false)
-            }
-          }
-        }
-        ToolbarItem(placement: .confirmationAction) {
-          Button("Import") {
-            let chosen = appleCals.first(where: { $0.id == pendingAppleId })
-              ?? appleCals.first(where: \.primary)
-              ?? appleCals.first
-            Task { await importApple(chosen) }
-          }
-          .fontWeight(.semibold)
-          .disabled(appleBusy || appleCals.isEmpty)
-        }
+    }
+    .onDisappear {
+      // Backing out without choosing leaves Apple Calendar off, like the PWA picker.
+      if CalendarSync.selectedId == nil {
+        appleOn = false
+        CalendarSync.setConnected(false)
       }
     }
     .onAppear {
@@ -1037,7 +954,7 @@ struct SettingsView: View {
       return
     }
     guard next != current else { return }
-    await app.renameCurrentSpace(orbDraft)
+    await app.renameCurrentSpace(next)
   }
 
   private func persistProfileName() async {
@@ -1052,7 +969,7 @@ struct SettingsView: View {
     do {
       try await app.updateDisplayName(next)
     } catch {
-      app.toast = "Couldn't save name"
+      app.toast = "Couldn’t save name"
     }
   }
 
@@ -1065,6 +982,14 @@ struct SettingsView: View {
       dismiss()
       await app.switchToSpace(id)
       spaceBusy = false
+    }
+  }
+
+  /// Invite is its own sheet, so Settings closes first — never stacked.
+  private func openInvite() {
+    dismiss()
+    DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Motion.sheetHandoffLong) {
+      app.pendingInviteShare = true
     }
   }
 
@@ -1105,8 +1030,8 @@ struct SettingsView: View {
     Task {
       await app.deletePastOrb(id)
       confirm = nil
-      if pastOrbs.count <= 1 {
-        showPastOrbs = false
+      if pastOrbs.isEmpty {
+        navPath = NavigationPath()
       }
       spaceBusy = false
     }
