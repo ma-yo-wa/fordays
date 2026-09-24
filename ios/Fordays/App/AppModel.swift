@@ -621,10 +621,11 @@ final class AppModel: ObservableObject {
     return true
   }
 
-  func moveActivityToSpace(_ id: String, targetSpaceId: String) async {
+  @discardableResult
+  func moveActivityToSpace(_ id: String, targetSpaceId: String) async -> Bool {
     guard space?.canCompose == true else {
       toast = "This is a copy from when you left"
-      return
+      return false
     }
     struct MoveSpacePayload: Encodable {
       let space_id: String
@@ -641,7 +642,9 @@ final class AppModel: ObservableObject {
       activities = backup
       persistNotebook()
       toast = error.localizedDescription
+      return false
     }
+    return true
   }
 
   /// Patch fields like the PWA `backend.patch`.
@@ -760,15 +763,16 @@ final class AppModel: ObservableObject {
     tab = .bucket
   }
 
+  @discardableResult
   func suggestWhen(
     _ id: String,
     dateTime: String,
     endsAt: String?,
     note: String?
-  ) async {
+  ) async -> Bool {
     guard space?.isMatched == true, space?.canCompose == true else {
       toast = "Suggest a date when someone else is in this Orb"
-      return
+      return false
     }
     do {
       let session = try await sb.auth.session
@@ -789,13 +793,16 @@ final class AppModel: ObservableObject {
       toast = "Suggested"
     } catch {
       toast = error.localizedDescription
+      return false
     }
+    return true
   }
 
-  func acceptSuggestion(_ id: String) async {
+  @discardableResult
+  func acceptSuggestion(_ id: String) async -> Bool {
     guard space?.canCompose == true else {
       toast = "This is a copy from when you left"
-      return
+      return false
     }
     do {
       struct Sug: Decodable {
@@ -811,7 +818,7 @@ final class AppModel: ObservableObject {
         .value
       guard let data = rows.first, let when = data.suggested_date_time else {
         toast = "That suggestion is gone — ask them to send it again"
-        return
+        return false
       }
       let patch: [String: AnyJSON] = [
         "date_time": .string(when),
@@ -830,13 +837,16 @@ final class AppModel: ObservableObject {
       tab = .plans
     } catch {
       toast = error.localizedDescription
+      return false
     }
+    return true
   }
 
-  func dismissSuggestion(_ id: String) async {
+  @discardableResult
+  func dismissSuggestion(_ id: String) async -> Bool {
     guard space?.canCompose == true else {
       toast = "This is a copy from when you left"
-      return
+      return false
     }
     do {
       let patch: [String: AnyJSON] = [
@@ -852,7 +862,15 @@ final class AppModel: ObservableObject {
       toast = "Dismissed"
     } catch {
       toast = error.localizedDescription
+      return false
     }
+    return true
+  }
+
+  /// Point the Plans calendar at a day — the one a plan just landed on.
+  func showDay(_ iso: String) {
+    pickedDay = iso
+    if let d = DateLocal.parseLocalDay(iso) { cursorMonth = d }
   }
 
   func activity(id: String) -> Activity? {

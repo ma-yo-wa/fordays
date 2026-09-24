@@ -58,8 +58,13 @@ struct DetailView: View {
     )
   }
 
+  private func partnerOrName(_ target: SpaceInfo) -> String {
+    if let partner = target.partnerName, !partner.isEmpty { return partner }
+    return target.name
+  }
+
   private func targetOrbLabel(_ target: SpaceInfo) -> String {
-    if let partner = target.partnerName {
+    if let partner = target.partnerName, !partner.isEmpty {
       return "\(partner) (\(target.name))"
     }
     return target.name
@@ -292,9 +297,10 @@ struct DetailView: View {
         }
 
         if let note = item.suggestedNote, !note.isEmpty {
-          Text(note)
+          Text(AttributedString.linkified(note))
             .font(.subheadline)
             .foregroundStyle(Theme.inkSoft)
+            .tint(Theme.inkSoft)
         }
 
         if app.space?.frozen != true {
@@ -306,9 +312,11 @@ struct DetailView: View {
             } else {
               FDButton("Accept", variant: .primary, size: .sm, disabled: busy) {
                 busy = true
-                await app.acceptSuggestion(item.id)
+                let day = DateLocal.dtDate(item.suggestedDateTime)
+                if await app.acceptSuggestion(item.id), let day {
+                  app.showDay(day)
+                }
                 busy = false
-                dismiss()
               }
               FDButton("Dismiss", variant: .secondary, size: .sm, disabled: busy) {
                 await dismissSuggestion(item, mine: false)
@@ -339,7 +347,7 @@ struct DetailView: View {
         lineLimit: 3...6
       )
 
-      fieldLabel("Cover", hint: "— optional")
+      fieldLabel("Cover")
       CoverPickerView(cover: $cover, titleHint: { title })
 
       HStack(spacing: Theme.Spacing.s10) {
@@ -633,7 +641,7 @@ struct DetailView: View {
     if !item.isMemory(), isPersonalOrb, !activeSharedOrbs.isEmpty {
       if activeSharedOrbs.count == 1 {
         let target = activeSharedOrbs[0]
-        let targetName = target.partnerName ?? target.name
+        let targetName = partnerOrName(target)
         rows.append(DetailAction(id: "with", title: Copy.Orbs.doWith(targetName), icon: .people, destructive: false) {
           Task { await handleDoWith(target) }
         })
@@ -649,7 +657,7 @@ struct DetailView: View {
       icon: .calendar,
       destructive: false
     ) {
-      seedWhen(from: item)
+      seedWhen(from: item, suggestion: false)
       mode = .when
     })
     if app.space?.isMatched == true, !item.isMemory() {
@@ -707,8 +715,8 @@ struct DetailView: View {
 
   private func handleDoWith(_ targetSpace: SpaceInfo) async {
     guard let item else { return }
-    let targetName = targetSpace.partnerName ?? targetSpace.name
-    await app.moveActivityToSpace(item.id, targetSpaceId: targetSpace.id)
+    let targetName = partnerOrName(targetSpace)
+    guard await app.moveActivityToSpace(item.id, targetSpaceId: targetSpace.id) else { return }
     app.toast = item.isPlan
       ? Copy.Orbs.movedToPlans(targetName)
       : Copy.Orbs.movedToSomeday(targetName)
@@ -756,12 +764,14 @@ struct DetailView: View {
     cover = item.imageUrl ?? ""
     suggestNote = ""
     busy = false
-    seedWhen(from: item)
+    seedWhen(from: item, suggestion: false)
   }
 
-  private func seedWhen(from item: Activity) {
-    let start = item.suggestedDateTime ?? item.dateTime
-    let finish = item.suggestedEndsAt ?? item.endsAt
+  /// Change the day starts from the plan's own day; Suggest something else
+  /// starts from the pending suggestion — the PWA's seed vs `openSuggest`.
+  private func seedWhen(from item: Activity, suggestion: Bool) {
+    let start = suggestion ? (item.suggestedDateTime ?? item.dateTime) : item.dateTime
+    let finish = suggestion ? (item.suggestedEndsAt ?? item.endsAt) : item.endsAt
     day = DateLocal.parseLocalDay(start ?? DateLocal.todayISO()) ?? Date()
     fromTime = DateLocal.dtTime(start) ?? ""
     untilTime = DateLocal.dtTime(finish) ?? ""
@@ -778,7 +788,7 @@ struct DetailView: View {
   }
 
   private func openSuggest(_ item: Activity) {
-    seedWhen(from: item)
+    seedWhen(from: item, suggestion: true)
     suggestNote = ""
     mode = .suggest
   }
@@ -819,6 +829,7 @@ struct DetailView: View {
     )
     app.toast = item?.isPlan == true ? "Updated" : "Made it a plan"
     app.tab = .plans
+    app.showDay(DateLocal.todayISO(day))
     mode = .view
   }
 
@@ -837,20 +848,22 @@ struct DetailView: View {
       return
     }
     busy = true
-    await app.suggestWhen(
+    let sent = await app.suggestWhen(
       item.id,
       dateTime: when.dateTime,
       endsAt: when.endsAt,
       note: suggestNote
     )
     busy = false
-    mode = .view
+    // A failed suggestion keeps the form (and the note) open.
+    if sent { mode = .view }
   }
 
   private func dismissSuggestion(_ item: Activity, mine: Bool) async {
     busy = true
-    await app.dismissSuggestion(item.id)
-    app.toast = mine ? "Cancelled" : "Dismissed"
+    if await app.dismissSuggestion(item.id) {
+      app.toast = mine ? "Cancelled" : "Dismissed"
+    }
     busy = false
   }
 }
