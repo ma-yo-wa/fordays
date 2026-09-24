@@ -358,6 +358,82 @@ enum DateLocal {
     }
     return (countdown, dateStr)
   }
+
+  static func timeAgo(_ stamp: String) -> String {
+    guard let then = parseStamp(stamp) else { return "" }
+    let mins = Int(Date().timeIntervalSince(then) / 60)
+    if mins < 1 { return "just now" }
+    if mins < 60 { return "\(mins) min ago" }
+    let hours = mins / 60
+    if hours < 24 { return "\(hours) hr ago" }
+    let days = hours / 24
+    if days == 1 { return "yesterday" }
+    if days < 7 { return "\(days) days ago" }
+    let names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    let parts = Calendar.current.dateComponents([.month, .day], from: then)
+    let month = names[(parts.month ?? 1) - 1]
+    return "\(month) \(parts.day ?? 1)"
+  }
+
+  /// Postgres writes audit details in UTC ("Sep 07, 2026 at 01:00 AM"). Show the local day.
+  static func localizeAuditDetails(_ details: String) -> String {
+    let pattern = #"\b([A-Z][a-z]{2})\s+(\d{1,2}),\s+(\d{4})\s+at\s+(\d{1,2}):(\d{2})\s+(AM|PM)\b"#
+    guard let regex = try? NSRegularExpression(pattern: pattern) else { return details }
+    let ns = details as NSString
+    let matches = regex.matches(in: details, range: NSRange(location: 0, length: ns.length))
+    guard !matches.isEmpty else { return details }
+    let names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    var result = details
+    for match in matches.reversed() {
+      func piece(_ i: Int) -> String {
+        guard match.range(at: i).location != NSNotFound else { return "" }
+        return ns.substring(with: match.range(at: i))
+      }
+      let mon = piece(1)
+      guard let monthIdx = names.firstIndex(of: mon),
+            let day = Int(piece(2)),
+            let year = Int(piece(3)),
+            var hour = Int(piece(4)),
+            let minute = Int(piece(5)) else { continue }
+      let ampm = piece(6)
+      if ampm == "PM", hour < 12 { hour += 12 }
+      if ampm == "AM", hour == 12 { hour = 0 }
+      var comps = DateComponents()
+      comps.calendar = Calendar(identifier: .gregorian)
+      comps.timeZone = TimeZone(secondsFromGMT: 0)
+      comps.year = year
+      comps.month = monthIdx + 1
+      comps.day = day
+      comps.hour = hour
+      comps.minute = minute
+      guard let utc = comps.date else { continue }
+      let local = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: utc)
+      guard let localMonth = local.month, let localDay = local.day, let localYear = local.year else { continue }
+      let localMon = names[localMonth - 1]
+      let localH = local.hour ?? 0
+      let localM = local.minute ?? 0
+      let replacement: String
+      if localH == 0, localM == 0 {
+        replacement = "\(localMon) \(localDay), \(localYear)"
+      } else {
+        let hh = String(format: "%02d", localH)
+        let mm = String(format: "%02d", localM)
+        replacement = "\(localMon) \(localDay), \(localYear) at \(prettyLower("\(hh):\(mm)"))"
+      }
+      let range = Range(match.range, in: result)
+      if let range { result.replaceSubrange(range, with: replacement) }
+    }
+    return result
+  }
+
+  private static func parseStamp(_ stamp: String) -> Date? {
+    let fractional = ISO8601DateFormatter()
+    fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    if let date = fractional.date(from: stamp) { return date }
+    let plain = ISO8601DateFormatter()
+    plain.formatOptions = [.withInternetDateTime]
+    return plain.date(from: stamp)
+  }
 }
 
 extension ActivityRow {

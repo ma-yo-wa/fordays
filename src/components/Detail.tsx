@@ -35,11 +35,11 @@ function PencilIcon() {
   );
 }
 
-function CalendarPlusIcon() {
+function CalendarIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
       <rect x="3" y="5" width="18" height="16" rx="4" />
-      <path d="M3 10h18M8 3v3M16 3v3M12 13v5M9.5 15.5h5" strokeLinecap="round" />
+      <path d="M3 10h18M8 3v3M16 3v3" strokeLinecap="round" />
     </svg>
   );
 }
@@ -605,7 +605,7 @@ export default function Detail() {
           )}
 
           <ActionRow
-            icon={<CalendarPlusIcon />}
+            icon={<CalendarIcon />}
             label={planned ? 'Change the day' : 'Make it a plan'}
             onClick={() => setMode('when')}
           />

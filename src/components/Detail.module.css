@@ -154,6 +154,14 @@
   overflow: hidden;
 }
 
+.actions button {
+  padding-inline: var(--space-3-5);
+}
+
+.actions button + button {
+  border-top: var(--hairline-w) solid var(--separator);
+}
+
 .action {
   display: flex;
   align-items: center;

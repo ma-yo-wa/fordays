@@ -307,3 +307,151 @@ struct FormGlyphIcon: View {
   }
 }
 
+/// Detail-sheet marks. Calendar is the home-tab outline (no plus, no dot).
+enum ActionGlyph {
+  case calendar
+  case suggest
+  case trash
+  case people
+  case bucket
+  case again
+}
+
+struct ActionGlyphIcon: View {
+  let glyph: ActionGlyph
+
+  var body: some View {
+    Canvas { ctx, size in
+      let s = min(size.width, size.height) / 24
+      let width: CGFloat = glyph == .calendar ? 1.7 : 1.8
+      let stroke = StrokeStyle(lineWidth: width * s, lineCap: .round, lineJoin: .round)
+      func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: x * s, y: y * s) }
+      func line(_ x1: CGFloat, _ y1: CGFloat, _ x2: CGFloat, _ y2: CGFloat) -> Path {
+        var path = Path()
+        path.move(to: p(x1, y1))
+        path.addLine(to: p(x2, y2))
+        return path
+      }
+      func box(_ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ h: CGFloat, _ rx: CGFloat) -> Path {
+        Path(roundedRect: CGRect(x: x * s, y: y * s, width: w * s, height: h * s), cornerRadius: rx * s)
+      }
+
+      switch glyph {
+      case .calendar:
+        ctx.stroke(box(3, 5, 18, 16, 4), with: .foreground, style: stroke)
+        ctx.stroke(line(3, 10, 21, 10), with: .foreground, style: stroke)
+        ctx.stroke(line(8, 3, 8, 6), with: .foreground, style: stroke)
+        ctx.stroke(line(16, 3, 16, 6), with: .foreground, style: stroke)
+
+      case .suggest:
+        var bubble = Path()
+        bubble.move(to: p(7.5, 4))
+        bubble.addLine(to: p(16.5, 4))
+        bubble.addQuadCurve(to: p(19, 6.5), control: p(19, 4))
+        bubble.addLine(to: p(19, 13.5))
+        bubble.addQuadCurve(to: p(16.5, 16), control: p(19, 16))
+        bubble.addLine(to: p(12, 16))
+        bubble.addLine(to: p(8, 19))
+        bubble.addLine(to: p(8, 16))
+        bubble.addLine(to: p(7.5, 16))
+        bubble.addQuadCurve(to: p(5, 13.5), control: p(5, 16))
+        bubble.addLine(to: p(5, 6.5))
+        bubble.addQuadCurve(to: p(7.5, 4), control: p(5, 4))
+        bubble.closeSubpath()
+        ctx.stroke(bubble, with: .foreground, style: stroke)
+        ctx.stroke(line(9, 9, 15, 9), with: .foreground, style: stroke)
+        ctx.stroke(line(9, 12, 12.5, 12), with: .foreground, style: stroke)
+
+      case .trash:
+        ctx.stroke(line(4, 7, 20, 7), with: .foreground, style: stroke)
+        var lid = Path()
+        lid.move(to: p(9, 7))
+        lid.addLine(to: p(9, 5))
+        lid.addQuadCurve(to: p(10, 4), control: p(9, 4))
+        lid.addLine(to: p(14, 4))
+        lid.addQuadCurve(to: p(15, 5), control: p(15, 4))
+        lid.addLine(to: p(15, 7))
+        ctx.stroke(lid, with: .foreground, style: stroke)
+        var bin = Path()
+        bin.move(to: p(6, 7))
+        bin.addLine(to: p(7, 19))
+        bin.addQuadCurve(to: p(9, 21), control: p(7, 21))
+        bin.addLine(to: p(15, 21))
+        bin.addQuadCurve(to: p(17, 19), control: p(17, 21))
+        bin.addLine(to: p(18, 7))
+        ctx.stroke(bin, with: .foreground, style: stroke)
+
+      case .people:
+        ctx.stroke(
+          Path(ellipseIn: CGRect(x: 5 * s, y: 3 * s, width: 8 * s, height: 8 * s)),
+          with: .foreground,
+          style: stroke
+        )
+        var shoulders = Path()
+        shoulders.move(to: p(16, 21))
+        shoulders.addLine(to: p(16, 19))
+        shoulders.addQuadCurve(to: p(12, 15), control: p(16, 15))
+        shoulders.addLine(to: p(6, 15))
+        shoulders.addQuadCurve(to: p(2, 19), control: p(2, 15))
+        shoulders.addLine(to: p(2, 21))
+        ctx.stroke(shoulders, with: .foreground, style: stroke)
+        var head = Path()
+        head.addArc(
+          center: p(16, 7),
+          radius: 4 * s,
+          startAngle: .degrees(-80),
+          endAngle: .degrees(80),
+          clockwise: false
+        )
+        ctx.stroke(head, with: .foreground, style: stroke)
+        var beside = Path()
+        beside.move(to: p(22, 21))
+        beside.addLine(to: p(22, 19))
+        beside.addQuadCurve(to: p(19, 15.13), control: p(22, 15.13))
+        ctx.stroke(beside, with: .foreground, style: stroke)
+
+      case .bucket:
+        var bucket = Path()
+        bucket.move(to: p(4.6, 5))
+        bucket.addLine(to: p(19.4, 5))
+        bucket.addLine(to: p(17.4, 17.3))
+        bucket.addQuadCurve(to: p(14.4, 20), control: p(17.2, 20))
+        bucket.addLine(to: p(9.6, 20))
+        bucket.addQuadCurve(to: p(6.6, 17.3), control: p(6.8, 20))
+        bucket.closeSubpath()
+        ctx.stroke(bucket, with: .foreground, style: stroke)
+        var check = Path()
+        check.move(to: p(8.6, 10.6))
+        check.addLine(to: p(11, 13))
+        check.addLine(to: p(15.4, 8.6))
+        ctx.stroke(check, with: .foreground, style: stroke)
+
+      case .again:
+        var topArrow = Path()
+        topArrow.move(to: p(17, 2))
+        topArrow.addLine(to: p(21, 6))
+        topArrow.addLine(to: p(17, 10))
+        ctx.stroke(topArrow, with: .foreground, style: stroke)
+        var top = Path()
+        top.move(to: p(3, 11))
+        top.addLine(to: p(3, 10))
+        top.addQuadCurve(to: p(7, 6), control: p(3, 6))
+        top.addLine(to: p(21, 6))
+        ctx.stroke(top, with: .foreground, style: stroke)
+        var bottomArrow = Path()
+        bottomArrow.move(to: p(7, 22))
+        bottomArrow.addLine(to: p(3, 18))
+        bottomArrow.addLine(to: p(7, 14))
+        ctx.stroke(bottomArrow, with: .foreground, style: stroke)
+        var bottom = Path()
+        bottom.move(to: p(21, 13))
+        bottom.addLine(to: p(21, 14))
+        bottom.addQuadCurve(to: p(17, 18), control: p(21, 18))
+        bottom.addLine(to: p(3, 18))
+        ctx.stroke(bottom, with: .foreground, style: stroke)
+      }
+    }
+    .frame(width: Theme.Spacing.s22, height: Theme.Spacing.s22)
+  }
+}
+

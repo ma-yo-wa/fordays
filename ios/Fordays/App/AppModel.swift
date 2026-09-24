@@ -8,6 +8,7 @@ final class AppModel: ObservableObject {
   @Published var space: SpaceInfo?
   @Published var spaces: [SpaceInfo] = []
   @Published var activities: [Activity] = []
+  @Published var logs: [AuditLog] = []
   @Published var externalEvents: [ExternalEvent] = []
   @Published var tab: HomeTab = .plans {
     didSet {
@@ -354,6 +355,7 @@ final class AppModel: ObservableObject {
     spaces = []
     storedSpaceId = nil
     activities = []
+    logs = []
     authPhase = .signedOut
   }
 
@@ -375,6 +377,7 @@ final class AppModel: ObservableObject {
   func refreshActivities() async {
     guard let space else {
       activities = []
+      logs = []
       externalEvents = []
       return
     }
@@ -391,7 +394,27 @@ final class AppModel: ObservableObject {
     } catch {
       toast = error.localizedDescription
     }
+    Task { await refreshLogs() }
     Task { await refreshExternal() }
+  }
+
+  func refreshLogs() async {
+    guard let space else {
+      logs = []
+      return
+    }
+    do {
+      let rows: [AuditLog] = try await sb.from("audit_logs")
+        .select()
+        .eq("space_id", value: space.id)
+        .order("timestamp", ascending: false)
+        .limit(200)
+        .execute()
+        .value
+      logs = rows
+    } catch {
+      logs = []
+    }
   }
 
   func refreshExternal() async {
@@ -1160,6 +1183,7 @@ final class AppModel: ObservableObject {
       Task { await syncAppleIfNeeded() }
     } else {
       activities = []
+      logs = []
     }
   }
 

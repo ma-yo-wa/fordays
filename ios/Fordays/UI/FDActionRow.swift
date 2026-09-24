@@ -5,13 +5,16 @@ struct FDActionRow: View {
   var note: String? = nil
   var systemImage: String? = nil
   var glyph: String? = nil
+  var icon: ActionGlyph? = nil
   var destructive: Bool = false
   var action: () -> Void
 
   var body: some View {
     Button(action: action) {
       HStack(spacing: Theme.Spacing.md) {
-        if let systemImage {
+        if let icon {
+          ActionGlyphIcon(glyph: icon)
+        } else if let systemImage {
           Image(systemName: systemImage)
             .font(.fdBody.weight(.semibold))
             .frame(width: Theme.Spacing.s22)
@@ -33,7 +36,7 @@ struct FDActionRow: View {
       }
       .foregroundStyle(destructive ? Theme.roseInk : Theme.ink)
       .padding(.vertical, Theme.Spacing.row)
-      .padding(.horizontal, Theme.Spacing.xs)
+      .padding(.horizontal, Theme.Spacing.row)
       .contentShape(Rectangle())
     }
     .buttonStyle(FDScaleButtonStyle())

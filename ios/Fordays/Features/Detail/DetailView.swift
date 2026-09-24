@@ -177,6 +177,10 @@ struct DetailView: View {
             actionList(item)
           }
         }
+
+        if mode == .view {
+          historyList(item)
+        }
       }
       .padding(Theme.Spacing.lg)
       .padding(.bottom, Theme.Spacing.xl)
@@ -585,55 +589,110 @@ struct DetailView: View {
   }
 
   private func actionList(_ item: Activity) -> some View {
-    VStack(spacing: Theme.Spacing.xs) {
-      if item.isMemory() {
-        FDActionRow(title: Copy.Memories.doAgain, systemImage: "arrow.triangle.2.circlepath") {
-          showDoAgainDialog = true
+    let rows = actionRows(item)
+    return VStack(spacing: Theme.Spacing.none) {
+      ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
+        FDActionRow(title: row.title, icon: row.icon, destructive: row.destructive, action: row.run)
+        if index < rows.count - 1 {
+          Rectangle()
+            .fill(Theme.separator)
+            .frame(height: Theme.TouchTarget.hairlineWidth)
+            .padding(.leading, Theme.Spacing.row + Theme.Spacing.s22 + Theme.Spacing.md)
         }
-      }
-
-      if !item.isMemory() && isPersonalOrb && !activeSharedOrbs.isEmpty {
-        if activeSharedOrbs.count == 1 {
-          let target = activeSharedOrbs[0]
-          let targetName = target.partnerName ?? target.name
-          FDActionRow(title: Copy.Orbs.doWith(targetName), systemImage: "person.2") {
-            Task { await handleDoWith(target) }
-          }
-        } else {
-          FDActionRow(title: Copy.Orbs.doWithEllipsis, systemImage: "person.2") {
-            showMoveDialog = true
-          }
-        }
-      }
-
-      FDActionRow(
-        title: item.isPlan ? "Change the day" : "Make it a plan",
-        systemImage: "calendar.badge.plus"
-      ) {
-        seedWhen(from: item)
-        mode = .when
-      }
-
-      if app.space?.isMatched == true && !item.isMemory() {
-        FDActionRow(title: "Suggest a date", systemImage: "bubble.left.and.bubble.right") {
-          openSuggest(item)
-        }
-      }
-
-      if item.isPlan && !item.isMemory() {
-        FDActionRow(title: Copy.Ideas.backTo, systemImage: "checklist") {
-          Task {
-            await app.moveToBucket(item.id)
-            dismiss()
-          }
-        }
-      }
-
-      FDActionRow(title: "Delete", systemImage: "trash", destructive: true) {
-        mode = .confirmDelete
       }
     }
-    .padding(.top, Theme.Spacing.sm)
+    .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
+    .padding(.top, Theme.Spacing.lg)
+  }
+
+  private struct DetailAction: Identifiable {
+    let id: String
+    let title: String
+    let icon: ActionGlyph
+    let destructive: Bool
+    let run: () -> Void
+  }
+
+  private func actionRows(_ item: Activity) -> [DetailAction] {
+    var rows: [DetailAction] = []
+    if item.isMemory() {
+      rows.append(DetailAction(id: "again", title: Copy.Memories.doAgain, icon: .again, destructive: false) {
+        showDoAgainDialog = true
+      })
+    }
+    if !item.isMemory(), isPersonalOrb, !activeSharedOrbs.isEmpty {
+      if activeSharedOrbs.count == 1 {
+        let target = activeSharedOrbs[0]
+        let targetName = target.partnerName ?? target.name
+        rows.append(DetailAction(id: "with", title: Copy.Orbs.doWith(targetName), icon: .people, destructive: false) {
+          Task { await handleDoWith(target) }
+        })
+      } else {
+        rows.append(DetailAction(id: "with", title: Copy.Orbs.doWithEllipsis, icon: .people, destructive: false) {
+          showMoveDialog = true
+        })
+      }
+    }
+    rows.append(DetailAction(
+      id: "when",
+      title: item.isPlan ? "Change the day" : "Make it a plan",
+      icon: .calendar,
+      destructive: false
+    ) {
+      seedWhen(from: item)
+      mode = .when
+    })
+    if app.space?.isMatched == true, !item.isMemory() {
+      rows.append(DetailAction(id: "suggest", title: "Suggest a date", icon: .suggest, destructive: false) {
+        openSuggest(item)
+      })
+    }
+    if item.isPlan, !item.isMemory() {
+      rows.append(DetailAction(id: "bucket", title: Copy.Ideas.backTo, icon: .bucket, destructive: false) {
+        Task {
+          await app.moveToBucket(item.id)
+          dismiss()
+        }
+      })
+    }
+    rows.append(DetailAction(id: "delete", title: "Delete", icon: .trash, destructive: true) {
+      mode = .confirmDelete
+    })
+    return rows
+  }
+
+  @ViewBuilder
+  private func historyList(_ item: Activity) -> some View {
+    let rows = app.logs
+      .filter { $0.activityId == item.id }
+      .sorted { $0.timestamp > $1.timestamp }
+    if !rows.isEmpty {
+      VStack(alignment: .leading, spacing: Theme.Spacing.none) {
+        Text("History")
+          .font(.fdFootnote.weight(.semibold))
+          .foregroundStyle(Theme.inkFaint)
+          .padding(.bottom, Theme.Spacing.s10)
+        ForEach(rows) { log in
+          HStack(alignment: .top, spacing: Theme.Spacing.s11) {
+            FDAvatar(name: displayName(for: log.userId), seat: faceSeat(for: log.userId), size: .sm)
+            historyLine(log)
+          }
+          .padding(.vertical, Theme.Spacing.s7)
+        }
+      }
+      .padding(.top, Theme.Spacing.s10)
+    }
+  }
+
+  private func historyLine(_ log: AuditLog) -> Text {
+    let who = displayName(for: log.userId)
+    let what = DateLocal.localizeAuditDetails(log.details)
+    let ago = DateLocal.timeAgo(log.timestamp)
+    let body = Text("\(who) \(what)").foregroundStyle(Theme.ink2)
+    if ago.isEmpty {
+      return body.font(.fdFootnote)
+    }
+    return (body + Text(" · \(ago)").foregroundStyle(Theme.inkFaint)).font(.fdFootnote)
   }
 
   private func handleDoWith(_ targetSpace: SpaceInfo) async {

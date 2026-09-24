@@ -1,5 +1,21 @@
 import Foundation
 
+struct AuditLog: Identifiable, Hashable, Decodable {
+  var id: String
+  var activityId: String
+  var userId: String
+  var details: String
+  var timestamp: String
+
+  enum CodingKeys: String, CodingKey {
+    case id
+    case activityId = "activity_id"
+    case userId = "user_id"
+    case details
+    case timestamp
+  }
+}
+
 struct Activity: Identifiable, Hashable, Codable {
   var id: String
   var spaceId: String?
