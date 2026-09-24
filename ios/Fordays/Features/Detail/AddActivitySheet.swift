@@ -181,8 +181,24 @@ struct ComposerView: View {
           }
           .buttonStyle(.plain)
         } else {
-          fieldLabel("Cover", hint: "")
-            .padding(.top, Theme.Spacing.sm)
+          HStack(alignment: .bottom) {
+            Text("Cover")
+              .font(.caption.weight(.semibold))
+              .foregroundStyle(Theme.inkFaint)
+            Spacer()
+            if cover.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+              Button("Cancel") {
+                withAnimation(.spring(response: Theme.Motion.spring)) {
+                  cover = ""
+                }
+              }
+              .font(.caption)
+              .foregroundStyle(Theme.inkSoft)
+            }
+          }
+          .padding(.top, Theme.Spacing.xl)
+          .padding(.bottom, Theme.Spacing.s6)
+          
           CoverPickerView(cover: $cover, titleHint: { title })
         }
 
