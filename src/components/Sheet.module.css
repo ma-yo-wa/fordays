@@ -17,7 +17,7 @@
   max-height: calc(100dvh - var(--safe-t) - var(--space-3));
   display: flex;
   flex-direction: column;
-  background: var(--paper-warm);
+  background: var(--paper);
   border-radius: var(--r-sheet) var(--r-sheet) var(--space-0) var(--space-0);
   padding: var(--space-1-5) max(var(--space-5), var(--safe-l))
     calc(var(--space-5-5) + var(--safe-b)) max(var(--space-5), var(--safe-r));

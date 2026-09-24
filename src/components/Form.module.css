@@ -158,7 +158,7 @@ textarea.input {
   gap: var(--space-0-5);
   padding: var(--space-0-5);
   background: var(--fill-tertiary);
-  border-radius: var(--r-control);
+  border-radius: var(--r-capsule);
 }
 
 .segment {
@@ -168,7 +168,7 @@ textarea.input {
   background: none;
   cursor: pointer;
   padding: var(--space-1-75) var(--space-3);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-capsule);
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   font-weight: 500;
@@ -184,7 +184,7 @@ textarea.input {
 .segmentKnob {
   position: absolute;
   inset: var(--space-0);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-capsule);
   background: var(--paper-warm);
   box-shadow:
     var(--space-0) var(--space-px) var(--space-0-75) var(--hairline),
