@@ -31,6 +31,7 @@ struct FDFormGroup<Content: View>: View {
 struct FDFormRow<RightContent: View>: View {
   let label: String
   var note: String? = nil
+  var glyph: FormGlyph? = nil
   var systemImage: String? = nil
   var destructive: Bool = false
   var action: (() -> Void)? = nil
@@ -39,12 +40,14 @@ struct FDFormRow<RightContent: View>: View {
   init(
     label: String,
     note: String? = nil,
+    glyph: FormGlyph? = nil,
     systemImage: String? = nil,
     destructive: Bool = false,
     @ViewBuilder rightContent: @escaping () -> RightContent
   ) {
     self.label = label
     self.note = note
+    self.glyph = glyph
     self.systemImage = systemImage
     self.destructive = destructive
     self.action = nil
@@ -54,6 +57,7 @@ struct FDFormRow<RightContent: View>: View {
   init(
     label: String,
     note: String? = nil,
+    glyph: FormGlyph? = nil,
     systemImage: String? = nil,
     destructive: Bool = false,
     action: (() -> Void)? = nil,
@@ -61,6 +65,7 @@ struct FDFormRow<RightContent: View>: View {
   ) {
     self.label = label
     self.note = note
+    self.glyph = glyph
     self.systemImage = systemImage
     self.destructive = destructive
     self.action = action
@@ -69,7 +74,9 @@ struct FDFormRow<RightContent: View>: View {
 
   var body: some View {
     let rowContent = HStack(spacing: Theme.Spacing.md) {
-      if let systemImage {
+      if let glyph {
+        FormGlyphIcon(glyph: glyph, destructive: destructive)
+      } else if let systemImage {
         Image(systemName: systemImage)
           .font(.fdBody.weight(.semibold))
           .foregroundStyle(destructive ? Theme.roseInk : Theme.inkSoft)

@@ -14,6 +14,7 @@
 .sheet {
   width: 100%;
   max-width: var(--w-content);
+  height: calc(100dvh - var(--safe-t) - var(--space-3));
   max-height: calc(100dvh - var(--safe-t) - var(--space-3));
   display: flex;
   flex-direction: column;

@@ -213,3 +213,97 @@ private struct MemoriesGlyph: View {
     }
   }
 }
+
+/// Fine outline glyphs for forms and navigation, matching PWA SVGs with 1.8pt stroke.
+enum FormGlyph {
+  case orb
+  case account
+  case calendar
+  case bell
+  case history
+  case signOut
+}
+
+struct FormGlyphIcon: View {
+  let glyph: FormGlyph
+  var destructive: Bool = false
+
+  var body: some View {
+    Canvas { ctx, size in
+      let s = min(size.width, size.height) / 24
+      let stroke = StrokeStyle(lineWidth: 1.8 * s, lineCap: .round, lineJoin: .round)
+      func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: x * s, y: y * s) }
+      func r(_ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ h: CGFloat, _ rx: CGFloat) -> Path {
+        Path(roundedRect: CGRect(x: x * s, y: y * s, width: w * s, height: h * s), cornerRadius: rx * s)
+      }
+      func line(_ x1: CGFloat, _ y1: CGFloat, _ x2: CGFloat, _ y2: CGFloat) -> Path {
+        var path = Path()
+        path.move(to: p(x1, y1))
+        path.addLine(to: p(x2, y2))
+        return path
+      }
+
+      switch glyph {
+      case .orb:
+        let circle = Path(ellipseIn: CGRect(x: 4 * s, y: 4 * s, width: 16 * s, height: 16 * s))
+        ctx.stroke(circle, with: .foreground, style: stroke)
+
+      case .account:
+        let head = Path(ellipseIn: CGRect(x: 8 * s, y: 4 * s, width: 8 * s, height: 8 * s))
+        ctx.stroke(head, with: .foreground, style: stroke)
+        var shoulders = Path()
+        shoulders.move(to: p(4, 20))
+        shoulders.addCurve(to: p(12, 13), control1: p(4, 16), control2: p(8, 13))
+        shoulders.addCurve(to: p(20, 20), control1: p(16, 13), control2: p(20, 16))
+        ctx.stroke(shoulders, with: .foreground, style: stroke)
+
+      case .calendar:
+        ctx.stroke(r(3, 4, 18, 18, 2), with: .foreground, style: stroke)
+        ctx.stroke(line(16, 2, 16, 6), with: .foreground, style: stroke)
+        ctx.stroke(line(8, 2, 8, 6), with: .foreground, style: stroke)
+        ctx.stroke(line(3, 10, 21, 10), with: .foreground, style: stroke)
+
+      case .bell:
+        var bell = Path()
+        bell.move(to: p(18, 8))
+        bell.addCurve(to: p(6, 8), control1: p(18, 4.69), control2: p(12.63, 2))
+        bell.addCurve(to: p(3, 17), control1: p(6, 15), control2: p(3, 17))
+        bell.addLine(to: p(21, 17))
+        bell.addCurve(to: p(18, 8), control1: p(21, 17), control2: p(18, 15))
+        ctx.stroke(bell, with: .foreground, style: stroke)
+        var clapper = Path()
+        clapper.move(to: p(13.73, 21))
+        clapper.addQuadCurve(to: p(10.27, 21), control: p(12, 23))
+        ctx.stroke(clapper, with: .foreground, style: stroke)
+
+      case .history:
+        let clock = Path(ellipseIn: CGRect(x: 2 * s, y: 2 * s, width: 20 * s, height: 20 * s))
+        ctx.stroke(clock, with: .foreground, style: stroke)
+        var hands = Path()
+        hands.move(to: p(12, 6))
+        hands.addLine(to: p(12, 12))
+        hands.addLine(to: p(16, 14))
+        ctx.stroke(hands, with: .foreground, style: stroke)
+
+      case .signOut:
+        var door = Path()
+        door.move(to: p(9, 21))
+        door.addLine(to: p(5, 21))
+        door.addQuadCurve(to: p(3, 19), control: p(3, 21))
+        door.addLine(to: p(3, 5))
+        door.addQuadCurve(to: p(5, 3), control: p(3, 3))
+        door.addLine(to: p(9, 3))
+        ctx.stroke(door, with: .foreground, style: stroke)
+        var arrow = Path()
+        arrow.move(to: p(16, 17))
+        arrow.addLine(to: p(21, 12))
+        arrow.addLine(to: p(16, 7))
+        ctx.stroke(arrow, with: .foreground, style: stroke)
+        ctx.stroke(line(21, 12, 9, 12), with: .foreground, style: stroke)
+      }
+    }
+    .foregroundStyle(destructive ? Theme.roseInk : Theme.inkSoft)
+    .frame(width: Theme.Spacing.lg, height: Theme.Spacing.lg)
+  }
+}
+

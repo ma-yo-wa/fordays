@@ -101,6 +101,11 @@ struct SettingsView: View {
     return soloOrb && (space.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "personal" || soloOrbs.count <= 1)
   }
 
+  private func spaceOrbLabel(_ space: SpaceInfo) -> String {
+    let label = space.peopleLabel
+    return label.isEmpty ? "This Orb" : label
+  }
+
   var body: some View {
     NavigationStack(path: $navPath) {
       ScrollView {
@@ -113,9 +118,9 @@ struct SettingsView: View {
             
             FDFormGroup {
               NavigationLink(value: SettingsDestination.orbDetails) {
-                FDFormRow(label: space.name ?? "This Orb", systemImage: "circle.circle", action: nil) {
-                  Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
+                FDFormRow(label: spaceOrbLabel(space), glyph: .orb, action: nil) {
+                  Text("›")
+                    .font(.fdSubhead)
                     .foregroundStyle(Theme.inkFaint)
                 }
               }
@@ -123,9 +128,9 @@ struct SettingsView: View {
               
               Divider().overlay(Theme.separator)
               NavigationLink(value: SettingsDestination.account) {
-                FDFormRow(label: "Account", systemImage: "person.crop.circle", action: nil) {
-                  Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
+                FDFormRow(label: "Account", glyph: .account, action: nil) {
+                  Text("›")
+                    .font(.fdSubhead)
                     .foregroundStyle(Theme.inkFaint)
                 }
               }
@@ -133,9 +138,9 @@ struct SettingsView: View {
               
               Divider().overlay(Theme.separator)
               NavigationLink(value: SettingsDestination.calendars) {
-                FDFormRow(label: "External calendars", systemImage: "calendar", action: nil) {
-                  Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
+                FDFormRow(label: "External calendars", glyph: .calendar, action: nil) {
+                  Text("›")
+                    .font(.fdSubhead)
                     .foregroundStyle(Theme.inkFaint)
                 }
               }
@@ -143,9 +148,9 @@ struct SettingsView: View {
               
               Divider().overlay(Theme.separator)
               NavigationLink(value: SettingsDestination.notifications) {
-                FDFormRow(label: "Notifications", systemImage: "bell", action: nil) {
-                  Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
+                FDFormRow(label: "Notifications", glyph: .bell, action: nil) {
+                  Text("›")
+                    .font(.fdSubhead)
                     .foregroundStyle(Theme.inkFaint)
                 }
               }
@@ -708,13 +713,13 @@ struct SettingsView: View {
               FDFormRow(
                 label: Copy.Orbs.pastOrbs,
                 note: Copy.Orbs.pastOrbsSub,
-                systemImage: "clock.arrow.circlepath",
+                glyph: .history,
                 action: { showPastOrbs = true }
               ) {
                 HStack(spacing: Theme.Spacing.s6) {
                   FDPill(title: "\(pastOrbs.count)", variant: .neutral, size: .sm)
-                  Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
+                  Text("›")
+                    .font(.fdSubhead)
                     .foregroundStyle(Theme.inkFaint)
                 }
               }
@@ -738,7 +743,7 @@ struct SettingsView: View {
     ScrollView {
       VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
         FDFormGroup {
-          FDFormRow(label: Copy.Availability.appleCalendar, systemImage: "calendar") {
+          FDFormRow(label: Copy.Availability.appleCalendar, glyph: .calendar) {
             Toggle("Connect Apple Calendar", isOn: appleToggle)
               .labelsHidden()
               .tint(Theme.roseInk)
@@ -773,7 +778,7 @@ struct SettingsView: View {
 
           Divider().overlay(Theme.separator)
 
-          FDFormRow(label: Copy.Availability.outlookCalendar, systemImage: "calendar") {
+          FDFormRow(label: Copy.Availability.outlookCalendar, glyph: .calendar) {
             Toggle("Connect Outlook Calendar", isOn: outlookToggle)
               .labelsHidden()
               .tint(Theme.roseInk)
@@ -796,7 +801,7 @@ struct SettingsView: View {
     ScrollView {
       VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
         FDFormGroup {
-          FDFormRow(label: "Push notifications", systemImage: "bell") {
+          FDFormRow(label: "Push notifications", glyph: .bell) {
             Toggle("Notifications", isOn: .constant(false)) // Setup proper binding when push is implemented on iOS
               .labelsHidden()
               .tint(Theme.roseInk)
@@ -968,8 +973,7 @@ struct SettingsView: View {
             pendingAppleId = cal.id
           } label: {
             HStack(spacing: Theme.Spacing.md) {
-              Image(systemName: "calendar")
-                .foregroundStyle(Theme.inkSoft)
+              FormGlyphIcon(glyph: .calendar)
               Text(cal.primary ? "\(cal.summary) · Primary" : cal.summary)
                 .font(.body)
                 .foregroundStyle(Theme.ink)
@@ -989,7 +993,7 @@ struct SettingsView: View {
     VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
       sectionLabel("Session")
       FDFormGroup {
-        FDFormRow(label: "Sign out", systemImage: "rectangle.portrait.and.arrow.right", destructive: true) {
+        FDFormRow(label: "Sign out", glyph: .signOut, destructive: true) {
           Task {
             await app.signOut()
             dismiss()
