@@ -102,6 +102,7 @@ struct JoinOrbView: View {
       .padding(Theme.Spacing.lg)
     }
     .background(Theme.paper.ignoresSafeArea())
+    .presentationBackground(Theme.paper)
     .presentationDetents([.medium])
     .presentationDragIndicator(.visible)
   }

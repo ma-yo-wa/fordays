@@ -48,7 +48,8 @@ struct AddSheetView: View {
     }
     .padding(Theme.Spacing.lg)
     .padding(.bottom, Theme.Spacing.sm)
-    .background(Theme.paper)
+    .background(Theme.paper.ignoresSafeArea())
+    .presentationBackground(Theme.paper)
     .presentationDetents([.height(300)])
     .presentationDragIndicator(.visible)
   }
@@ -216,6 +217,7 @@ struct ComposerView: View {
       .padding(.bottom, Theme.Spacing.s28)
     }
     .background(Theme.paper.ignoresSafeArea())
+    .presentationBackground(Theme.paper)
     .presentationDetents([.large])
     .presentationDragIndicator(.visible)
   }

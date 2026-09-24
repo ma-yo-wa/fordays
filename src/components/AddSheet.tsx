@@ -16,7 +16,6 @@ function PlanGlyph() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
       <rect x="3" y="5" width="18" height="16" rx="4" />
       <path d="M3 10h18M8 3v3M16 3v3" strokeLinecap="round" />
-      <circle cx="12" cy="15" r="1.6" fill="currentColor" stroke="none" />
     </svg>
   );
 }

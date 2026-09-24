@@ -165,6 +165,7 @@ struct ExternalDetailView: View {
       }
       .padding(Theme.Spacing.lg)
       .background(Theme.paper.ignoresSafeArea())
+      .presentationBackground(Theme.paper)
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .topBarTrailing) {

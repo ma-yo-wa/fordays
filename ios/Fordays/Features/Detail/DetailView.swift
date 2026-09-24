@@ -67,6 +67,7 @@ struct DetailView: View {
     NavigationStack {
       mainContainer
         .background(Theme.paper.ignoresSafeArea())
+        .presentationBackground(Theme.paper)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
           ToolbarItem(placement: .topBarTrailing) {

@@ -162,6 +162,7 @@ struct SettingsView: View {
         .padding(.bottom, Theme.Spacing.s30)
       }
       .background(Theme.paper.ignoresSafeArea())
+      .presentationBackground(Theme.paper)
       .navigationTitle("Settings")
       .navigationDestination(for: SettingsDestination.self) { dest in
         switch dest {
