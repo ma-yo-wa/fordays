@@ -723,6 +723,17 @@ export const useApp = create<AppState>()((set, get) => {
         set({ screen: 'bucket' });
       }
 
+      // Never stack sheets: whatever was open gives way to the card.
+      set({
+        settingsOpen: false,
+        addOpen: false,
+        composerMode: null,
+        composerDraft: null,
+        externalId: null,
+        searchOpen: false,
+        inviteShareOpen: false,
+        joinOrbOpen: false,
+      });
       get().openDetail(act.id);
     },
     openExternal: (externalId) => set({ externalId }),

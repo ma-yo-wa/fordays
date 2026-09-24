@@ -161,10 +161,14 @@ struct MainShellView: View {
     }
     .onChange(of: app.detailActivityId) { _, id in
       if let id {
+        // Never stack sheets: whatever was open gives way to the card.
         showSettings = false
         showAddChooser = false
         composer = nil
         selectedExternal = nil
+        showSearch = false
+        showInvite = false
+        app.showJoinOrb = false
         selected = app.activity(id: id)
       } else {
         selected = nil
