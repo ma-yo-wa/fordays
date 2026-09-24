@@ -15,7 +15,7 @@ export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const Avatar: React.FC<AvatarProps> = ({
   name,
-  seat = 0,
+  seat: _seat = 0,
   color,
   imageUrl,
   size = 'md',
@@ -25,7 +25,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   ...rest
 }) => {
   const initial = name?.trim() ? name.trim()[0]?.toUpperCase() : '';
-  const bgColor = color || faceColor(seat);
+  const bgColor = color || faceColor();
 
   const sizeClass =
     size === 'sm' ? s.sizeSm : size === 'lg' ? s.sizeLg : s.sizeMd;

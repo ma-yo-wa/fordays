@@ -39,7 +39,7 @@ struct FDAvatar: View {
 
   private var backgroundColor: Color {
     if let color { return color }
-    return seat == 0 ? Theme.faceSage : Theme.faceRose
+    return Theme.inkSoft
   }
 
   var body: some View {

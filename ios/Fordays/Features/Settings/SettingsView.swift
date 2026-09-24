@@ -372,7 +372,7 @@ struct SettingsView: View {
       ForEach(faces.prefix(3)) { f in
         ZStack {
           Circle()
-            .fill(f.them ? Theme.faceRose : Theme.faceSage)
+            .fill(Theme.inkSoft)
           Text(f.letter)
             .font(.fdCaption.weight(.bold))
             .foregroundStyle(.white)
@@ -637,7 +637,7 @@ struct SettingsView: View {
                     ForEach(faces.prefix(3)) { f in
                       ZStack {
                         Circle()
-                          .fill(f.them ? Theme.faceRose : Theme.faceSage)
+                          .fill(Theme.inkSoft)
                         Text(f.letter)
                           .font(.fdCaption2.weight(.bold))
                           .foregroundStyle(.white)

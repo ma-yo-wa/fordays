@@ -71,10 +71,10 @@ export default function DesktopGate() {
             <div className={s.mockupHeader}>
               <div className={s.mockupPill}>
                 <div className={s.mockupFaces}>
-                  <span className={s.mockupFace} style={{ background: 'var(--sage-ink)' }}>
+                  <span className={s.mockupFace} style={{ background: 'var(--ink-soft)' }}>
                     M
                   </span>
-                  <span className={s.mockupFace} style={{ background: 'var(--rose-ink)' }}>
+                  <span className={s.mockupFace} style={{ background: 'var(--ink-soft)' }}>
                     A
                   </span>
                 </div>

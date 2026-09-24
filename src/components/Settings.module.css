@@ -84,7 +84,7 @@
 }
 
 .faceMe {
-  background: var(--sage-ink);
+  background: var(--ink-soft);
 }
 
 .profileInput {
@@ -210,12 +210,9 @@
   margin-left: var(--space-0);
 }
 
-.orbMiniFaceMe {
-  background: var(--sage-ink);
-}
-
+.orbMiniFaceMe,
 .orbMiniFaceThem {
-  background: var(--rose-ink);
+  background: var(--ink-soft);
 }
 
 .orbMiniMore {
@@ -340,12 +337,9 @@
   flex-shrink: var(--space-0);
 }
 
-.personFaceMe {
-  background: var(--sage-ink);
-}
-
+.personFaceMe,
 .personFaceThem {
-  background: var(--rose-ink);
+  background: var(--ink-soft);
 }
 
 .personFaceAdd {

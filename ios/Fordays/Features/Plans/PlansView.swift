@@ -385,14 +385,11 @@ struct PlansView: View {
   }
 
   private func face(for userId: String) -> some View {
-    let me = app.space?.myId
-    let seat = (me != nil && userId == me) ? (app.space?.me ?? 0) : (1 - (app.space?.me ?? 0))
-    let fill = seat == 0 ? Theme.faceSage : Theme.faceRose
     return Text(String(displayName(for: userId).prefix(1)).uppercased())
       .font(.caption2.weight(.bold))
       .foregroundStyle(.white)
       .frame(width: Theme.TouchTarget.avatarXs, height: Theme.TouchTarget.avatarXs)
-      .background(fill, in: Circle())
+      .background(Theme.inkSoft, in: Circle())
   }
 
   private func displayName(for userId: String) -> String {

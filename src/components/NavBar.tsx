@@ -129,8 +129,8 @@ export default function NavBar() {
                 {visibleFaces.map((f) => (
                   <span
                     key={f.key}
-                    className={`${s.face} ${f.them ? s.dim : ''}`}
-                    style={{ background: faceColor(f.them ? 1 : 0) }}
+                    className={s.face}
+                    style={{ background: faceColor() }}
                   >
                     {f.letter}
                   </span>

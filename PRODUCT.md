@@ -28,7 +28,7 @@ Someday / Plans / Memories **are** that notebook. Everyone has at least one **li
 - Type parity: Someday moves directly to Someday; Plans move directly to Plans (retaining their date, time, location, notes, and cover).
 - When moved, the item leaves Personal and appears in the target Orb with a clean confirmation toast (`Moved to Aline’s Someday` / `Moved to Aline’s Plans`).
 
-**Orb** = the notebook. **Faces** = people in *this* space (two: rose / sage; many: names + initials). Not a hue per person or per space.
+**Orb** = the notebook. **Faces** = people in *this* space. Every face is the same warm stone (`ink-soft`) with a white initial — one color, like a group thread. The letter tells people apart. A photo can replace the initial later. Not a hue per person, and not rose / sage.
 
 A name is **required** for Just you and With people. Placeholder in the field (`Personal` / `Aline’s Crew`) is only an example — never saved, never shown as the title. Unnamed legacy Orbs (Fordays / Someday / blank) stay untitled: empty field, no caption on the tile, faces already say who. When they name it, that word sits **under the circle** and **beside This Orb** (label semibold faint, name regular ink). Never title an Orb with a person’s name.
 

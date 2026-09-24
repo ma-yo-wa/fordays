@@ -214,16 +214,16 @@ struct MainShellView: View {
                 if let members = app.space?.members, !members.isEmpty {
                   let ordered = orderedHeaderMembers(members, myId: app.space?.myId)
                   ForEach(ordered.prefix(2), id: \.id) { member in
-                    face(member.name, them: member.id != app.space?.myId)
+                    face(member.name)
                   }
                   let more = max(0, ordered.count - 2)
                   if more > 0 {
                     moreFace(more)
                   }
                 } else {
-                  face(app.space?.myName, them: false)
+                  face(app.space?.myName)
                   if app.space?.isMatched == true {
-                    face(app.space?.partnerName, them: true)
+                    face(app.space?.partnerName)
                   }
                 }
               }
@@ -333,14 +333,12 @@ struct MainShellView: View {
     return named.isEmpty ? nil : named
   }
 
-  /// You = sage, everyone else in this space = rose.
-  private func face(_ name: String?, them: Bool) -> some View {
-    let fill = them ? Theme.faceRose : Theme.faceSage
+  private func face(_ name: String?) -> some View {
     return Text(String((name ?? "?").prefix(1)).uppercased())
       .font(.caption.weight(.bold))
       .foregroundStyle(.white)
       .frame(width: Theme.TouchTarget.avatarMd, height: Theme.TouchTarget.avatarMd)
-      .background(fill, in: Circle())
+      .background(Theme.inkSoft, in: Circle())
       .overlay(Circle().stroke(Theme.paper, lineWidth: Theme.TouchTarget.strokeThick))
   }
 

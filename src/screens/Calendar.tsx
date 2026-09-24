@@ -305,7 +305,7 @@ export default function Calendar() {
                             <span
                               className={s.avatar}
                               style={{
-                                background: faceColor(faceIndexFor(a.created_by, faceCtx)),
+                                background: faceColor(),
                               }}
                             >
                               {(partnerName(config, a.created_by)[0] ?? '?').toUpperCase()}
@@ -356,7 +356,7 @@ export default function Calendar() {
                         <span
                           className={s.avatar}
                           style={{
-                            background: faceColor(faceIndexFor(a.created_by, faceCtx)),
+                            background: faceColor(),
                           }}
                         >
                           {(partnerName(config, a.created_by)[0] ?? '?').toUpperCase()}
@@ -400,7 +400,7 @@ export default function Calendar() {
                       </div>
                     )}
                     <div className={s.meta}>
-                      <span className={s.avatar} style={{ background: faceColor(owner) }}>
+                      <span className={s.avatar} style={{ background: faceColor() }}>
                         {(ownerName[0] ?? '?').toUpperCase()}
                       </span>
                       {ownerName}

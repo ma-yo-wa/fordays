@@ -32,10 +32,6 @@ enum Theme {
   static let ext = Color(hex: 0x98917F)
   static let extWash = Color(hex: 0xECE7DA)
 
-  /// Avatar seats — one partner at each end of the orb (matches web).
-  static let faceSage = Color(hex: 0x4F7735)
-  static let faceRose = Color(hex: 0xC4285A)
-
   // Concentric corner radii
   static let radiusXs: CGFloat = 4
   static let radiusSm: CGFloat = 8

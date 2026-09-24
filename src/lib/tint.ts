@@ -66,9 +66,9 @@ export function tintsFor(
   return chosen.map(gradient);
 }
 
-/** One partner at each end of the orb. */
-export function faceColor(index: 0 | 1): string {
-  return index === 0 ? '#4F7735' : '#C4285A';
+/** One face color for everyone. Initials tell people apart. */
+export function faceColor(): string {
+  return 'var(--ink-soft)';
 }
 
 /** Map a profile id (or local demo "0"/"1") onto seat color 0 | 1. */
