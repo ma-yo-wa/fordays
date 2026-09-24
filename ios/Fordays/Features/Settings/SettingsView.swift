@@ -317,23 +317,19 @@ struct SettingsView: View {
         ZStack {
           Circle()
             .fill(Theme.fillTertiary)
-          if active {
-            Circle()
-              .fill(
-                LinearGradient(
-                  colors: [Theme.roseWash, Theme.sageWash],
-                  startPoint: .topLeading,
-                  endPoint: .bottomTrailing
-                )
-              )
-          }
           orbFaceStack(faces)
         }
         .frame(width: Self.orbSize, height: Self.orbSize)
+        .overlay {
+          if active {
+            Circle()
+              .stroke(Theme.inkSoft, lineWidth: Theme.TouchTarget.ringWidth)
+          }
+        }
 
         Text(orb.peopleLabel.isEmpty ? " " : orb.peopleLabel)
-          .font(.caption)
-          .foregroundStyle(Theme.inkSoft)
+          .font(active ? .caption.weight(.semibold) : .caption)
+          .foregroundStyle(active ? Theme.ink : Theme.inkSoft)
           .lineLimit(1)
           .truncationMode(.tail)
           .frame(width: Self.orbSize)

@@ -158,12 +158,12 @@
 }
 
 .orbTileOn .orbCircle {
-  background:
-    radial-gradient(
-      120% 140% at 12% 18%,
-      var(--rose-wash) 0%,
-      var(--sage-wash) 78%
-    );
+  box-shadow: inset var(--space-0) var(--space-0) var(--space-0) var(--border-md) var(--ink-soft);
+}
+
+.orbTileOn .orbTileName {
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .orbAddMark {
