@@ -14,8 +14,10 @@ struct CompactTimePicker: UIViewRepresentable {
     picker.preferredDatePickerStyle = .compact
     picker.minuteInterval = minuteInterval
     picker.tintColor = UIColor(Theme.rose)
-    picker.setContentHuggingPriority(.defaultHigh, for: .horizontal)
-    picker.setContentHuggingPriority(.defaultHigh, for: .vertical)
+    picker.setContentHuggingPriority(.required, for: .horizontal)
+    picker.setContentCompressionResistancePriority(.required, for: .horizontal)
+    picker.setContentHuggingPriority(.required, for: .vertical)
+    picker.setContentCompressionResistancePriority(.required, for: .vertical)
     picker.addTarget(context.coordinator, action: #selector(Coordinator.changed(_:)), for: .valueChanged)
     return picker
   }
@@ -25,6 +27,14 @@ struct CompactTimePicker: UIViewRepresentable {
       uiView.date = selection
     }
     uiView.minuteInterval = minuteInterval
+  }
+
+  func sizeThatFits(_ proposal: ProposedViewSize, uiView: UIDatePicker, context: Context) -> CGSize? {
+    let fitted = uiView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+    if fitted.width > 0, fitted.height > 0 { return fitted }
+    let intrinsic = uiView.intrinsicContentSize
+    guard intrinsic.width > 0, intrinsic.height > 0 else { return nil }
+    return intrinsic
   }
 
   func makeCoordinator() -> Coordinator {
