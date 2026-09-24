@@ -143,7 +143,7 @@ struct AuthView: View {
   }
 
   private var leadCopy: String {
-    guard let peek = app.pendingInvitePeek else { return "Someday, Plans and Memories" }
+    guard let peek = app.pendingInvitePeek else { return "Plans, Bucket lists and Memories" }
     let named = peek.spaceName.flatMap { $0.isEmpty ? nil : $0 }
     if mode == .signUp {
       if let named { return Copy.Auth.invitedToNamedOrb(inviter: peek.inviterName, orb: named) }

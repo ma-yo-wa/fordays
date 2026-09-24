@@ -218,7 +218,7 @@ export default function Auth({
             : inviteSpaceName
               ? `${inviterHint} invited you to “${inviteSpaceName}” — sign in to join`
               : `${inviterHint} invited you — sign in to join`
-          : 'Someday, Plans and Memories'}
+          : 'Plans, Bucket lists and Memories'}
       </p>
 
       {mode === 'signup' && (
