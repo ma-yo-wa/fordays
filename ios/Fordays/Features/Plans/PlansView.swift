@@ -383,7 +383,7 @@ struct PlansView: View {
     let today = DateLocal.todayISO()
     return VStack(spacing: Theme.Spacing.sm) {
       LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Theme.Spacing.none), count: 7), spacing: Theme.Spacing.s6) {
-        ForEach(["S", "M", "T", "W", "T", "F", "S"], id: \.self) { d in
+        ForEach(Array(["S", "M", "T", "W", "T", "F", "S"].enumerated()), id: \.offset) { _, d in
           Text(d)
             .font(.caption2.weight(.semibold))
             .foregroundStyle(Theme.inkFaint)
