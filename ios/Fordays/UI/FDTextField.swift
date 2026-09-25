@@ -29,20 +29,23 @@ struct FDTextField: View {
       }
 
       HStack(spacing: Theme.Spacing.sm) {
-        if isSecure {
-          SecureField(placeholder, text: $text)
-            .font(.fdBody)
-            .foregroundStyle(Theme.ink)
-        } else if axis == .vertical {
-          TextField(placeholder, text: $text, axis: .vertical)
-            .font(.fdBody)
-            .foregroundStyle(Theme.ink)
-            .lineLimit(lineLimit ?? 3...6)
-        } else {
-          TextField(placeholder, text: $text)
-            .font(.fdBody)
-            .foregroundStyle(Theme.ink)
+        Group {
+          if isSecure {
+            SecureField(placeholder, text: $text)
+              .font(.fdBody)
+              .foregroundStyle(Theme.ink)
+          } else if axis == .vertical {
+            TextField(placeholder, text: $text, axis: .vertical)
+              .font(.fdBody)
+              .foregroundStyle(Theme.ink)
+              .lineLimit(lineLimit ?? 3...6)
+          } else {
+            TextField(placeholder, text: $text)
+              .font(.fdBody)
+              .foregroundStyle(Theme.ink)
+          }
         }
+        .accessibilityLabel(label ?? placeholder)
 
         if clearable && !text.isEmpty {
           Button {
