@@ -344,35 +344,50 @@ struct SettingsView: View {
     .accessibilityLabel(Copy.Orbs.anotherOrb)
   }
 
+  /// Where each face sits in an Orb tile, in steps of (face − overlap) / 2
+  /// from the centre: one centred, two side by side, three as two over one,
+  /// four as a square. Past four, the last spot says +N. Same as the PWA.
+  private static let orbSpots: [Int: [(CGFloat, CGFloat)]] = [
+    1: [(0, 0)],
+    2: [(-1, 0), (1, 0)],
+    3: [(-1, -1), (1, -1), (0, 1)],
+    4: [(-1, -1), (1, -1), (-1, 1), (1, 1)],
+  ]
+
   private func orbFaceStack(_ faces: [OrbFaceChip]) -> some View {
-    HStack(spacing: Theme.Spacing.overlapSm) {
-      ForEach(faces.prefix(3)) { f in
-        ZStack {
-          Circle()
-            .fill(Theme.faceColor(for: f.id))
+    let spots = Self.orbSpots[min(max(faces.count, 1), 4)] ?? []
+    let more = faces.count > 4 ? faces.count - 3 : 0
+    let shown = Array(faces.prefix(more > 0 ? 3 : 4))
+    let step = (Theme.TouchTarget.avatarFace - Theme.Spacing.xs) / 2
+    return ZStack {
+      if more > 0 {
+        orbFaceCircle(fill: Theme.fillSecondary) {
+          Text("+\(more)")
+            .font(.fdTiny)
+        }
+        .offset(x: spots[3].0 * step, y: spots[3].1 * step)
+      }
+      // Drawn last-first so the first face sits on top, like the PWA.
+      ForEach(Array(shown.enumerated().reversed()), id: \.element.id) { idx, f in
+        orbFaceCircle(fill: Theme.faceColor(for: f.id)) {
           Text(f.letter)
             .font(.fdCaption.weight(.bold))
-            .foregroundStyle(Theme.faceInk)
-            .offset(y: Theme.Spacing.opticalNudge)
         }
-        .frame(width: Theme.TouchTarget.avatarFace, height: Theme.TouchTarget.avatarFace)
-        .overlay(Circle().stroke(Theme.paperWarm, lineWidth: Theme.TouchTarget.ringWidth))
-        .fixedSize()
-      }
-      if faces.count > 3 {
-        ZStack {
-          Circle()
-            .fill(Theme.fillSecondary)
-          Text("+\(faces.count - 3)")
-            .font(.fdTiny)
-            .foregroundStyle(Theme.faceInk)
-            .offset(y: Theme.Spacing.opticalNudge)
-        }
-        .frame(width: Theme.TouchTarget.avatarFace, height: Theme.TouchTarget.avatarFace)
-        .overlay(Circle().stroke(Theme.paperWarm, lineWidth: Theme.TouchTarget.ringWidth))
-        .fixedSize()
+        .offset(x: spots[idx].0 * step, y: spots[idx].1 * step)
       }
     }
+  }
+
+  private func orbFaceCircle<Label: View>(fill: Color, @ViewBuilder label: () -> Label) -> some View {
+    ZStack {
+      Circle().fill(fill)
+      label()
+        .foregroundStyle(Theme.faceInk)
+        .offset(y: Theme.Spacing.opticalNudge)
+    }
+    .frame(width: Theme.TouchTarget.avatarFace, height: Theme.TouchTarget.avatarFace)
+    .overlay(Circle().stroke(Theme.paperWarm, lineWidth: Theme.TouchTarget.ringWidth))
+    .fixedSize()
   }
 
   private var anotherOrbView: some View {

@@ -103,6 +103,42 @@ function orbFaceChips(space: SpaceInfo): { key: string; letter: string; them: bo
   ];
 }
 
+/* Where each face sits in an Orb tile, in steps of (face − overlap) / 2
+   from the centre: one centred, two side by side, three as two over one,
+   four as a square. Past four, the last spot says +N. Same as iOS. */
+const ORB_SPOTS: Record<number, Array<[number, number]>> = {
+  1: [[0, 0]],
+  2: [[-1, 0], [1, 0]],
+  3: [[-1, -1], [1, -1], [0, 1]],
+  4: [[-1, -1], [1, -1], [-1, 1], [1, 1]],
+};
+
+function OrbFaces({ faces }: { faces: { key: string; letter: string }[] }) {
+  const spots = ORB_SPOTS[Math.min(Math.max(faces.length, 1), 4)] ?? [];
+  const more = faces.length > 4 ? faces.length - 3 : 0;
+  const shown = more ? faces.slice(0, 3) : faces.slice(0, 4);
+  const place = ([x, y]: [number, number]) =>
+    `translate(calc(-50% + ${x} * var(--orb-face-step)), calc(-50% + ${y} * var(--orb-face-step)))`;
+  return (
+    <span className={ui.orbFaceCluster} aria-hidden>
+      {shown.map((f, idx) => (
+        <span
+          key={f.key}
+          className={ui.orbMiniFace}
+          style={{ zIndex: 4 - idx, background: faceColor(f.key), transform: place(spots[idx]!) }}
+        >
+          {f.letter}
+        </span>
+      ))}
+      {more > 0 && (
+        <span className={`${ui.orbMiniFace} ${ui.orbMiniMore}`} style={{ transform: place(spots[3]!) }}>
+          +{more}
+        </span>
+      )}
+    </span>
+  );
+}
+
 function OrbIcon() {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -567,23 +603,7 @@ export default function Settings() {
                       onClick={() => void handleSwitchOrb(orb)}
                     >
                       <span className={ui.orbCircle}>
-                        <span className={ui.orbFaceStack}>
-                          {faces.slice(0, 3).map((f, idx) => (
-                            <span
-                              key={f.key}
-                              className={ui.orbMiniFace}
-                              style={{ zIndex: 4 - idx, background: faceColor(f.key) }}
-                              aria-hidden
-                            >
-                              {f.letter}
-                            </span>
-                          ))}
-                          {faces.length > 3 && (
-                            <span className={`${ui.orbMiniFace} ${ui.orbMiniMore}`}>
-                              +{faces.length - 3}
-                            </span>
-                          )}
-                        </span>
+                        <OrbFaces faces={faces} />
                       </span>
                       <span className={ui.orbTileName}>{spaceOrbName(orb) || '\u00a0'}</span>
                     </button>
