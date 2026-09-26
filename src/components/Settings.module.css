@@ -744,3 +744,18 @@
 .switcherGrid {
   margin-top: var(--space-2);
 }
+
+/* Calendars: who sees your events leads the page; the where-from note closes it. */
+.calLead {
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  color: var(--ink-soft);
+  margin: var(--space-0) var(--space-1) var(--space-4);
+}
+
+.calNote {
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  color: var(--ink-faint);
+  margin: var(--space-5) var(--space-1) var(--space-0);
+}

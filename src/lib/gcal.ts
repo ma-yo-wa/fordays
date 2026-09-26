@@ -1,5 +1,5 @@
 import type { ExternalEventInput } from './backend';
-import type { ImportedCalendar } from './calendars';
+import { chosenCalendars, type ImportedCalendar } from './calendars';
 import { loadConfig } from './config';
 
 declare global {
@@ -26,8 +26,6 @@ declare global {
 
 const TOKEN_KEY = 'fordays.gcalToken';
 const LEGACY_TOKEN_KEY = 'someday.gcalToken';
-const CAL_KEY = 'fordays.gcalCalendar';
-const LEGACY_CAL_KEY = 'someday.gcalCalendar';
 const WANTED_KEY = 'fordays.gcalWanted';
 const SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
 
@@ -143,9 +141,9 @@ export function markGoogleWanted(on: boolean): void {
 
 export function googleWanted(): boolean {
   try {
-    return localStorage.getItem(WANTED_KEY) === '1' || Boolean(savedGoogleCalendar());
+    return localStorage.getItem(WANTED_KEY) === '1' || chosenCalendars('google').length > 0;
   } catch {
-    return Boolean(savedGoogleCalendar());
+    return chosenCalendars('google').length > 0;
   }
 }
 
@@ -180,27 +178,6 @@ export async function ensureGoogleToken(): Promise<string | null> {
   if (existing) return existing;
   if (!googleWanted() || !googleClientId()) return null;
   return connectGoogleSilent();
-}
-
-export function savedGoogleCalendar(): GoogleCalendar | null {
-  try {
-    const raw = takeItem(localStorage, CAL_KEY, LEGACY_CAL_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as GoogleCalendar;
-    if (!parsed?.id || !parsed?.summary) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-export function saveGoogleCalendar(cal: GoogleCalendar | null): void {
-  try {
-    if (!cal) localStorage.removeItem(CAL_KEY);
-    else localStorage.setItem(CAL_KEY, JSON.stringify(cal));
-  } catch {
-    /* */
-  }
 }
 
 export async function listGoogleCalendars(token: string): Promise<GoogleCalendar[]> {
@@ -250,7 +227,7 @@ export async function fetchGoogleEvents(
   const min = new Date();
   min.setMonth(min.getMonth() - 1);
   const max = new Date();
-  max.setMonth(max.getMonth() + 3);
+  max.setMonth(max.getMonth() + 6);
 
   const cal = encodeURIComponent(calendarId);
   type GCalItem = {
@@ -258,6 +235,8 @@ export async function fetchGoogleEvents(
     summary?: string;
     location?: string;
     description?: string;
+    status?: string;
+    attendees?: Array<{ self?: boolean; responseStatus?: string }>;
     start: { date?: string; dateTime?: string };
     end: { date?: string; dateTime?: string };
   };
@@ -266,13 +245,13 @@ export async function fetchGoogleEvents(
   // partial response; page through so a busy shared calendar isn’t truncated.
   const items: GCalItem[] = [];
   let pageToken = '';
-  for (let page = 0; page < 6; page++) {
+  for (let page = 0; page < 12; page++) {
     const url =
       `https://www.googleapis.com/calendar/v3/calendars/${cal}/events` +
       `?timeMin=${encodeURIComponent(min.toISOString())}` +
       `&timeMax=${encodeURIComponent(max.toISOString())}` +
       '&singleEvents=true&orderBy=startTime&maxResults=250' +
-      '&fields=items(id,summary,location,description,start,end),nextPageToken' +
+      '&fields=items(id,status,summary,location,description,start,end,attendees(self,responseStatus)),nextPageToken' +
       (pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : '');
 
     const res = await fetch(url, {
@@ -293,10 +272,16 @@ export async function fetchGoogleEvents(
     pageToken = body.nextPageToken;
   }
 
-  const label = calendarName?.trim() || savedGoogleCalendar()?.summary || 'Google';
+  const label = calendarName?.trim() || 'Google';
 
   return items
     .filter((ev) => ev.id && (ev.start?.date || ev.start?.dateTime))
+    // Cancelled, or an invite you said no to: not in your day.
+    .filter(
+      (ev) =>
+        ev.status !== 'cancelled' &&
+        !ev.attendees?.some((a) => a.self && a.responseStatus === 'declined'),
+    )
     .map((ev) => {
       const allDay = Boolean(ev.start.date);
       const startRaw = ev.start.date ?? ev.start.dateTime ?? '';

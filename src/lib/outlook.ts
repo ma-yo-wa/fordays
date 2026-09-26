@@ -1,9 +1,8 @@
 import type { ExternalEventInput } from './backend';
-import type { ImportedCalendar } from './calendars';
+import { chosenCalendars, type ImportedCalendar } from './calendars';
 import { loadConfig } from './config';
 
 const TOKEN_KEY = 'fordays.outlookTokens';
-const CAL_KEY = 'fordays.outlookCalendar';
 const WANTED_KEY = 'fordays.outlookWanted';
 const PKCE_KEY = 'fordays.outlook.pkce';
 const SCOPE = 'offline_access Calendars.Read';
@@ -27,9 +26,9 @@ export function outlookRedirectUri(): string {
 
 export function outlookWanted(): boolean {
   try {
-    return localStorage.getItem(WANTED_KEY) === '1' || Boolean(savedOutlookCalendar());
+    return localStorage.getItem(WANTED_KEY) === '1' || chosenCalendars('outlook').length > 0;
   } catch {
-    return Boolean(savedOutlookCalendar());
+    return chosenCalendars('outlook').length > 0;
   }
 }
 
@@ -72,27 +71,6 @@ export function clearOutlookTokens(): void {
   markOutlookWanted(false);
   try {
     sessionStorage.removeItem(PKCE_KEY);
-  } catch {
-    /* */
-  }
-}
-
-export function savedOutlookCalendar(): OutlookCalendar | null {
-  try {
-    const raw = localStorage.getItem(CAL_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as OutlookCalendar;
-    if (!parsed?.id || !parsed?.summary) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-export function saveOutlookCalendar(cal: OutlookCalendar | null): void {
-  try {
-    if (!cal) localStorage.removeItem(CAL_KEY);
-    else localStorage.setItem(CAL_KEY, JSON.stringify(cal));
   } catch {
     /* */
   }
@@ -257,12 +235,14 @@ export async function fetchOutlookEvents(
   const min = new Date();
   min.setMonth(min.getMonth() - 1);
   const max = new Date();
-  max.setMonth(max.getMonth() + 3);
+  max.setMonth(max.getMonth() + 6);
 
   type GraphEvent = {
     id?: string;
     subject?: string;
     isAllDay?: boolean;
+    isCancelled?: boolean;
+    responseStatus?: { response?: string };
     location?: { displayName?: string };
     start?: { dateTime?: string; date?: string };
     end?: { dateTime?: string; date?: string };
@@ -273,10 +253,10 @@ export async function fetchOutlookEvents(
     `https://graph.microsoft.com/v1.0/me/calendars/${encodeURIComponent(calendarId)}/calendarView` +
     `?startDateTime=${encodeURIComponent(min.toISOString())}` +
     `&endDateTime=${encodeURIComponent(max.toISOString())}` +
-    '&$select=id,subject,isAllDay,location,start,end' +
+    '&$select=id,subject,isAllDay,isCancelled,responseStatus,location,start,end' +
     '&$top=100';
 
-  for (let page = 0; page < 8 && url; page++) {
+  for (let page = 0; page < 20 && url; page++) {
     const res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -293,14 +273,18 @@ export async function fetchOutlookEvents(
     url = body['@odata.nextLink'] ?? '';
   }
 
-  const label = calendarName?.trim() || savedOutlookCalendar()?.summary || 'Outlook';
+  const label = calendarName?.trim() || 'Outlook';
+  // Graph sends UTC (we asked for it) without the Z; say so, or it reads as local.
+  const utc = (v: string) => (/[zZ]|[+-]\d\d:\d\d$/.test(v) ? v : `${v}Z`);
 
   return items
     .filter((ev) => ev.id && (ev.start?.dateTime || ev.start?.date))
+    // Cancelled, or an invite you said no to: not in your day.
+    .filter((ev) => !ev.isCancelled && ev.responseStatus?.response !== 'declined')
     .map((ev) => {
       const allDay = Boolean(ev.isAllDay);
-      const startRaw = ev.start?.date ?? ev.start?.dateTime ?? '';
-      const endRaw = ev.end?.date ?? ev.end?.dateTime ?? startRaw;
+      const startRaw = ev.start?.date ?? (allDay ? ev.start?.dateTime : utc(ev.start?.dateTime ?? '')) ?? '';
+      const endRaw = ev.end?.date ?? (ev.end?.dateTime ? (allDay ? ev.end.dateTime : utc(ev.end.dateTime)) : startRaw);
       let endsAt = toLocal(endRaw, allDay);
       if (allDay && endsAt > toLocal(startRaw, true)) {
         const d = new Date(`${endsAt}T12:00:00`);

@@ -6,6 +6,7 @@ import { LocationInput } from './LocationInput';
 import { useApp } from '../lib/store';
 import { composeWhen, describePlan, iso, parseISO, todayISO } from '../lib/date';
 import { Copy } from '../lib/copy';
+import { clashLine } from '../lib/clash';
 import { Button, Input } from '../ui';
 import f from './Form.module.css';
 
@@ -23,6 +24,8 @@ export default function Composer() {
   const setPicked = useApp((st) => st.setPicked);
   const setScreen = useApp((st) => st.setScreen);
   const setCursor = useApp((st) => st.setCursor);
+  const myEvents = useApp((st) => st.external);
+  const homePlans = useApp((st) => st.homePlans);
 
   const isPlan = mode === 'plan';
 
@@ -37,6 +40,12 @@ export default function Composer() {
   const [multiDay, setMultiDay] = useState(false);
   const [saving, setSaving] = useState(false);
   const [sessionKey, setSessionKey] = useState(0);
+
+  /* Yours only: your calendar and your home Orb's plans on that day or at
+     that time. It never stops a save. */
+  const clash = isPlan
+    ? clashLine({ date, from, until, endDate: multiDay ? end : null }, [...myEvents, ...homePlans])
+    : null;
 
   useEffect(() => {
     if (!mode) return;
@@ -176,6 +185,11 @@ export default function Composer() {
               }).ends_at,
             )}
           </p>
+          {clash && (
+            <p className={f.whisper} aria-label={`Only you see this. ${clash}`}>
+              <span className={f.whisperText}>{clash}</span>
+            </p>
+          )}
         </>
       )}
 

@@ -6,10 +6,21 @@ import s from './GcalPicker.module.css';
 
 interface Props {
   calendars: ImportedCalendar[];
-  selectedId: string | null;
+  /** Ticked already; none means a first connect, which ticks the main one. */
+  selectedIds: string[];
+  /** Events each calendar brought last time, when known. */
+  counts?: Record<string, number>;
   busy?: boolean;
   onClose: () => void;
-  onPick: (cal: ImportedCalendar) => void;
+  onSave: (cals: ImportedCalendar[]) => void;
+}
+
+function Tick() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M6.5 12.5l3.5 3.5 7.5-8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 function CalIcon() {
@@ -23,24 +34,33 @@ function CalIcon() {
 
 export default function GcalPicker({
   calendars,
-  selectedId,
+  selectedIds,
+  counts,
   busy,
   onClose,
-  onPick,
+  onSave,
 }: Props) {
-  const [pending, setPending] = useState<string | null>(selectedId);
+  const [ticked, setTicked] = useState<Set<string>>(new Set(selectedIds));
 
   useEffect(() => {
-    if (selectedId) {
-      setPending(selectedId);
+    if (selectedIds.length) {
+      setTicked(new Set(selectedIds));
       return;
     }
     const main =
       calendars.find((c) => c.primary) ??
       calendars.find((c) => c.accessRole === 'owner') ??
       calendars[0];
-    setPending(main?.id ?? null);
-  }, [selectedId, calendars]);
+    setTicked(new Set(main ? [main.id] : []));
+  }, [selectedIds, calendars]);
+
+  const toggle = (id: string) =>
+    setTicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   const sections = useMemo(() => {
     const mine = calendars.filter((c) => c.accessRole === 'owner' || c.primary);
@@ -51,8 +71,7 @@ export default function GcalPicker({
     return out;
   }, [calendars]);
 
-  const chosen =
-    calendars.find((c) => c.id === (pending ?? selectedId)) ?? null;
+  const chosen = calendars.filter((c) => ticked.has(c.id));
 
   return (
     <div>
@@ -63,22 +82,27 @@ export default function GcalPicker({
           <span className={s.sectionLabel}>{sec.label}</span>
           <div className={s.list}>
             {sec.items.map((cal) => {
-              const on = (pending ?? selectedId) === cal.id;
+              const on = ticked.has(cal.id);
+              const n = counts?.[cal.id];
               return (
                 <button
                   key={cal.id}
                   type="button"
+                  role="checkbox"
                   className={s.row}
                   disabled={busy}
-                  onClick={() => setPending(cal.id)}
-                  aria-pressed={on}
+                  onClick={() => toggle(cal.id)}
+                  aria-checked={on}
                 >
                   <CalIcon />
                   <span className={s.name}>
                     {cal.summary}
                     {cal.primary ? ' · Primary' : ''}
                   </span>
-                  <span className={`${s.radio} ${on ? s.radioOn : ''}`} aria-hidden />
+                  {n != null && <span className={s.count}>{n}</span>}
+                  <span className={`${s.check} ${on ? s.checkOn : ''}`} aria-hidden>
+                    {on && <Tick />}
+                  </span>
                 </button>
               );
             })}
@@ -93,12 +117,10 @@ export default function GcalPicker({
         <button
           type="button"
           className={`${f.btn} ${f.accent}`}
-          disabled={busy || !chosen}
-          onClick={() => {
-            if (chosen) onPick(chosen);
-          }}
+          disabled={busy || (!chosen.length && !selectedIds.length)}
+          onClick={() => onSave(chosen)}
         >
-          {busy ? 'Importing…' : 'Import'}
+          {busy ? 'Importing…' : selectedIds.length ? 'Save' : 'Import'}
         </button>
       </div>
     </div>

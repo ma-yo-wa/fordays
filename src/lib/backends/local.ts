@@ -1,8 +1,6 @@
-import type { CalendarSource } from '../calendars';
 import type {
   Backend,
   BackendHandlers,
-  ExternalEventInput,
   NewActivity,
 } from '../backend';
 import { uid } from '../backend';
@@ -223,44 +221,6 @@ export class LocalBackend implements Backend {
     const a = this.data.activities.find((x) => x.id === id);
     if (a) this.log(id, 'deleted', `deleted “${a.title}”`);
     this.data.activities = this.data.activities.filter((x) => x.id !== id);
-    this.commit();
-  }
-
-  async replaceExternal(events: ExternalEventInput[], source: CalendarSource): Promise<void> {
-    const me = String(loadConfig().me);
-    const prevShare = new Map(
-      this.data.external
-        .filter((e) => e.ownerId === me && (e.source ?? 'google') === source)
-        .map((e) => [e.id, e.sharedWithSpace]),
-    );
-    const mine = events.map((e): ExternalEvent => {
-      const id = `${e.source}-${e.sourceId}`;
-      return {
-        id,
-        ownerId: me,
-        title: e.title,
-        location: e.location,
-        startsAt: e.startsAt,
-        endsAt: e.endsAt,
-        allDay: e.allDay,
-        calendar: e.calendar,
-        source: e.source,
-        sharedWithSpace: prevShare.get(id) ?? false,
-      };
-    });
-    this.data.external = [
-      ...this.data.external.filter(
-        (e) => e.ownerId !== me || (e.source ?? 'google') !== source,
-      ),
-      ...mine,
-    ];
-    this.commit();
-  }
-
-  async toggleExternalShare(id: string, shared: boolean): Promise<void> {
-    this.data.external = this.data.external.map((e) =>
-      e.id === id ? { ...e, sharedWithSpace: shared } : e,
-    );
     this.commit();
   }
 

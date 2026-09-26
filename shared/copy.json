@@ -127,7 +127,7 @@
     "outlookCalendar": "Outlook Calendar",
     "appleCalendar": "Apple Calendar",
     "onlyYou": "Only you",
-    "pickerLead": "Your main calendar is picked. That’s usually where appointments land. You can choose another.",
+    "pickerLead": "Tick the calendars to bring in. Your main one is ticked to start.",
     "makePlan": "Make it a plan",
     "makePlanShort": "Make plan",
     "convertToPlan": "Make it a plan",
@@ -145,7 +145,9 @@
     "sharedByDesc": "{owner} wanted you to see this.",
     "noConflicts": "Nothing else on this day",
     "settingsNoteIos": "Calendars already on this iPhone — including Google or Outlook, if they’re in the Calendar app. Don’t see it? iPhone Settings → Calendar → Accounts → Add Account, then come back and refresh.",
-    "settingsNoteWeb": "Google and Outlook here. On iPhone, Fordays reads the Calendar app instead — add Gmail or Outlook there if those days should show, so they don’t land twice."
+    "settingsNoteWeb": "Google and Outlook here. On iPhone, Fordays reads the Calendar app instead — add Gmail or Outlook there if those days should show, so they don’t land twice.",
+    "yoursOnly": "Your events show in {orb} and remind you. Nobody else ever sees them.",
+    "clash": "You have {title}, {when}"
   },
   "auth": {
     "invitedToOrb": "{inviter} invited you to an Orb",

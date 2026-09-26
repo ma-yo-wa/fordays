@@ -1,12 +1,10 @@
 import type { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
-import type { CalendarSource } from '../calendars';
 import type {
   Backend,
   BackendHandlers,
-  ExternalEventInput,
   NewActivity,
 } from '../backend';
-import type { Activity, AuditLog, ExternalEvent, WhenSuggestion } from '../types';
+import type { Activity, AuditLog, WhenSuggestion } from '../types';
 import { iso } from '../date';
 import type { Config } from '../config';
 import { getClient } from '../auth';
@@ -108,7 +106,6 @@ export class SupabaseBackend implements Backend {
 
     await this.refreshActivities();
     void this.refreshLogs();
-    void this.refreshExternal();
 
     // A start that overlaps an earlier one (a quick Orb switch back, or
     // React running effects twice in dev) finds this Orb's channel already
@@ -139,16 +136,6 @@ export class SupabaseBackend implements Backend {
           filter: `space_id=eq.${this.spaceId}`,
         },
         () => void this.refreshLogs(),
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'external_events',
-          filter: `space_id=eq.${this.spaceId}`,
-        },
-        () => void this.refreshExternal(),
       )
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
@@ -442,125 +429,11 @@ export class SupabaseBackend implements Backend {
     }
   }
 
-  async replaceExternal(
-    events: ExternalEventInput[],
-    source: CalendarSource,
-  ): Promise<void> {
-    const { data: userData, error: userErr } = await this.client.auth.getUser();
-    if (userErr || !userData.user) {
-      throw new Error('Session expired — sign out and sign back in.');
-    }
-    this.uid = userData.user.id;
-    if (!this.spaceId) {
-      throw new Error('No Orb yet — sign out and sign back in.');
-    }
-
-    const { data: existing, error: readErr } = await this.client
-      .from('external_events')
-      .select('id, source_id')
-      .eq('space_id', this.spaceId)
-      .eq('owner_id', this.uid)
-      .eq('calendar_source', source);
-    if (readErr) {
-      throw mapExternalError(readErr);
-    }
-
-    const seen = new Set<string>();
-    const uniqueEvents: ExternalEventInput[] = [];
-    // Keep the last occurrence of any duplicate sourceId
-    for (let i = events.length - 1; i >= 0; i--) {
-      const e = events[i];
-      if (!e || seen.has(e.sourceId)) continue;
-      seen.add(e.sourceId);
-      uniqueEvents.push(e);
-    }
-    uniqueEvents.reverse();
-
-    const keep = new Set(uniqueEvents.map((e) => e.sourceId));
-    const staleIds = (existing ?? [])
-      .filter((r: { id: string; source_id: string }) => !keep.has(r.source_id))
-      .map((r: { id: string }) => r.id);
-
-    if (staleIds.length) {
-      const chunk = 80;
-      for (let i = 0; i < staleIds.length; i += chunk) {
-        const { error: delErr } = await this.client
-          .from('external_events')
-          .delete()
-          .in('id', staleIds.slice(i, i + chunk));
-        if (delErr) throw mapExternalError(delErr);
-      }
-    }
-
-    if (uniqueEvents.length) {
-      const rows = uniqueEvents.map((e) => ({
-        space_id: this.spaceId,
-        owner_id: this.uid,
-        source_id: e.sourceId,
-        calendar_source: source,
-        title: e.title,
-        location: e.location,
-        starts_at: toTimestamptz(e.startsAt),
-        ends_at: toTimestamptz(e.endsAt),
-        all_day: e.allDay,
-        calendar_name: e.calendar,
-        updated_at: new Date().toISOString(),
-      }));
-      const sentPlaces = rows.filter((r) => r.location).length;
-      const chunk = 80;
-      for (let i = 0; i < rows.length; i += chunk) {
-        const slice = rows.slice(i, i + chunk);
-        const { data, error: upErr } = await this.client
-          .from('external_events')
-          .upsert(slice, {
-            onConflict: 'space_id,owner_id,calendar_source,source_id',
-          })
-          .select('id, location');
-        if (upErr) throw mapExternalError(upErr);
-        if (!data?.length) {
-          throw new Error(
-            'Calendar rows didn’t save — check you’re signed in and migration 014 is applied',
-          );
-        }
-      }
-
-      if (sentPlaces > 0) {
-        const { data: placed, error: checkErr } = await this.client
-          .from('external_events')
-          .select('id')
-          .eq('space_id', this.spaceId)
-          .eq('owner_id', this.uid)
-          .eq('calendar_source', source)
-          .not('location', 'is', null)
-          .limit(1);
-        if (checkErr) throw mapExternalError(checkErr);
-        if (!placed?.length) {
-          throw new Error(
-            'Places didn’t save — in Supabase run migrations/005_external_event_details.sql, then Settings → Refresh overlay',
-          );
-        }
-      }
-    }
-
-    await this.refreshExternal();
-  }
-
-  async toggleExternalShare(id: string, shared: boolean): Promise<void> {
-    if (!this.client) return;
-    const { error } = await this.client
-      .from('external_events')
-      .update({ shared_with_space: shared, updated_at: new Date().toISOString() })
-      .eq('id', id);
-    if (error) throw mapExternalError(error);
-    await this.refreshExternal();
-  }
-
   /* ---------------- internals ---------------- */
 
   private async refresh(): Promise<void> {
     await this.refreshActivities();
     void this.refreshLogs();
-    void this.refreshExternal();
   }
 
   private async fetchActivities(): Promise<Activity[]> {
@@ -590,24 +463,6 @@ export class SupabaseBackend implements Backend {
     this.handlers.onLogs(data as AuditLog[]);
   }
 
-  private async refreshExternal(): Promise<void> {
-    const { data, error } = await this.client
-      .from('external_events')
-      .select('*')
-      .eq('space_id', this.spaceId)
-      .order('starts_at', { ascending: true });
-    if (error) {
-      // Table missing until migration 003 is applied — don’t brick the app.
-      if (/external_events|schema cache/i.test(error.message)) {
-        this.handlers.onExternal([]);
-        return;
-      }
-      console.error(error);
-      return;
-    }
-    this.handlers.onExternal(((data ?? []) as ExternalRow[]).map(mapExternal));
-  }
-
   /** Exposed so settings can show who you're actually signed in as. */
   get userId(): string {
     return this.uid;
@@ -616,34 +471,6 @@ export class SupabaseBackend implements Backend {
   get configRef(): Config {
     return this.config;
   }
-}
-
-function mapExternalError(err: { message?: string; code?: string }): Error {
-  const msg = err.message ?? 'Calendar sync failed';
-  if (/location/i.test(msg) && /schema cache|could not find|does not exist/i.test(msg)) {
-    return new Error(
-      'Location column missing — run migrations/005_external_event_details.sql in Supabase, then import again',
-    );
-  }
-  if (/calendar_source|external_events_source_uniq/i.test(msg)) {
-    return new Error(
-      'Calendar sources aren’t set up yet — run migrations/014_calendar_source.sql in Supabase',
-    );
-  }
-  if (/external_events|schema cache|does not exist/i.test(msg)) {
-    return new Error(
-      'Calendar sharing isn’t set up yet — run migrations/003_external_events.sql in Supabase',
-    );
-  }
-  if (/permission denied|42501/i.test(msg) || err.code === '42501') {
-    return new Error(
-      'No permission to save calendar overlays — re-run migrations/003_external_events.sql (includes grants)',
-    );
-  }
-  if (/foreign key|23503/i.test(msg) || err.code === '23503') {
-    return new Error('Space or profile missing — sign out and sign back in, then import again');
-  }
-  return new Error(msg);
 }
 
 function mapActivity(r: ActivityRow): Activity {
@@ -671,34 +498,3 @@ function mapActivity(r: ActivityRow): Activity {
   };
 }
 
-interface ExternalRow {
-  id: string;
-  owner_id: string;
-  title: string | null;
-  location?: string | null;
-  starts_at: string;
-  ends_at: string;
-  all_day: boolean;
-  calendar_name: string;
-  calendar_source?: string | null;
-  shared_with_space?: boolean | null;
-}
-
-function mapExternal(r: ExternalRow): ExternalEvent {
-  const source =
-    r.calendar_source === 'apple' || r.calendar_source === 'outlook'
-      ? r.calendar_source
-      : 'google';
-  return {
-    id: r.id,
-    ownerId: r.owner_id,
-    title: r.title,
-    location: r.location ?? null,
-    startsAt: fromTimestamptz(r.starts_at, r.all_day) ?? r.starts_at,
-    endsAt: fromTimestamptz(r.ends_at, r.all_day) ?? r.ends_at,
-    allDay: r.all_day,
-    calendar: r.calendar_name,
-    source,
-    sharedWithSpace: Boolean(r.shared_with_space),
-  };
-}

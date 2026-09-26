@@ -9,7 +9,7 @@ import { useApp, spaceOrbName, spacePeopleLabel } from '../lib/store';
 import {
   currentEmail,
   isDefaultSpaceName,
-  isHomeSoloName,
+  isHomeOrb,
   soloNotebookTitle,
   updateDisplayName,
   type SpaceInfo,
@@ -17,26 +17,25 @@ import {
 import {
   clearGoogleToken,
   connectGoogle,
-  fetchGoogleEvents,
   googleToken,
   listGoogleCalendars,
-  saveGoogleCalendar,
-  savedGoogleCalendar,
-  type GoogleCalendar,
 } from '../lib/gcal';
 import {
   clearOutlookTokens,
   connectOutlook,
   consumeOutlookRedirect,
-  fetchOutlookEvents,
   listOutlookCalendars,
   msClientId,
-  saveOutlookCalendar,
-  savedOutlookCalendar,
   ensureOutlookToken,
-  type OutlookCalendar,
 } from '../lib/outlook';
-import type { ImportedCalendar } from '../lib/calendars';
+import {
+  chooseCalendars,
+  chosenCalendars,
+  lastSynced,
+  updatedAgo,
+  type ImportedCalendar,
+} from '../lib/calendars';
+import { forgetSource } from '../lib/myCalendar';
 import {
   disablePush,
   enablePush,
@@ -95,6 +94,8 @@ type SettingsConfirm = {
 
 /* Settings is a stack of pages, like iOS Settings: each has its own title
    and the back button names the page underneath. */
+type WebSource = 'google' | 'outlook';
+
 type Page =
   | { k: 'main' }
   | { k: 'account' }
@@ -179,9 +180,7 @@ function peopleNote(orb: SpaceInfo): string {
 
 /** A solo Orb that is someone's home base: it can't be left or shared. */
 function isPersonal(orb: SpaceInfo, activeOrbs: SpaceInfo[]): boolean {
-  const solo = (orb.members ?? []).length <= 1;
-  const soloOrbs = activeOrbs.filter((s) => (s.members ?? []).length <= 1);
-  return solo && (isHomeSoloName(orb.name, orb.myName) || soloOrbs.length <= 1);
+  return isHomeOrb({ ...orb, frozen: false }, activeOrbs);
 }
 
 export default function Settings() {
@@ -194,7 +193,9 @@ export default function Settings() {
   const signOutUser = useApp((st) => st.signOutUser);
   const authPhase = useApp((st) => st.authPhase);
   const space = useApp((st) => st.space);
-  const syncExternal = useApp((st) => st.syncExternal);
+  const syncCalendarSource = useApp((st) => st.syncCalendarSource);
+  const reloadMine = useApp((st) => st.reloadMine);
+  const myEvents = useApp((st) => st.external);
   const setInviteShareOpen = useApp((st) => st.setInviteShareOpen);
   const setJoinOrbOpen = useApp((st) => st.setJoinOrbOpen);
   const refreshSpace = useApp((st) => st.refreshSpace);
@@ -218,12 +219,14 @@ export default function Settings() {
   const [email, setEmail] = useState<string | null>(null);
   const [myName, setMyName] = useState(space?.myName ?? config.names[config.me]);
   const [orbDraft, setOrbDraft] = useState('');
-  const [gcalOn, setGcalOn] = useState(Boolean(savedGoogleCalendar() || googleToken()));
-  const [gcalName, setGcalName] = useState(savedGoogleCalendar()?.summary ?? null);
-  const [outlookOn, setOutlookOn] = useState(Boolean(savedOutlookCalendar()));
-  const [outlookName, setOutlookName] = useState(savedOutlookCalendar()?.summary ?? null);
+  const [gcalOn, setGcalOn] = useState(Boolean(chosenCalendars('google').length || googleToken()));
+  const [outlookOn, setOutlookOn] = useState(chosenCalendars('outlook').length > 0);
+  const [chosen, setChosen] = useState<Record<WebSource, ImportedCalendar[]>>(() => ({
+    google: chosenCalendars('google'),
+    outlook: chosenCalendars('outlook'),
+  }));
   const [calPicker, setCalPicker] = useState<{
-    source: 'google' | 'outlook';
+    source: WebSource;
     items: ImportedCalendar[];
   } | null>(null);
   const [calBusy, setCalBusy] = useState(false);
@@ -275,16 +278,15 @@ export default function Settings() {
     setMyName(space?.myName ?? config.names[config.me]);
     setConfirm(null);
     void currentEmail().then(setEmail);
-    setGcalOn(Boolean(savedGoogleCalendar() || googleToken()));
-    setGcalName(savedGoogleCalendar()?.summary ?? null);
-    setOutlookOn(Boolean(savedOutlookCalendar()));
-    setOutlookName(savedOutlookCalendar()?.summary ?? null);
+    setGcalOn(Boolean(chosenCalendars('google').length || googleToken()));
+    setOutlookOn(chosenCalendars('outlook').length > 0);
+    setChosen({ google: chosenCalendars('google'), outlook: chosenCalendars('outlook') });
     void registerPush().then(() => setBell(pushState()));
     void syncPush().then(() => setBell(pushState()));
     void (async () => {
       const redirected = await consumeOutlookRedirect();
       const token = redirected || (await ensureOutlookToken());
-      if (!token || savedOutlookCalendar()) return;
+      if (!token || chosenCalendars('outlook').length) return;
       setOutlookOn(true);
       try {
         const calendars = await listOutlookCalendars(token);
@@ -310,34 +312,49 @@ export default function Settings() {
     };
   }, [open]);
 
-  function openPicker() {
-    push({ k: 'calPicker' });
+  const setOn = (source: WebSource, on: boolean) =>
+    source === 'google' ? setGcalOn(on) : setOutlookOn(on);
+
+  const sourceName = (source: WebSource) =>
+    source === 'google' ? Copy.availability.googleCalendar : Copy.availability.outlookCalendar;
+
+  async function listCalendars(source: WebSource): Promise<ImportedCalendar[] | null> {
+    const token = source === 'google' ? googleToken() : await ensureOutlookToken();
+    if (!token) {
+      toast(source === 'google' ? 'Connect Google again' : 'Connect Outlook again');
+      setOn(source, false);
+      return null;
+    }
+    return source === 'google' ? listGoogleCalendars(token) : listOutlookCalendars(token);
   }
 
-  async function importGoogleCalendar(cal: GoogleCalendar) {
-    const token = googleToken();
-    if (!token) {
-      toast('Connect Google again');
-      setGcalOn(false);
-      setCalPicker(null);
-      return;
-    }
+  async function openPicker(source: WebSource) {
     setCalBusy(true);
     try {
-      saveGoogleCalendar(cal);
-      setGcalName(cal.summary);
-      setCalPicker(null);
-      const events = await fetchGoogleEvents(token, cal.id, cal.summary);
-      await syncExternal(events, 'google');
-      setGcalOn(true);
-      const withPlace = events.filter((e) => e.location).length;
-      toast(
-        events.length
-          ? withPlace
-            ? `${cal.summary} — ${events.length} events · ${withPlace} with a place`
-            : `${cal.summary} — ${events.length} events (no places on those Google events)`
-          : `${cal.summary} — nothing in the next few months`,
-      );
+      const items = await listCalendars(source);
+      if (!items) return;
+      setCalPicker({ source, items });
+      push({ k: 'calPicker' });
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Couldn’t list calendars');
+    } finally {
+      setCalBusy(false);
+    }
+  }
+
+  /* Tick boxes saved: sync the ticked ones, forget the rest. */
+  async function saveChoice(source: WebSource, list: ImportedCalendar[]) {
+    if (!list.length) {
+      await disconnect(source);
+      return;
+    }
+    chooseCalendars(source, list);
+    setChosen((c) => ({ ...c, [source]: list }));
+    setOn(source, true);
+    setCalBusy(true);
+    try {
+      const n = await syncCalendarSource(source);
+      toast(n ? `${n} events from ${sourceName(source)}` : 'Nothing in the next few months');
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Couldn’t load that calendar');
     } finally {
@@ -345,78 +362,72 @@ export default function Settings() {
     }
   }
 
-  async function importOutlookCalendar(cal: OutlookCalendar) {
-    const token = await ensureOutlookToken();
-    if (!token) {
-      toast('Connect Outlook again');
-      setOutlookOn(false);
-      setCalPicker(null);
-      return;
-    }
+  async function refreshSource(source: WebSource) {
     setCalBusy(true);
     try {
-      saveOutlookCalendar(cal);
-      setOutlookName(cal.summary);
-      setCalPicker(null);
-      const events = await fetchOutlookEvents(token, cal.id, cal.summary);
-      await syncExternal(events, 'outlook');
-      setOutlookOn(true);
-      toast(
-        events.length
-          ? `${cal.summary} — ${events.length} events`
-          : `${cal.summary} — nothing in the next few months`,
-      );
+      await syncCalendarSource(source);
+      toast('Up to date');
     } catch (err) {
-      toast(err instanceof Error ? err.message : 'Couldn’t load that calendar');
+      toast(err instanceof Error ? err.message : 'Couldn’t refresh');
     } finally {
       setCalBusy(false);
     }
   }
 
-  async function pickImportedCalendar(cal: ImportedCalendar) {
-    if (calPicker?.source === 'outlook') {
-      await importOutlookCalendar(cal);
-      return;
+  /* Off: the token goes, and every event from that source with it. */
+  async function disconnect(source: WebSource) {
+    if (source === 'google') clearGoogleToken();
+    else clearOutlookTokens();
+    setChosen((c) => ({ ...c, [source]: [] }));
+    setOn(source, false);
+    setCalPicker(null);
+    try {
+      await forgetSource(source);
+      await reloadMine();
+      toast(`${sourceName(source)} disconnected`);
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Couldn’t clear those events');
     }
-    await importGoogleCalendar(cal);
   }
 
-  async function refreshGoogleOverlay() {
-    const cal = savedGoogleCalendar();
-    if (!cal) {
-      toast('Choose a calendar first');
+  async function connect(source: WebSource) {
+    if (source === 'outlook' && !msClientId()) {
+      toast('Outlook isn’t available yet');
       return;
     }
-    await importGoogleCalendar(cal);
-  }
-
-  async function refreshOutlookOverlay() {
-    const cal = savedOutlookCalendar();
-    if (!cal) {
-      toast('Choose a calendar first');
-      return;
+    setCalBusy(true);
+    try {
+      const token = source === 'google' ? await connectGoogle() : await connectOutlook();
+      const items =
+        source === 'google' ? await listGoogleCalendars(token) : await listOutlookCalendars(token);
+      if (!items.length) {
+        setOn(source, false);
+        toast(`No calendars found on that ${source === 'google' ? 'Google' : 'Outlook'} account`);
+        return;
+      }
+      setOn(source, true);
+      setCalPicker({ source, items });
+      push({ k: 'calPicker' });
+    } catch (err) {
+      setOn(source, false);
+      toast(err instanceof Error ? err.message : `${source === 'google' ? 'Google' : 'Outlook'} connect failed`);
+    } finally {
+      setCalBusy(false);
     }
-    await importOutlookCalendar(cal);
   }
 
   function closeCalPicker() {
     const source = calPicker?.source;
     setCalPicker(null);
     pop();
-    if (source === 'outlook') {
-      if (!savedOutlookCalendar()) {
-        clearOutlookTokens();
-        setOutlookOn(false);
-        setOutlookName(null);
-      }
-      return;
-    }
-    if (!savedGoogleCalendar()) {
-      clearGoogleToken();
-      setGcalOn(false);
-      setGcalName(null);
+    // Backed out of a first connect: nothing was ticked, so let go of the account.
+    if (source && !chosenCalendars(source).length) {
+      if (source === 'google') clearGoogleToken();
+      else clearOutlookTokens();
+      setOn(source, false);
     }
   }
+
 
   async function persistOrbName(orb: SpaceInfo) {
     if (orb.frozen) return;
@@ -1076,172 +1087,56 @@ export default function Settings() {
   }
 
   function renderCalendars() {
+    const home = activeOrbs.find((o) => isHomeOrb(o, activeOrbs));
+    const sources: WebSource[] = ['google', 'outlook'];
     return (
       <div className={ui.section}>
-              <FormGroup footer={Copy.availability.settingsNoteWeb}>
-            <FormRow label={Copy.availability.googleCalendar} icon={<CalendarIcon />}>
-              <Switch
-                on={gcalOn}
-                disabled={calBusy}
-                label="Connect Google Calendar"
-                onChange={(on) => {
-                  void (async () => {
-                    if (!on) {
-                      clearGoogleToken();
-                      saveGoogleCalendar(null);
-                      setCalPicker(null);
-                      setGcalName(null);
-                      setGcalOn(false);
-                      void syncExternal([], 'google')
-                        .then(() => toast('Google Calendar disconnected'))
-                        .catch((err) =>
-                          toast(err instanceof Error ? err.message : 'Couldn’t clear overlay'),
-                        );
-                      return;
-                    }
-                    setCalBusy(true);
-                    try {
-                      const token = await connectGoogle();
-                      const calendars = await listGoogleCalendars(token);
-                      if (!calendars.length) {
-                        setGcalOn(false);
-                        toast('No calendars found on that Google account');
-                        return;
-                      }
-                      setGcalOn(true);
-                      setCalPicker({ source: 'google', items: calendars });
-                      openPicker();
-                    } catch (err) {
-                      setGcalOn(false);
-                      toast(err instanceof Error ? err.message : 'Google connect failed');
-                    } finally {
-                      setCalBusy(false);
-                    }
-                  })();
-                }}
-              />
-            </FormRow>
-            {gcalOn && (
-              <FormRow
-                label={gcalName ?? 'Choose calendar'}
-                onClick={calBusy ? undefined : () => {
-                  void (async () => {
-                    const token = googleToken();
-                    if (!token) {
-                      toast('Connect Google again');
-                      setGcalOn(false);
-                      return;
-                    }
-                    setCalBusy(true);
-                    try {
-                      setCalPicker({
-                        source: 'google',
-                        items: await listGoogleCalendars(token),
-                      });
-                      openPicker();
-                    } catch (err) {
-                      toast(err instanceof Error ? err.message : 'Couldn’t list calendars');
-                    } finally {
-                      setCalBusy(false);
-                    }
-                  })();
-                }}
-              >
-                <span className={f.hint}>{gcalName ? 'Change ›' : '›'}</span>
+        <p className={ui.calLead}>
+          {formatCopy(Copy.availability.yoursOnly, { orb: home ? spaceOrbName(home) : 'your own Orb' })}
+        </p>
+        {sources.map((source) => {
+          const on = source === 'google' ? gcalOn : outlookOn;
+          const list = chosen[source];
+          const synced = lastSynced(source);
+          const count = myEvents.filter((e) => e.source === source).length;
+          return (
+            <FormGroup
+              key={source}
+              footer={
+                on && list.length
+                  ? `${count === 1 ? '1 event' : `${count} events`}${synced ? ` · ${updatedAgo(synced.at)}` : ''}`
+                  : undefined
+              }
+              style={source === 'outlook' ? { marginTop: 'var(--space-5)' } : undefined}
+            >
+              <FormRow label={sourceName(source)} icon={<CalendarIcon />}>
+                <Switch
+                  on={on}
+                  disabled={calBusy}
+                  label={`Connect ${sourceName(source)}`}
+                  onChange={(next) => void (next ? connect(source) : disconnect(source))}
+                />
               </FormRow>
-            )}
-            {gcalOn && gcalName && (
-              <FormRow
-                label="Refresh overlay"
-                onClick={calBusy ? undefined : () => void refreshGoogleOverlay()}
-              >
-                <span className={f.hint}>{calBusy ? '…' : '›'}</span>
-              </FormRow>
-            )}
-            <FormRow label={Copy.availability.outlookCalendar} icon={<CalendarIcon />}>
-              <Switch
-                on={outlookOn}
-                disabled={calBusy}
-                label="Connect Outlook Calendar"
-                onChange={(on) => {
-                  void (async () => {
-                    if (!on) {
-                      clearOutlookTokens();
-                      saveOutlookCalendar(null);
-                      setCalPicker(null);
-                      setOutlookName(null);
-                      setOutlookOn(false);
-                      void syncExternal([], 'outlook')
-                        .then(() => toast('Outlook Calendar disconnected'))
-                        .catch((err) =>
-                          toast(err instanceof Error ? err.message : 'Couldn’t clear overlay'),
-                        );
-                      return;
-                    }
-                    if (!msClientId()) {
-                      toast('Outlook isn’t available yet');
-                      return;
-                    }
-                    setCalBusy(true);
-                    try {
-                      const token = await connectOutlook();
-                      const calendars = await listOutlookCalendars(token);
-                      if (!calendars.length) {
-                        setOutlookOn(false);
-                        toast('No calendars found on that Outlook account');
-                        return;
-                      }
-                      setOutlookOn(true);
-                      setCalPicker({ source: 'outlook', items: calendars });
-                      openPicker();
-                    } catch (err) {
-                      setOutlookOn(false);
-                      toast(err instanceof Error ? err.message : 'Outlook connect failed');
-                    } finally {
-                      setCalBusy(false);
-                    }
-                  })();
-                }}
-              />
-            </FormRow>
-            {outlookOn && (
-              <FormRow
-                label={outlookName ?? 'Choose calendar'}
-                onClick={calBusy ? undefined : () => {
-                  void (async () => {
-                    const token = await ensureOutlookToken();
-                    if (!token) {
-                      toast('Connect Outlook again');
-                      setOutlookOn(false);
-                      return;
-                    }
-                    setCalBusy(true);
-                    try {
-                      setCalPicker({
-                        source: 'outlook',
-                        items: await listOutlookCalendars(token),
-                      });
-                      openPicker();
-                    } catch (err) {
-                      toast(err instanceof Error ? err.message : 'Couldn’t list calendars');
-                    } finally {
-                      setCalBusy(false);
-                    }
-                  })();
-                }}
-              >
-                <span className={f.hint}>{outlookName ? 'Change ›' : '›'}</span>
-              </FormRow>
-            )}
-            {outlookOn && outlookName && (
-              <FormRow
-                label="Refresh overlay"
-                onClick={calBusy ? undefined : () => void refreshOutlookOverlay()}
-              >
-                <span className={f.hint}>{calBusy ? '…' : '›'}</span>
-              </FormRow>
-            )}
-          </FormGroup>
+              {on && (
+                <FormRow
+                  label={list.length ? list.map((c) => c.summary).join(', ') : 'Choose calendars'}
+                  onClick={calBusy ? undefined : () => void openPicker(source)}
+                >
+                  <span className={f.hint}>{list.length ? 'Change ›' : '›'}</span>
+                </FormRow>
+              )}
+              {on && list.length > 0 && (
+                <FormRow
+                  label="Refresh"
+                  onClick={calBusy ? undefined : () => void refreshSource(source)}
+                >
+                  <span className={f.hint}>{calBusy ? '…' : '›'}</span>
+                </FormRow>
+              )}
+            </FormGroup>
+          );
+        })}
+        <p className={ui.calNote}>{Copy.availability.settingsNoteWeb}</p>
       </div>
     );
   }
@@ -1335,20 +1230,19 @@ export default function Settings() {
 
   function renderCalPicker() {
     if (!calPicker) return null;
+    const source = calPicker.source;
     return (
       <div className={ui.section}>
         <GcalPicker
           calendars={calPicker.items}
-          selectedId={
-            calPicker.source === 'outlook'
-              ? (savedOutlookCalendar()?.id ?? null)
-              : (savedGoogleCalendar()?.id ?? null)
-          }
+          selectedIds={chosen[source].map((c) => c.id)}
+          counts={lastSynced(source)?.counts}
           busy={calBusy}
           onClose={closeCalPicker}
-          onPick={async (cal) => {
-            await pickImportedCalendar(cal);
+          onSave={(list) => {
+            setCalPicker(null);
             pop();
+            void saveChoice(source, list);
           }}
         />
       </div>

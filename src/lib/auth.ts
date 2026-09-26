@@ -44,6 +44,14 @@ export function isHomeSoloName(name: string, displayName: string | null | undefi
   return Boolean(title) && raw === title;
 }
 
+/** Your home solo Orb: where your own calendar shows. It can't be left or
+ *  shared. A lone solo Orb is home whatever it's called. */
+export function isHomeOrb(orb: SpaceInfo | null | undefined, all: SpaceInfo[]): boolean {
+  if (!orb || orb.frozen || (orb.members ?? []).length > 1) return false;
+  const soloOrbs = all.filter((s) => !s.frozen && (s.members ?? []).length <= 1);
+  return isHomeSoloName(orb.name, orb.myName) || soloOrbs.length <= 1;
+}
+
 const FIRST_ORB_SETUP_KEY = 'fordays:first-orb-setup';
 
 /** Only the account that just signed up should see Your Orb. Sign-in never sets this. */

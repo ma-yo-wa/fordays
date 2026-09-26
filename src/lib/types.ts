@@ -64,15 +64,12 @@ export interface AuditLog {
   timestamp: string;
 }
 
-/* Imported calendar events. Overlaid, never merged into activities — a
-   work meeting is not a thing you two agreed to do.
-
-   `title` is nullable on purpose: it's how "share that I'm busy" and
-   "share what I'm doing" stay one shape instead of two features. When
-   it's null the row renders as Busy and the time is all anyone sees. */
+/* Your own Google / Apple / Outlook events. Never merged into activities
+   and never seen by anyone else: they show in your home Orb, remind you,
+   and are in your morning summary. */
 export interface ExternalEvent {
   id: string;
-  /** Whose calendar it came from. '0' | '1' locally, a profile uuid live. */
+  /** Always you. '0' | '1' in the offline demo, a profile uuid live. */
   ownerId: string;
   title: string | null;
   location: string | null;
@@ -81,9 +78,9 @@ export interface ExternalEvent {
   endsAt: string;
   allDay: boolean;
   calendar: string;
-  /** google when missing — rows saved before migration 014. */
+  /** The provider's id for the calendar it came from. */
+  calendarId?: string;
   source?: CalendarSource;
-  sharedWithSpace?: boolean;
 }
 
 export interface Partner {

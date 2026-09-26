@@ -15,6 +15,7 @@ import {
   todayISO,
 } from '../lib/date';
 import { Copy, formatCopy } from '../lib/copy';
+import { isHomeOrb } from '../lib/auth';
 import s from './Calendar.module.css';
 
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -101,6 +102,8 @@ export default function Calendar() {
   const openDetail = useApp((st) => st.openDetail);
   const openExternal = useApp((st) => st.openExternal);
   const space = useApp((st) => st.space);
+  const spaces = useApp((st) => st.spaces);
+  const backendName = useApp((st) => st.backendName);
   const pullImportedCalendars = useApp((st) => st.pullImportedCalendars);
 
   useEffect(() => {
@@ -144,13 +147,10 @@ export default function Calendar() {
     }
   }
 
-  /* Imported external events belong strictly to Personal / solo Orb.
-     In a shared Orb with a partner or group, external events do not appear. */
+  /* Your own calendar shows in your home Orb and nowhere else. */
   const extByDate = new Map<string, ExternalEvent[]>();
-  if (!matched) {
-    const myId = space?.myId ?? String(space?.me ?? config.me);
+  if (backendName === 'local' ? !matched : isHomeOrb(space, spaces)) {
     for (const e of external) {
-      if (e.ownerId !== myId) continue;
       for (const day of spanDays(e.startsAt, e.endsAt)) {
         extByDate.set(day, [...(extByDate.get(day) ?? []), e]);
       }

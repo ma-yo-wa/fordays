@@ -60,20 +60,33 @@
   min-width: var(--space-0);
 }
 
-.radio {
+.count {
+  flex: none;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.check {
   flex: none;
   width: var(--space-5-5);
   height: var(--space-5-5);
-  border-radius: 50%;
+  border-radius: var(--space-1-5);
   border: var(--border-md) solid var(--ink-faint);
   display: grid;
   place-items: center;
+  color: var(--paper-warm);
 }
 
-.radioOn {
+.check svg {
+  width: 100%;
+  height: 100%;
+}
+
+.checkOn {
   border-color: var(--ink);
   background: var(--ink);
-  box-shadow: inset var(--space-0) var(--space-0) var(--space-0) var(--space-0-75) var(--paper-warm);
 }
 
 .actions {

@@ -14,7 +14,7 @@ export interface NewActivity {
 
 export type { WhenSuggestion };
 
-/** One imported overlay row, before it has a database id. */
+/** One imported calendar event, as fetched, before it's saved. */
 export interface ExternalEventInput {
   sourceId: string;
   title: string | null;
@@ -49,10 +49,6 @@ export interface Backend {
   acceptSuggestion(id: string): Promise<void>;
   /** Clear the pending suggestion (dismiss or cancel). */
   dismissSuggestion(id: string): Promise<void>;
-  /** Replace this user’s imported overlay for one calendar source. */
-  replaceExternal(events: ExternalEventInput[], source: CalendarSource): Promise<void>;
-  /** Toggle whether an imported row is visible to others in this Orb. */
-  toggleExternalShare(id: string, shared: boolean): Promise<void>;
   dispose(): void;
 }
 

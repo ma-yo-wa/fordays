@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { isPlan, type Activity, type AuditLog, type ExternalEvent, type PlanDraft } from './types';
-import type { Backend, ExternalEventInput, NewActivity, WhenSuggestion } from './backend';
+import type { Backend, NewActivity, WhenSuggestion } from './backend';
 import type { CalendarSource } from './calendars';
+import type { BusyItem } from './clash';
 import { LocalBackend } from './backends/local';
 import { loadConfig, saveConfig, isSupabaseConfigured, type Config } from './config';
 import {
@@ -18,6 +19,7 @@ import {
   renameSpace as renameSpaceRemote,
   isDefaultSpaceName,
   soloNotebookTitle,
+  isHomeOrb,
   isHomeSoloName,
   clearFirstOrbSetupPending,
   pendingInvite,
@@ -76,6 +78,8 @@ interface AppState {
   activities: Activity[];
   logs: AuditLog[];
   external: ExternalEvent[];
+  /** Your home Orb's plans, for the private clash line in other Orbs. */
+  homePlans: BusyItem[];
 
   config: Config;
   space: SpaceInfo | null;
@@ -167,9 +171,11 @@ interface AppState {
   joinOrb: (code: string) => Promise<SpaceInfo>;
   updateConfig: (patch: Partial<Config>) => void;
   setExternal: (events: ExternalEvent[]) => void;
-  syncExternal: (events: ExternalEventInput[], source: CalendarSource) => Promise<void>;
+  /** Load your own calendar events (my_events), once each. */
+  reloadMine: () => Promise<void>;
+  /** Sync every ticked calendar of a source now; how many events came in. */
+  syncCalendarSource: (source: CalendarSource) => Promise<number>;
   pullImportedCalendars: () => Promise<void>;
-  toggleExternalShare: (id: string, shared: boolean) => Promise<void>;
   toast: (text: string, ms?: number) => void;
 }
 
@@ -304,6 +310,7 @@ export const useApp = create<AppState>()((set, get) => {
     activities: snap ? snap.activities : [],
     logs: [],
     external: [],
+    homePlans: [],
 
     config: loadConfig(),
     space: snap ? snap.space : null,
@@ -366,6 +373,7 @@ export const useApp = create<AppState>()((set, get) => {
           if (space) {
             await start(new SupabaseBackend({ ...loadConfig(), spaceId: space.id }));
             void import('./push').then((m) => m.syncPush());
+            void get().reloadMine();
             void get().pullImportedCalendars();
           } else {
             set({ ready: true });
@@ -448,7 +456,6 @@ export const useApp = create<AppState>()((set, get) => {
           space: snap.space,
           spaces: snap.spaces.length ? snap.spaces : [snap.space],
           activities: snap.activities,
-          external: [],
           detailId: null,
           searchOpen: false,
         });
@@ -460,7 +467,6 @@ export const useApp = create<AppState>()((set, get) => {
         set({
           ...(target ? { space: target } : {}),
           activities: [],
-          external: [],
           logs: [],
           detailId: null,
           searchOpen: false,
@@ -640,7 +646,7 @@ export const useApp = create<AppState>()((set, get) => {
       await import('./push').then((m) => m.forgetThisDevice());
       await signOut();
       clearSnaps();
-      set({ space: null, spaces: [], authPhase: 'signedOut', activities: [], logs: [] });
+      set({ space: null, spaces: [], authPhase: 'signedOut', activities: [], logs: [], external: [], homePlans: [] });
       backend?.dispose();
       backend = null;
       set({ ready: true, backendName: 'local', live: false, liveLabel: 'Signed out' });
@@ -920,35 +926,31 @@ export const useApp = create<AppState>()((set, get) => {
 
     setExternal: (external) => set({ external }),
 
-    async syncExternal(events, source) {
-      if (!backend) throw new Error('Not connected');
-      if (backend.name !== 'supabase') {
-        throw new Error(
-          'Calendar sharing needs a signed-in cloud Orb — sign out and sign back in, then import again',
-        );
+    async reloadMine() {
+      if (get().authPhase !== 'signedIn') return;
+      const { loadMyEvents } = await import('./myCalendar');
+      const spaces = get().spaces;
+      const home = spaces.find((sp) => isHomeOrb(sp, spaces)) ?? null;
+      try {
+        const { events, homePlans } = await loadMyEvents(home?.id ?? null);
+        set({ external: events, homePlans });
+      } catch {
+        /* keep what's showing; the next open tries again */
       }
-      await backend.replaceExternal(events, source);
+    },
+
+    async syncCalendarSource(source) {
+      const { syncSource } = await import('./calSync');
+      const n = await syncSource(source);
+      await get().reloadMine();
+      return n;
     },
 
     async pullImportedCalendars() {
-      if (!backend || backend.name !== 'supabase') return;
-      if (get().space?.frozen) return;
+      if (get().authPhase !== 'signedIn') return;
       const { pullImportedCalendars } = await import('./calSync');
-      await pullImportedCalendars((events, source) => get().syncExternal(events, source)).catch(
-        () => {
-          /* overlay already in the database from last import */
-        },
-      );
-    },
-
-    async toggleExternalShare(id, shared) {
-      if (!backend) throw new Error('Not connected');
-      await backend.toggleExternalShare(id, shared);
-      set({
-        external: get().external.map((e) =>
-          e.id === id ? { ...e, sharedWithSpace: shared } : e,
-        ),
-      });
+      const synced = await pullImportedCalendars().catch(() => false);
+      if (synced) await get().reloadMine();
     },
 
     toast: (text, ms = 2600) => {
