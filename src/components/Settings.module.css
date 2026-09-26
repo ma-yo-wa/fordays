@@ -158,7 +158,8 @@
 }
 
 .orbTileOn .orbCircle {
-  box-shadow: inset var(--space-0) var(--space-0) var(--space-0) var(--border-md) var(--ink-soft);
+  /* Rose like today's date: pink means "you are here". */
+  box-shadow: inset var(--space-0) var(--space-0) var(--space-0) var(--border-md) var(--rose);
 }
 
 .orbTileOn .orbTileName {
@@ -200,7 +201,7 @@
   place-items: center;
   font-size: var(--fs-caption);
   font-weight: 700;
-  color: var(--paper-card);
+  color: var(--face-ink);
   border: var(--border-md) solid var(--paper);
   margin-left: calc(-1 * var(--space-1-5));
   flex-shrink: var(--space-0);
@@ -212,11 +213,11 @@
 
 .orbMiniFaceMe,
 .orbMiniFaceThem {
-  background: var(--ink-soft);
+  background: var(--face-fill);
 }
 
 .orbMiniMore {
-  background: var(--ink-soft);
+  background: var(--face-fill);
   font-size: var(--fs-micro);
   font-weight: 600;
 }

@@ -218,7 +218,7 @@
   font-size: var(--fs-micro);
   font-weight: 700;
   line-height: var(--lh-solid);
-  color: var(--paper-warm);
+  color: var(--face-ink);
 }
 .place {
   font: var(--t-footnote);

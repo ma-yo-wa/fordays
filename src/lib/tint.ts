@@ -68,7 +68,7 @@ export function tintsFor(
 
 /** One face color for everyone. Initials tell people apart. */
 export function faceColor(): string {
-  return 'var(--ink-soft)';
+  return 'var(--face-fill)';
 }
 
 /** Map a profile id (or local demo "0"/"1") onto seat color 0 | 1. */

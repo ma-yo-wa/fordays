@@ -258,9 +258,9 @@ struct PlansView: View {
   private func face(_ name: String) -> some View {
     Text(String(name.prefix(1)).uppercased())
       .font(.caption2.weight(.bold))
-      .foregroundStyle(.white)
+      .foregroundStyle(Theme.faceInk)
       .frame(width: Theme.TouchTarget.avatarXs, height: Theme.TouchTarget.avatarXs)
-      .background(Theme.inkSoft, in: Circle())
+      .background(Theme.faceFill, in: Circle())
       .accessibilityLabel("Added by \(name)")
   }
 

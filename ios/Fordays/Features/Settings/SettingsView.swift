@@ -285,8 +285,9 @@ struct SettingsView: View {
         .frame(width: Self.orbSize, height: Self.orbSize)
         .overlay {
           if active {
+            // Rose like today's date: pink means "you are here".
             Circle()
-              .stroke(Theme.inkSoft, lineWidth: Theme.TouchTarget.ringWidth)
+              .stroke(Theme.rose, lineWidth: Theme.TouchTarget.ringWidth)
           }
         }
 
@@ -331,10 +332,10 @@ struct SettingsView: View {
       ForEach(faces.prefix(3)) { f in
         ZStack {
           Circle()
-            .fill(Theme.inkSoft)
+            .fill(Theme.faceFill)
           Text(f.letter)
             .font(.fdCaption.weight(.bold))
-            .foregroundStyle(.white)
+            .foregroundStyle(Theme.faceInk)
             .offset(y: Theme.Spacing.opticalNudge)
         }
         .frame(width: Theme.TouchTarget.avatarFace, height: Theme.TouchTarget.avatarFace)
@@ -344,10 +345,10 @@ struct SettingsView: View {
       if faces.count > 3 {
         ZStack {
           Circle()
-            .fill(Theme.inkSoft)
+            .fill(Theme.faceFill)
           Text("+\(faces.count - 3)")
             .font(.fdTiny)
-            .foregroundStyle(.white)
+            .foregroundStyle(Theme.faceInk)
             .offset(y: Theme.Spacing.opticalNudge)
         }
         .frame(width: Theme.TouchTarget.avatarFace, height: Theme.TouchTarget.avatarFace)
@@ -601,10 +602,10 @@ struct SettingsView: View {
                     ForEach(faces.prefix(3)) { f in
                       ZStack {
                         Circle()
-                          .fill(Theme.inkSoft)
+                          .fill(Theme.faceFill)
                         Text(f.letter)
                           .font(.fdCaption2.weight(.bold))
-                          .foregroundStyle(.white)
+                          .foregroundStyle(Theme.faceInk)
                           .offset(y: Theme.Spacing.opticalNudge)
                       }
                       .frame(width: Theme.TouchTarget.avatarChip, height: Theme.TouchTarget.avatarChip)

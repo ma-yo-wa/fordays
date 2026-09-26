@@ -34,6 +34,10 @@
   --orb-olive: #d6deaa;
   --orb-green: #cde7b3;
   --orb-mint: #ddf2d8;
+  /* A person's face is a little Orb: rose into peach, with an ink letter
+     (at least 7.9:1). White letters on these hues fall near 2:1. */
+  --face-fill: linear-gradient(145deg, var(--orb-rose), var(--orb-peach));
+  --face-ink: var(--ink);
 
   /* Rose = a Plan. Fills take ink, never white. */
   --rose: #f2648b;

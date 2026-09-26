@@ -180,14 +180,14 @@
   font: var(--t-caption);
   font-weight: 600;
   line-height: var(--lh-solid);
-  color: var(--paper-warm);
+  color: var(--face-ink);
   border: var(--border-thick) solid var(--paper);
   padding-bottom: var(--space-px);
 }
 
 .more {
-  background: var(--ink-soft);
-  color: var(--paper-warm);
+  background: var(--face-fill);
+  color: var(--face-ink);
   font: var(--t-caption2);
   font-weight: 700;
   padding-bottom: var(--space-0);

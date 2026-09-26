@@ -37,7 +37,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   return (
     <div
       className={classes}
-      style={{ backgroundColor: imageUrl ? 'transparent' : bgColor, ...style }}
+      style={{ background: imageUrl ? 'transparent' : bgColor, ...style }}
       aria-label={name || 'Avatar'}
       {...rest}
     >

@@ -9,7 +9,7 @@
   user-select: none;
   font-family: var(--ui);
   font-weight: 700;
-  color: var(--paper-card);
+  color: var(--face-ink);
 }
 
 .sizeXs {

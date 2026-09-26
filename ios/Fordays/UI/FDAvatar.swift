@@ -37,20 +37,20 @@ struct FDAvatar: View {
     return String(name.prefix(1)).uppercased()
   }
 
-  private var backgroundColor: Color {
-    if let color { return color }
-    return Theme.inkSoft
-  }
 
   var body: some View {
     ZStack {
       if let imageUrl, !imageUrl.isEmpty {
         RemoteOrDataImage(urlString: imageUrl, contentMode: .fill)
       } else {
-        backgroundColor
+        if let color {
+          color
+        } else {
+          Theme.faceFill
+        }
         Text(initial)
           .font(size.font)
-          .foregroundStyle(.white)
+          .foregroundStyle(color == nil ? Theme.faceInk : .white)
       }
     }
     .frame(width: size.dimension, height: size.dimension)

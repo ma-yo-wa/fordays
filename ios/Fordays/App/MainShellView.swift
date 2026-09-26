@@ -355,18 +355,18 @@ struct MainShellView: View {
   private func face(_ name: String?) -> some View {
     return Text(String((name ?? "?").prefix(1)).uppercased())
       .font(.caption.weight(.bold))
-      .foregroundStyle(.white)
+      .foregroundStyle(Theme.faceInk)
       .frame(width: Theme.TouchTarget.avatarMd, height: Theme.TouchTarget.avatarMd)
-      .background(Theme.inkSoft, in: Circle())
+      .background(Theme.faceFill, in: Circle())
       .overlay(Circle().stroke(Theme.paper, lineWidth: Theme.TouchTarget.strokeThick))
   }
 
   private func moreFace(_ count: Int) -> some View {
     Text("+\(count)")
       .font(.caption2.weight(.bold))
-      .foregroundStyle(.white)
+      .foregroundStyle(Theme.faceInk)
       .frame(width: Theme.TouchTarget.avatarMd, height: Theme.TouchTarget.avatarMd)
-      .background(Theme.inkSoft, in: Circle())
+      .background(Theme.faceFill, in: Circle())
       .overlay(Circle().stroke(Theme.paper, lineWidth: Theme.TouchTarget.strokeThick))
   }
 
