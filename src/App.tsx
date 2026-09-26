@@ -18,6 +18,7 @@ import Calendar from './screens/Calendar';
 import Memories from './screens/Memories';
 import {
   clearInviteFromUrl,
+  currentSession,
   peekInvite,
   spaceNeedsFirstSetup,
   watchPasswordRecovery,
@@ -152,6 +153,10 @@ function AppShell() {
   useEffect(() => {
     if (authPhase !== 'signedIn' || !inviteCode) return;
     void (async () => {
+      // A cold start says "signed in" from the snapshot before the session is
+      // checked. Join only with a real session; otherwise keep the invite so
+      // sign-in shows who invited you and joins afterwards.
+      if (!(await currentSession().catch(() => null))) return;
       try {
         await useApp.getState().joinOrb(inviteCode);
       } catch (err) {
@@ -184,14 +189,15 @@ function AppShell() {
             useApp.getState().setSettingsOpen(false);
             try {
               if (inviteCode) {
+                // Clear first so the signed-in auto-join doesn't run it again.
+                const code = inviteCode;
+                setInviteCode(null);
+                clearInviteFromUrl();
                 try {
-                  await useApp.getState().joinOrb(inviteCode);
+                  await useApp.getState().joinOrb(code);
                 } catch (err) {
                   useApp.getState().toast(err instanceof Error ? err.message : 'Couldn’t join that Orb');
                   await refreshSpace();
-                } finally {
-                  setInviteCode(null);
-                  clearInviteFromUrl();
                 }
               } else {
                 await refreshSpace();

@@ -196,6 +196,20 @@ function readSnap(spaceId?: string | null): NotebookSnap | null {
   }
 }
 
+/* Signing out takes the notebook off this device: the next person on it
+   must not see it, even for the instant a cold start shows the snapshot. */
+function clearSnaps(): void {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('fordays:snap:')) localStorage.removeItem(key);
+    }
+    localStorage.removeItem(SNAP_LAST);
+  } catch {
+    /* private mode */
+  }
+}
+
 function writeSnap(space: SpaceInfo, spaces: SpaceInfo[], activities: Activity[]): void {
   try {
     const snap: NotebookSnap = {
@@ -563,6 +577,7 @@ export const useApp = create<AppState>()((set, get) => {
 
     async signOutUser() {
       await signOut();
+      clearSnaps();
       set({ space: null, spaces: [], authPhase: 'signedOut', activities: [], logs: [] });
       backend?.dispose();
       backend = null;
@@ -790,6 +805,8 @@ export const useApp = create<AppState>()((set, get) => {
         if (mine) await renameSpaceRemote(genericSolo.id, mine);
       }
       await get().switchToSpace(spaceId);
+      // Joining from the sign-in screen: leave it for the Orb just joined.
+      set({ authPhase: 'signedIn', ready: true });
       const space = get().space;
       const name = space ? spaceOrbName(space) : '';
       get().toast(name ? formatCopy(Copy.invite.joinedSuccess, { orb: name }) : Copy.invite.joinedUnnamed);
