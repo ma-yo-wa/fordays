@@ -298,20 +298,6 @@ struct MainShellView: View {
 
   private var trailingCalendarControls: some View {
     HStack(spacing: Theme.Spacing.xxs) {
-      if DateLocal.isOffCurrentMonth(app.cursorMonth) {
-        Button {
-          app.goToday()
-        } label: {
-          Text("Today")
-            .font(.footnote.weight(.semibold))
-            .foregroundStyle(Theme.roseInk)
-            .padding(.horizontal, Theme.Spacing.s10)
-            .frame(height: Theme.Spacing.s30)
-            .background(Theme.fillTertiary, in: Capsule())
-        }
-        .buttonStyle(.plain)
-      }
-
       Button {
         app.shiftMonth(by: -1)
       } label: {

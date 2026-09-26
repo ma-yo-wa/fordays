@@ -149,11 +149,33 @@
   min-height: var(--space-0);
 }
 
+.dayRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
 .dayLabel {
   font: var(--t-headline);
   letter-spacing: var(--tr-headline);
-  margin-bottom: var(--space-3);
   color: var(--ink);
+}
+
+.todayLink {
+  border: none;
+  background: none;
+  padding: var(--space-1) var(--space-0);
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-weight: 500;
+  color: var(--rose-ink);
+  cursor: pointer;
+}
+
+.todayLink:active {
+  opacity: var(--op-60);
 }
 
 .plansList {

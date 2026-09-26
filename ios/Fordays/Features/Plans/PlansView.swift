@@ -105,9 +105,20 @@ struct PlansView: View {
         .padding(.bottom, Theme.Spacing.sm)
 
       VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-        Text(dayTitle)
-          .font(.headline)
-          .foregroundStyle(Theme.ink)
+        // "Today" lives by the day heading, where the eye is after browsing,
+        // so the top bar stays calm.
+        HStack(alignment: .firstTextBaseline) {
+          Text(dayTitle)
+            .font(.headline)
+            .foregroundStyle(Theme.ink)
+          Spacer(minLength: Theme.Spacing.sm)
+          if !showingToday {
+            Button("Back to today") { app.goToday() }
+              .font(.subheadline.weight(.medium))
+              .foregroundStyle(Theme.roseInk)
+              .buttonStyle(.plain)
+          }
+        }
         if dayPlans.isEmpty && dayExternal.isEmpty {
           if let next = upNext {
             Text(emptyCopy)
@@ -275,6 +286,10 @@ struct PlansView: View {
   /// The day is already in the heading, so the row gives only the time.
   private func rowTime(_ a: Activity) -> String {
     DateLocal.dtTime(a.dateTime).map(DateLocal.prettyTime) ?? "All day"
+  }
+
+  private var showingToday: Bool {
+    app.pickedDay == DateLocal.todayISO() && !DateLocal.isOffCurrentMonth(app.cursorMonth)
   }
 
   private var dayTitle: String {

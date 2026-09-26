@@ -7,6 +7,7 @@ import {
   dtDate,
   dtTime,
   formatUpNext,
+  iso,
   monthGrid,
   parseISO,
   pretty,
@@ -94,6 +95,7 @@ export default function Calendar() {
   const picked = useApp((st) => st.picked);
   const cursor = useApp((st) => st.cursor);
   const setPicked = useApp((st) => st.setPicked);
+  const setCursor = useApp((st) => st.setCursor);
   const openDetail = useApp((st) => st.openDetail);
   const openExternal = useApp((st) => st.openExternal);
   const space = useApp((st) => st.space);
@@ -105,6 +107,15 @@ export default function Calendar() {
 
   const cursorDate = parseISO(cursor);
   const today = todayISO();
+  const now = new Date();
+  const showingToday =
+    picked === today &&
+    cursorDate.getMonth() === now.getMonth() &&
+    cursorDate.getFullYear() === now.getFullYear();
+  const goToday = () => {
+    setPicked(today);
+    setCursor(iso(new Date(now.getFullYear(), now.getMonth(), 1)));
+  };
   const matched = isMatched(space);
   /* Your own plans go unmarked, so a face stays a signal: someone else added this. */
   const addedByOther = (createdBy: string) =>
@@ -295,7 +306,16 @@ export default function Calendar() {
       </div>
 
       <div className={s.agenda}>
-        <div className={s.dayLabel}>{dayHeading}</div>
+        {/* "Today" lives by the day heading, where the eye is after browsing,
+            so the top bar stays calm. */}
+        <div className={s.dayRow}>
+          <div className={s.dayLabel}>{dayHeading}</div>
+          {!showingToday && (
+            <button type="button" className={s.todayLink} onClick={goToday}>
+              Back to today
+            </button>
+          )}
+        </div>
 
         {!dayPlans.length && !dayExternal.length ? (
           <>

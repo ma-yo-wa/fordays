@@ -1,8 +1,7 @@
 import { useApp, isMatched, spaceOrbName } from '../lib/store';
 import { faceColor } from '../lib/tint';
-import { MONTHS, iso, parseISO, todayISO } from '../lib/date';
+import { MONTHS, iso, parseISO } from '../lib/date';
 import { Copy } from '../lib/copy';
-import { Pill } from '../ui';
 import s from './NavBar.module.css';
 
 function Chevron({ dir }: { dir: 'left' | 'right' }) {
@@ -42,7 +41,6 @@ export default function NavBar() {
   const navScroll = useApp((st) => st.navScroll);
   const cursor = useApp((st) => st.cursor);
   const setCursor = useApp((st) => st.setCursor);
-  const setPicked = useApp((st) => st.setPicked);
   const setSettingsOpen = useApp((st) => st.setSettingsOpen);
   const setSearchOpen = useApp((st) => st.setSearchOpen);
   const space = useApp((st) => st.space);
@@ -94,20 +92,11 @@ export default function NavBar() {
       ? Copy.tabs.memories
       : Copy.tabs.ideas;
 
-  const now = new Date();
-  const offCurrentMonth =
-    cursorDate.getMonth() !== now.getMonth() ||
-    cursorDate.getFullYear() !== now.getFullYear();
 
   const scrolled = navScroll > 2;
 
   const shiftMonth = (delta: number) =>
     setCursor(iso(new Date(cursorDate.getFullYear(), cursorDate.getMonth() + delta, 1)));
-
-  const goToday = () => {
-    setPicked(todayISO());
-    setCursor(iso(new Date(now.getFullYear(), now.getMonth(), 1)));
-  };
 
   return (
     <header className={s.nav}>
@@ -158,11 +147,6 @@ export default function NavBar() {
         <div className={s.trailing}>
           {isCalendar && (
             <>
-              {offCurrentMonth && (
-                <Pill variant="neutral" size="sm" onClick={goToday}>
-                  Today
-                </Pill>
-              )}
               <button
                 type="button"
                 className={s.action}
