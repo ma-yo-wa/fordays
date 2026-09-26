@@ -106,7 +106,7 @@
   --space-55: 220px;
   --space-65: 260px;
   --space-70: 280px;
-  --h-dock-clearance: 128px;
+  --h-dock-clearance: 156px; /* the + button's top edge (144px) plus a gap */
   --h-toast-anchor: 104px;
   --size-ambient-orb: 680px;
   --size-plus-pip: 2.6px;

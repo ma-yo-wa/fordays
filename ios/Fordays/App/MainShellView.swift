@@ -44,7 +44,13 @@ struct MainShellView: View {
       VStack(spacing: Theme.Spacing.md) {
         Button {
           if app.space?.canCompose == true {
-            showAddChooser = true
+            // The tab already says what you're adding; only Memories asks.
+            composerDraft = nil
+            switch app.tab {
+            case .plans: composer = .plan
+            case .bucket: composer = .bucket
+            case .memories: showAddChooser = true
+            }
           } else {
             app.toast = "This is a copy from when you left"
           }

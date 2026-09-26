@@ -78,7 +78,8 @@ enum Theme {
     static let s48: CGFloat = 48
     static let huge: CGFloat = 56
     static let toastClearance: CGFloat = 100
-    static let scrollBottomClearance: CGFloat = 132
+    /// Clears the + button's top edge (~143pt above the safe area) with a gap.
+    static let scrollBottomClearance: CGFloat = 156
     static let overlapSm: CGFloat = -6
     static let overlapMd: CGFloat = -8
     static let opticalNudge: CGFloat = -0.5

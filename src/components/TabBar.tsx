@@ -64,6 +64,7 @@ export default function TabBar() {
   const screen = useApp((st) => st.screen);
   const setScreen = useApp((st) => st.setScreen);
   const setAddOpen = useApp((st) => st.setAddOpen);
+  const openComposer = useApp((st) => st.openComposer);
   const compose = useApp((st) => canCompose(st.space));
 
   const tab = (id: Screen, label: string, icon: (on: boolean) => React.ReactNode) => {
@@ -101,7 +102,12 @@ export default function TabBar() {
         <motion.button
           type="button"
           className={s.make}
-          onClick={() => setAddOpen(true)}
+          onClick={() => {
+            // The tab already says what you're adding; only Memories asks.
+            if (screen === 'calendar') openComposer('plan');
+            else if (screen === 'bucket') openComposer('bucket');
+            else setAddOpen(true);
+          }}
           whileTap={{ scale: scalePressIcon }}
           transition={springTap}
           aria-label="Add something"
