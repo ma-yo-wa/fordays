@@ -104,6 +104,7 @@ enum Theme {
     static let avatarMd: CGFloat = 32
     static let avatarLg: CGFloat = 40
     static let thumb: CGFloat = 42
+    static let agendaTime: CGFloat = 72
     static let dayNumber: CGFloat = 30
     static let coverPreview: CGFloat = 140
     static let coverHero: CGFloat = 200

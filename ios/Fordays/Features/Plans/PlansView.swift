@@ -140,9 +140,10 @@ struct PlansView: View {
               .padding(.top, Theme.Spacing.xs)
               .padding(.horizontal, Theme.Spacing.xxs)
 
-              ForEach(next.plans) { a in
-                // The subhead already names the day, so the card gives only the time.
-                planCard(a, timing: upNextTiming(a))
+              VStack(spacing: Theme.Spacing.none) {
+                ForEach(next.plans) { a in
+                  planRow(a)
+                }
               }
             }
           } else {
@@ -154,48 +155,16 @@ struct PlansView: View {
               .padding(.top, Theme.Spacing.xl)
           }
         } else {
-          ForEach(dayAgenda) { item in
-            switch item {
-            case .plan(let a):
-              planCard(a, timing: planTiming(a))
-            case .external(let e):
-              let isMine = app.space?.myId == e.userId || e.userId == "0"
-              let ownerName = isMine ? (app.space?.myName ?? "You") : displayName(for: e.userId)
-              let title = (e.title ?? "").isEmpty ? Copy.Availability.busy : (e.title ?? "")
-              Button {
-                onSelectExternal?(e)
-              } label: {
-                HStack(alignment: .top, spacing: Theme.Spacing.md) {
-                  externalThumb(e)
-                  VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-                    Text(title)
-                      .font(.headline)
-                      .foregroundStyle(Theme.ink)
-                    Text(planExternalTiming(e))
-                      .font(.subheadline)
-                      .foregroundStyle(Theme.inkSoft)
-                    if let loc = e.location, !loc.isEmpty {
-                      locationLine(loc)
-                    }
-                    HStack(spacing: Theme.Spacing.s6) {
-                      face(for: e.userId)
-                      Text(ownerName)
-                        .font(.caption)
-                        .foregroundStyle(Theme.inkSoft)
-                      Text(e.sourceLabel)
-                        .font(.caption2.weight(.medium))
-                        .foregroundStyle(Theme.inkSoft)
-                        .padding(.horizontal, Theme.Spacing.s6)
-                        .padding(.vertical, Theme.TouchTarget.hairlineWidth)
-                        .background(Theme.fillTertiary, in: Capsule())
-                    }
-                  }
-                  Spacer(minLength: 0)
-                }
-                .padding(Theme.Spacing.row)
-                .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
+          VStack(spacing: Theme.Spacing.none) {
+            ForEach(dayAgenda) { item in
+              switch item {
+              case .plan(let a):
+                planRow(a)
+              case .external(let e):
+                let title = (e.title ?? "").isEmpty ? Copy.Availability.busy : (e.title ?? "")
+                agendaRow(time: externalTiming(e), title: title, place: e.location)
+                  .onTapGesture { onSelectExternal?(e) }
               }
-              .buttonStyle(.plain)
             }
           }
         }
@@ -227,77 +196,56 @@ struct PlansView: View {
     }
   }
 
-  /// A plan on the agenda. A tap gesture rather than a Button so links in the note stay tappable.
-  private func planCard(_ a: Activity, timing: String) -> some View {
-    HStack(alignment: .top, spacing: Theme.Spacing.md) {
-      planThumb(a)
-      VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-        Text(a.title)
-          .font(.headline)
+  /// A plan on the agenda: time on the left, title and place on the right.
+  /// Cover, note and who made it live in Detail.
+  private func planRow(_ a: Activity) -> some View {
+    agendaRow(time: rowTime(a), title: a.title, place: a.location)
+      .onTapGesture { onSelect(a) }
+  }
+
+  private func agendaRow(time: String, title: String, place: String?) -> some View {
+    HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.md) {
+      Text(time)
+        .font(.subheadline.monospacedDigit())
+        .foregroundStyle(Theme.inkSoft)
+        .lineLimit(1)
+        .minimumScaleFactor(0.85)
+        .frame(width: Theme.TouchTarget.agendaTime, alignment: .trailing)
+      VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
+        Text(title)
+          .font(.body)
           .foregroundStyle(Theme.ink)
-        Text(timing)
-          .font(.subheadline)
-          .foregroundStyle(Theme.inkSoft)
-        if let loc = a.location, !loc.isEmpty {
-          locationLine(loc)
-        }
-        if let note = a.description, !note.isEmpty {
-          Text(AttributedString.linkified(note))
+        if let place = shortPlace(place, title: title) {
+          Text(place)
             .font(.footnote)
             .foregroundStyle(Theme.inkSoft)
-            .tint(Theme.inkSoft)
-        }
-        HStack(spacing: Theme.Spacing.s6) {
-          face(for: a.createdBy)
-          Text(displayName(for: a.createdBy))
-            .font(.caption)
-            .foregroundStyle(Theme.inkSoft)
+            .lineLimit(1)
         }
       }
       Spacer(minLength: 0)
     }
-    .padding(Theme.Spacing.row)
-    .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
+    .padding(.vertical, Theme.Spacing.md)
+    .overlay(alignment: .bottom) {
+      Rectangle()
+        .fill(Theme.hairline)
+        .frame(height: Theme.TouchTarget.hairlineWidth)
+    }
     .contentShape(Rectangle())
-    .onTapGesture { onSelect(a) }
+    .accessibilityElement(children: .combine)
     .accessibilityAddTraits(.isButton)
   }
 
-  private func locationLine(_ loc: String) -> some View {
-    HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.xs) {
-      Text("📍").font(.caption2)
-      Text(loc)
-        .font(.footnote)
-        .foregroundStyle(Theme.inkSoft)
-    }
+  /// The place name without the street address, or nil when the title already says it.
+  private func shortPlace(_ place: String?, title: String) -> String? {
+    guard let name = place?.split(separator: ",").first?
+      .trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty
+    else { return nil }
+    return title.localizedCaseInsensitiveContains(name) ? nil : name
   }
 
-  @ViewBuilder
-  private func planThumb(_ a: Activity) -> some View {
-    Group {
-      if let urlStr = a.imageUrl, !urlStr.isEmpty {
-        RemoteOrDataImage(urlString: urlStr, contentMode: .fill)
-      } else {
-        LinearGradient(
-          colors: Theme.orbColors(for: a.id, title: a.title),
-          startPoint: .topLeading,
-          endPoint: .bottomTrailing
-        )
-      }
-    }
-    .frame(width: Theme.TouchTarget.thumb, height: Theme.TouchTarget.thumb)
-    .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
-  }
-
-  @ViewBuilder
-  private func externalThumb(_ e: ExternalEvent) -> some View {
-    LinearGradient(
-      colors: Theme.orbColors(for: e.id, title: e.title),
-      startPoint: .topLeading,
-      endPoint: .bottomTrailing
-    )
-    .frame(width: Theme.TouchTarget.thumb, height: Theme.TouchTarget.thumb)
-    .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
+  /// The day is already in the heading, so the row gives only the time.
+  private func rowTime(_ a: Activity) -> String {
+    DateLocal.dtTime(a.dateTime).map(DateLocal.prettyLower) ?? "All day"
   }
 
   private var dayTitle: String {
@@ -344,38 +292,6 @@ struct PlansView: View {
       return "Until \(DateLocal.prettyLower(t))"
     }
     return "All day"
-  }
-
-  private func planExternalTiming(_ e: ExternalEvent) -> String {
-    let start = String(e.startsAt.prefix(10))
-    let when = DateLocal.relativeDay(start)
-    return "\(when) · \(externalTiming(e))"
-  }
-
-  private func upNextTiming(_ a: Activity) -> String {
-    DateLocal.dtTime(a.dateTime).map(DateLocal.prettyLower) ?? "All day"
-  }
-
-  private func planTiming(_ a: Activity) -> String {
-    let start = a.dateTime.map { String($0.prefix(10)) } ?? app.pickedDay
-    let when = DateLocal.relativeDay(start)
-    if let t = DateLocal.dtTime(a.dateTime) {
-      return "\(when) · \(DateLocal.prettyLower(t))"
-    }
-    return "\(when) · All day"
-  }
-
-  private func face(for userId: String) -> some View {
-    return Text(String(displayName(for: userId).prefix(1)).uppercased())
-      .font(.caption2.weight(.bold))
-      .foregroundStyle(.white)
-      .frame(width: Theme.TouchTarget.avatarXs, height: Theme.TouchTarget.avatarXs)
-      .background(Theme.inkSoft, in: Circle())
-  }
-
-  private func displayName(for userId: String) -> String {
-    guard let space = app.space else { return "?" }
-    return space.displayName(for: userId)
   }
 
   private var monthGrid: some View {
