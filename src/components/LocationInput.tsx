@@ -151,6 +151,7 @@ export function LocationInput({
           </span>
           <input
             className={`${f.input} ${f.locationInputWithPin}`}
+            aria-label="Location"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onFocus={handleFocus}

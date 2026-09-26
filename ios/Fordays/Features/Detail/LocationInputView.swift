@@ -49,6 +49,7 @@ struct LocationInputView: View {
           .frame(width: Theme.Spacing.lg, height: Theme.Spacing.lg)
 
         TextField(placeholder, text: $text)
+          .accessibilityLabel("Location")
           .focused($isFocused)
           .onChange(of: text) { _, next in
             if isFocused {
