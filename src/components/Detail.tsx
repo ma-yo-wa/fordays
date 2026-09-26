@@ -27,14 +27,6 @@ import Linkify from './Linkify';
 import s from './Detail.module.css';
 import f from './Form.module.css';
 
-function PencilIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <path d="M4 20h4L20 8a2.8 2.8 0 0 0-4-4L4 16v4Z" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 function CalendarIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
@@ -101,6 +93,36 @@ function PeopleIcon() {
 
 type Mode = 'view' | 'edit' | 'when' | 'suggest';
 
+/* The place on its own: name, then the rest of the address. Opens Maps. */
+function PlaceBlock({ place }: { place: string }) {
+  const comma = place.indexOf(',');
+  const name = (comma < 0 ? place : place.slice(0, comma)).trim();
+  const rest = comma < 0 ? '' : place.slice(comma + 1).trim();
+  return (
+    <a
+      href={`https://maps.apple.com/?q=${encodeURIComponent(place)}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={s.place}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <span className={s.placeText}>
+        <span className={s.placeName}>{name}</span>
+        {rest && <span className={s.placeRest}>{rest}</span>}
+      </span>
+      <span className={s.placeArrow} aria-hidden>
+        ↗
+      </span>
+    </a>
+  );
+}
+
+/* All-day plans are stored at noon UTC, so the server logs "at 12:00 PM".
+   That isn't a time anyone chose; keep only the date. */
+function dropNoonUTC(details: string): string {
+  return details.replace(/\b([A-Z][a-z]{2}) 0?(\d{1,2}), (\d{4}) at 12:00 PM\b/g, '$1 $2, $3');
+}
+
 function sameWhen(
   a: string | null,
   b: string | null,
@@ -158,6 +180,7 @@ export default function Detail() {
   const [doAgainOpen, setDoAgainOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [doWithOpen, setDoWithOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   async function handleDoWith(targetSpace: SpaceInfo) {
     if (!item) return;
@@ -204,6 +227,7 @@ export default function Detail() {
   const matched = isMatched(space);
   const frozen = Boolean(space?.frozen);
   const pending = Boolean(item.suggested_date_time && item.suggested_by);
+  const suggestOthers = (space?.members ?? []).filter((m) => m.id !== space?.myId);
   const minePending = pending && item.suggested_by === myId;
   const history = logs
     .filter((l) => l.activity_id === item.id)
@@ -338,51 +362,31 @@ export default function Detail() {
   return (
     <>
     <Sheet open={!!detailId} onClose={close}>
-      <div className={`${s.head} ${item.image_url ? s.headCovered : ''}`}>
-        {!item.image_url && (
-          <CoverArt
-            washId={item.id}
-            washTitle={item.title}
-            size="thumb"
-            className={s.headWash}
-          />
-        )}
-        <div>
-          <h3 className={s.title}>{item.title}</h3>
-          <div className={s.when}>
-            {planned
-              ? describePlan(item.date_time as string, item.ends_at)
-              : Copy.ideas.inList}
-          </div>
-          {item.location && (
-            <a
-              href={`https://maps.apple.com/?q=${encodeURIComponent(item.location)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={s.locationLink}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span className={s.locationPin} aria-hidden>📍</span>
-              <span>{item.location}</span>
-              <span className={s.locationArrow} aria-hidden>↗</span>
-            </a>
-          )}
-        </div>
-        {mode === 'view' && !frozen && (
-          <button
-            type="button"
-            className={s.round}
-            onClick={() => setMode('edit')}
-            aria-label="Edit"
-          >
-            <PencilIcon />
+      <div className={s.bar}>
+        {mode === 'view' && !frozen ? (
+          <button type="button" className={s.barButton} onClick={() => setMode('edit')}>
+            Edit
           </button>
+        ) : (
+          <span />
         )}
+        <button type="button" className={s.barButton} onClick={close}>
+          Done
+        </button>
       </div>
 
       {item.image_url && mode === 'view' && (
         <CoverArt url={item.image_url} size="hero" className={s.cover} />
       )}
+
+      <div className={s.head}>
+        <h3 className={s.title}>{item.title}</h3>
+        <div className={s.when}>
+          {planned ? describePlan(item.date_time as string, item.ends_at) : Copy.ideas.inList}
+        </div>
+      </div>
+
+      {mode === 'view' && item.location && <PlaceBlock place={item.location} />}
 
       {mode === 'view' && item.description && (
         <p className={`${s.notes} selectable`}><Linkify text={item.description} /></p>
@@ -545,6 +549,13 @@ export default function Detail() {
         </>
       )}
 
+      {mode === 'view' && matched && (
+        <p className={s.addedBy}>
+          Added by {partnerName(config, item.created_by)}
+          {timeAgo(item.created_at) ? ` · ${timeAgo(item.created_at)}` : ''}
+        </p>
+      )}
+
       {mode === 'view' && frozen && (
         <p className={f.rowNote} style={{ marginTop: 'var(--space-3-5)' }}>
           This is a copy from when you left — you can look, not change
@@ -588,7 +599,7 @@ export default function Detail() {
           {matched && !memory && (
             <ActionRow
               icon={<SuggestIcon />}
-              label="Suggest a date"
+              label={suggestOthers.length === 1 ? `Suggest a date to ${suggestOthers[0]!.name}` : 'Suggest a date'}
               onClick={openSuggest}
             />
           )}
@@ -601,6 +612,11 @@ export default function Detail() {
             />
           )}
 
+        </div>
+      )}
+
+      {mode === 'view' && !frozen && (
+        <div className={`${s.actions} ${s.danger}`}>
           <ActionRow
             icon={<TrashIcon />}
             label="Delete"
@@ -612,20 +628,32 @@ export default function Detail() {
 
       {mode === 'view' && history.length > 0 && (
         <>
-          <span className={s.historyHead}>History</span>
-          {history.map((l) => (
-            <div key={l.id} className={s.entry}>
-              <Avatar
-                name={partnerName(config, l.user_id)}
-                seat={faceIndexFor(l.user_id, faceCtx)}
-                size="sm"
-              />
-              <span className={s.what}>
-                {partnerName(config, l.user_id)} {localizeAuditDetails(l.details)}{' '}
-                <span className={s.ago}>· {timeAgo(l.timestamp)}</span>
-              </span>
-            </div>
-          ))}
+          <button
+            type="button"
+            className={s.historyHead}
+            aria-expanded={historyOpen}
+            onClick={() => setHistoryOpen((v) => !v)}
+          >
+            History
+            <svg className={historyOpen ? s.historyChevronOpen : s.historyChevron} viewBox="0 0 8 14" aria-hidden="true">
+              <path d="M1 1l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          {historyOpen &&
+            history.map((l) => (
+              <div key={l.id} className={s.entry}>
+                <Avatar
+                  name={partnerName(config, l.user_id)}
+                  seat={faceIndexFor(l.user_id, faceCtx)}
+                  size="sm"
+                />
+                <span className={s.what}>
+                  {partnerName(config, l.user_id)}{' '}
+                  {localizeAuditDetails(item.all_day ? dropNoonUTC(l.details) : l.details)}{' '}
+                  <span className={s.ago}>· {timeAgo(l.timestamp)}</span>
+                </span>
+              </div>
+            ))}
         </>
       )}
     </Sheet>

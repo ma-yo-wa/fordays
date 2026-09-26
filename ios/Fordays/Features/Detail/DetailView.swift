@@ -27,6 +27,7 @@ struct DetailView: View {
   @State private var showDoAgainDialog = false
   @State private var showMoveDialog = false
   @State private var showDeleteDialog = false
+  @State private var showHistory = false
 
   private var item: Activity? {
     app.activity(id: activityId)
@@ -77,6 +78,11 @@ struct DetailView: View {
         .presentationBackground(Theme.paper)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+          ToolbarItem(placement: .topBarLeading) {
+            if let item, mode == .view, app.space?.frozen != true {
+              Button("Edit") { startEditing(item) }
+            }
+          }
           ToolbarItem(placement: .topBarTrailing) {
             Button("Done") { dismiss() }
           }
@@ -165,13 +171,17 @@ struct DetailView: View {
   private func content(_ item: Activity) -> some View {
     ScrollView {
       VStack(alignment: .leading, spacing: Theme.Spacing.base) {
-        header(item)
-
         if mode == .view, let urlStr = item.imageUrl, !urlStr.isEmpty {
           RemoteOrDataImage(urlString: urlStr, contentMode: .fill)
             .frame(maxWidth: .infinity)
             .frame(height: Theme.TouchTarget.coverHero)
             .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
+        }
+
+        header(item)
+
+        if mode == .view, let loc = item.location, !loc.isEmpty {
+          placeBlock(loc)
         }
 
         if mode == .view, let description = item.description, !description.isEmpty {
@@ -184,6 +194,10 @@ struct DetailView: View {
 
         if mode == .view, pending(item) {
           suggestionCard(item)
+        }
+
+        if mode == .view, app.space?.isMatched == true {
+          addedBy(item)
         }
 
         switch mode {
@@ -211,60 +225,64 @@ struct DetailView: View {
     }
   }
 
+  /// Title and when, one left-aligned column. Edit lives in the top bar.
   private func header(_ item: Activity) -> some View {
-    HStack(alignment: .top, spacing: Theme.Spacing.md) {
-      if item.imageUrl == nil || item.imageUrl?.isEmpty == true {
-        LinearGradient(
-          colors: Theme.orbColors(for: item.id, title: item.title),
-          startPoint: .topLeading,
-          endPoint: .bottomTrailing
-        )
-        .frame(width: Theme.TouchTarget.formRow, height: Theme.TouchTarget.formRow)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
-      }
-      VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-        Text(item.title)
-          .font(.title2.weight(.semibold))
-          .foregroundStyle(Theme.ink)
-        Text(whenLabel(item))
-          .font(.subheadline)
-          .foregroundStyle(Theme.inkSoft)
-        if let loc = item.location, !loc.isEmpty {
-          if let url = URL(string: "https://maps.apple.com/?q=\(loc.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? loc)") {
-            Link(destination: url) {
-              HStack(spacing: Theme.Spacing.xs) {
-                Text("📍")
-                  .font(.caption)
-                Text(loc)
-                  .font(.subheadline)
-                  .foregroundStyle(Theme.inkSoft)
-                  .underline()
-                Text("↗")
-                  .font(.caption2)
-                  .foregroundStyle(Theme.inkFaint)
-              }
+    VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
+      Text(item.title)
+        .font(.title2.weight(.semibold))
+        .foregroundStyle(Theme.ink)
+      Text(whenLabel(item))
+        .font(.subheadline)
+        .foregroundStyle(Theme.inkSoft)
+    }
+    .frame(maxWidth: .infinity, alignment: .leading)
+  }
+
+  private func startEditing(_ item: Activity) {
+    title = item.title
+    notes = item.description ?? ""
+    cover = item.imageUrl ?? ""
+    mode = .edit
+  }
+
+  /// The place on its own: name, then the rest of the address. Opens Maps.
+  @ViewBuilder
+  private func placeBlock(_ loc: String) -> some View {
+    let parts = loc.split(separator: ",", maxSplits: 1)
+      .map { $0.trimmingCharacters(in: .whitespaces) }
+    let name = parts.first ?? loc
+    let rest = parts.count > 1 ? parts[1] : nil
+    let query = loc.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? loc
+    if let url = URL(string: "https://maps.apple.com/?q=\(query)") {
+      Link(destination: url) {
+        HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.sm) {
+          VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
+            Text(name)
+              .font(.body)
+              .foregroundStyle(Theme.ink)
+            if let rest, !rest.isEmpty {
+              Text(rest)
+                .font(.footnote)
+                .foregroundStyle(Theme.inkSoft)
             }
           }
+          Spacer(minLength: Theme.Spacing.sm)
+          Image(systemName: "arrow.up.right")
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(Theme.inkFaint)
         }
+        .multilineTextAlignment(.leading)
       }
-      Spacer(minLength: Theme.Spacing.sm)
-      if mode == .view, app.space?.frozen != true {
-        Button {
-          title = item.title
-          notes = item.description ?? ""
-          cover = item.imageUrl ?? ""
-          mode = .edit
-        } label: {
-          // The PWA's pencil (Detail.tsx PencilIcon): 16pt glyph in a 34pt circle.
-          PencilGlyph()
-            .stroke(Theme.ink2, style: StrokeStyle(lineWidth: Theme.TouchTarget.strokeThick * 16 / 24, lineJoin: .round))
-            .frame(width: Theme.Spacing.base, height: Theme.Spacing.base)
-            .frame(width: Theme.Spacing.s34, height: Theme.Spacing.s34)
-            .background(Theme.fillTertiary, in: Circle())
-        }
-        .accessibilityLabel("Edit")
-      }
+      .accessibilityHint("Opens in Maps")
     }
+  }
+
+  private func addedBy(_ item: Activity) -> some View {
+    let ago = DateLocal.timeAgo(item.createdAt)
+    let who = displayName(for: item.createdBy)
+    return Text(ago.isEmpty ? "Added by \(who)" : "Added by \(who) · \(ago)")
+      .font(.footnote)
+      .foregroundStyle(Theme.inkFaint)
   }
 
   private func whenLabel(_ item: Activity) -> String {
@@ -607,21 +625,41 @@ struct DetailView: View {
     }
   }
 
+  /// Plain rows between hairlines; Delete sits alone below the rest.
   private func actionList(_ item: Activity) -> some View {
     let rows = actionRows(item)
-    return VStack(spacing: Theme.Spacing.none) {
-      ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
-        FDActionRow(title: row.title, icon: row.icon, destructive: row.destructive, action: row.run)
-        if index < rows.count - 1 {
-          Rectangle()
-            .fill(Theme.separator)
-            .frame(height: Theme.TouchTarget.hairlineWidth)
-            .padding(.leading, Theme.Spacing.row + Theme.Spacing.s22 + Theme.Spacing.md)
+    return VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
+      actionGroup(rows.filter { !$0.destructive })
+      actionGroup(rows.filter(\.destructive))
+    }
+    .padding(.top, Theme.Spacing.sm)
+  }
+
+  private func actionGroup(_ rows: [DetailAction]) -> some View {
+    VStack(spacing: Theme.Spacing.none) {
+      ForEach(rows) { row in
+        Button(action: row.run) {
+          HStack(spacing: Theme.Spacing.md) {
+            ActionGlyphIcon(glyph: row.icon)
+            Text(row.title)
+              .font(.fdBody)
+            Spacer()
+          }
+          .foregroundStyle(row.destructive ? Theme.roseInk : Theme.ink)
+          .padding(.vertical, Theme.Spacing.md)
+          .contentShape(Rectangle())
         }
+        .buttonStyle(FDScaleButtonStyle())
+        .overlay(alignment: .top) { hairline }
       }
     }
-    .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
-    .padding(.top, Theme.Spacing.lg)
+    .overlay(alignment: .bottom) { hairline }
+  }
+
+  private var hairline: some View {
+    Rectangle()
+      .fill(Theme.hairline)
+      .frame(height: Theme.TouchTarget.hairlineWidth)
   }
 
   private struct DetailAction: Identifiable {
@@ -662,7 +700,9 @@ struct DetailView: View {
       mode = .when
     })
     if app.space?.isMatched == true, !item.isMemory() {
-      rows.append(DetailAction(id: "suggest", title: "Suggest a date", icon: .suggest, destructive: false) {
+      let others = app.space?.members.filter { $0.id != app.space?.myId } ?? []
+      let suggestTitle = others.count == 1 ? "Suggest a date to \(others[0].name)" : "Suggest a date"
+      rows.append(DetailAction(id: "suggest", title: suggestTitle, icon: .suggest, destructive: false) {
         openSuggest(item)
       })
     }
@@ -680,6 +720,7 @@ struct DetailView: View {
     return rows
   }
 
+  /// Folded away by default: the drawer is about the plan, not its log.
   @ViewBuilder
   private func historyList(_ item: Activity) -> some View {
     let rows = app.logs
@@ -687,31 +728,56 @@ struct DetailView: View {
       .sorted { $0.timestamp > $1.timestamp }
     if !rows.isEmpty {
       VStack(alignment: .leading, spacing: Theme.Spacing.none) {
-        Text("History")
-          .font(.fdFootnote.weight(.semibold))
-          .foregroundStyle(Theme.inkFaint)
-          .padding(.bottom, Theme.Spacing.s10)
-        ForEach(rows) { log in
-          HStack(alignment: .top, spacing: Theme.Spacing.s11) {
-            FDAvatar(name: displayName(for: log.userId), seat: faceSeat(for: log.userId), size: .sm)
-            historyLine(log)
+        Button {
+          withAnimation(.easeInOut(duration: Theme.Motion.fade)) { showHistory.toggle() }
+        } label: {
+          HStack(spacing: Theme.Spacing.xs) {
+            Text("History")
+              .font(.fdFootnote.weight(.semibold))
+            Image(systemName: "chevron.right")
+              .font(.caption2.weight(.semibold))
+              .rotationEffect(.degrees(showHistory ? 90 : 0))
           }
-          .padding(.vertical, Theme.Spacing.s7)
+          .foregroundStyle(Theme.inkFaint)
+          .padding(.vertical, Theme.Spacing.sm)
+          .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityValue(showHistory ? "Shown" : "Hidden")
+
+        if showHistory {
+          ForEach(rows) { log in
+            HStack(alignment: .top, spacing: Theme.Spacing.s11) {
+              FDAvatar(name: displayName(for: log.userId), seat: faceSeat(for: log.userId), size: .sm)
+              historyLine(log, allDay: item.allDay)
+            }
+            .padding(.vertical, Theme.Spacing.s7)
+          }
         }
       }
       .padding(.top, Theme.Spacing.s10)
     }
   }
 
-  private func historyLine(_ log: AuditLog) -> Text {
+  private func historyLine(_ log: AuditLog, allDay: Bool) -> Text {
     let who = displayName(for: log.userId)
-    let what = DateLocal.localizeAuditDetails(log.details)
+    let what = DateLocal.localizeAuditDetails(allDay ? Self.dropNoonUTC(log.details) : log.details)
     let ago = DateLocal.timeAgo(log.timestamp)
     let body = Text("\(who) \(what)").foregroundStyle(Theme.ink2)
     if ago.isEmpty {
       return body.font(.fdFootnote)
     }
     return (body + Text(" · \(ago)").foregroundStyle(Theme.inkFaint)).font(.fdFootnote)
+  }
+
+  /// All-day plans are stored at noon UTC, so the server logs "at 12:00 PM".
+  /// That isn't a time anyone chose; keep only the date.
+  static func dropNoonUTC(_ details: String) -> String {
+    details.replacingOccurrences(
+      of: #"\b([A-Z][a-z]{2}) 0?(\d{1,2}), (\d{4}) at 12:00 PM\b"#,
+      with: "$1 $2, $3",
+      options: .regularExpression
+    )
   }
 
   private func handleDoWith(_ targetSpace: SpaceInfo) async {
@@ -866,29 +932,5 @@ struct DetailView: View {
       app.toast = mine ? "Cancelled" : "Dismissed"
     }
     busy = false
-  }
-}
-
-/// The PWA's pencil path — `M4 20h4L20 8a2.8 2.8 0 0 0-4-4L4 16v4Z` on a 24-unit box.
-private struct PencilGlyph: Shape {
-  func path(in rect: CGRect) -> Path {
-    let k = min(rect.width, rect.height) / 24
-    func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: rect.minX + x * k, y: rect.minY + y * k) }
-    var p = Path()
-    p.move(to: pt(4, 20))
-    p.addLine(to: pt(8, 20))
-    p.addLine(to: pt(20, 8))
-    // `a2.8 2.8 0 0 0 -4 -4`: the endpoints are 2√2 from their midpoint, so
-    // SVG grows the radius to 2√2 — a half circle around (18, 6) bulging up-right.
-    p.addArc(
-      center: pt(18, 6),
-      radius: 2 * 2.squareRoot() * k,
-      startAngle: .degrees(45),
-      endAngle: .degrees(-135),
-      clockwise: true
-    )
-    p.addLine(to: pt(4, 16))
-    p.closeSubpath()
-    return p
   }
 }
