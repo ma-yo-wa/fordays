@@ -279,15 +279,15 @@ struct SettingsView: View {
       VStack(spacing: Theme.Spacing.s6) {
         ZStack {
           Circle()
-            .fill(Theme.fillTertiary)
+            .fill(active ? Theme.sageWash : Theme.fillTertiary)
           orbFaceStack(faces)
         }
         .frame(width: Self.orbSize, height: Self.orbSize)
         .overlay {
           if active {
-            // Rose like today's date: pink means "you are here".
+            // A soft green glow, not a hard line: the bold name carries it too.
             Circle()
-              .stroke(Theme.rose, lineWidth: Theme.TouchTarget.ringWidth)
+              .stroke(Theme.sage, lineWidth: Theme.TouchTarget.ringWidth)
           }
         }
 

@@ -24,14 +24,10 @@ enum Theme {
 
   static let rose = Color(hex: 0xF2648B)
 
-  /// A person's face is a little Orb: rose into peach, with an ink letter
-  /// (at least 7.9:1). White letters on these hues fall near 2:1.
-  static let faceFill = LinearGradient(
-    colors: [Color(hex: 0xFD8696), Color(hex: 0xF0C296)],
-    startPoint: .topLeading,
-    endPoint: .bottomTrailing
-  )
-  static let faceInk = ink
+  /// A person's face: flat warm peach with a soft brown letter (7.4:1).
+  /// Calm enough to repeat; white letters on these hues fall near 2:1.
+  static let faceFill = Color(hex: 0xF0C296)
+  static let faceInk = ink2
   static let roseInk = Color(hex: 0xC4285A)
   static let roseWash = Color(hex: 0xFFEAEE)
   static let sage = Color(hex: 0xA8CE85)

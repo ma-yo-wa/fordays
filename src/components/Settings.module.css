@@ -158,8 +158,9 @@
 }
 
 .orbTileOn .orbCircle {
-  /* Rose like today's date: pink means "you are here". */
-  box-shadow: inset var(--space-0) var(--space-0) var(--space-0) var(--border-md) var(--rose);
+  /* A soft green glow, not a hard line: the bold name carries it too. */
+  background: var(--sage-wash);
+  box-shadow: inset var(--space-0) var(--space-0) var(--space-0) var(--border-md) var(--sage);
 }
 
 .orbTileOn .orbTileName {
