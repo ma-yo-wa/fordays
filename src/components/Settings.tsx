@@ -1,3 +1,4 @@
+import { faceColor } from '../lib/tint';
 import { useEffect, useState } from 'react';
 import Sheet from './Sheet';
 import ActionSheet from './ActionSheet';
@@ -570,8 +571,8 @@ export default function Settings() {
                           {faces.slice(0, 3).map((f, idx) => (
                             <span
                               key={f.key}
-                              className={`${ui.orbMiniFace} ${f.them ? ui.orbMiniFaceThem : ui.orbMiniFaceMe}`}
-                              style={{ zIndex: 4 - idx }}
+                              className={ui.orbMiniFace}
+                              style={{ zIndex: 4 - idx, background: faceColor(f.key) }}
                               aria-hidden
                             >
                               {f.letter}
@@ -691,7 +692,8 @@ export default function Settings() {
                       <div key={member.id} className={ui.person}>
                         <div className={ui.personWrap}>
                           <span
-                            className={`${ui.personFace} ${mine ? ui.personFaceMe : ui.personFaceThem}`}
+                            className={ui.personFace}
+                            style={{ background: faceColor(member.id) }}
                             aria-hidden
                           >
                             {firstLetter(member.name)}
@@ -810,6 +812,7 @@ export default function Settings() {
                 <div className={ui.profileRow}>
                   <Avatar
                     name={myName || space?.myName || 'Me'}
+                    personId={space?.myId}
                     seat={0}
                     size="md"
                   />
@@ -1215,8 +1218,8 @@ export default function Settings() {
                     {pFaces.slice(0, 3).map((fc, idx) => (
                       <span
                         key={fc.key}
-                        className={`${ui.orbMiniFace} ${fc.them ? ui.orbMiniFaceThem : ui.orbMiniFaceMe}`}
-                        style={{ zIndex: 4 - idx }}
+                        className={ui.orbMiniFace}
+                        style={{ zIndex: 4 - idx, background: faceColor(fc.key) }}
                         aria-hidden
                       >
                         {fc.letter}

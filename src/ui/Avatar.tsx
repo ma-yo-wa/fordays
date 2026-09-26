@@ -6,6 +6,8 @@ export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg';
 
 export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   name?: string;
+  /** Picks the face colour; falls back to the name. */
+  personId?: string | null;
   seat?: 0 | 1;
   color?: string;
   imageUrl?: string | null;
@@ -15,6 +17,7 @@ export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const Avatar: React.FC<AvatarProps> = ({
   name,
+  personId,
   seat: _seat = 0,
   color,
   imageUrl,
@@ -25,7 +28,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   ...rest
 }) => {
   const initial = name?.trim() ? name.trim()[0]?.toUpperCase() : '';
-  const bgColor = color || faceColor();
+  const bgColor = color || faceColor(personId || name);
 
   const sizeClass =
     size === 'sm' ? s.sizeSm : size === 'lg' ? s.sizeLg : s.sizeMd;

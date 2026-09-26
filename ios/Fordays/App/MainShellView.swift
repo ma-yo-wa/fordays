@@ -224,16 +224,16 @@ struct MainShellView: View {
                 if let members = app.space?.members, !members.isEmpty {
                   let ordered = orderedHeaderMembers(members, myId: app.space?.myId)
                   ForEach(ordered.prefix(2), id: \.id) { member in
-                    face(member.name)
+                    face(member.name, id: member.id)
                   }
                   let more = max(0, ordered.count - 2)
                   if more > 0 {
                     moreFace(more)
                   }
                 } else {
-                  face(app.space?.myName)
+                  face(app.space?.myName, id: app.space?.myId)
                   if app.space?.isMatched == true {
-                    face(app.space?.partnerName)
+                    face(app.space?.partnerName, id: nil)
                   }
                 }
               }
@@ -338,12 +338,12 @@ struct MainShellView: View {
     return named.isEmpty ? nil : named
   }
 
-  private func face(_ name: String?) -> some View {
+  private func face(_ name: String?, id: String?) -> some View {
     return Text(String((name ?? "?").prefix(1)).uppercased())
       .font(.caption.weight(.bold))
       .foregroundStyle(Theme.faceInk)
       .frame(width: Theme.TouchTarget.avatarMd, height: Theme.TouchTarget.avatarMd)
-      .background(Theme.faceFill, in: Circle())
+      .background(Theme.faceColor(for: id ?? name), in: Circle())
       .overlay(Circle().stroke(Theme.paper, lineWidth: Theme.TouchTarget.strokeThick))
   }
 
@@ -352,7 +352,7 @@ struct MainShellView: View {
       .font(.caption2.weight(.bold))
       .foregroundStyle(Theme.faceInk)
       .frame(width: Theme.TouchTarget.avatarMd, height: Theme.TouchTarget.avatarMd)
-      .background(Theme.faceFill, in: Circle())
+      .background(Theme.fillSecondary, in: Circle())
       .overlay(Circle().stroke(Theme.paper, lineWidth: Theme.TouchTarget.strokeThick))
   }
 

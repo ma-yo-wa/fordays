@@ -217,7 +217,7 @@ struct PlansView: View {
       $0.isMatched && a.createdBy.caseInsensitiveCompare($0.myId) != .orderedSame
     } ?? false
     let who = byOther ? app.space?.displayName(for: a.createdBy) : nil
-    return agendaRow(time: rowTime(a), title: a.title, place: a.location, who: who) {
+    return agendaRow(time: rowTime(a), title: a.title, place: a.location, who: who, whoId: a.createdBy) {
       onSelect(a)
     }
   }
@@ -228,6 +228,7 @@ struct PlansView: View {
     title: String,
     place: String?,
     who: String? = nil,
+    whoId: String? = nil,
     action: @escaping () -> Void
   ) -> some View {
     Button(action: action) {
@@ -251,7 +252,7 @@ struct PlansView: View {
         }
         Spacer(minLength: 0)
         if let who {
-          face(who)
+          face(who, id: whoId)
         }
       }
       .padding(.vertical, Theme.Spacing.md)
@@ -266,12 +267,12 @@ struct PlansView: View {
     .accessibilityElement(children: .combine)
   }
 
-  private func face(_ name: String) -> some View {
+  private func face(_ name: String, id: String?) -> some View {
     Text(String(name.prefix(1)).uppercased())
       .font(.caption2.weight(.bold))
       .foregroundStyle(Theme.faceInk)
       .frame(width: Theme.TouchTarget.avatarXs, height: Theme.TouchTarget.avatarXs)
-      .background(Theme.faceFill, in: Circle())
+      .background(Theme.faceColor(for: id ?? name), in: Circle())
       .accessibilityLabel("Added by \(name)")
   }
 

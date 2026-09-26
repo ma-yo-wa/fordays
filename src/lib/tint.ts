@@ -18,14 +18,14 @@ const PALETTE: Array<[string, string]> = [
   ['#34925A', '#1B4A2E'],
 ];
 
-function bucket(id: string): number {
+function bucket(id: string, n: number = PALETTE.length): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (Math.imul(h, 31) + id.charCodeAt(i)) | 0;
   // Ids that share a prefix land together without a final avalanche.
   h ^= h >>> 16;
   h = Math.imul(h, 0x45d9f3b);
   h ^= h >>> 16;
-  return Math.abs(h) % PALETTE.length;
+  return Math.abs(h) % n;
 }
 
 const gradient = (i: number): string => {
@@ -66,9 +66,21 @@ export function tintsFor(
   return chosen.map(gradient);
 }
 
-/** One face color for everyone. Initials tell people apart. */
-export function faceColor(): string {
-  return 'var(--face-fill)';
+/* A person's face: one of the orb's pastels, picked from their id so it
+   looks random but is the same colour for them everywhere, on the phone
+   as in the browser (Theme.faceColor mirrors this list and the hash).
+   All take ink letters. Replaced by a photo once people can upload one. */
+const FACES = [
+  'var(--orb-peach)',
+  'var(--orb-coral)',
+  'var(--orb-rose)',
+  'var(--orb-sand)',
+  'var(--orb-green)',
+] as const;
+
+export function faceColor(personId?: string | null): string {
+  if (!personId) return 'var(--face-fill)';
+  return FACES[bucket(personId.toLowerCase(), FACES.length)] as string;
 }
 
 /** Map a profile id (or local demo "0"/"1") onto seat color 0 | 1. */

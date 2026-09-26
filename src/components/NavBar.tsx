@@ -119,7 +119,7 @@ export default function NavBar() {
                   <span
                     key={f.key}
                     className={s.face}
-                    style={{ background: faceColor() }}
+                    style={{ background: faceColor(f.key) }}
                   >
                     {f.letter}
                   </span>

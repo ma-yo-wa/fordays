@@ -120,7 +120,7 @@ struct ExternalDetailView: View {
         // Rows
         VStack(alignment: .leading, spacing: Theme.Spacing.row) {
           HStack(spacing: Theme.Spacing.s10) {
-            FDAvatar(name: ownerName, seat: isMine ? 0 : 1, size: .sm)
+            FDAvatar(name: ownerName, personId: isMine ? app.space?.myId : event.userId, seat: isMine ? 0 : 1, size: .sm)
             Text(ownerName)
               .font(.subheadline)
               .foregroundStyle(Theme.ink)

@@ -189,6 +189,26 @@ enum Theme {
   /// is the same colour on the phone as in the browser.
   private static func orbHue(for id: String, title: String?) -> Int {
     if let title, let hue = Art.hue(for: title) { return hue }
+    return bucket(id, orbPalette.count)
+  }
+
+  /// A person's face: one of the orb's pastels, picked from their id so it
+  /// looks random but is the same colour for them everywhere. Same list and
+  /// hash as the PWA's `faceColor` in tint.ts. All take ink letters.
+  private static let faceFills: [Color] = [
+    Color(hex: 0xF0C296), // peach
+    Color(hex: 0xFDA492), // coral
+    Color(hex: 0xFD8696), // rose
+    Color(hex: 0xE1D4A0), // sand
+    Color(hex: 0xCDE7B3), // green
+  ]
+
+  static func faceColor(for personId: String?) -> Color {
+    guard let personId, !personId.isEmpty else { return faceFill }
+    return faceFills[bucket(personId.lowercased(), faceFills.count)]
+  }
+
+  private static func bucket(_ id: String, _ n: Int) -> Int {
     var h: Int32 = 0
     for u in id.utf16 {
       h = h &* 31 &+ Int32(u)
@@ -197,7 +217,7 @@ enum Theme {
     x ^= x >> 16
     x = x &* 0x45d9f3b
     x ^= x >> 16
-    return abs(Int(Int32(bitPattern: x))) % orbPalette.count
+    return abs(Int(Int32(bitPattern: x))) % n
   }
 }
 

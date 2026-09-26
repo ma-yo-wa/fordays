@@ -186,7 +186,7 @@
 }
 
 .more {
-  background: var(--face-fill);
+  background: var(--fill-secondary);
   color: var(--face-ink);
   font: var(--t-caption2);
   font-weight: 700;

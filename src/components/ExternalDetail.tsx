@@ -125,6 +125,7 @@ export default function ExternalDetail() {
               <div className={s.row}>
                 <Avatar
                   name={ownerName}
+                  personId={isMine ? space?.myId : event?.ownerId}
                   seat={owner}
                   size="sm"
                 />

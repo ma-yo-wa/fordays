@@ -24,6 +24,8 @@ enum FDAvatarSize {
 
 struct FDAvatar: View {
   var name: String? = nil
+  /// Picks the face colour; falls back to the name.
+  var personId: String? = nil
   var seat: Int = 0
   var color: Color? = nil
   var imageUrl: String? = nil
@@ -46,7 +48,7 @@ struct FDAvatar: View {
         if let color {
           color
         } else {
-          Theme.faceFill
+          Theme.faceColor(for: personId ?? name)
         }
         Text(initial)
           .font(size.font)

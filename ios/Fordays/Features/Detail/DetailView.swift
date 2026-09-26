@@ -306,7 +306,7 @@ struct DetailView: View {
     return FDCard(variant: .sageWash, padding: .sm) {
       VStack(alignment: .leading, spacing: Theme.Spacing.md) {
         HStack(spacing: Theme.Spacing.s10) {
-          FDAvatar(name: who, seat: faceSeat(for: item.suggestedBy), size: .sm)
+          FDAvatar(name: who, personId: item.suggestedBy, seat: faceSeat(for: item.suggestedBy), size: .sm)
           (
             Text(mine ? "You suggested " : "\(who) suggests ")
               + Text(label).fontWeight(.semibold)
@@ -746,7 +746,7 @@ struct DetailView: View {
           .padding(.bottom, Theme.Spacing.s10)
         ForEach(showAllHistory ? rows : Array(rows.prefix(Self.historyCap))) { log in
           HStack(alignment: .top, spacing: Theme.Spacing.s11) {
-            FDAvatar(name: displayName(for: log.userId), seat: faceSeat(for: log.userId), size: .sm)
+            FDAvatar(name: displayName(for: log.userId), personId: log.userId, seat: faceSeat(for: log.userId), size: .sm)
             historyLine(log, allDay: item.allDay)
           }
           .padding(.vertical, Theme.Spacing.s7)
@@ -811,7 +811,7 @@ struct DetailView: View {
   private func face(for userId: String?) -> some View {
     let seat = faceSeat(for: userId)
     let name = displayName(for: userId ?? "")
-    return FDAvatar(name: name, seat: seat, size: .sm)
+    return FDAvatar(name: name, personId: userId, seat: seat, size: .sm)
   }
 
   private func faceSeat(for userId: String?) -> Int {

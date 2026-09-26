@@ -349,7 +349,7 @@ struct SettingsView: View {
       ForEach(faces.prefix(3)) { f in
         ZStack {
           Circle()
-            .fill(Theme.faceFill)
+            .fill(Theme.faceColor(for: f.id))
           Text(f.letter)
             .font(.fdCaption.weight(.bold))
             .foregroundStyle(Theme.faceInk)
@@ -362,7 +362,7 @@ struct SettingsView: View {
       if faces.count > 3 {
         ZStack {
           Circle()
-            .fill(Theme.faceFill)
+            .fill(Theme.fillSecondary)
           Text("+\(faces.count - 3)")
             .font(.fdTiny)
             .foregroundStyle(Theme.faceInk)
@@ -465,7 +465,7 @@ struct SettingsView: View {
                 let removable = !space.frozen && space.myRole == "admin" && space.members.count >= 3 && member.id != space.myId
                 ZStack(alignment: .topLeading) {
                   VStack(spacing: Theme.Spacing.xs) {
-                    face(member.name, mine: member.id == space.myId, size: Theme.TouchTarget.avatarMd)
+                    face(member.name, id: member.id, size: Theme.TouchTarget.avatarMd)
                     Text(member.name)
                       .font(.caption)
                       .foregroundStyle(Theme.ink)
@@ -648,7 +648,7 @@ struct SettingsView: View {
                     ForEach(faces.prefix(3)) { f in
                       ZStack {
                         Circle()
-                          .fill(Theme.faceFill)
+                          .fill(Theme.faceColor(for: f.id))
                         Text(f.letter)
                           .font(.fdCaption2.weight(.bold))
                           .foregroundStyle(Theme.faceInk)
@@ -697,7 +697,7 @@ struct SettingsView: View {
           sectionLabel("Profile")
           FDFormGroup {
             HStack(spacing: Theme.Spacing.md) {
-              FDAvatar(name: profileNameDraft.isEmpty ? space.myName : profileNameDraft, seat: 0, size: .md)
+              FDAvatar(name: profileNameDraft.isEmpty ? space.myName : profileNameDraft, personId: space.myId, size: .md)
               TextField("Aline", text: $profileNameDraft)
                 .font(.fdBody)
                 .foregroundStyle(Theme.ink)
@@ -1124,8 +1124,8 @@ struct SettingsView: View {
       .foregroundStyle(Theme.inkFaint)
   }
 
-  private func face(_ name: String, mine: Bool, size: CGFloat = Theme.TouchTarget.avatarMd) -> some View {
-    FDAvatar(name: name, seat: mine ? 0 : 1, size: size <= 24 ? .sm : .md)
+  private func face(_ name: String, id: String, size: CGFloat = Theme.TouchTarget.avatarMd) -> some View {
+    FDAvatar(name: name, personId: id, size: size <= 24 ? .sm : .md)
   }
 
   private func isDefaultOrbName(_ name: String) -> Bool {

@@ -400,6 +400,7 @@ export default function Detail() {
           <div className={s.suggestWho}>
             <Avatar
               name={partnerName(config, item.suggested_by!)}
+              personId={item.suggested_by}
               seat={faceIndexFor(item.suggested_by!, faceCtx)}
               size="sm"
             />
@@ -641,6 +642,7 @@ export default function Detail() {
             <div key={l.id} className={s.entry}>
               <Avatar
                 name={partnerName(config, l.user_id)}
+                personId={l.user_id}
                 seat={faceIndexFor(l.user_id, faceCtx)}
                 size="sm"
               />

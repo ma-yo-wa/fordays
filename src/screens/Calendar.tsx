@@ -51,6 +51,7 @@ function AgendaRow({
   title,
   place,
   who,
+  whoId,
   onOpen,
 }: {
   time: string;
@@ -58,6 +59,7 @@ function AgendaRow({
   place?: string | null;
   /** In a shared Orb, who added the plan when it wasn't you. */
   who?: string;
+  whoId?: string | null;
   onOpen: () => void;
 }) {
   const shown = shortPlace(place, title);
@@ -80,7 +82,7 @@ function AgendaRow({
         {shown && <span className={s.place}>{shown}</span>}
       </span>
       {who && (
-        <span className={s.face} style={{ background: faceColor() }} aria-label={`Added by ${who}`}>
+        <span className={s.face} style={{ background: faceColor(whoId || who) }} aria-label={`Added by ${who}`}>
           {(who[0] ?? '?').toUpperCase()}
         </span>
       )}
@@ -349,6 +351,7 @@ export default function Calendar() {
                       title={a.title}
                       place={a.location}
                       who={addedByOther(a.created_by) ? partnerName(config, a.created_by) : undefined}
+                      whoId={a.created_by}
                       onOpen={() => openDetail(a.id)}
                     />
                   ))}
@@ -366,6 +369,7 @@ export default function Calendar() {
                   title={item.plan.title}
                   place={item.plan.location}
                   who={addedByOther(item.plan.created_by) ? partnerName(config, item.plan.created_by) : undefined}
+                  whoId={item.plan.created_by}
                   onOpen={() => openDetail(item.plan.id)}
                 />
               ) : (
