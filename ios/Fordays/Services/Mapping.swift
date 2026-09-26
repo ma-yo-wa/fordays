@@ -96,10 +96,6 @@ enum DateLocal {
     return "\(names[m - 1]) \(d)"
   }
 
-  static func prettyLower(_ hhmm: String) -> String {
-    prettyTime(hhmm).replacingOccurrences(of: "AM", with: "am").replacingOccurrences(of: "PM", with: "pm")
-  }
-
   static func relativeDay(_ dateISO: String, from: String = todayISO()) -> String {
     guard let start = parseLocalDay(from), let target = parseLocalDay(dateISO) else {
       return String(dateISO.prefix(10))
@@ -247,11 +243,12 @@ enum DateLocal {
     return (dateTime, nil)
   }
 
+  /// 18:30 -> "6:30 pm". Lowercase everywhere the app writes a time.
   static func prettyTime(_ hhmm: String) -> String {
     let parts = hhmm.split(separator: ":").compactMap { Int($0) }
     guard let hRaw = parts.first else { return hhmm }
     let m = parts.count > 1 ? parts[1] : 0
-    let ampm = hRaw >= 12 ? "PM" : "AM"
+    let ampm = hRaw >= 12 ? "pm" : "am"
     let h = hRaw % 12 == 0 ? 12 : hRaw % 12
     return String(format: "%d:%02d %@", h, m, ampm)
   }
@@ -423,7 +420,7 @@ enum DateLocal {
       } else {
         let hh = String(format: "%02d", localH)
         let mm = String(format: "%02d", localM)
-        replacement = "\(localMon) \(localDay), \(localYear) at \(prettyLower("\(hh):\(mm)"))"
+        replacement = "\(localMon) \(localDay), \(localYear) at \(prettyTime("\(hh):\(mm)"))"
       }
       let range = Range(match.range, in: result)
       if let range { result.replaceSubrange(range, with: replacement) }

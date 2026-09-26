@@ -58,18 +58,14 @@ export function nextSaturday(): string {
 }
 
 /** 18:30 -> "6:30 PM" */
+/** 18:30 -> "6:30 pm". Lowercase everywhere the app writes a time, so it
+ *  recedes behind the title instead of competing with it. */
 export function pretty(time: string): string {
   const [hRaw, m] = time.split(':').map(Number);
   const h = hRaw ?? 0;
-  const suffix = h >= 12 ? 'PM' : 'AM';
+  const suffix = h >= 12 ? 'pm' : 'am';
   const h12 = h % 12 === 0 ? 12 : h % 12;
   return `${h12}:${pad(m ?? 0)} ${suffix}`;
-}
-
-/** 18:30 -> "6:30 pm" — the agenda sets time lowercase, so it recedes
- *  behind the title instead of competing with it. */
-export function prettyLower(time: string): string {
-  return pretty(time).replace('AM', 'am').replace('PM', 'pm');
 }
 
 /**
@@ -145,10 +141,10 @@ export function formatRange(
     return `${shortDate(sDate)} – ${shortDate(eDate)}`;
   }
   if (sameDay) {
-    return `${sTime ? prettyLower(sTime) : ''}${eTime ? ` – ${prettyLower(eTime)}` : ''}`;
+    return `${sTime ? pretty(sTime) : ''}${eTime ? ` – ${pretty(eTime)}` : ''}`;
   }
-  const left = `${shortDate(sDate)}${sTime ? ` at ${prettyLower(sTime)}` : ''}`;
-  const right = `${shortDate(eDate)}${eTime ? ` at ${prettyLower(eTime)}` : ''}`;
+  const left = `${shortDate(sDate)}${sTime ? ` at ${pretty(sTime)}` : ''}`;
+  const right = `${shortDate(eDate)}${eTime ? ` at ${pretty(eTime)}` : ''}`;
   return `${left} – ${right}`;
 }
 
@@ -289,7 +285,7 @@ export function localizeAuditDetails(details: string): string {
 
       const localHH = String(localH).padStart(2, '0');
       const localMM = String(localM).padStart(2, '0');
-      const timeStr = prettyLower(`${localHH}:${localMM}`);
+      const timeStr = pretty(`${localHH}:${localMM}`);
       return `${localMon} ${localDay}, ${localYear} at ${timeStr}`;
     }
   );

@@ -274,7 +274,7 @@ struct PlansView: View {
 
   /// The day is already in the heading, so the row gives only the time.
   private func rowTime(_ a: Activity) -> String {
-    DateLocal.dtTime(a.dateTime).map(DateLocal.prettyLower) ?? "All day"
+    DateLocal.dtTime(a.dateTime).map(DateLocal.prettyTime) ?? "All day"
   }
 
   private var dayTitle: String {
@@ -310,15 +310,15 @@ struct PlansView: View {
     let endsToday = String(e.endsAt.prefix(10)) == day
     if startsToday && endsToday {
       let t = String(e.startsAt.dropFirst(11).prefix(5))
-      return DateLocal.prettyLower(t)
+      return DateLocal.prettyTime(t)
     }
     if startsToday {
       let t = String(e.startsAt.dropFirst(11).prefix(5))
-      return "From \(DateLocal.prettyLower(t))"
+      return "From \(DateLocal.prettyTime(t))"
     }
     if endsToday {
       let t = String(e.endsAt.dropFirst(11).prefix(5))
-      return "Until \(DateLocal.prettyLower(t))"
+      return "Until \(DateLocal.prettyTime(t))"
     }
     return "All day"
   }

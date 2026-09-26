@@ -9,7 +9,7 @@ import {
   formatUpNext,
   monthGrid,
   parseISO,
-  prettyLower,
+  pretty,
   spanDays,
   todayISO,
 } from '../lib/date';
@@ -24,16 +24,16 @@ function pillWhen(e: ExternalEvent, day: string): string {
   if (e.allDay) return 'All day';
   const startsToday = dtDate(e.startsAt) === day;
   const endsToday = dtDate(e.endsAt) === day;
-  if (startsToday && endsToday) return prettyLower(dtTime(e.startsAt) as string);
-  if (startsToday) return `From ${prettyLower(dtTime(e.startsAt) as string)}`;
-  if (endsToday) return `Until ${prettyLower(dtTime(e.endsAt) as string)}`;
+  if (startsToday && endsToday) return pretty(dtTime(e.startsAt) as string);
+  if (startsToday) return `From ${pretty(dtTime(e.startsAt) as string)}`;
+  if (endsToday) return `Until ${pretty(dtTime(e.endsAt) as string)}`;
   return 'All day';
 }
 
 /* The day is already in the heading, so a row gives only the time. */
 function planTime(dateTime: string | null): string {
   const time = dtTime(dateTime);
-  return time ? prettyLower(time) : 'All day';
+  return time ? pretty(time) : 'All day';
 }
 
 /* The place name without the street address, or null when the title already says it. */
