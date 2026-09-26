@@ -12,6 +12,7 @@
 		0ABD8BDDC53DCA0F3633C966 /* Push.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1380463C27B7F36BA40DDB4 /* Push.swift */; };
 		1091443FA7F64C8FD71F0298 /* AddActivitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4EBB535ABBFFC73548D5B4B /* AddActivitySheet.swift */; };
 		1C7CC0C7BE7875ED37D216FA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 472B49EF886BAF4F0DE4D928 /* Assets.xcassets */; };
+		1DE025F114DB82A1A084794D /* Alerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42F22075D5254D9C781E1F5D /* Alerts.swift */; };
 		34A2A51CD5273BE9E69140E5 /* FDPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02152F4A039006F0A7F7DCA /* FDPill.swift */; };
 		37A527B9CB1D55A5ADA32802 /* FDCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFEBE95A3A294EA60D6446DC /* FDCard.swift */; };
 		3C59A33262DBAE5E46AFED61 /* FDActionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E8A620538E162C11055A1D /* FDActionRow.swift */; };
@@ -40,6 +41,7 @@
 		DB2FCD0106C7E179ED0D60AA /* CalendarSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A6D7334EA1868ADD41BF6BD /* CalendarSync.swift */; };
 		DDF081F94BBBE968449273EC /* FDButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7AFA33428D7D3DB7633CB3 /* FDButton.swift */; };
 		DF6831A3FC46CE01064E7791 /* FDAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B58C9EF1CD4E548293D85FD /* FDAvatar.swift */; };
+		E59431D89E8C78F60A70412E /* PlanAlertsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0AE861D531714A6D8EF72E /* PlanAlertsView.swift */; };
 		FCD76F79A8D74CF94DF6B76B /* FDTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F21DAC59C930002A20A147 /* FDTextField.swift */; };
 		FCF823D1FA959CF01E14B81B /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06275BDB4475A336F2D09A3 /* SupabaseService.swift */; };
 		FFF2EC3B34025F324B2EFA3C /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E2CF128B98BD9C0207520F /* AppModel.swift */; };
@@ -52,9 +54,11 @@
 		22C6534D4843BB76DDC865AC /* MainShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainShellView.swift; sourceTree = "<group>"; };
 		230281E6660476AB193B9044 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		278A98778F6A723A508BFB57 /* Copy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Copy.swift; sourceTree = "<group>"; };
+		2A0AE861D531714A6D8EF72E /* PlanAlertsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanAlertsView.swift; sourceTree = "<group>"; };
 		2B7AFA33428D7D3DB7633CB3 /* FDButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDButton.swift; sourceTree = "<group>"; };
 		3351142946F30E708F5A9F47 /* PlansView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansView.swift; sourceTree = "<group>"; };
 		412FB2B7E55638A2B182DA85 /* BucketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BucketView.swift; sourceTree = "<group>"; };
+		42F22075D5254D9C781E1F5D /* Alerts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alerts.swift; sourceTree = "<group>"; };
 		472B49EF886BAF4F0DE4D928 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		58F21DAC59C930002A20A147 /* FDTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDTextField.swift; sourceTree = "<group>"; };
 		5FB0FFC2A4D225F12EDC9838 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
@@ -115,6 +119,7 @@
 		24BBEFEC6412F83B07C74DD6 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				42F22075D5254D9C781E1F5D /* Alerts.swift */,
 				6A6D7334EA1868ADD41BF6BD /* CalendarSync.swift */,
 				278A98778F6A723A508BFB57 /* Copy.swift */,
 				152F2260E49DE06874ECA5D3 /* Mapping.swift */,
@@ -143,6 +148,7 @@
 				5FB0FFC2A4D225F12EDC9838 /* DetailView.swift */,
 				6295E3AD2F3DC023BF498500 /* ExternalDetailView.swift */,
 				A1F029CE2CC91FB99AAA3C02 /* LocationInputView.swift */,
+				2A0AE861D531714A6D8EF72E /* PlanAlertsView.swift */,
 			);
 			path = Detail;
 			sourceTree = "<group>";
@@ -338,6 +344,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1091443FA7F64C8FD71F0298 /* AddActivitySheet.swift in Sources */,
+				1DE025F114DB82A1A084794D /* Alerts.swift in Sources */,
 				FFF2EC3B34025F324B2EFA3C /* AppModel.swift in Sources */,
 				8CB2D76D439D916AC41C417A /* Art.swift in Sources */,
 				D9176915A481EBD86A04B1E6 /* AuthView.swift in Sources */,
@@ -363,6 +370,7 @@
 				4A9C299BE6211B6044D28565 /* Mapping.swift in Sources */,
 				7C48673361A091E5A6DD44F7 /* Models.swift in Sources */,
 				6CC2E7D333F9B7E852CD4CB7 /* OrbSetupView.swift in Sources */,
+				E59431D89E8C78F60A70412E /* PlanAlertsView.swift in Sources */,
 				79539FCCEA4A670404F82F7D /* PlansView.swift in Sources */,
 				0ABD8BDDC53DCA0F3633C966 /* Push.swift in Sources */,
 				9942713DF9F91BACE7A39699 /* RootView.swift in Sources */,

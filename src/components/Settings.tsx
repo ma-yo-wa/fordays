@@ -37,7 +37,18 @@ import {
   type PushState,
 } from '../lib/push';
 import { Copy, formatCopy } from '../lib/copy';
-import { Button, Avatar, Card, Input, ActionRow, FormGroup, FormRow, Pill } from '../ui';
+import { Button, Avatar, Card, Input, ActionRow, FormGroup, FormRow, Pill, PickRow } from '../ui';
+import {
+  ALL_DAY_ALERTS,
+  DEFAULT_PREFS,
+  SUMMARY_TIMES,
+  TIMED_ALERTS,
+  loadOrbMuted,
+  loadPrefs,
+  savePrefs,
+  setOrbMuted,
+  type NotificationPrefs,
+} from '../lib/alerts';
 import f from './Form.module.css';
 import ui from './Settings.module.css';
 import auth from './Auth.module.css';
@@ -187,6 +198,24 @@ export default function Settings() {
   const [subview, setSubview] = useState<
     'main' | 'anotherOrb' | 'orbSetup' | 'pastOrbs' | 'calPicker' | 'account' | 'orbDetails' | 'calendars' | 'notifications'
   >('main');
+  const [prefs, setPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS);
+  const [muted, setMuted] = useState(false);
+
+  useEffect(() => {
+    if (subview === 'notifications') void loadPrefs().then(setPrefs);
+    if (subview === 'orbDetails' && space?.id) void loadOrbMuted(space.id).then(setMuted);
+  }, [subview, space?.id]);
+
+  // Save as they change, like iOS Settings; put it back if it didn't take.
+  const changePrefs = (patch: Partial<NotificationPrefs>) => {
+    const before = prefs;
+    const next = { ...prefs, ...patch };
+    setPrefs(next);
+    void savePrefs(next).catch(() => {
+      setPrefs(before);
+      toast('Couldn’t save that. Check your connection and try again.');
+    });
+  };
   const [createWithPeople, setCreateWithPeople] = useState(false);
   const [orbSetupBackTo, setOrbSetupBackTo] = useState<'main' | 'anotherOrb' | 'orbDetails'>('anotherOrb');
 
@@ -711,6 +740,27 @@ export default function Settings() {
                 <p className={ui.frozen}>{Copy.orbs.frozenNotice}</p>
               )}
 
+              {!space.frozen && !soloOrb && (
+                <FormGroup
+                  footer="Alerts you set on plans still ring."
+                  style={{ marginTop: 'var(--space-4)' }}
+                >
+                  <FormRow label="Mute this Orb" icon={<BellIcon />}>
+                    <Switch
+                      on={muted}
+                      label="Mute this Orb"
+                      onChange={(on) => {
+                        setMuted(on);
+                        void setOrbMuted(space.id, on).catch(() => {
+                          setMuted(!on);
+                          toast('Couldn’t save that. Check your connection and try again.');
+                        });
+                      }}
+                    />
+                  </FormRow>
+                </FormGroup>
+              )}
+
               {removableMembers.map((member) => (
                 <button
                   key={`ask-${member.id}`}
@@ -1028,6 +1078,60 @@ export default function Settings() {
                     }
                   })();
                 }}
+              />
+            </FormRow>
+          </FormGroup>
+
+          <FormGroup
+            header="Alerts"
+            footer="Yours only. Change them on any plan."
+            style={{ marginTop: 'var(--space-5)' }}
+          >
+            <PickRow
+              label="Plans"
+              value={prefs.alertTimed[0] ?? -1}
+              options={[{ value: -1, label: 'None' }, ...TIMED_ALERTS]}
+              onChange={(v) => changePrefs({ alertTimed: v < 0 ? [] : [v] })}
+            />
+            <PickRow
+              label="All-day plans"
+              value={prefs.alertAllDay[0] ?? -1}
+              options={[{ value: -1, label: 'None' }, ...ALL_DAY_ALERTS]}
+              onChange={(v) => changePrefs({ alertAllDay: v < 0 ? [] : [v] })}
+            />
+          </FormGroup>
+
+          <FormGroup
+            header="Morning summary"
+            footer="Today’s plans, on days you have some"
+            style={{ marginTop: 'var(--space-5)' }}
+          >
+            <FormRow label="Morning summary">
+              <Switch
+                on={prefs.summaryMinute != null}
+                label="Morning summary"
+                onChange={(on) => changePrefs({ summaryMinute: on ? 480 : null })}
+              />
+            </FormRow>
+            {prefs.summaryMinute != null && (
+              <PickRow
+                label="Time"
+                value={prefs.summaryMinute}
+                options={SUMMARY_TIMES}
+                onChange={(v) => changePrefs({ summaryMinute: v })}
+              />
+            )}
+          </FormGroup>
+
+          <FormGroup
+            footer="From 10 pm to 8 am, news from others waits until morning. Alerts you set still ring."
+            style={{ marginTop: 'var(--space-5)' }}
+          >
+            <FormRow label="Quiet overnight">
+              <Switch
+                on={prefs.quietHours}
+                label="Quiet overnight"
+                onChange={(on) => changePrefs({ quietHours: on })}
               />
             </FormRow>
           </FormGroup>

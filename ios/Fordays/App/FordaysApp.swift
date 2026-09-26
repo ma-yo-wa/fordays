@@ -5,6 +5,19 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
   weak var appModel: AppModel? {
     didSet {
       guard let app = appModel else { return }
+      if pendingToday {
+        pendingToday = false
+        Task { @MainActor in
+          app.goToday()
+          app.tab = .plans
+        }
+      }
+      if pendingActivityId == nil, let spId = pendingSpaceId {
+        pendingSpaceId = nil
+        Task { @MainActor in
+          if app.space?.id != spId { await app.switchToSpace(spId) }
+        }
+      }
       if let actId = pendingActivityId {
         let spId = pendingSpaceId
         pendingActivityId = nil
@@ -18,6 +31,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
   private var pendingActivityId: String?
   private var pendingSpaceId: String?
+  private var pendingToday = false
 
   func application(
     _ application: UIApplication,
@@ -64,7 +78,19 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
       ?? (userInfo["space_id"] as? String)
       ?? (userInfo["s"] as? String)
 
-    if let activityId, !activityId.isEmpty {
+    let kind = userInfo["kind"] as? String
+
+    if kind == "summary" {
+      // The morning summary: Plans, on today.
+      Task { @MainActor in
+        if let app = self.appModel {
+          app.goToday()
+          app.tab = .plans
+        } else {
+          self.pendingToday = true
+        }
+      }
+    } else if let activityId, !activityId.isEmpty {
       if let app = appModel {
         Task { @MainActor in
           await app.navigateToActivity(activityId: activityId, spaceId: spaceId)
@@ -72,6 +98,15 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
       } else {
         pendingActivityId = activityId
         pendingSpaceId = spaceId
+      }
+    } else if let spaceId, !spaceId.isEmpty {
+      // Joined, left, removed, or several adds: open that Orb.
+      Task { @MainActor in
+        if let app = self.appModel {
+          if app.space?.id != spaceId { await app.switchToSpace(spaceId) }
+        } else {
+          self.pendingSpaceId = spaceId
+        }
       }
     } else if let urlStr = userInfo["url"] as? String, let url = URL(string: urlStr) {
       if let app = appModel {

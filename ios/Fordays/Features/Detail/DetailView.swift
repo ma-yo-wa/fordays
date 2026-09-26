@@ -628,14 +628,24 @@ struct DetailView: View {
   /// Plain rows between hairlines; Delete sits alone below the rest.
   private func actionList(_ item: Activity) -> some View {
     let rows = actionRows(item)
+    let main = rows.filter { !$0.destructive }
+    // Alert rows sit right under Change the day, as in Calendar.
+    let cut = (main.firstIndex { $0.id == "when" }).map { $0 + 1 } ?? main.count
     return VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
-      actionGroup(rows.filter { !$0.destructive })
+      VStack(spacing: Theme.Spacing.none) {
+        actionGroup(Array(main[..<cut]), closed: false)
+        if item.isPlan, !item.isMemory() {
+          PlanAlertsView(activityId: item.id, allDay: item.allDay)
+        }
+        actionGroup(Array(main[cut...]), closed: false)
+      }
+      .overlay(alignment: .bottom) { hairline }
       actionGroup(rows.filter(\.destructive))
     }
     .padding(.top, Theme.Spacing.sm)
   }
 
-  private func actionGroup(_ rows: [DetailAction]) -> some View {
+  private func actionGroup(_ rows: [DetailAction], closed: Bool = true) -> some View {
     VStack(spacing: Theme.Spacing.none) {
       ForEach(rows) { row in
         Button(action: row.run) {
@@ -655,7 +665,7 @@ struct DetailView: View {
         .overlay(alignment: .top) { hairline }
       }
     }
-    .overlay(alignment: .bottom) { hairline }
+    .overlay(alignment: .bottom) { if closed { hairline } }
   }
 
   private var hairline: some View {

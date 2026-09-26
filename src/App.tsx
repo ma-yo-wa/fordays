@@ -115,11 +115,15 @@ function AppShell() {
         type?: string;
         activityId?: string | null;
         spaceId?: string | null;
+        kind?: string | null;
         oldEndpoint?: string | null;
         subscription?: PushSubscriptionJSON;
       } | null;
-      if (data?.type === 'notification-click' && data.activityId) {
-        void useApp.getState().navigateToActivity(data.activityId, data.spaceId);
+      if (data?.type === 'notification-click') {
+        const st = useApp.getState();
+        if (data.kind === 'summary') st.openToday();
+        else if (data.activityId) void st.navigateToActivity(data.activityId, data.spaceId);
+        else if (data.spaceId && data.spaceId !== st.space?.id) void st.switchToSpace(data.spaceId);
       }
       if (data?.type === 'subscription-change' && data.subscription) {
         void import('./lib/push').then((m) =>
@@ -138,13 +142,18 @@ function AppShell() {
     const params = new URLSearchParams(window.location.search);
     const actId = params.get('a');
     const spId = params.get('s');
-    if (actId) {
-      void useApp.getState().navigateToActivity(actId, spId);
-      params.delete('a');
-      params.delete('s');
-      const q = params.toString();
-      window.history.replaceState(null, '', window.location.pathname + (q ? `?${q}` : ''));
-    }
+    const today = params.get('today') === '1';
+    if (!actId && !spId && !today) return;
+    const st = useApp.getState();
+    // Opened cold from a notification.
+    if (today) st.openToday();
+    else if (actId) void st.navigateToActivity(actId, spId);
+    else if (spId && spId !== st.space?.id) void st.switchToSpace(spId);
+    params.delete('a');
+    params.delete('s');
+    params.delete('today');
+    const q = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (q ? `?${q}` : ''));
   }, [authPhase]);
 
   useEffect(() => {

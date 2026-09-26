@@ -139,6 +139,8 @@ interface AppState {
   setNavScroll: (y: number) => void;
   openDetail: (id: string | null) => void;
   navigateToActivity: (activityId: string, spaceId?: string | null) => Promise<void>;
+  /** The morning summary's tap: Plans, on today, nothing on top. */
+  openToday: () => void;
   openExternal: (id: string | null) => void;
   setAddOpen: (v: boolean) => void;
   openComposer: (mode: Kind, draft?: PlanDraft | null) => void;
@@ -716,6 +718,18 @@ export const useApp = create<AppState>()((set, get) => {
       if (Math.abs(get().navScroll - navScroll) > 0.5) set({ navScroll });
     },
     openDetail: (detailId) => set({ detailId }),
+    openToday() {
+      set({
+        screen: 'calendar',
+        picked: todayISO(),
+        cursor: firstOfMonth(new Date()),
+        detailId: null,
+        settingsOpen: false,
+        addOpen: false,
+        searchOpen: false,
+      });
+    },
+
     navigateToActivity: async (activityId, spaceId) => {
       if (!activityId) return;
 

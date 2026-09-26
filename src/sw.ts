@@ -69,7 +69,7 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'Fordays';
   event.waitUntil(
     self.registration.showNotification(title, {
-      body: data.body || 'Something changed in your Orb.',
+      body: data.body || 'Something changed in your Orb',
       icon: data.icon || '/icon-192.png',
       badge: data.badge || '/badge-96.png',
       // Same tag: a second update about the same activity replaces the
@@ -91,6 +91,7 @@ self.addEventListener('notificationclick', (event) => {
     url?: string;
     activityId?: string | null;
     spaceId?: string | null;
+    kind?: string | null;
   };
   const target = new URL(info.url || '/', self.location.origin).href;
 
@@ -107,6 +108,7 @@ self.addEventListener('notificationclick', (event) => {
             type: 'notification-click',
             activityId: info.activityId ?? null,
             spaceId: info.spaceId ?? null,
+            kind: info.kind ?? null,
           });
           return client.focus();
         }

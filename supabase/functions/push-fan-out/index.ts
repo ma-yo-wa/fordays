@@ -8,16 +8,18 @@
    and the user's push service. iOS goes straight to APNs with a token
    signed by our own .p8 key, same idea.
 
-   Invoked by private.enqueue_push_event (migration 020) with:
-     { recipient_id, space_id, activity_id?, kind, facts }
-   facts = { actor, title?, note?, at?, all_day?, orb?, orb_name? }
+   Invoked by private.push_send (migrations 020–021) with:
+     { recipient_id, space_id?, activity_id?, kind, facts }
+   facts = { actor, title?, note?, at?, ends_at?, all_day?, location?,
+             orb?, orb_name?, count?, items?, day? }
 
    The words are written here, per device, so a time reads in that
    device's time zone. Older callers that still send { title, body }
    are passed through as they are.
 
-   kind is one of: idea | scheduled | rescheduled | notes | joined |
-                   suggested | suggestion_accepted
+   kind is one of: idea | ideas | scheduled | rescheduled | unscheduled |
+                   notes | deleted | suggested | suggestion_accepted |
+                   joined | left | reminder | summary
 
    Secrets required (supabase secrets set ...):
      VAPID_PUBLIC_KEY    base64url, uncompressed P-256 point (65 bytes)
@@ -182,7 +184,12 @@ type Facts = {
   at?: string | null;
   all_day?: boolean;
   orb?: string | null;       // set only when they're in more than one shared Orb
-  orb_name?: string | null;  // "joined" always names the Orb if it has a name
+  orb_name?: string | null;  // "joined" / "left" always name the Orb if it has a name
+  ends_at?: string | null;
+  location?: string | null;
+  count?: number;            // "ideas": how many adds were grouped
+  items?: { title: string; at: string; all_day: boolean }[];  // "summary"
+  day?: string;              // "summary": the local date it covers
 };
 
 type Words = { title: string; body: string };
@@ -228,6 +235,51 @@ function when(iso: string | null | undefined, allDay: boolean, tz: string | null
   return `${day} at ${h12}:${mm} ${a.h >= 12 ? "pm" : "am"}`;
 }
 
+/** "7:30 pm" in the device's zone. */
+function clock(iso: string, tz: string): string {
+  const a = partsIn(new Date(iso), tz);
+  const h12 = a.h % 12 === 0 ? 12 : a.h % 12;
+  return `${h12}:${String(a.min).padStart(2, "0")} ${a.h >= 12 ? "pm" : "am"}`;
+}
+
+/** The reminder line, as a calendar alert reads: the plan's time (and the
+ *  day, when it isn't today), then where. "7:30 – 9:30 pm · Nopi",
+ *  "Tomorrow, 7:30 pm", "Sat, Oct 3". */
+function alertLine(f: Facts, tz: string | null): string {
+  let line = "";
+  if (f.at) {
+    const day = when(f.at, Boolean(f.all_day), tz).split(" at ")[0];
+    const dayCap = day.charAt(0).toUpperCase() + day.slice(1);
+    if (f.all_day || !tz) {
+      line = dayCap;
+    } else {
+      let span = clock(f.at, tz);
+      if (f.ends_at) {
+        const end = clock(f.ends_at, tz);
+        const sameDay = partsIn(new Date(f.at), tz).day === partsIn(new Date(f.ends_at), tz).day;
+        if (sameDay && end !== span) {
+          // "7:30 – 9:30 pm", or "11:00 am – 1:00 pm" across noon.
+          const [s1, m1] = span.split(" ");
+          const [, m2] = end.split(" ");
+          span = m1 === m2 ? `${s1} – ${end}` : `${span} – ${end}`;
+        }
+      }
+      line = day === "today" ? span : `${dayCap}, ${span}`;
+    }
+  }
+  const where = f.location ? clip(f.location, 60) : "";
+  return [line, where].filter(Boolean).join(" · ");
+}
+
+/** "Dinner at Nopi at 7:30 pm, Cinema at 9:45 pm". Four or more: the
+ *  first and a count. */
+function summaryLine(items: NonNullable<Facts["items"]>, tz: string | null): string {
+  const one = (i: { title: string; at: string; all_day: boolean }) =>
+    i.all_day || !tz ? clip(i.title, 40) : `${clip(i.title, 40)} at ${clock(i.at, tz)}`;
+  if (items.length >= 4) return `${one(items[0])} and ${items.length - 1} more`;
+  return items.map(one).join(", ");
+}
+
 function clip(s: string, n: number): string {
   const t = s.replace(/\s+/g, " ").trim();
   return t.length > n ? t.slice(0, n - 1).trimEnd() + "…" : t;
@@ -256,6 +308,24 @@ function words(kind: string, f: Facts, tz: string | null): Words {
       return { title: titled, body: at ? `${who} said yes to ${at}` : `${who} said yes to your day` };
     case "notes":
       return { title: titled, body: withNote(`${who} updated the note`) };
+    case "ideas":
+      return {
+        title: f.orb ? `Someday · ${f.orb}` : "Someday",
+        body: `${who} added ${f.count ?? 2} things to Someday`,
+      };
+    case "unscheduled":
+      return { title: titled, body: `${who} moved this back to Someday` };
+    case "deleted":
+      return { title: titled, body: `${who} removed this` };
+    case "reminder":
+      return { title: titled, body: alertLine(f, tz) };
+    case "summary":
+      return { title: "Today", body: summaryLine(f.items ?? [], tz) };
+    case "left":
+      return {
+        title: f.orb_name ? `${who} left ${f.orb_name}` : `${who} left your Orb`,
+        body: "Your plans here stay as they are",
+      };
     case "joined":
       return {
         title: f.orb_name ? `${who} joined ${f.orb_name}` : `${who} joined your Orb`,
@@ -282,7 +352,7 @@ type Message = Words & {
   tag: string;
   kind: string;
   activityId: string | null;
-  spaceId: string;
+  spaceId: string | null;
   url: string;
 };
 
@@ -359,7 +429,7 @@ async function sendIos(sub: Sub, msg: Message): Promise<"ok" | "gone" | "failed"
     aps: {
       alert: { title: msg.title, body: msg.body },
       sound: "default",
-      "thread-id": msg.spaceId,
+      "thread-id": msg.spaceId ?? msg.kind,
     },
     kind: msg.kind,
     activityId: msg.activityId,
@@ -436,7 +506,7 @@ Deno.serve(async (req) => {
 
   let job: {
     recipient_id: string;
-    space_id: string;
+    space_id?: string | null;
     activity_id?: string | null;
     kind: string;
     facts?: Facts;
@@ -449,7 +519,7 @@ Deno.serve(async (req) => {
     return new Response("Bad JSON", { status: 400 });
   }
 
-  if (!job.recipient_id || !job.space_id || (!job.facts && !job.title)) {
+  if (!job.recipient_id || (!job.space_id && job.kind !== "summary") || (!job.facts && !job.title)) {
     return new Response("Missing fields", { status: 400 });
   }
 
@@ -459,16 +529,21 @@ Deno.serve(async (req) => {
   }
 
   const activityId = job.activity_id ?? null;
-  const spaceId = job.space_id;
+  const spaceId = job.space_id ?? null;
   const base = {
-    // Collapse repeats: one activity, or one "joined" per space.
-    tag: activityId ? `activity-${activityId}` : `space-${job.kind}-${spaceId}`,
+    // Collapse repeats: one activity, one summary a day, or one of each
+    // other kind per space.
+    tag: job.kind === "summary"
+      ? `summary-${job.facts?.day ?? ""}`
+      : activityId ? `activity-${activityId}` : `space-${job.kind}-${spaceId}`,
     kind: job.kind,
     activityId,
     spaceId,
-    url: activityId
-      ? `/?a=${encodeURIComponent(activityId)}&s=${encodeURIComponent(spaceId)}`
-      : `/?s=${encodeURIComponent(spaceId)}`,
+    url: job.kind === "summary"
+      ? "/?today=1"
+      : activityId
+      ? `/?a=${encodeURIComponent(activityId)}&s=${encodeURIComponent(spaceId ?? "")}`
+      : `/?s=${encodeURIComponent(spaceId ?? "")}`,
   };
 
   const results = await Promise.all(subs.map(async (s) => {

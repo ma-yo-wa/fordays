@@ -24,6 +24,7 @@ import {
   todayISO,
 } from '../lib/date';
 import Linkify from './Linkify';
+import PlanAlerts from './PlanAlerts';
 import s from './Detail.module.css';
 import f from './Form.module.css';
 
@@ -597,6 +598,10 @@ export default function Detail() {
             label={planned ? 'Change the day' : 'Make it a plan'}
             onClick={() => setMode('when')}
           />
+
+          {planned && !memory && item.date_time && (
+            <PlanAlerts activityId={item.id} allDay={Boolean(item.all_day)} />
+          )}
 
           {matched && !memory && (
             <ActionRow

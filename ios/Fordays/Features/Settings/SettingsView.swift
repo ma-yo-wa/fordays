@@ -77,6 +77,8 @@ struct SettingsView: View {
   @State private var appleBusy = false
   @StateObject private var push = Push.shared
   @State private var pushBusy = false
+  @State private var prefs = Alerts.Prefs()
+  @State private var orbMuted = false
   @State private var appleCals: [DeviceCalendar] = []
   @State private var pendingAppleId: String?
 
@@ -538,6 +540,35 @@ struct SettingsView: View {
             .padding(.horizontal, Theme.Spacing.xs)
         }
 
+        if !space.frozen && !soloOrb {
+          FDFormGroup {
+            FDFormRow(label: "Mute this Orb", glyph: .bell) {
+              Toggle("Mute this Orb", isOn: Binding(
+                get: { orbMuted },
+                set: { on in
+                  orbMuted = on
+                  Task {
+                    do {
+                      try await Alerts.setMuted(space.id, on)
+                    } catch {
+                      orbMuted = !on
+                      app.toast = "Couldn’t save that. Check your connection and try again."
+                    }
+                  }
+                }
+              ))
+              .labelsHidden()
+              .tint(Theme.roseInk)
+            }
+          }
+          .padding(.top, Theme.Spacing.sm)
+          .task(id: space.id) { orbMuted = await Alerts.loadMuted(space.id) }
+          Text("Alerts you set on plans still ring.")
+            .font(.fdFootnote)
+            .foregroundStyle(Theme.inkSoft)
+            .padding(.horizontal, Theme.Spacing.xs)
+        }
+
         if !space.frozen, space.myRole == "admin", space.members.count >= 3 {
           ForEach(space.members.filter { $0.id != space.myId }, id: \.id) { member in
             Button("Remove \(member.name)") {
@@ -776,6 +807,68 @@ struct SettingsView: View {
         Text(pushNote)
           .font(.fdFootnote)
           .foregroundStyle(Theme.inkSoft)
+
+        sectionLabel("Alerts")
+          .padding(.top, Theme.Spacing.base)
+        FDFormGroup {
+          FDFormRow(label: "Plans") {
+            pickMenu(
+              "Plans",
+              value: prefs.alertTimed.first ?? Alerts.none,
+              options: Alerts.options(allDay: false)
+            ) { v in changePrefs { $0.alertTimed = v == Alerts.none ? [] : [v] } }
+          }
+          Divider().overlay(Theme.separator)
+          FDFormRow(label: "All-day plans") {
+            pickMenu(
+              "All-day plans",
+              value: prefs.alertAllDay.first ?? Alerts.none,
+              options: Alerts.options(allDay: true)
+            ) { v in changePrefs { $0.alertAllDay = v == Alerts.none ? [] : [v] } }
+          }
+        }
+        Text("Yours only. Change them on any plan.")
+          .font(.fdFootnote)
+          .foregroundStyle(Theme.inkSoft)
+
+        sectionLabel("Morning summary")
+          .padding(.top, Theme.Spacing.base)
+        FDFormGroup {
+          FDFormRow(label: "Morning summary") {
+            Toggle("Morning summary", isOn: Binding(
+              get: { prefs.summaryMinute != nil },
+              set: { on in changePrefs { $0.summaryMinute = on ? 480 : nil } }
+            ))
+            .labelsHidden()
+            .tint(Theme.roseInk)
+          }
+          if let minute = prefs.summaryMinute {
+            Divider().overlay(Theme.separator)
+            FDFormRow(label: "Time") {
+              pickMenu("Time", value: minute, options: Alerts.summaryTimes) { v in
+                changePrefs { $0.summaryMinute = v }
+              }
+            }
+          }
+        }
+        Text("Today’s plans, on days you have some")
+          .font(.fdFootnote)
+          .foregroundStyle(Theme.inkSoft)
+
+        FDFormGroup {
+          FDFormRow(label: "Quiet overnight") {
+            Toggle("Quiet overnight", isOn: Binding(
+              get: { prefs.quietHours },
+              set: { on in changePrefs { $0.quietHours = on } }
+            ))
+            .labelsHidden()
+            .tint(Theme.roseInk)
+          }
+        }
+        .padding(.top, Theme.Spacing.base)
+        Text("From 10 pm to 8 am, news from others waits until morning. Alerts you set still ring.")
+          .font(.fdFootnote)
+          .foregroundStyle(Theme.inkSoft)
       }
       .padding(.horizontal, Theme.Spacing.lg)
       .padding(.vertical, Theme.Spacing.base)
@@ -783,7 +876,47 @@ struct SettingsView: View {
     .background(Theme.paper.ignoresSafeArea())
     .navigationTitle("Notifications")
     .navigationBarTitleDisplayMode(.inline)
-    .task { await push.refresh() }
+    .task {
+      await push.refresh()
+      prefs = await Alerts.loadPrefs()
+    }
+  }
+
+  /// The system pop-up menu with a check beside the current choice, as
+  /// Calendar's Alert row.
+  private func pickMenu(
+    _ title: String,
+    value: Int,
+    options: [Alerts.Option],
+    onPick: @escaping (Int) -> Void
+  ) -> some View {
+    Menu {
+      Picker(title, selection: Binding(get: { value }, set: onPick)) {
+        ForEach(options, id: \.value) { option in
+          Text(option.label).tag(option.value)
+        }
+      }
+    } label: {
+      Text(options.first { $0.value == value }?.label ?? "None")
+        .font(.fdSubhead)
+        .foregroundStyle(Theme.inkSoft)
+    }
+  }
+
+  /// Save as they change, like iOS Settings; put it back if it didn't take.
+  private func changePrefs(_ edit: (inout Alerts.Prefs) -> Void) {
+    let before = prefs
+    var next = prefs
+    edit(&next)
+    prefs = next
+    Task {
+      do {
+        try await Alerts.savePrefs(next)
+      } catch {
+        prefs = before
+        app.toast = "Couldn’t save that. Check your connection and try again."
+      }
+    }
   }
 
   private var pushNote: String {

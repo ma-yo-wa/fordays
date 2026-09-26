@@ -20,3 +20,6 @@ export { FormGroup, FormRow } from './FormGroup';
 export type { FormGroupProps, FormRowProps } from './FormGroup';
 
 export { PinIcon } from './PinIcon';
+
+export { PickRow } from './PickRow';
+export type { PickRowProps } from './PickRow';
