@@ -3,7 +3,7 @@ import Sheet from './Sheet';
 import CoverArt from './CoverArt';
 import ActionSheet from './ActionSheet';
 import { useApp } from '../lib/store';
-import { Avatar, Pill, ActionRow } from '../ui';
+import { Avatar, Pill, ActionRow, PinIcon } from '../ui';
 import { describePlan, dtDate } from '../lib/date';
 import { Copy, formatCopy } from '../lib/copy';
 import type { SpaceInfo } from '../lib/auth';
@@ -113,7 +113,7 @@ export default function ExternalDetail() {
                     className={s.locationLink}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <span className={s.locationPin} aria-hidden>📍</span>
+                    <span className={s.locationPin} aria-hidden><PinIcon /></span>
                     <span>{event.location}</span>
                     <span className={s.locationArrow} aria-hidden>↗</span>
                   </a>

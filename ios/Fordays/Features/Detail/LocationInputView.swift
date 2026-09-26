@@ -44,9 +44,9 @@ struct LocationInputView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: Theme.Spacing.s6) {
       HStack(spacing: Theme.Spacing.sm) {
-        Text("📍")
-          .font(.footnote)
+        PinGlyph()
           .foregroundStyle(Theme.inkFaint)
+          .frame(width: Theme.Spacing.lg, height: Theme.Spacing.lg)
 
         TextField(placeholder, text: $text)
           .focused($isFocused)

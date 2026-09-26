@@ -207,10 +207,16 @@
 /* ---- history ---- */
 
 .historyHead {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  margin: var(--space-6) var(--space-0) var(--space-1);
+  display: block;
+  margin: var(--space-6-5) var(--space-0) var(--space-2-5);
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
+  font-weight: 600;
+  color: var(--ink-faint);
+}
+
+.historyMore {
+  margin-top: var(--space-1);
   padding: var(--space-2) var(--space-0);
   border: none;
   background: none;
@@ -218,18 +224,7 @@
   font: var(--t-footnote);
   letter-spacing: var(--tr-footnote);
   font-weight: 600;
-  color: var(--ink-faint);
-}
-
-.historyChevron,
-.historyChevronOpen {
-  width: var(--space-1-5);
-  height: var(--space-2-5);
-  transition: transform var(--duration-press) var(--ease-ios);
-}
-
-.historyChevronOpen {
-  transform: rotate(90deg);
+  color: var(--ink-soft);
 }
 
 .entry {

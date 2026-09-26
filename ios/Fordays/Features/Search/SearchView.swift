@@ -311,7 +311,9 @@ struct SearchView: View {
 
           if let loc = item.location, !loc.isEmpty {
             HStack(spacing: Theme.Spacing.xs) {
-              Text("📍").font(.caption2)
+              PinGlyph()
+                .foregroundStyle(Theme.inkSoft)
+                .frame(width: Theme.Spacing.row, height: Theme.Spacing.row)
               Text(loc)
                 .font(.footnote)
                 .foregroundStyle(Theme.inkSoft)

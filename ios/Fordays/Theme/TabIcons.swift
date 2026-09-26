@@ -455,3 +455,23 @@ struct ActionGlyphIcon: View {
   }
 }
 
+/// The location mark, drawn like every other icon: 1.7 on a 24 grid, round ends.
+struct PinGlyph: View {
+  var body: some View {
+    Canvas { ctx, size in
+      let s = min(size.width, size.height) / 24
+      func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: x * s, y: y * s) }
+      let stroke = StrokeStyle(lineWidth: 1.7 * s, lineCap: .round, lineJoin: .round)
+      var drop = Path()
+      drop.move(to: p(12, 21))
+      drop.addCurve(to: p(5.5, 10), control1: p(8.5, 17.5), control2: p(5.5, 13.6))
+      drop.addCurve(to: p(12, 3.5), control1: p(5.5, 6.41), control2: p(8.41, 3.5))
+      drop.addCurve(to: p(18.5, 10), control1: p(15.59, 3.5), control2: p(18.5, 6.41))
+      drop.addCurve(to: p(12, 21), control1: p(18.5, 13.6), control2: p(15.5, 17.5))
+      drop.closeSubpath()
+      ctx.stroke(drop, with: .foreground, style: stroke)
+      ctx.stroke(Path(ellipseIn: CGRect(x: 9.6 * s, y: 7.6 * s, width: 4.8 * s, height: 4.8 * s)), with: .foreground, style: stroke)
+    }
+    .accessibilityHidden(true)
+  }
+}

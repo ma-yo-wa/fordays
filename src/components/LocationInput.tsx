@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { PinIcon } from '../ui';
 import f from './Form.module.css';
 
 interface Suggestion {
@@ -146,7 +147,7 @@ export function LocationInput({
       <div className={f.group}>
         <div className={f.locationRow}>
           <span className={f.locationPinIcon} aria-hidden>
-            📍
+            <PinIcon />
           </span>
           <input
             className={`${f.input} ${f.locationInputWithPin}`}

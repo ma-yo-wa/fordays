@@ -4,7 +4,7 @@ import { useApp } from '../lib/store';
 import { isMemory, lastDayOf, type Activity } from '../lib/types';
 import { Copy, formatCopy } from '../lib/copy';
 import { dtDate, dtTime, formatSearchDate, pretty, todayISO } from '../lib/date';
-import { Pill } from '../ui';
+import { Pill, PinIcon } from '../ui';
 import { durationFade, easeIos, ySearch } from '../ui/motion';
 import s from './SearchOverlay.module.css';
 
@@ -229,7 +229,7 @@ export default function SearchOverlay() {
                                 {item.location && (
                                   <span className={s.rowLoc}>
                                     <span className={s.rowLocPin} aria-hidden>
-                                      📍
+                                      <PinIcon />
                                     </span>
                                     <span>{item.location}</span>
                                   </span>
@@ -262,7 +262,7 @@ export default function SearchOverlay() {
                                 {item.location && (
                                   <span className={s.rowLoc}>
                                     <span className={s.rowLocPin} aria-hidden>
-                                      📍
+                                      <PinIcon />
                                     </span>
                                     <span>{item.location}</span>
                                   </span>
@@ -312,7 +312,7 @@ export default function SearchOverlay() {
                             {item.location && (
                               <span className={s.rowLoc}>
                                 <span className={s.rowLocPin} aria-hidden>
-                                  📍
+                                  <PinIcon />
                                 </span>
                                 <span>{item.location}</span>
                               </span>
@@ -349,7 +349,7 @@ export default function SearchOverlay() {
                         {item.location && (
                           <span className={s.rowLoc}>
                             <span className={s.rowLocPin} aria-hidden>
-                              📍
+                              <PinIcon />
                             </span>
                             <span>{item.location}</span>
                           </span>
@@ -385,7 +385,7 @@ export default function SearchOverlay() {
                             {item.location && (
                               <span className={s.rowLoc}>
                                 <span className={s.rowLocPin} aria-hidden>
-                                  📍
+                                  <PinIcon />
                                 </span>
                                 <span>{item.location}</span>
                               </span>

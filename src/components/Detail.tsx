@@ -93,6 +93,8 @@ function PeopleIcon() {
 
 type Mode = 'view' | 'edit' | 'when' | 'suggest';
 
+const HISTORY_CAP = 5;
+
 /* The place on its own: name, then the rest of the address. Opens Maps. */
 function PlaceBlock({ place }: { place: string }) {
   const comma = place.indexOf(',');
@@ -180,7 +182,7 @@ export default function Detail() {
   const [doAgainOpen, setDoAgainOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [doWithOpen, setDoWithOpen] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyAll, setHistoryAll] = useState(false);
 
   async function handleDoWith(targetSpace: SpaceInfo) {
     if (!item) return;
@@ -626,34 +628,29 @@ export default function Detail() {
         </div>
       )}
 
+      {/* Always visible, newest first, capped so the drawer stays about the plan. */}
       {mode === 'view' && history.length > 0 && (
         <>
-          <button
-            type="button"
-            className={s.historyHead}
-            aria-expanded={historyOpen}
-            onClick={() => setHistoryOpen((v) => !v)}
-          >
-            History
-            <svg className={historyOpen ? s.historyChevronOpen : s.historyChevron} viewBox="0 0 8 14" aria-hidden="true">
-              <path d="M1 1l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          {historyOpen &&
-            history.map((l) => (
-              <div key={l.id} className={s.entry}>
-                <Avatar
-                  name={partnerName(config, l.user_id)}
-                  seat={faceIndexFor(l.user_id, faceCtx)}
-                  size="sm"
-                />
-                <span className={s.what}>
-                  {partnerName(config, l.user_id)}{' '}
-                  {localizeAuditDetails(item.all_day ? dropNoonUTC(l.details) : l.details)}{' '}
-                  <span className={s.ago}>· {timeAgo(l.timestamp)}</span>
-                </span>
-              </div>
-            ))}
+          <span className={s.historyHead}>History</span>
+          {(historyAll ? history : history.slice(0, HISTORY_CAP)).map((l) => (
+            <div key={l.id} className={s.entry}>
+              <Avatar
+                name={partnerName(config, l.user_id)}
+                seat={faceIndexFor(l.user_id, faceCtx)}
+                size="sm"
+              />
+              <span className={s.what}>
+                {partnerName(config, l.user_id)}{' '}
+                {localizeAuditDetails(item.all_day ? dropNoonUTC(l.details) : l.details)}{' '}
+                <span className={s.ago}>· {timeAgo(l.timestamp)}</span>
+              </span>
+            </div>
+          ))}
+          {!historyAll && history.length > HISTORY_CAP && (
+            <button type="button" className={s.historyMore} onClick={() => setHistoryAll(true)}>
+              Show {history.length - HISTORY_CAP} more
+            </button>
+          )}
         </>
       )}
     </Sheet>

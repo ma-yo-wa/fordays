@@ -96,8 +96,9 @@ struct ExternalDetailView: View {
               if let url = URL(string: "https://maps.apple.com/?q=\(loc.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? loc)") {
                 Link(destination: url) {
                   HStack(spacing: Theme.Spacing.xs) {
-                    Text("📍")
-                      .font(.caption)
+                    PinGlyph()
+                      .foregroundStyle(Theme.inkSoft)
+                      .frame(width: Theme.Spacing.base, height: Theme.Spacing.base)
                     Text(loc)
                       .font(.subheadline)
                       .foregroundStyle(Theme.inkSoft)

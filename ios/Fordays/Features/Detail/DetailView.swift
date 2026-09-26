@@ -27,7 +27,7 @@ struct DetailView: View {
   @State private var showDoAgainDialog = false
   @State private var showMoveDialog = false
   @State private var showDeleteDialog = false
-  @State private var showHistory = false
+  @State private var showAllHistory = false
 
   private var item: Activity? {
     app.activity(id: activityId)
@@ -722,7 +722,7 @@ struct DetailView: View {
     return rows
   }
 
-  /// Folded away by default: the drawer is about the plan, not its log.
+  /// Always visible, newest first, capped so the drawer stays about the plan.
   @ViewBuilder
   private func historyList(_ item: Activity) -> some View {
     let rows = app.logs
@@ -730,36 +730,29 @@ struct DetailView: View {
       .sorted { $0.timestamp > $1.timestamp }
     if !rows.isEmpty {
       VStack(alignment: .leading, spacing: Theme.Spacing.none) {
-        Button {
-          withAnimation(.easeInOut(duration: Theme.Motion.fade)) { showHistory.toggle() }
-        } label: {
-          HStack(spacing: Theme.Spacing.xs) {
-            Text("History")
-              .font(.fdFootnote.weight(.semibold))
-            Image(systemName: "chevron.right")
-              .font(.caption2)
-              .rotationEffect(.degrees(showHistory ? 90 : 0))
-          }
+        Text("History")
+          .font(.fdFootnote.weight(.semibold))
           .foregroundStyle(Theme.inkFaint)
-          .padding(.vertical, Theme.Spacing.sm)
-          .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityValue(showHistory ? "Shown" : "Hidden")
-
-        if showHistory {
-          ForEach(rows) { log in
-            HStack(alignment: .top, spacing: Theme.Spacing.s11) {
-              FDAvatar(name: displayName(for: log.userId), seat: faceSeat(for: log.userId), size: .sm)
-              historyLine(log, allDay: item.allDay)
-            }
-            .padding(.vertical, Theme.Spacing.s7)
+          .padding(.bottom, Theme.Spacing.s10)
+        ForEach(showAllHistory ? rows : Array(rows.prefix(Self.historyCap))) { log in
+          HStack(alignment: .top, spacing: Theme.Spacing.s11) {
+            FDAvatar(name: displayName(for: log.userId), seat: faceSeat(for: log.userId), size: .sm)
+            historyLine(log, allDay: item.allDay)
           }
+          .padding(.vertical, Theme.Spacing.s7)
+        }
+        if !showAllHistory, rows.count > Self.historyCap {
+          Button("Show \(rows.count - Self.historyCap) more") { showAllHistory = true }
+            .font(.fdFootnote.weight(.semibold))
+            .foregroundStyle(Theme.inkSoft)
+            .padding(.vertical, Theme.Spacing.sm)
         }
       }
       .padding(.top, Theme.Spacing.s10)
     }
   }
+
+  private static let historyCap = 5
 
   private func historyLine(_ log: AuditLog, allDay: Bool) -> Text {
     let who = displayName(for: log.userId)

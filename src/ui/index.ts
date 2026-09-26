@@ -18,3 +18,5 @@ export type { ActionRowProps } from './ActionRow';
 
 export { FormGroup, FormRow } from './FormGroup';
 export type { FormGroupProps, FormRowProps } from './FormGroup';
+
+export { PinIcon } from './PinIcon';
