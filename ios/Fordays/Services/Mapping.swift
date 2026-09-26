@@ -27,6 +27,7 @@ struct ActivityRow: Decodable {
   let space_id: String?
   let title: String
   let description: String?
+  let location: String?
   let image_url: String?
   let created_by: String
   let date_time: String?
@@ -449,6 +450,7 @@ extension ActivityRow {
       spaceId: space_id,
       title: title,
       description: description,
+      location: location,
       imageUrl: image_url,
       createdBy: created_by,
       dateTime: DateLocal.fromTimestamptz(date_time, allDay: allDay),
