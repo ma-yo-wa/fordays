@@ -533,8 +533,12 @@ Deno.serve(async (req) => {
   const base = {
     // Collapse repeats: one activity, one summary a day, or one of each
     // other kind per space.
+    // Reminders keep their own tag so they sit beside, not over, news
+    // about the same plan.
     tag: job.kind === "summary"
       ? `summary-${job.facts?.day ?? ""}`
+      : job.kind === "reminder"
+      ? `reminder-${activityId}`
       : activityId ? `activity-${activityId}` : `space-${job.kind}-${spaceId}`,
     kind: job.kind,
     activityId,

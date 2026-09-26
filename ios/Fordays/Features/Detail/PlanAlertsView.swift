@@ -10,7 +10,7 @@ struct PlanAlertsView: View {
   @State private var alerts: [Int]?
 
   var body: some View {
-    Group {
+    VStack(spacing: Theme.Spacing.none) {
       if let alerts {
         let first = alerts.first ?? Alerts.none
         let second = alerts.count > 1 ? alerts[1] : Alerts.none
@@ -22,6 +22,9 @@ struct PlanAlertsView: View {
             save(v == Alerts.none ? [first] : [first, v])
           }
         }
+      } else {
+        // Something has to be on screen for .task to run.
+        Color.clear.frame(height: 0)
       }
     }
     .task(id: "\(activityId)-\(allDay)") {
