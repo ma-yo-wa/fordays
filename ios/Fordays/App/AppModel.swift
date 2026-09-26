@@ -455,7 +455,13 @@ final class AppModel: ObservableObject {
         .order("starts_at", ascending: true)
         .execute()
         .value
-      externalEvents = rows
+      // The server stores UTC; show local times like the PWA does.
+      externalEvents = rows.map { row in
+        var e = row
+        e.startsAt = DateLocal.fromTimestamptz(row.startsAt, allDay: row.allDay) ?? row.startsAt
+        e.endsAt = DateLocal.fromTimestamptz(row.endsAt, allDay: row.allDay) ?? row.endsAt
+        return e
+      }
     } catch {
       externalEvents = []
     }
