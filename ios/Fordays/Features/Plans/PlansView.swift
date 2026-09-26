@@ -210,7 +210,7 @@ struct PlansView: View {
         .foregroundStyle(Theme.inkSoft)
         .lineLimit(1)
         .minimumScaleFactor(0.85)
-        .frame(width: Theme.TouchTarget.agendaTime, alignment: .trailing)
+        .frame(width: Theme.TouchTarget.agendaTime, alignment: .leading)
       VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
         Text(title)
           .font(.body)
