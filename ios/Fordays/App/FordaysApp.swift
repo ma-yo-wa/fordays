@@ -80,8 +80,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
     let kind = userInfo["kind"] as? String
 
-    if kind == "summary" {
-      // The morning summary: Plans, on today.
+    if kind == "summary" || (kind == "reminder" && (activityId ?? "").isEmpty) {
+      // The morning summary, or a Google or Apple event's reminder: Plans, on today.
       Task { @MainActor in
         if let app = self.appModel {
           app.goToday()

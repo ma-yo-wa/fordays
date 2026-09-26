@@ -190,6 +190,7 @@ type Facts = {
   count?: number;            // "ideas": how many adds were grouped
   items?: { title: string; at: string; all_day: boolean }[];  // "summary"
   day?: string;              // "summary": the local date it covers
+  external?: boolean;        // "reminder": a Google or Apple event, not a plan
 };
 
 type Words = { title: string; body: string };
@@ -519,7 +520,10 @@ Deno.serve(async (req) => {
     return new Response("Bad JSON", { status: 400 });
   }
 
-  if (!job.recipient_id || (!job.space_id && job.kind !== "summary") || (!job.facts && !job.title)) {
+  // Summaries cover every Orb, and a Google or Apple event's reminder
+  // belongs to the person, not an Orb, so those two come without one.
+  const orbless = job.kind === "summary" || (job.kind === "reminder" && Boolean(job.facts?.external));
+  if (!job.recipient_id || (!job.space_id && !orbless) || (!job.facts && !job.title)) {
     return new Response("Missing fields", { status: 400 });
   }
 
@@ -538,12 +542,12 @@ Deno.serve(async (req) => {
     tag: job.kind === "summary"
       ? `summary-${job.facts?.day ?? ""}`
       : job.kind === "reminder"
-      ? `reminder-${activityId}`
+      ? `reminder-${activityId ?? `${job.facts?.title ?? ""}-${job.facts?.at ?? ""}`}`
       : activityId ? `activity-${activityId}` : `space-${job.kind}-${spaceId}`,
     kind: job.kind,
     activityId,
     spaceId,
-    url: job.kind === "summary"
+    url: job.kind === "summary" || (job.kind === "reminder" && !activityId)
       ? "/?today=1"
       : activityId
       ? `/?a=${encodeURIComponent(activityId)}&s=${encodeURIComponent(spaceId ?? "")}`
