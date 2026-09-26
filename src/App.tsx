@@ -11,6 +11,7 @@ import InviteAccept from './components/InviteAccept';
 import InviteShare from './components/InviteShare';
 import Auth from './components/Auth';
 import OrbSetup from './components/OrbSetup';
+import OrbSwitcher from './components/OrbSwitcher';
 import Toasts from './components/Toasts';
 import UpdateBanner from './components/UpdateBanner';
 import BucketList from './screens/BucketList';
@@ -278,6 +279,7 @@ function AppShell() {
       <Composer />
       <Detail />
       <Settings />
+      <OrbSwitcher />
       <ExternalDetail />
       <SearchOverlay />
       <InviteShare

@@ -211,3 +211,28 @@
   background: var(--gold);
   border: var(--border-thick) solid var(--paper);
 }
+
+/* Your face: the way into Settings. */
+.me {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--space-8-5);
+  height: var(--space-8-5);
+  margin-left: var(--space-1);
+  padding: var(--space-0);
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.me > * {
+  width: var(--space-7-5);
+  height: var(--space-7-5);
+  font-size: var(--fs-caption);
+}
+
+.me:active {
+  opacity: var(--op-70);
+}

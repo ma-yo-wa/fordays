@@ -216,6 +216,7 @@
 .orbFaceCluster {
   --orb-face-step: calc((var(--space-6-5) - var(--space-1)) / 2);
   position: relative;
+  display: block;
   width: 100%;
   height: 100%;
 }
@@ -529,6 +530,8 @@
 .pastOrbActions {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-3);
   gap: var(--space-2);
   flex-wrap: wrap;
   padding-top: var(--space-1);
@@ -592,4 +595,152 @@
 
 .confirmDanger {
   color: var(--rose-ink);
+}
+
+/* ---------------------------------------------------------------------
+   Settings as a full screen: it slides in from the right like a pushed
+   page, each page has its own large title, and the back button names
+   the page underneath.
+   --------------------------------------------------------------------- */
+.screen {
+  position: fixed;
+  inset: var(--space-0);
+  z-index: var(--z-sheet);
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+}
+
+.screenBar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  min-height: var(--space-11);
+  padding: var(--safe-t) max(var(--space-2), var(--safe-r)) var(--space-0) max(var(--space-2), var(--safe-l));
+}
+
+.screenBack {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-0-5);
+  min-height: var(--space-11);
+  padding: var(--space-0) var(--space-2) var(--space-0) var(--space-0);
+  border: none;
+  background: none;
+  color: var(--rose-ink);
+  font: var(--t-body);
+  letter-spacing: var(--tr-body);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.screenBack svg {
+  width: var(--space-6);
+  height: var(--space-6);
+}
+
+.screenBack:active {
+  opacity: var(--op-50);
+}
+
+.screenScroll {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-0) max(var(--space-5), var(--safe-r)) calc(var(--safe-b) + var(--space-10)) max(var(--space-5), var(--safe-l));
+}
+
+.screenTitle {
+  font: var(--t-large-title);
+  letter-spacing: var(--tr-large-title);
+  color: var(--ink);
+  margin: var(--space-0) var(--space-0) var(--space-4);
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--space-9);
+  padding: var(--space-0) var(--space-3);
+  border-radius: var(--r-control);
+  background: var(--fill-tertiary);
+  color: var(--ink-faint);
+}
+
+.searchIcon {
+  display: flex;
+  flex: none;
+}
+
+.searchIcon svg {
+  width: var(--space-4-5);
+  height: var(--space-4-5);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: var(--space-0);
+  border: none;
+  background: none;
+  outline: none;
+  font: var(--t-body);
+  letter-spacing: var(--tr-body);
+  color: var(--ink);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.searchInput::placeholder {
+  color: var(--ink-faint);
+}
+
+.searchInput::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.noResults {
+  margin-top: var(--space-8);
+  text-align: center;
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  color: var(--ink-faint);
+}
+
+/* Rows whose leading picture is bigger than an icon. */
+.youRow > :first-child > :first-child,
+.orbRow > :first-child > :first-child {
+  width: auto;
+}
+
+.orbRowIcon {
+  position: relative;
+  display: block;
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: 50%;
+  background: var(--fill-tertiary);
+  overflow: hidden;
+}
+
+.orbFaceClusterSm {
+  --orb-face-step: calc((var(--space-4-5) - var(--space-0-5)) / 2);
+}
+
+.orbFaceClusterSm .orbMiniFace {
+  width: var(--space-4-5);
+  height: var(--space-4-5);
+  font-size: var(--fs-micro);
+  border-width: var(--border-w);
+}
+
+.rowTrail {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+
+.switcherGrid {
+  margin-top: var(--space-2);
 }

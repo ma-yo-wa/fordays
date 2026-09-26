@@ -637,3 +637,11 @@ export function clearInviteFromUrl(): void {
   url.searchParams.delete('invite');
   window.history.replaceState(null, '', url.pathname + url.search + url.hash);
 }
+
+/** The signed-in person's email, for the You row in Settings. */
+export async function currentEmail(): Promise<string | null> {
+  const sb = await getClient();
+  if (!sb) return null;
+  const { data } = await sb.auth.getSession();
+  return data.session?.user.email ?? null;
+}

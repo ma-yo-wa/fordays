@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import { useApp, isMatched, spaceOrbName } from '../lib/store';
+import { Avatar } from '../ui';
 import { faceColor } from '../lib/tint';
 import { MONTHS, iso, parseISO } from '../lib/date';
 import { Copy } from '../lib/copy';
@@ -33,6 +35,9 @@ function SearchIcon() {
   );
 }
 
+/** How long a press on the Orb name counts as a hold. */
+const HOLD_MS = 450;
+
 export default function NavBar() {
   const screen = useApp((st) => st.screen);
   const config = useApp((st) => st.config);
@@ -42,6 +47,8 @@ export default function NavBar() {
   const cursor = useApp((st) => st.cursor);
   const setCursor = useApp((st) => st.setCursor);
   const setSettingsOpen = useApp((st) => st.setSettingsOpen);
+  const setSwitcherOpen = useApp((st) => st.setSwitcherOpen);
+  const switchBack = useApp((st) => st.switchBack);
   const setSearchOpen = useApp((st) => st.setSearchOpen);
   const space = useApp((st) => st.space);
 
@@ -95,6 +102,22 @@ export default function NavBar() {
 
   const scrolled = navScroll > 2;
 
+  /* Tap the Orb name to switch; hold it to jump back to the last Orb. */
+  const holdTimer = useRef<number | null>(null);
+  const held = useRef(false);
+  const startHold = () => {
+    held.current = false;
+    holdTimer.current = window.setTimeout(() => {
+      held.current = true;
+      navigator.vibrate?.(10);
+      void switchBack();
+    }, HOLD_MS);
+  };
+  const endHold = () => {
+    if (holdTimer.current) window.clearTimeout(holdTimer.current);
+    holdTimer.current = null;
+  };
+
   const shiftMonth = (delta: number) =>
     setCursor(iso(new Date(cursorDate.getFullYear(), cursorDate.getMonth() + delta, 1)));
 
@@ -107,9 +130,20 @@ export default function NavBar() {
           <button
             type="button"
             className={`${s.who} ${customOrbName ? s.whoNamed : s.whoAvatars}`}
-            onClick={() => setSettingsOpen(true)}
-            aria-label={customOrbName ? `Open settings for ${customOrbName}` : 'Open Orb settings'}
-            title={customOrbName ?? 'Orb settings'}
+            onClick={() => {
+              if (held.current) {
+                held.current = false;
+                return;
+              }
+              setSwitcherOpen(true);
+            }}
+            onPointerDown={startHold}
+            onPointerUp={endHold}
+            onPointerLeave={endHold}
+            onPointerCancel={endHold}
+            onContextMenu={(e) => e.preventDefault()}
+            aria-label={customOrbName ? `Switch Orb, now in ${customOrbName}` : 'Switch Orb'}
+            title={customOrbName ?? 'Switch Orb'}
           >
             {customOrbName ? (
               <span className={s.whoTitle}>{customOrbName}</span>
@@ -173,6 +207,19 @@ export default function NavBar() {
             title="Search"
           >
             <SearchIcon />
+          </button>
+          <button
+            type="button"
+            className={s.me}
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Settings"
+            title="Settings"
+          >
+            <Avatar
+              name={space?.myName || config.names[me] || 'Me'}
+              personId={space?.myId}
+              size="sm"
+            />
           </button>
         </div>
       </div>

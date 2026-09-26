@@ -17,6 +17,7 @@ export const durationSheetSlide = 0.38;
 export const durationSheetFade = 0.22;
 
 export const ySearch = 15;
+export const xPage = 24;
 export const yToast = 12;
 export const yToastExit = 8;
 export const yActionSheet = 80;

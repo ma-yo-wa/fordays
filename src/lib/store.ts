@@ -102,6 +102,12 @@ interface AppState {
   /* The little menu that asks which one. */
   addOpen: boolean;
   settingsOpen: boolean;
+  /** Settings opens on this Orb's page instead of the top, when set. */
+  settingsOrbId: string | null;
+  /** The Orb switcher drawer, opened from the Orb name. */
+  switcherOpen: boolean;
+  /** The Orb you were in before this one, for the long-press jump back. */
+  previousSpaceId: string | null;
   inviteShareOpen: boolean;
   inviteCode: string | null;
   /** Reset-link session — force the new-password screen before the app. */
@@ -114,11 +120,13 @@ interface AppState {
   addSpace: (name?: string, withPeople?: boolean) => Promise<void>;
   completeFirstOrb: (name: string, withPeople: boolean) => Promise<void>;
   renameCurrentSpace: (name: string) => Promise<void>;
+  renameSpace: (spaceId: string, name: string) => Promise<void>;
   leaveCurrentSpace: () => Promise<void>;
   leaveSpace: (spaceId: string) => Promise<void>;
   restorePastOrb: (spaceId: string) => Promise<void>;
   deletePastOrb: (spaceId: string) => Promise<void>;
   removeMemberFromSpace: (userId: string) => Promise<void>;
+  removeMember: (spaceId: string, userId: string) => Promise<void>;
   signOutUser: () => Promise<void>;
   setPasswordRecovery: (v: boolean) => void;
   connect: (next: Partial<Config>) => Promise<void>;
@@ -148,6 +156,10 @@ interface AppState {
   searchOpen: boolean;
   setSearchOpen: (v: boolean) => void;
   setSettingsOpen: (v: boolean) => void;
+  /** Settings, opened on one Orb's page. */
+  openOrbSettings: (spaceId: string) => void;
+  setSwitcherOpen: (v: boolean) => void;
+  switchBack: () => Promise<void>;
   setInviteShareOpen: (v: boolean) => void;
   setInviteCode: (code: string | null) => void;
   joinOrbOpen: boolean;
@@ -226,6 +238,24 @@ function writeSnap(space: SpaceInfo, spaces: SpaceInfo[], activities: Activity[]
   }
 }
 
+const PREVIOUS_ORB_KEY = 'fordays.previousOrb';
+
+function readPreviousOrb(): string | null {
+  try {
+    return localStorage.getItem(PREVIOUS_ORB_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function savePreviousOrb(id: string): void {
+  try {
+    localStorage.setItem(PREVIOUS_ORB_KEY, id);
+  } catch {
+    /* private mode: the jump back just won't survive a reload */
+  }
+}
+
 export const useApp = create<AppState>()((set, get) => {
   const scheduleSnap = () => {
     const { space, spaces, activities } = get();
@@ -290,6 +320,9 @@ export const useApp = create<AppState>()((set, get) => {
     addOpen: false,
     searchOpen: false,
     settingsOpen: false,
+    settingsOrbId: null,
+    switcherOpen: false,
+    previousSpaceId: readPreviousOrb(),
     inviteShareOpen: false,
     inviteCode: pendingInvite(),
     joinOrbOpen: false,
@@ -404,6 +437,11 @@ export const useApp = create<AppState>()((set, get) => {
     },
 
     async switchToSpace(id) {
+      const was = get().space?.id;
+      if (was && was !== id) {
+        set({ previousSpaceId: was });
+        savePreviousOrb(was);
+      }
       const snap = readSnap(id);
       if (snap) {
         set({
@@ -570,6 +608,26 @@ export const useApp = create<AppState>()((set, get) => {
       get().toast('Orb permanently deleted');
     },
 
+    async renameSpace(spaceId, name) {
+      const clean = name.trim();
+      if (!clean) return;
+      await renameSpaceRemote(spaceId, clean);
+      if (get().space?.id === spaceId) {
+        await get().refreshSpace();
+      } else {
+        set({ spaces: await loadSpaces() });
+      }
+    },
+
+    async removeMember(spaceId, userId) {
+      await removeSpaceMemberRemote(spaceId, userId);
+      if (get().space?.id === spaceId) {
+        await get().refreshSpace();
+      } else {
+        set({ spaces: await loadSpaces() });
+      }
+    },
+
     async removeMemberFromSpace(userId) {
       const current = get().space;
       if (!current) return;
@@ -725,6 +783,7 @@ export const useApp = create<AppState>()((set, get) => {
         cursor: firstOfMonth(new Date()),
         detailId: null,
         settingsOpen: false,
+        switcherOpen: false,
         addOpen: false,
         searchOpen: false,
       });
@@ -774,6 +833,7 @@ export const useApp = create<AppState>()((set, get) => {
       // Never stack sheets: whatever was open gives way to the card.
       set({
         settingsOpen: false,
+        switcherOpen: false,
         addOpen: false,
         composerMode: null,
         composerDraft: null,
@@ -801,7 +861,21 @@ export const useApp = create<AppState>()((set, get) => {
     },
     closeComposer: () => set({ composerMode: null, composerDraft: null }),
     setSearchOpen: (searchOpen) => set({ searchOpen }),
-    setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
+    setSettingsOpen: (settingsOpen) =>
+      set(settingsOpen ? { settingsOpen, switcherOpen: false } : { settingsOpen, settingsOrbId: null }),
+    openOrbSettings: (settingsOrbId) =>
+      set({ settingsOpen: true, settingsOrbId, switcherOpen: false }),
+    setSwitcherOpen: (switcherOpen) => set({ switcherOpen }),
+    async switchBack() {
+      const prev = get().previousSpaceId;
+      const target = get().spaces.find((sp) => sp.id === prev && !sp.frozen);
+      if (!target) {
+        get().toast('No other Orb to go back to');
+        return;
+      }
+      await get().switchToSpace(target.id);
+      get().toast(`Switched to ${spaceOrbName(target) || 'your Orb'}`);
+    },
     setInviteShareOpen: (inviteShareOpen) => set({ inviteShareOpen }),
     setInviteCode: (inviteCode) => set({ inviteCode }),
     setJoinOrbOpen: (joinOrbOpen) => set({ joinOrbOpen }),
