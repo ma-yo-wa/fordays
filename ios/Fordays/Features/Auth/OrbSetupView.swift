@@ -37,25 +37,8 @@ struct OrbSetupView: View {
   }
 
   private var firstRunBody: some View {
-    ZStack {
-      Theme.paper.ignoresSafeArea()
-      ScrollView {
-        VStack(alignment: .leading, spacing: Theme.Spacing.none) {
-          Text(Copy.Orbs.setupTitle)
-            .font(.fdBrand)
-            .foregroundStyle(Theme.ink)
-            .padding(.top, Theme.Spacing.s48)
-            .padding(.bottom, Theme.Spacing.sm)
-
-          Text(Copy.Orbs.setupLead)
-            .font(.title3.weight(.medium))
-            .foregroundStyle(Theme.inkSoft)
-            .padding(.bottom, Theme.Spacing.lg)
-
-          formFields
-        }
-        .padding(Theme.Spacing.xl)
-      }
+    OnboardingScaffold(title: Copy.Orbs.setupTitle, lead: Copy.Orbs.setupLead) {
+      formFields
     }
   }
 
@@ -94,7 +77,7 @@ struct OrbSetupView: View {
         .textInputAutocapitalization(.words)
         .submitLabel(.go)
         .onSubmit { Task { await submit() } }
-        .padding(.top, Theme.Spacing.base)
+        .padding(.top, Theme.Spacing.lg)
 
       FDButton(
         withPeople ? Copy.Orbs.invitePerson : Copy.Orbs.startPlanning,
@@ -104,7 +87,7 @@ struct OrbSetupView: View {
       ) {
         await submit()
       }
-      .padding(.top, Theme.Spacing.lg)
+      .padding(.top, Theme.Spacing.s26)
     }
   }
 
@@ -124,14 +107,17 @@ struct OrbSetupView: View {
   private func kindTab(_ title: String, selected: Bool, action: @escaping () -> Void) -> some View {
     Button(action: action) {
       Text(title)
-        .font(.subheadline.weight(selected ? .semibold : .medium))
-        .foregroundStyle(selected ? Theme.ink : Theme.inkSoft)
+        .font(.fdSubhead.weight(selected ? .semibold : .medium))
+        .foregroundStyle(selected ? Theme.ink : Theme.ink2)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, Theme.Spacing.s10)
+        .padding(.vertical, Theme.Spacing.s7)
+        .padding(.horizontal, Theme.Spacing.md)
+        // Same as the PWA's segmented tabs: capsules on a soft fill, the
+        // chosen one lifted onto warm paper.
         .background {
-          RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous)
-            .fill(selected ? Theme.paper : Theme.fillTertiary)
-            .shadow(color: selected ? Theme.fillSecondary : .clear, radius: selected ? Theme.Spacing.xxs : Theme.Spacing.none, y: Theme.TouchTarget.borderWidth)
+          Capsule()
+            .fill(selected ? Theme.paperWarm : Theme.fillTertiary)
+            .shadow(color: selected ? Theme.hairline : .clear, radius: selected ? Theme.Spacing.s3 / 2 : Theme.Spacing.none, y: selected ? Theme.Spacing.px : Theme.Spacing.none)
         }
     }
     .buttonStyle(.plain)

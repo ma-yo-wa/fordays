@@ -48,8 +48,8 @@
   border: none;
   background: none;
   color: var(--ink-soft);
-  font: var(--t-subhead);
-  letter-spacing: var(--tr-subhead);
+  font: var(--t-footnote);
+  letter-spacing: var(--tr-footnote);
   font-weight: 600;
   cursor: pointer;
   padding: var(--space-0);

@@ -71,7 +71,7 @@ export default function OrbKindForm({ knobId, initialWithPeople = false, onSubmi
         </button>
       </div>
 
-      <div style={{ marginTop: 'var(--space-5)' }}>
+      <div>
         <Input
           label={Copy.orbs.orbName}
           type="text"
@@ -89,6 +89,7 @@ export default function OrbKindForm({ knobId, initialWithPeople = false, onSubmi
       <div className={f.row}>
         <Button
           variant="primary"
+          fullWidth
           loading={busy}
           disabled={busy || !name.trim()}
           onClick={() => void continueSetup()}

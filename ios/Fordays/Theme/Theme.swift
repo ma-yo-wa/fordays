@@ -312,7 +312,6 @@ extension Font {
   static let fdCaption1 = fdCaption
   static let fdCaption2 = Font.system(size: 11, weight: .medium, design: .default)
   static let fdGlyph = Font.system(size: 36, weight: .regular, design: .default)
-  static let fdBrand = Font.system(size: 40, weight: .semibold, design: .rounded)
 }
 
 

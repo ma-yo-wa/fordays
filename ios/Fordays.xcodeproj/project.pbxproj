@@ -42,6 +42,7 @@
 		DDF081F94BBBE968449273EC /* FDButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7AFA33428D7D3DB7633CB3 /* FDButton.swift */; };
 		DF6831A3FC46CE01064E7791 /* FDAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B58C9EF1CD4E548293D85FD /* FDAvatar.swift */; };
 		E59431D89E8C78F60A70412E /* PlanAlertsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0AE861D531714A6D8EF72E /* PlanAlertsView.swift */; };
+		EAD5FFE35B36D7EFB41B7EBE /* OnboardingScaffold.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF75D4E74989F10F780BF49 /* OnboardingScaffold.swift */; };
 		FCD76F79A8D74CF94DF6B76B /* FDTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F21DAC59C930002A20A147 /* FDTextField.swift */; };
 		FCF823D1FA959CF01E14B81B /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06275BDB4475A336F2D09A3 /* SupabaseService.swift */; };
 		FFF2EC3B34025F324B2EFA3C /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E2CF128B98BD9C0207520F /* AppModel.swift */; };
@@ -61,6 +62,7 @@
 		42F22075D5254D9C781E1F5D /* Alerts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alerts.swift; sourceTree = "<group>"; };
 		472B49EF886BAF4F0DE4D928 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		58F21DAC59C930002A20A147 /* FDTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDTextField.swift; sourceTree = "<group>"; };
+		5DF75D4E74989F10F780BF49 /* OnboardingScaffold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScaffold.swift; sourceTree = "<group>"; };
 		5FB0FFC2A4D225F12EDC9838 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		61E8A620538E162C11055A1D /* FDActionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDActionRow.swift; sourceTree = "<group>"; };
 		6295E3AD2F3DC023BF498500 /* ExternalDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalDetailView.swift; sourceTree = "<group>"; };
@@ -199,6 +201,7 @@
 			isa = PBXGroup;
 			children = (
 				0499C47B337DC05EAB80984C /* AuthView.swift */,
+				5DF75D4E74989F10F780BF49 /* OnboardingScaffold.swift */,
 				F5437A1E822D9D347CB576D7 /* OrbSetupView.swift */,
 			);
 			path = Auth;
@@ -369,6 +372,7 @@
 				C808786345D1F366BD4FE8C0 /* MainShellView.swift in Sources */,
 				4A9C299BE6211B6044D28565 /* Mapping.swift in Sources */,
 				7C48673361A091E5A6DD44F7 /* Models.swift in Sources */,
+				EAD5FFE35B36D7EFB41B7EBE /* OnboardingScaffold.swift in Sources */,
 				6CC2E7D333F9B7E852CD4CB7 /* OrbSetupView.swift in Sources */,
 				E59431D89E8C78F60A70412E /* PlanAlertsView.swift in Sources */,
 				79539FCCEA4A670404F82F7D /* PlansView.swift in Sources */,

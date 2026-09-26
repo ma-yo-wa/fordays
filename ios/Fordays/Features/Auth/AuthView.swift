@@ -11,41 +11,35 @@ struct AuthView: View {
   enum Mode { case signIn, signUp, forgot, sent }
 
   var body: some View {
-    ZStack {
-      OrbBackground().ignoresSafeArea()
-      ScrollView {
-        VStack(alignment: .leading, spacing: Theme.Spacing.none) {
-          Text(Theme.brandName)
-            .font(.fdLargeTitle)
-            .foregroundStyle(Theme.ink)
-            .padding(.top, Theme.Spacing.s48)
-            .padding(.bottom, Theme.Spacing.sm)
-
-          switch mode {
-          case .sent:
-            sentBody
-          case .forgot:
-            forgotBody
-          case .signIn, .signUp:
-            credentialsBody
-          }
-
-          if let err = app.errorMessage {
-            Text(err)
-              .font(.footnote)
-              .foregroundStyle(Theme.roseInk)
-              .padding(.top, Theme.Spacing.sm)
-          }
-        }
-        .padding(Theme.Spacing.xl)
+    OnboardingScaffold(title: Theme.brandName, lead: currentLead) {
+      switch mode {
+      case .sent:
+        sentBody
+      case .forgot:
+        forgotBody
+      case .signIn, .signUp:
+        credentialsBody
       }
+
+      if let err = app.errorMessage {
+        Text(err)
+          .font(.fdFootnote)
+          .foregroundStyle(Theme.roseInk)
+          .padding(.top, Theme.Spacing.md)
+      }
+    }
+  }
+
+  private var currentLead: String {
+    switch mode {
+    case .sent: return "Check your email for a reset link — open it on this phone"
+    case .forgot: return "We’ll email a link to reset your password"
+    case .signIn, .signUp: return leadCopy
     }
   }
 
   private var credentialsBody: some View {
     VStack(alignment: .leading, spacing: Theme.Spacing.none) {
-      lead(leadCopy)
-
       if mode == .signUp {
         FDTextField(label: "Your name", placeholder: "Aline", text: $name)
           .textContentType(.name)
@@ -71,11 +65,11 @@ struct AuthView: View {
       ) {
         await submit()
       }
-      .padding(.top, Theme.Spacing.lg)
+      .padding(.top, Theme.Spacing.s26)
 
       if mode == .signIn {
         textLink("Forgot password?") { switchMode(.forgot) }
-          .padding(.top, Theme.Spacing.md)
+          .padding(.top, Theme.Spacing.s10)
       }
 
       Button {
@@ -88,15 +82,13 @@ struct AuthView: View {
           .fontWeight(.semibold)
       }
       .buttonStyle(.plain)
-      .font(.footnote)
+      .font(.fdFootnote)
       .padding(.top, Theme.Spacing.s18)
     }
   }
 
   private var forgotBody: some View {
     VStack(alignment: .leading, spacing: Theme.Spacing.none) {
-      lead("We’ll email a link to reset your password")
-
       emailField
         .submitLabel(.send)
         .onSubmit { Task { await sendReset() } }
@@ -104,7 +96,7 @@ struct AuthView: View {
       FDButton("Send reset link", variant: .primary, loading: busy, disabled: busy) {
         await sendReset()
       }
-      .padding(.top, Theme.Spacing.lg)
+      .padding(.top, Theme.Spacing.s26)
 
       textLink("Back to sign in") { switchMode(.signIn) }
         .padding(.top, Theme.Spacing.s18)
@@ -113,8 +105,8 @@ struct AuthView: View {
 
   private var sentBody: some View {
     VStack(alignment: .leading, spacing: Theme.Spacing.none) {
-      lead("Check your email for a reset link — open it on this phone")
       FDButton("Back to sign in", variant: .secondary) { switchMode(.signIn) }
+        .padding(.top, Theme.Spacing.s26)
     }
   }
 
@@ -126,17 +118,10 @@ struct AuthView: View {
       .keyboardType(.emailAddress)
   }
 
-  private func lead(_ text: String) -> some View {
-    Text(text)
-      .font(.fdBody)
-      .foregroundStyle(Theme.inkSoft)
-      .padding(.bottom, Theme.Spacing.lg)
-  }
-
   private func textLink(_ title: String, action: @escaping () -> Void) -> some View {
     Button(action: action) {
       Text(title)
-        .font(.footnote.weight(.semibold))
+        .font(.fdFootnote.weight(.semibold))
         .foregroundStyle(Theme.inkSoft)
     }
     .buttonStyle(.plain)
