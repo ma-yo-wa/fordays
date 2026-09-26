@@ -1,4 +1,5 @@
 .btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -73,7 +74,26 @@
   color: var(--ink);
 }
 
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Busy, not broken: stay solid, hide the words, spin in their place. */
+.loading:disabled {
+  opacity: var(--op-100);
+  cursor: progress;
+}
+
+.loading .label {
+  visibility: hidden;
+}
+
 .spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
   width: var(--space-4);
   height: var(--space-4);
   border: var(--border-thick) solid currentColor;

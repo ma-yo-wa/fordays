@@ -29,6 +29,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     s[variant],
     size === 'sm' ? s.sizeSm : s.sizeMd,
     fullWidth ? s.fullWidth : '',
+    loading ? s.loading : '',
     className,
   ]
     .filter(Boolean)
@@ -41,7 +42,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       disabled={disabled || loading}
       {...rest}
     >
-      {loading ? <span className={s.spinner} aria-hidden="true" /> : children}
+      {/* The label keeps its space while loading, so the button never
+          shrinks to the spinner's width. */}
+      <span className={s.label}>{children}</span>
+      {loading && <span className={s.spinner} aria-hidden="true" />}
     </button>
   );
 });
