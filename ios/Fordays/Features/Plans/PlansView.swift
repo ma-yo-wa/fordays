@@ -199,15 +199,19 @@ struct PlansView: View {
 
   /// A plan on the agenda: time on the left, title and place on the right.
   /// Cover, note and who made it live in Detail.
-  /// In a shared Orb, a small face says who put the plan here.
+  /// In a shared Orb, a small face marks plans someone else added.
+  /// Your own plans go unmarked, so the face stays a signal.
   private func planRow(_ a: Activity) -> some View {
-    let who = app.space?.isMatched == true ? app.space?.displayName(for: a.createdBy) : nil
+    let byOther = app.space.map {
+      $0.isMatched && a.createdBy.caseInsensitiveCompare($0.myId) != .orderedSame
+    } ?? false
+    let who = byOther ? app.space?.displayName(for: a.createdBy) : nil
     return agendaRow(time: rowTime(a), title: a.title, place: a.location, who: who) {
       onSelect(a)
     }
   }
 
-  /// A chevron and a press highlight say the row opens something.
+  /// The press highlight says the row opens something.
   private func agendaRow(
     time: String,
     title: String,
@@ -238,10 +242,6 @@ struct PlansView: View {
         if let who {
           face(who)
         }
-        Image(systemName: "chevron.right")
-          .font(.footnote.weight(.semibold))
-          .foregroundStyle(Theme.inkFaint)
-          .accessibilityHidden(true)
       }
       .padding(.vertical, Theme.Spacing.md)
       .contentShape(Rectangle())

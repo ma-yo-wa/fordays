@@ -44,7 +44,7 @@ function shortPlace(place: string | null | undefined, title: string): string | n
 }
 
 /* A plan on the agenda: time on the left, title and place on the right.
-   A chevron and a press highlight say it opens. Cover and note live in Detail. */
+   A press highlight says it opens. Cover and note live in Detail. */
 function AgendaRow({
   time,
   title,
@@ -55,7 +55,7 @@ function AgendaRow({
   time: string;
   title: string;
   place?: string | null;
-  /** In a shared Orb, who put the plan here. */
+  /** In a shared Orb, who added the plan when it wasn't you. */
   who?: string;
   onOpen: () => void;
 }) {
@@ -78,16 +78,11 @@ function AgendaRow({
         <span className={s.title}>{title}</span>
         {shown && <span className={s.place}>{shown}</span>}
       </span>
-      <span className={s.trail}>
-        {who && (
-          <span className={s.face} style={{ background: faceColor() }} aria-label={`Added by ${who}`}>
-            {(who[0] ?? '?').toUpperCase()}
-          </span>
-        )}
-        <svg className={s.chevron} viewBox="0 0 8 14" aria-hidden="true">
-          <path d="M1 1l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </span>
+      {who && (
+        <span className={s.face} style={{ background: faceColor() }} aria-label={`Added by ${who}`}>
+          {(who[0] ?? '?').toUpperCase()}
+        </span>
+      )}
     </div>
   );
 }
@@ -111,6 +106,9 @@ export default function Calendar() {
   const cursorDate = parseISO(cursor);
   const today = todayISO();
   const matched = isMatched(space);
+  /* Your own plans go unmarked, so a face stays a signal: someone else added this. */
+  const addedByOther = (createdBy: string) =>
+    matched && createdBy.toLowerCase() !== (space?.myId ?? '').toLowerCase();
   const others = (space?.members ?? []).filter((m) => m.id !== space?.myId);
   const other =
     others.length === 1 && others[0]?.name && others[0].name !== space?.myName
@@ -330,7 +328,7 @@ export default function Calendar() {
                       time={planTime(a.date_time)}
                       title={a.title}
                       place={a.location}
-                      who={matched ? partnerName(config, a.created_by) : undefined}
+                      who={addedByOther(a.created_by) ? partnerName(config, a.created_by) : undefined}
                       onOpen={() => openDetail(a.id)}
                     />
                   ))}
@@ -347,7 +345,7 @@ export default function Calendar() {
                   time={planTime(item.plan.date_time)}
                   title={item.plan.title}
                   place={item.plan.location}
-                  who={matched ? partnerName(config, item.plan.created_by) : undefined}
+                  who={addedByOther(item.plan.created_by) ? partnerName(config, item.plan.created_by) : undefined}
                   onOpen={() => openDetail(item.plan.id)}
                 />
               ) : (

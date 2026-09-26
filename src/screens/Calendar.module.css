@@ -207,18 +207,8 @@
   letter-spacing: var(--tr-body);
   overflow-wrap: break-word;
 }
-.trail {
-  align-self: center;
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-.chevron {
-  width: var(--space-2);
-  height: var(--space-3-5);
-  color: var(--ink-faint);
-}
 .face {
+  align-self: center;
   width: var(--space-4-25);
   height: var(--space-4-25);
   border-radius: 50%;
