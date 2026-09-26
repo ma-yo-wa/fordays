@@ -10,7 +10,7 @@ function CalendarIcon({ on }: { on: boolean }) {
   return on ? (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
       <rect x="3" y="5" width="18" height="16" rx="4" />
-      <path d="M8 2.5v3M16 2.5v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M8 2.5v3M16 2.5v3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
       <path d="M4 10h16" stroke="#fffdfb" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   ) : (

@@ -43,6 +43,12 @@ html {
   color-scheme: light;
 }
 
+/* Soft icons everywhere, like the tab bar: every line ends and turns round. */
+svg {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 /* Marketing landing must scroll; the planner html is overflow: hidden. */
 html.marketing {
   overflow: auto;

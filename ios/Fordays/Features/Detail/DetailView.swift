@@ -268,7 +268,7 @@ struct DetailView: View {
           }
           Spacer(minLength: Theme.Spacing.sm)
           Image(systemName: "arrow.up.right")
-            .font(.footnote.weight(.semibold))
+            .font(.footnote)
             .foregroundStyle(Theme.inkFaint)
         }
         .multilineTextAlignment(.leading)
@@ -640,7 +640,9 @@ struct DetailView: View {
       ForEach(rows) { row in
         Button(action: row.run) {
           HStack(spacing: Theme.Spacing.md) {
+            // Warm grey icon beside ink text, like the tab bar.
             ActionGlyphIcon(glyph: row.icon)
+              .foregroundStyle(row.destructive ? Theme.roseInk : Theme.inkSoft)
             Text(row.title)
               .font(.fdBody)
             Spacer()
@@ -735,7 +737,7 @@ struct DetailView: View {
             Text("History")
               .font(.fdFootnote.weight(.semibold))
             Image(systemName: "chevron.right")
-              .font(.caption2.weight(.semibold))
+              .font(.caption2)
               .rotationEffect(.degrees(showHistory ? 90 : 0))
           }
           .foregroundStyle(Theme.inkFaint)

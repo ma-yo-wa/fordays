@@ -78,7 +78,7 @@ struct FDFormRow<RightContent: View>: View {
         FormGlyphIcon(glyph: glyph, destructive: destructive)
       } else if let systemImage {
         Image(systemName: systemImage)
-          .font(.fdBody.weight(.semibold))
+          .font(.fdBody)
           .foregroundStyle(destructive ? Theme.roseInk : Theme.inkSoft)
           .frame(width: Theme.Spacing.lg)
       }

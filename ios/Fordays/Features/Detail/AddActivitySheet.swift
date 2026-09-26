@@ -21,7 +21,7 @@ struct AddSheetView: View {
         Spacer(minLength: 12)
         Button(action: onClose) {
           Image(systemName: "xmark")
-            .font(.footnote.weight(.bold))
+            .font(.footnote)
             .foregroundStyle(Theme.inkSoft)
             .frame(width: Theme.TouchTarget.control, height: Theme.TouchTarget.control)
             .background(Theme.fillTertiary, in: Circle())

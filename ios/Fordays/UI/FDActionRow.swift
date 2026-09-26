@@ -13,10 +13,12 @@ struct FDActionRow: View {
     Button(action: action) {
       HStack(spacing: Theme.Spacing.md) {
         if let icon {
+          // Warm grey icon beside ink text, like the tab bar.
           ActionGlyphIcon(glyph: icon)
+            .foregroundStyle(destructive ? Theme.roseInk : Theme.inkSoft)
         } else if let systemImage {
           Image(systemName: systemImage)
-            .font(.fdBody.weight(.semibold))
+            .font(.fdBody)
             .frame(width: Theme.Spacing.s22)
         } else if let glyph {
           Text(glyph)

@@ -106,7 +106,7 @@ struct SearchView: View {
         onClose()
       } label: {
         Image(systemName: "chevron.left")
-          .font(.subheadline.weight(.semibold))
+          .font(.subheadline)
           .foregroundStyle(Theme.roseInk)
           .frame(width: Theme.TouchTarget.avatarMd, height: Theme.TouchTarget.avatarMd)
           .contentShape(Rectangle())

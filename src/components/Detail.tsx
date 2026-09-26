@@ -38,7 +38,7 @@ function CalendarIcon() {
 
 function SuggestIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
       <path
         d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v7a2.5 2.5 0 0 1-2.5 2.5H12l-4 3v-3H7.5A2.5 2.5 0 0 1 5 13.5v-7Z"
         strokeLinejoin="round"
@@ -50,7 +50,7 @@ function SuggestIcon() {
 
 function BucketIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
       <path
         d="M4.6 5h14.8l-2 12.3A3 3 0 0 1 14.4 20H9.6a3 3 0 0 1-3-2.7L4.6 5Z"
         strokeLinejoin="round"
@@ -62,7 +62,7 @@ function BucketIcon() {
 
 function TrashIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
       <path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" strokeLinecap="round" />
       <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" strokeLinejoin="round" />
     </svg>
@@ -71,7 +71,7 @@ function TrashIcon() {
 
 function RepeatIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
       <path d="M17 2l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M3 11v-1a4 4 0 0 1 4-4h14" strokeLinecap="round" />
       <path d="M7 22l-4-4 4-4" strokeLinecap="round" strokeLinejoin="round" />
@@ -82,7 +82,7 @@ function RepeatIcon() {
 
 function PeopleIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
       <circle cx="9" cy="7" r="4" />
       <path d="M22 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" />
@@ -636,7 +636,7 @@ export default function Detail() {
           >
             History
             <svg className={historyOpen ? s.historyChevronOpen : s.historyChevron} viewBox="0 0 8 14" aria-hidden="true">
-              <path d="M1 1l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M1 1l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
           {historyOpen &&

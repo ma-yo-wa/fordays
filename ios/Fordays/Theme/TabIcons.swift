@@ -52,7 +52,7 @@ private struct BucketGlyph: View {
         ctx.stroke(
           check,
           with: .color(Theme.paperWarm),
-          style: StrokeStyle(lineWidth: 1.8 * s, lineCap: .round, lineJoin: .round)
+          style: StrokeStyle(lineWidth: 1.7 * s, lineCap: .round, lineJoin: .round)
         )
       } else {
         var bucket = Path()
@@ -104,12 +104,12 @@ private struct CalendarGlyph: View {
         ctx.stroke(
           line(8, 2.5, 8, 5.5),
           with: .foreground,
-          style: StrokeStyle(lineWidth: 1.8 * s, lineCap: .round)
+          style: StrokeStyle(lineWidth: 1.7 * s, lineCap: .round)
         )
         ctx.stroke(
           line(16, 2.5, 16, 5.5),
           with: .foreground,
-          style: StrokeStyle(lineWidth: 1.8 * s, lineCap: .round)
+          style: StrokeStyle(lineWidth: 1.7 * s, lineCap: .round)
         )
         ctx.stroke(
           line(4, 10, 20, 10),
@@ -214,7 +214,7 @@ private struct MemoriesGlyph: View {
   }
 }
 
-/// Fine outline glyphs for forms and navigation, matching PWA SVGs with 1.8pt stroke.
+/// Fine outline glyphs for forms and navigation, matching PWA SVGs: 1.7 on a 24 grid, like the tab bar.
 enum FormGlyph {
   case orb
   case account
@@ -231,7 +231,7 @@ struct FormGlyphIcon: View {
   var body: some View {
     Canvas { ctx, size in
       let s = min(size.width, size.height) / 24
-      let stroke = StrokeStyle(lineWidth: 1.8 * s, lineCap: .round, lineJoin: .round)
+      let stroke = StrokeStyle(lineWidth: 1.7 * s, lineCap: .round, lineJoin: .round)
       func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: x * s, y: y * s) }
       func r(_ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ h: CGFloat, _ rx: CGFloat) -> Path {
         Path(roundedRect: CGRect(x: x * s, y: y * s, width: w * s, height: h * s), cornerRadius: rx * s)
@@ -323,7 +323,7 @@ struct ActionGlyphIcon: View {
   var body: some View {
     Canvas { ctx, size in
       let s = min(size.width, size.height) / 24
-      let width: CGFloat = glyph == .calendar ? 1.7 : 1.8
+      let width: CGFloat = 1.7
       let stroke = StrokeStyle(lineWidth: width * s, lineCap: .round, lineJoin: .round)
       func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: x * s, y: y * s) }
       func line(_ x1: CGFloat, _ y1: CGFloat, _ x2: CGFloat, _ y2: CGFloat) -> Path {

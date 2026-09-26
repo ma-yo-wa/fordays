@@ -5,7 +5,7 @@ import s from './AddSheet.module.css';
 
 function CloseIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" aria-hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
       <path d="M6 6l12 12M18 6 6 18" strokeLinecap="round" />
     </svg>
   );
@@ -13,7 +13,7 @@ function CloseIcon() {
 
 function PlanGlyph() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
       <rect x="3" y="5" width="18" height="16" rx="4" />
       <path d="M3 10h18M8 3v3M16 3v3" strokeLinecap="round" />
     </svg>
@@ -22,7 +22,7 @@ function PlanGlyph() {
 
 function BucketGlyph() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
       <path
         d="M4.6 5h14.8l-2 12.3A3 3 0 0 1 14.4 20H9.6a3 3 0 0 1-3-2.7L4.6 5Z"
         strokeLinejoin="round"

@@ -56,7 +56,7 @@ struct MainShellView: View {
           }
         } label: {
             Image(systemName: "plus")
-              .font(.title2.weight(.semibold))
+              .font(.title2.weight(.medium))
               .foregroundStyle(Theme.ink)
               .frame(width: Theme.TouchTarget.navBar, height: Theme.TouchTarget.navBar)
               .background(
@@ -240,7 +240,7 @@ struct MainShellView: View {
             }
 
             Image(systemName: "chevron.down")
-              .font(.caption2.weight(.semibold))
+              .font(.caption2)
               .foregroundStyle(Theme.inkSoft)
           }
           .padding(.leading, customOrbName != nil ? Theme.Spacing.md : Theme.Spacing.xxs)
@@ -264,7 +264,7 @@ struct MainShellView: View {
             showSearch = true
           } label: {
             Image(systemName: "magnifyingglass")
-              .font(.subheadline.weight(.semibold))
+              .font(.subheadline)
               .foregroundStyle(Theme.roseInk)
               .frame(width: Theme.TouchTarget.avatarMd, height: Theme.TouchTarget.avatarMd)
               .contentShape(Rectangle())
@@ -316,7 +316,7 @@ struct MainShellView: View {
         app.shiftMonth(by: -1)
       } label: {
         Image(systemName: "chevron.left")
-          .font(.subheadline.weight(.semibold))
+          .font(.subheadline)
           .foregroundStyle(Theme.roseInk)
           .frame(width: Theme.TouchTarget.avatarMd, height: Theme.TouchTarget.avatarMd)
           .contentShape(Rectangle())
@@ -328,7 +328,7 @@ struct MainShellView: View {
         app.shiftMonth(by: 1)
       } label: {
         Image(systemName: "chevron.right")
-          .font(.subheadline.weight(.semibold))
+          .font(.subheadline)
           .foregroundStyle(Theme.roseInk)
           .frame(width: Theme.TouchTarget.avatarMd, height: Theme.TouchTarget.avatarMd)
           .contentShape(Rectangle())

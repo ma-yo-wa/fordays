@@ -33,6 +33,12 @@
   display: grid;
   place-items: center;
   flex-shrink: var(--space-0);
+  /* Warm grey icon beside ink text, like the tab bar. */
+  color: var(--ink-soft);
+}
+
+.destructive .icon {
+  color: var(--rose-ink);
 }
 
 .textStack {

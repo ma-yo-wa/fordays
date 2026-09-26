@@ -31,7 +31,7 @@ const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 function Chevron({ dir }: { dir: 'left' | 'right' }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
       <path
         d={dir === 'left' ? 'M15 5 8 12l7 7' : 'M9 5l7 7-7 7'}
         strokeLinecap="round"
