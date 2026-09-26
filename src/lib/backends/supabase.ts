@@ -110,8 +110,16 @@ export class SupabaseBackend implements Backend {
     void this.refreshLogs();
     void this.refreshExternal();
 
+    // A start that overlaps an earlier one (a quick Orb switch back, or
+    // React running effects twice in dev) finds this Orb's channel already
+    // subscribed, and adding listeners to it throws. Start clean.
+    const topic = `space:${this.spaceId}`;
+    for (const ch of this.client.getChannels()) {
+      if (ch.topic === `realtime:${topic}`) await this.client.removeChannel(ch);
+    }
+
     this.channel = this.client
-      .channel(`space:${this.spaceId}`)
+      .channel(topic)
       .on(
         'postgres_changes',
         {
