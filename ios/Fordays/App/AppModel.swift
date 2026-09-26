@@ -1041,8 +1041,12 @@ final class AppModel: ObservableObject {
     // Show the target Orb's snapshot at once, then refresh — like the PWA.
     detailActivityId = nil
     if !hydrateNotebook() {
+      // No snapshot on this device yet: switch to the Orb we already
+      // know from the list, so the old Orb's name doesn't linger.
+      if let target = spaces.first(where: { $0.id == id }) { space = target }
       activities = []
       logs = []
+      externalEvents = []
     }
     do {
       try await refreshSpaceAndData()

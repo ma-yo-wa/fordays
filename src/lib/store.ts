@@ -400,7 +400,17 @@ export const useApp = create<AppState>()((set, get) => {
         });
         prefetchBoardCovers(snap.activities);
       } else {
-        set({ activities: [], external: [], logs: [], detailId: null, searchOpen: false });
+        // No snapshot on this device yet: switch to the Orb we already
+        // know from the list, so the old Orb's name doesn't linger.
+        const target = get().spaces.find((sp) => sp.id === id);
+        set({
+          ...(target ? { space: target } : {}),
+          activities: [],
+          external: [],
+          logs: [],
+          detailId: null,
+          searchOpen: false,
+        });
       }
       const space = await switchSpaceRemote(id);
       const spaces = await loadSpaces().catch(() => (space ? [space] : []));
