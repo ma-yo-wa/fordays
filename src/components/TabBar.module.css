@@ -87,6 +87,12 @@
   color: var(--ink);
 }
 
+.face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Twitter-style FAB: above the bar, hard against the right of the app
    column — absolute inside the dock so desktop doesn't pin it to the
    far edge of a wide window. */

@@ -25,9 +25,11 @@
 		6FC79FCDDA54EEDD10C2F23D /* InviteShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C572E327C77095DB7F3A9A9E /* InviteShareView.swift */; };
 		79539FCCEA4A670404F82F7D /* PlansView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3351142946F30E708F5A9F47 /* PlansView.swift */; };
 		7C48673361A091E5A6DD44F7 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2220F5B5358CFDCA0323FF88 /* Models.swift */; };
+		817E2277410E06C4ECD2FAB0 /* OrbFaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D905A75404443411094D74C /* OrbFaces.swift */; };
 		8CB2D76D439D916AC41C417A /* Art.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84390CF325E1E1275EA690BD /* Art.swift */; };
 		96739A2865B909787C74C32D /* FDFormGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74B42D148D7A9963107BD044 /* FDFormGroup.swift */; };
 		9942713DF9F91BACE7A39699 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230281E6660476AB193B9044 /* RootView.swift */; };
+		A6B3F5039FAD624D64898A56 /* OrbSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8204A5390262420F16C820E0 /* OrbSwitcherView.swift */; };
 		A7CEC5FD9CD385CE4AF503A7 /* LocationInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F029CE2CC91FB99AAA3C02 /* LocationInputView.swift */; };
 		B3D2EC000780D5224D4C20EF /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C511F3EC78C5026E5FF2CE /* SearchView.swift */; };
 		B9E187BA6DACC670E5DA5CC3 /* FordaysApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CE7C6FDBE348B28A340B03E /* FordaysApp.swift */; };
@@ -73,7 +75,9 @@
 		7B58C9EF1CD4E548293D85FD /* FDAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FDAvatar.swift; sourceTree = "<group>"; };
 		7CE7C6FDBE348B28A340B03E /* FordaysApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FordaysApp.swift; sourceTree = "<group>"; };
 		802F8CA48914FD96DEBF9F1D /* JoinOrbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinOrbView.swift; sourceTree = "<group>"; };
+		8204A5390262420F16C820E0 /* OrbSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrbSwitcherView.swift; sourceTree = "<group>"; };
 		84390CF325E1E1275EA690BD /* Art.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Art.swift; sourceTree = "<group>"; };
+		8D905A75404443411094D74C /* OrbFaces.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrbFaces.swift; sourceTree = "<group>"; };
 		A06275BDB4475A336F2D09A3 /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
 		A07014BC5F0CB371B41FE225 /* Fordays.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Fordays.entitlements; sourceTree = "<group>"; };
 		A1F029CE2CC91FB99AAA3C02 /* LocationInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationInputView.swift; sourceTree = "<group>"; };
@@ -114,6 +118,7 @@
 				74B42D148D7A9963107BD044 /* FDFormGroup.swift */,
 				B02152F4A039006F0A7F7DCA /* FDPill.swift */,
 				58F21DAC59C930002A20A147 /* FDTextField.swift */,
+				8D905A75404443411094D74C /* OrbFaces.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -136,6 +141,7 @@
 			children = (
 				C572E327C77095DB7F3A9A9E /* InviteShareView.swift */,
 				802F8CA48914FD96DEBF9F1D /* JoinOrbView.swift */,
+				8204A5390262420F16C820E0 /* OrbSwitcherView.swift */,
 				D894045084BAC7ECF003D6DC /* SettingsView.swift */,
 			);
 			path = Settings;
@@ -373,7 +379,9 @@
 				4A9C299BE6211B6044D28565 /* Mapping.swift in Sources */,
 				7C48673361A091E5A6DD44F7 /* Models.swift in Sources */,
 				EAD5FFE35B36D7EFB41B7EBE /* OnboardingScaffold.swift in Sources */,
+				817E2277410E06C4ECD2FAB0 /* OrbFaces.swift in Sources */,
 				6CC2E7D333F9B7E852CD4CB7 /* OrbSetupView.swift in Sources */,
+				A6B3F5039FAD624D64898A56 /* OrbSwitcherView.swift in Sources */,
 				E59431D89E8C78F60A70412E /* PlanAlertsView.swift in Sources */,
 				79539FCCEA4A670404F82F7D /* PlansView.swift in Sources */,
 				0ABD8BDDC53DCA0F3633C966 /* Push.swift in Sources */,

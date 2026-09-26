@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 import { useApp, isMatched, spaceOrbName } from '../lib/store';
-import { Avatar } from '../ui';
 import { faceColor } from '../lib/tint';
 import { MONTHS, iso, parseISO } from '../lib/date';
 import { Copy } from '../lib/copy';
@@ -46,7 +45,6 @@ export default function NavBar() {
   const navScroll = useApp((st) => st.navScroll);
   const cursor = useApp((st) => st.cursor);
   const setCursor = useApp((st) => st.setCursor);
-  const setSettingsOpen = useApp((st) => st.setSettingsOpen);
   const setSwitcherOpen = useApp((st) => st.setSwitcherOpen);
   const switchBack = useApp((st) => st.switchBack);
   const setSearchOpen = useApp((st) => st.setSearchOpen);
@@ -207,19 +205,6 @@ export default function NavBar() {
             title="Search"
           >
             <SearchIcon />
-          </button>
-          <button
-            type="button"
-            className={s.me}
-            onClick={() => setSettingsOpen(true)}
-            aria-label="Settings"
-            title="Settings"
-          >
-            <Avatar
-              name={space?.myName || config.names[me] || 'Me'}
-              personId={space?.myId}
-              size="sm"
-            />
           </button>
         </div>
       </div>

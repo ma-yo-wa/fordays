@@ -1054,6 +1054,7 @@ final class AppModel: ObservableObject {
   }
 
   func switchToSpace(_ id: String) async {
+    if let was = space?.id, was != id { previousSpaceId = was }
     storedSpaceId = id
     // Show the target Orb's snapshot at once, then refresh — like the PWA.
     detailActivityId = nil
@@ -1180,6 +1181,64 @@ final class AppModel: ObservableObject {
     } catch {
       toast = error.localizedDescription
     }
+  }
+
+  /// Rename any Orb, not only the open one.
+  func renameSpace(_ spaceId: String, name: String) async {
+    let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !clean.isEmpty else { return }
+    do {
+      try await sb.from("spaces")
+        .update(["name": AnyJSON.string(clean)])
+        .eq("id", value: spaceId)
+        .execute()
+      if spaceId == space?.id {
+        try await refreshSpaceAndData()
+      } else {
+        spaces = try await loadSpaces()
+      }
+    } catch {
+      toast = error.localizedDescription
+    }
+  }
+
+  /// Remove someone from any Orb you run, not only the open one.
+  func removeMember(spaceId: String, userId: String) async {
+    do {
+      try await sb.rpc(
+        "remove_space_member",
+        params: RemoveMemberParams(sid: spaceId, uid: userId)
+      ).execute()
+      if spaceId == space?.id {
+        try await refreshSpaceAndData()
+      } else {
+        spaces = try await loadSpaces()
+      }
+    } catch {
+      toast = error.localizedDescription
+    }
+  }
+
+  /// The Orb you were in before this one, for the long-press jump back.
+  var previousSpaceId: String? {
+    get { UserDefaults.standard.string(forKey: "fordays.previousOrb") }
+    set { UserDefaults.standard.set(newValue, forKey: "fordays.previousOrb") }
+  }
+
+  func switchBack() async {
+    guard let prev = previousSpaceId,
+      let target = spaces.first(where: { $0.id == prev && !$0.frozen })
+    else {
+      toast = "No other Orb to go back to"
+      return
+    }
+    await switchToSpace(target.id)
+    toast = "Switched to \(target.peopleLabel.isEmpty ? "your Orb" : target.peopleLabel)"
+  }
+
+  /// The signed-in person's email, for the You row in Settings.
+  func currentEmail() async -> String? {
+    try? await sb.auth.session.user.email
   }
 
   func removeMember(userId: String) async {

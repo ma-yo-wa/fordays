@@ -8,6 +8,8 @@ struct MainShellView: View {
   @State private var selectedExternal: ExternalEvent?
   @State private var showInvite = false
   @State private var showSettings = false
+  @State private var settingsOrbId: String?
+  @State private var showSwitcher = false
   @State private var selected: Activity?
   @State private var showSearch = false
 
@@ -81,7 +83,7 @@ struct MainShellView: View {
         .opacity(app.space?.canCompose == true ? 1 : 0)
         .allowsHitTesting(app.space?.canCompose == true)
 
-        TabDock(tab: $app.tab)
+        TabDock(tab: $app.tab) { openSettings(orbId: nil) }
           .padding(.bottom, Theme.Spacing.sm)
       }
 
@@ -190,9 +192,25 @@ struct MainShellView: View {
       })
       .environmentObject(app)
     }
-    .sheet(isPresented: $showSettings) {
-      SettingsView()
+    .sheet(isPresented: $showSwitcher) {
+      OrbSwitcherView { orbId in
+        showSwitcher = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Motion.sheetHandoffLong) {
+          openSettings(orbId: orbId)
+        }
+      }
+      .environmentObject(app)
+    }
+    // Settings is a full screen pushed in from the right, not a sheet.
+    .overlay {
+      if showSettings {
+        SettingsView(startOrbId: settingsOrbId) {
+          withAnimation(.easeInOut(duration: Theme.Motion.shelf)) { showSettings = false }
+        }
         .environmentObject(app)
+        .transition(.move(edge: .trailing))
+        .zIndex(10)
+      }
     }
     .sheet(isPresented: $app.showJoinOrb) {
       JoinOrbView()
@@ -210,8 +228,8 @@ struct MainShellView: View {
 
       // Bar controls pinned to edges
       HStack(spacing: Theme.Spacing.none) {
-        // Leading: Orb capsule
-        Button { showSettings = true } label: {
+        // Leading: Orb capsule. Tap to switch; hold to jump back to the last Orb.
+        Button { showSwitcher = true } label: {
           HStack(spacing: customOrbName != nil ? Theme.Spacing.s7 : Theme.Spacing.s6) {
             if let custom = customOrbName {
               Text(custom)
@@ -250,7 +268,16 @@ struct MainShellView: View {
           .overlay(Capsule().stroke(Theme.hairline, lineWidth: Theme.TouchTarget.hairlineWidth))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(customOrbName.map { "Open settings for \($0)" } ?? "Open Orb settings")
+        .simultaneousGesture(
+          LongPressGesture(minimumDuration: 0.45).onEnded { _ in
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            Task { await app.switchBack() }
+          }
+        )
+        .accessibilityLabel(customOrbName.map { "Switch Orb, now in \($0)" } ?? "Switch Orb")
+        .accessibilityAction(named: "Back to last Orb") {
+          Task { await app.switchBack() }
+        }
 
         Spacer(minLength: Theme.Spacing.sm)
 
@@ -271,6 +298,7 @@ struct MainShellView: View {
           }
           .buttonStyle(.plain)
           .accessibilityLabel("Search")
+
         }
       }
     }
@@ -294,6 +322,11 @@ struct MainShellView: View {
       }
       .animation(.easeInOut(duration: Theme.Motion.shelf), value: app.isScrolled)
     }
+  }
+
+  private func openSettings(orbId: String?) {
+    settingsOrbId = orbId
+    withAnimation(.easeInOut(duration: Theme.Motion.shelf)) { showSettings = true }
   }
 
   private var trailingCalendarControls: some View {
@@ -365,13 +398,29 @@ struct MainShellView: View {
 }
 
 struct TabDock: View {
+  @EnvironmentObject private var app: AppModel
   @Binding var tab: HomeTab
+  /// You: not a place in the app, so it opens Settings over it.
+  var onYou: () -> Void
 
   var body: some View {
     HStack(spacing: Theme.Spacing.none) {
       tabButton(.bucket, glyph: .bucket)
       tabButton(.plans, glyph: .calendar)
       tabButton(.memories, glyph: .memories)
+      Button(action: onYou) {
+        VStack(spacing: Theme.Spacing.xs) {
+          FDAvatar(name: app.space?.myName, personId: app.space?.myId, size: .sm)
+          Text("You")
+            .font(.fdCaption)
+            .lineLimit(1)
+        }
+        .foregroundStyle(Theme.inkSoft)
+        .frame(width: Theme.TouchTarget.tabItemWidth, height: Theme.TouchTarget.navBar)
+        .contentShape(Rectangle())
+      }
+      .buttonStyle(.plain)
+      .accessibilityLabel("Settings")
     }
     .padding(Theme.Spacing.s5)
     .background(.ultraThinMaterial, in: Capsule())

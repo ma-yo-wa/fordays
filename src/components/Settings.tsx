@@ -269,7 +269,8 @@ export default function Settings() {
 
   useEffect(() => {
     if (!open) return;
-    setStack(startOrbId ? [{ k: 'main' }, { k: 'orb', id: startOrbId }] : [{ k: 'main' }]);
+    // From the switcher, an Orb's page stands alone: back goes straight home.
+    setStack(startOrbId ? [{ k: 'orb', id: startOrbId }] : [{ k: 'main' }]);
     setQuery('');
     setMyName(space?.myName ?? config.names[config.me]);
     setConfirm(null);
@@ -494,7 +495,8 @@ export default function Settings() {
         try {
           await leaveSpace(orb.id);
           setConfirm(null);
-          pop();
+          if (stack.length > 1) pop();
+          else setOpen(false);
         } catch (err) {
           toast(err instanceof Error ? err.message : 'Couldn’t leave');
         } finally {
@@ -537,7 +539,8 @@ export default function Settings() {
         try {
           await deletePastOrb(id);
           setConfirm(null);
-          if (page.k === 'orb' || pastOrbs.length <= 1) pop();
+          if (stack.length <= 1) setOpen(false);
+          else if (page.k === 'orb' || pastOrbs.length <= 1) pop();
         } catch (err) {
           toast(err instanceof Error ? err.message : 'Couldn’t delete Orb');
         } finally {

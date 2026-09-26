@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { useApp, canCompose, type Screen } from '../lib/store';
 import { Copy } from '../lib/copy';
 import { scalePressIcon, springTab, springTap } from '../ui/motion';
+import { Avatar } from '../ui';
 import s from './TabBar.module.css';
 
 /* Outlined + ink-soft when idle, solid + ink when selected. Labels stay
@@ -66,6 +67,8 @@ export default function TabBar() {
   const setAddOpen = useApp((st) => st.setAddOpen);
   const openComposer = useApp((st) => st.openComposer);
   const compose = useApp((st) => canCompose(st.space));
+  const space = useApp((st) => st.space);
+  const setSettingsOpen = useApp((st) => st.setSettingsOpen);
 
   const tab = (id: Screen, label: string, icon: (on: boolean) => React.ReactNode) => {
     const on = screen === id;
@@ -96,6 +99,18 @@ export default function TabBar() {
         {tab('bucket', Copy.tabs.ideas, (on) => <BucketIcon on={on} />)}
         {tab('calendar', Copy.tabs.plans, (on) => <CalendarIcon on={on} />)}
         {tab('memories', Copy.tabs.memories, (on) => <MemoriesIcon on={on} />)}
+        {/* You: not a place in the app, so it opens Settings over it. */}
+        <button
+          type="button"
+          className={s.tab}
+          onClick={() => setSettingsOpen(true)}
+          aria-label="Settings"
+        >
+          <span className={`${s.icon} ${s.face}`}>
+            <Avatar name={space?.myName || 'Me'} personId={space?.myId} size="sm" />
+          </span>
+          <span className={s.caption}>You</span>
+        </button>
       </div>
 
       {compose && (

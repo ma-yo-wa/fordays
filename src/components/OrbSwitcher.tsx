@@ -5,8 +5,7 @@ import OrbFaces, { orbFaceChips } from './OrbFaces';
 import { useApp, spaceOrbName } from '../lib/store';
 import type { SpaceInfo } from '../lib/auth';
 import { Copy } from '../lib/copy';
-import { ActionRow, FormGroup, FormRow } from '../ui';
-import f from './Form.module.css';
+import { ActionRow } from '../ui';
 import ui from './Settings.module.css';
 import auth from './Auth.module.css';
 
@@ -113,18 +112,15 @@ export default function OrbSwitcher() {
             })}
           </div>
 
-          {space && (
-            <FormGroup className={ui.section}>
-              <FormRow
-                label={`${spaceOrbName(space) || Copy.orbs.thisOrb} settings`}
-                onClick={() => openOrbSettings(space.id)}
-              >
-                <span className={f.hint}>›</span>
-              </FormRow>
-            </FormGroup>
-          )}
-
           <div className={ui.section}>
+            {space && (
+              <ActionRow
+                icon="○"
+                label={`${spaceOrbName(space) || Copy.orbs.thisOrb} settings`}
+                note="Name, people and notifications"
+                onClick={() => openOrbSettings(space.id)}
+              />
+            )}
             <ActionRow
               icon="+"
               label={Copy.orbs.startNew}
