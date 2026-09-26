@@ -119,8 +119,16 @@
 .headline {
   font: var(--t-gate-display);
   letter-spacing: var(--tr-tighter);
-  margin: var(--space-0) var(--space-0) var(--space-5);
+  margin: var(--space-0) var(--space-0) var(--space-2);
   color: var(--ink);
+}
+
+/* The outer line, same as sign-in. */
+.tagline {
+  font: var(--t-title2);
+  letter-spacing: var(--tr-title2);
+  color: var(--ink-soft);
+  margin: var(--space-0) var(--space-0) var(--space-5);
 }
 
 .subheadline {
@@ -235,7 +243,8 @@
   place-items: center;
   font-size: var(--fs-tiny);
   font-weight: 700;
-  color: var(--paper-card);
+  background: var(--face-fill);
+  color: var(--face-ink);
   border: var(--border-md) solid var(--paper);
   margin-left: calc(-1 * var(--space-1-5));
 }
@@ -270,39 +279,38 @@
   margin-top: var(--space-1);
 }
 
-.mockupCard {
-  background: var(--paper-warm);
-  border: var(--hairline-w) solid var(--hairline);
-  border-radius: var(--r-md);
-  padding: var(--space-3);
+.mockupRow {
+  display: grid;
+  grid-template-columns: var(--space-15) 1fr;
+  gap: var(--space-2-5);
+  align-items: baseline;
+  padding: var(--space-2-5) var(--space-0);
+  border-bottom: var(--hairline-w) solid var(--hairline);
+}
+
+.mockupTime {
+  font-size: var(--fs-caption);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.mockupRowText {
   display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
+  flex-direction: column;
+  gap: var(--space-0-5);
 }
 
-.mockupCardThumb {
-  width: var(--space-9);
-  height: var(--space-9);
-  border-radius: var(--r-control);
-  background: var(--gate-mock-thumb);
-  flex-shrink: var(--space-0);
-}
-
-.mockupCardText strong {
-  display: block;
-  font: var(--t-footnote);
-  font-weight: 600;
+.mockupRowText strong {
+  font-size: var(--fs-footnote);
+  font-weight: 500;
   color: var(--ink);
 }
 
-.mockupCardText span {
-  display: block;
-  font: var(--t-caption2);
+.mockupRowText span {
+  font-size: var(--fs-caption2);
   color: var(--ink-soft);
-  margin-top: var(--space-0-5);
 }
 
-/* Features Grid */
 .features {
   position: relative;
   z-index: var(--z-gate);
@@ -331,8 +339,13 @@
   background: var(--fill-tertiary);
   display: grid;
   place-items: center;
-  font-size: var(--fs-title3);
+  color: var(--ink-soft);
   margin-bottom: var(--space-4);
+}
+
+.featureIcon svg {
+  width: var(--space-6);
+  height: var(--space-6);
 }
 
 .featureCard h3 {

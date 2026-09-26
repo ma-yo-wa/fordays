@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { BucketIcon, CalendarIcon } from './TabBar';
 import s from './DesktopGate.module.css';
 
 /**
@@ -38,13 +39,14 @@ export default function DesktopGate() {
         <div className={s.heroContent}>
           {hasInvite ? (
             <div className={s.inviteBanner}>
-              <span>✨ You’ve been invited to an Orb</span>
+              <span>You’ve been invited to plan together</span>
             </div>
           ) : (
             <div className={s.pillBadge}>Designed exclusively for mobile</div>
           )}
 
           <h1 className={s.headline}>Plans for days.</h1>
+          <p className={s.tagline}>Plans, Bucket lists and Memories</p>
           <p className={s.subheadline}>
             A quiet shared notebook for your plans, dreams, and memories. Not a
             busy calendar with corporate meetings — just an intimate space to
@@ -71,12 +73,8 @@ export default function DesktopGate() {
             <div className={s.mockupHeader}>
               <div className={s.mockupPill}>
                 <div className={s.mockupFaces}>
-                  <span className={s.mockupFace} style={{ background: 'var(--ink-soft)' }}>
-                    M
-                  </span>
-                  <span className={s.mockupFace} style={{ background: 'var(--ink-soft)' }}>
-                    A
-                  </span>
+                  <span className={s.mockupFace}>J</span>
+                  <span className={s.mockupFace}>S</span>
                 </div>
                 <span style={{ fontSize: 'var(--fs-tiny)', color: 'var(--ink-faint)' }}>⌵</span>
               </div>
@@ -84,26 +82,26 @@ export default function DesktopGate() {
               <span className={s.mockupControls}>Today</span>
             </div>
             <div className={s.mockupBody}>
-              <span className={s.mockupDayHeader}>Saturday, Sep 19</span>
-              <div className={s.mockupCard}>
-                <div className={s.mockupCardThumb} />
-                <div className={s.mockupCardText}>
-                  <strong>Dinner at Alma</strong>
-                  <span>Tonight · 7:30pm</span>
-                </div>
+              <span className={s.mockupDayHeader}>Today</span>
+              <div className={s.mockupRow}>
+                <span className={s.mockupTime}>11:00 am</span>
+                <span className={s.mockupRowText}>
+                  <strong>Farmers market</strong>
+                  <span>St. Jacobs</span>
+                </span>
               </div>
-              <div className={s.mockupCard}>
-                <div
-                  className={s.mockupCardThumb}
-                  style={{
-                    background:
-                      'radial-gradient(circle at 30% 30%, var(--orb-peach), var(--orb-rose))',
-                  }}
-                />
-                <div className={s.mockupCardText}>
+              <div className={s.mockupRow}>
+                <span className={s.mockupTime}>7:30 pm</span>
+                <span className={s.mockupRowText}>
+                  <strong>Dinner at Alma</strong>
+                </span>
+              </div>
+              <div className={s.mockupRow}>
+                <span className={s.mockupTime}>All day</span>
+                <span className={s.mockupRowText}>
                   <strong>Kayak the Grand River</strong>
-                  <span>Next weekend · All day</span>
-                </div>
+                  <span>Cambridge</span>
+                </span>
               </div>
             </div>
           </div>
@@ -112,29 +110,38 @@ export default function DesktopGate() {
 
       <section className={s.features}>
         <div className={s.featureCard}>
-          <div className={s.featureIcon}>🪐</div>
-          <h3>Private Orbs</h3>
+          <div className={s.featureIcon}>
+            <span className={s.mockupFaces}>
+              <span className={s.mockupFace}>J</span>
+              <span className={s.mockupFace}>S</span>
+            </span>
+          </div>
+          <h3>Just you, or your people</h3>
           <p>
-            Solo, two, or a few. An Orb is your personal or shared capsule to
-            dream, plan dates, and look back without algorithms or social noise.
+            Keep your own, or share with a partner or a few friends. No feeds,
+            no algorithms, no social noise.
           </p>
         </div>
 
         <div className={s.featureCard}>
-          <div className={s.featureIcon}>🕊️</div>
+          <div className={s.featureIcon}>
+            <CalendarIcon on={false} />
+          </div>
           <h3>Simpler than a calendar</h3>
           <p>
-            No complex timezones, video links, or rigid recurring forms. Just
-            dates, times, and places. Soft blanks are always valid.
+            No complex timezones, video links, or rigid recurring forms. Just a
+            day, a time if you want one, and a place.
           </p>
         </div>
 
         <div className={s.featureCard}>
-          <div className={s.featureIcon}>📸</div>
-          <h3>Someday, plans, memories</h3>
+          <div className={s.featureIcon}>
+            <BucketIcon on={false} />
+          </div>
+          <h3>Bucket lists, plans and memories</h3>
           <p>
-            Keep things you want to do someday. When you’re ready, lock them into
-            a day. Photos and memories stay together in your notebook.
+            Keep what you want to do one day. When you’re ready, give it a day.
+            Afterwards it becomes a memory, photos and all.
           </p>
         </div>
       </section>

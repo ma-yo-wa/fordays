@@ -6,7 +6,7 @@ import s from './TabBar.module.css';
 
 /* Outlined + ink-soft when idle, solid + ink when selected. Labels stay
    Regular — color and fill say where you are, not extra weight. */
-function CalendarIcon({ on }: { on: boolean }) {
+export function CalendarIcon({ on }: { on: boolean }) {
   return on ? (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
       <rect x="3" y="5" width="18" height="16" rx="4" />
@@ -21,7 +21,7 @@ function CalendarIcon({ on }: { on: boolean }) {
   );
 }
 
-function BucketIcon({ on }: { on: boolean }) {
+export function BucketIcon({ on }: { on: boolean }) {
   return on ? (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
       <path d="M3.6 5.5A1 1 0 0 1 4.6 4h14.8a1 1 0 0 1 1 1.2l-2 12.3A3 3 0 0 1 15.4 20H8.6a3 3 0 0 1-3-2.5l-2-12ZM9 9.4a1 1 0 1 0-1.4 1.4l2.6 2.6a1 1 0 0 0 1.5 0l4.6-4.7A1 1 0 0 0 15 7.3l-3.9 3.9L9 9.4Z" />
