@@ -756,6 +756,8 @@ final class AppModel: ObservableObject {
           throw error
         }
       }
+      // The server writes the history line; show it without a relaunch.
+      await refreshLogs()
     } catch {
       if let currentIdx = activities.firstIndex(where: { $0.id == id }) {
         activities[currentIdx] = backup
