@@ -21,18 +21,19 @@ Do not start a later item until the current one is in a place Mayowa is happy wi
   - **No delete-for-everyone** while someone else is still in. **Delete** only when you’re the last member.
   - **Two people:** no Remove. **Many:** admin may remove someone from the group; that still does not delete the notebook.
 
+- **Invite** (done 2026-09-26). Link or code for this space, from sign-in, sign-up, or already signed in. Wrong and closed invites say so plainly. PWA + iOS.
+
 - Covers: GIFs then Unsplash stills then phone photos. User taps a grid; never auto-assign a picture from the title.
 - No picture: `art.ts` family → orb hue. No match → id-hash wash (same default as before).
 
 ## Now
 
-**Invite** — PWA (believed broken) and iOS.
+**Notifications** — iOS push parity (APNs) and PWA push tap → plan.
 
 ## Then, in this order
 
-1. **Notifications**
-2. **Calendar UI**
-3. **Importing calendar**
-4. **Copy**
-5. **Error handling** — friendly failures for join / leave / create space, missing `010`, frozen writes. PWA + iOS.
-6. **Testing**
+1. **Calendar UI**
+2. **Importing calendar**
+3. **Copy**
+4. **Error handling** — friendly failures for join / leave / create space, missing `010`, frozen writes. PWA + iOS.
+5. **Testing**
