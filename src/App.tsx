@@ -160,7 +160,8 @@ function AppShell() {
       try {
         await useApp.getState().joinOrb(inviteCode);
       } catch (err) {
-        useApp.getState().toast(err instanceof Error ? err.message : 'Couldn’t join that Orb');
+        // Arrives while the page is still settling; stay up long enough to read.
+        useApp.getState().toast(err instanceof Error ? err.message : 'Couldn’t join that Orb', 6000);
       } finally {
         setInviteCode(null);
         clearInviteFromUrl();
@@ -196,7 +197,7 @@ function AppShell() {
                 try {
                   await useApp.getState().joinOrb(code);
                 } catch (err) {
-                  useApp.getState().toast(err instanceof Error ? err.message : 'Couldn’t join that Orb');
+                  useApp.getState().toast(err instanceof Error ? err.message : 'Couldn’t join that Orb', 6000);
                   await refreshSpace();
                 }
               } else {

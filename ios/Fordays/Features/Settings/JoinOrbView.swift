@@ -24,12 +24,12 @@ struct JoinOrbView: View {
   var body: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: Theme.Spacing.none) {
-        Text(peek != nil ? "\(peek!.inviterName) invited you" : Copy.Invite.joinTitle)
+        Text(peek?.isOpen == true ? "\(peek!.inviterName) invited you" : Copy.Invite.joinTitle)
           .font(.title2.weight(.semibold))
           .foregroundStyle(Theme.ink)
           .padding(.bottom, Theme.Spacing.sm)
 
-        Text(peek != nil ? "You’ll join \(peek!.inviterName) in this Orb." : Copy.Invite.joinSubtitle)
+        Text(peek?.isOpen == true ? "You’ll join \(peek!.inviterName) in this Orb." : Copy.Invite.joinSubtitle)
           .font(.footnote)
           .foregroundStyle(Theme.inkFaint)
           .padding(.bottom, Theme.Spacing.base)

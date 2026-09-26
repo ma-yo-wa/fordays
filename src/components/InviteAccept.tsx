@@ -64,7 +64,7 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
           }
           setPeek(p);
           if (!p.isOpen) {
-            setError('This Orb is no longer accepting new members.');
+            setError(Copy.invite.closedOrb);
           }
         })
         .catch((err) => {
@@ -120,10 +120,10 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
         clearInviteFromUrl();
         onDismiss();
       }}
-      heading={peek ? `${peek.inviterName} invited you` : Copy.invite.joinTitle}
+      heading={peek?.isOpen ? `${peek.inviterName} invited you` : Copy.invite.joinTitle}
     >
       <p className={f.rowNote} style={{ marginTop: 'var(--space-2)' }}>
-        {peek
+        {peek?.isOpen
           ? `You’ll join ${peek.inviterName} in this Orb.`
           : Copy.invite.joinSubtitle}
       </p>

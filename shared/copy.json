@@ -97,6 +97,7 @@
     "joining": "Joining…",
     "lookingUp": "Looking up Orb…",
     "invalidCode": "No open Orb found for that code or link.",
+    "closedOrb": "This Orb is no longer accepting new members.",
     "joinedSuccess": "Joined “{orb}”",
     "joinedUnnamed": "Joined this Orb",
     "orbCodeLabel": "Orb code",

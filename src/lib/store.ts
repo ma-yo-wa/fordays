@@ -156,7 +156,7 @@ interface AppState {
   syncExternal: (events: ExternalEventInput[], source: CalendarSource) => Promise<void>;
   pullImportedCalendars: () => Promise<void>;
   toggleExternalShare: (id: string, shared: boolean) => Promise<void>;
-  toast: (text: string) => void;
+  toast: (text: string, ms?: number) => void;
 }
 
 let backend: Backend | null = null;
@@ -791,7 +791,16 @@ export const useApp = create<AppState>()((set, get) => {
     setJoinOrbOpen: (joinOrbOpen) => set({ joinOrbOpen }),
 
     async joinOrb(rawCode: string) {
-      const spaceId = await joinInvite(rawCode);
+      let spaceId: string;
+      try {
+        spaceId = await joinInvite(rawCode);
+      } catch (err) {
+        // The server speaks of "spaces"; people see Orbs.
+        const msg = err instanceof Error ? err.message : '';
+        if (/copy from when someone left/i.test(msg)) throw new Error(Copy.invite.closedOrb);
+        if (/no space found|missing a code/i.test(msg)) throw new Error(Copy.invite.invalidCode);
+        throw err;
+      }
       clearFirstOrbSetupPending();
       const allSpaces = await loadSpaces().catch(() => []);
       const genericSolo = allSpaces.find(
@@ -852,12 +861,14 @@ export const useApp = create<AppState>()((set, get) => {
       });
     },
 
-    toast: (text) => {
+    toast: (text, ms = 2600) => {
+      // The same words twice in a row read as a glitch; show them once.
+      if (get().toasts.some((t) => t.text === text)) return;
       const id = ++toastSeq;
       set({ toasts: [...get().toasts, { id, text }] });
       setTimeout(() => {
         set({ toasts: get().toasts.filter((t) => t.id !== id) });
-      }, 2600);
+      }, ms);
     },
   };
 });
