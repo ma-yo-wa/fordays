@@ -6,6 +6,9 @@
 --  on the day for all-day) and shows in their morning summary. Only the
 --  owner hears about it. Counted once however many Orbs or calendars it
 --  came in through, and skipped when they already made a plan from it.
+--
+--  The summary also leaves out anything already over, and lists timed
+--  plans first so the banner leads with what's next.
 -- =====================================================================
 
 create or replace function private.push_tick()
@@ -151,8 +154,9 @@ begin
     on conflict do nothing;
     continue when not found;
 
-    -- Your plans and your Google and Apple events, each once.
-    select jsonb_agg(x order by (x->>'all_day')::boolean desc, (x->>'at')::timestamptz)
+    -- Your plans and your Google and Apple events, each once: timed ones
+    -- first in order, then all-day, and nothing that's already over.
+    select jsonb_agg(x order by (x->>'all_day')::boolean, (x->>'at')::timestamptz)
       into items
       from (
         select jsonb_build_object('title', a.title, 'at', a.date_time,
@@ -165,6 +169,7 @@ begin
                     then (a.date_time at time zone 'UTC')::date
                     else (a.date_time at time zone u.time_zone)::date end
                = u.local_ts::date
+           and (coalesce(a.all_day, false) or coalesce(a.ends_at, a.date_time) > now())
         union
         select jsonb_build_object('title', e.title, 'at', e.starts_at, 'all_day', e.all_day)
           from public.external_events e
@@ -172,6 +177,7 @@ begin
          where e.owner_id = u.user_id
            and nullif(btrim(e.title), '') is not null
            and (e.starts_at at time zone u.time_zone)::date = u.local_ts::date
+           and (e.all_day or coalesce(e.ends_at, e.starts_at) > now())
       ) today;
 
     if items is not null then

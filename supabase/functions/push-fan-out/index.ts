@@ -272,13 +272,20 @@ function alertLine(f: Facts, tz: string | null): string {
   return [line, where].filter(Boolean).join(" · ");
 }
 
-/** "Dinner at Nopi at 7:30 pm, Cinema at 9:45 pm". Four or more: the
- *  first and a count. */
+/** One plan a line, as far as a lock screen shows without opening it:
+ *  three, then "+N more" (exactly four fit, so four show).
+ *  "8:49 am  Aline's Commute" / "All day: Test coffee". */
 function summaryLine(items: NonNullable<Facts["items"]>, tz: string | null): string {
   const one = (i: { title: string; at: string; all_day: boolean }) =>
-    i.all_day || !tz ? clip(i.title, 40) : `${clip(i.title, 40)} at ${clock(i.at, tz)}`;
-  if (items.length >= 4) return `${one(items[0])} and ${items.length - 1} more`;
-  return items.map(one).join(", ");
+    i.all_day || !tz ? `All day: ${clip(i.title, 40)}` : `${clock(i.at, tz)}  ${clip(i.title, 40)}`;
+  if (items.length <= 4) return items.map(one).join("\n");
+  return [...items.slice(0, 3).map(one), `+${items.length - 3} more`].join("\n");
+}
+
+/** "Today · 6 plans" — how full the day is, even when the list is cut. */
+function summaryTitle(items: NonNullable<Facts["items"]>): string {
+  const n = items.length;
+  return `Today · ${n} ${n === 1 ? "plan" : "plans"}`;
 }
 
 function clip(s: string, n: number): string {
@@ -321,7 +328,7 @@ function words(kind: string, f: Facts, tz: string | null): Words {
     case "reminder":
       return { title: titled, body: alertLine(f, tz) };
     case "summary":
-      return { title: "Today", body: summaryLine(f.items ?? [], tz) };
+      return { title: summaryTitle(f.items ?? []), body: summaryLine(f.items ?? [], tz) };
     case "left":
       return {
         title: f.orb_name ? `${who} left ${f.orb_name}` : `${who} left your Orb`,
