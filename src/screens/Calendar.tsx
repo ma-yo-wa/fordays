@@ -1,8 +1,6 @@
 import { useEffect, useMemo } from 'react';
-import CoverArt from '../components/CoverArt';
-import { useApp, partnerName, isMatched } from '../lib/store';
+import { useApp, isMatched } from '../lib/store';
 import { isPlan, type ExternalEvent } from '../lib/types';
-import { faceColor, faceIndexFor } from '../lib/tint';
 import {
   MONTHS,
   dtDate,
@@ -11,13 +9,10 @@ import {
   monthGrid,
   parseISO,
   prettyLower,
-  relativeDay,
   spanDays,
   todayISO,
 } from '../lib/date';
 import { Copy, formatCopy } from '../lib/copy';
-import type { CalendarSource } from '../lib/calendars';
-import Linkify from '../components/Linkify';
 import s from './Calendar.module.css';
 
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -34,10 +29,53 @@ function pillWhen(e: ExternalEvent, day: string): string {
   return 'All day';
 }
 
-function sourceTag(source?: CalendarSource): string {
-  if (source === 'apple') return Copy.availability.apple;
-  if (source === 'outlook') return Copy.availability.outlook;
-  return Copy.availability.google;
+/* The day is already in the heading, so a row gives only the time. */
+function planTime(dateTime: string | null): string {
+  const time = dtTime(dateTime);
+  return time ? prettyLower(time) : 'All day';
+}
+
+/* The place name without the street address, or null when the title already says it. */
+function shortPlace(place: string | null | undefined, title: string): string | null {
+  const name = place?.split(',')[0]?.trim();
+  if (!name) return null;
+  return title.toLowerCase().includes(name.toLowerCase()) ? null : name;
+}
+
+/* A plan on the agenda: time on the left, title and place on the right.
+   Cover, note and who made it live in Detail. */
+function AgendaRow({
+  time,
+  title,
+  place,
+  onOpen,
+}: {
+  time: string;
+  title: string;
+  place?: string | null;
+  onOpen: () => void;
+}) {
+  const shown = shortPlace(place, title);
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className={s.row}
+      onClick={onOpen}
+      onKeyDown={(ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          onOpen();
+        }
+      }}
+    >
+      <span className={s.time}>{time}</span>
+      <span className={s.rowText}>
+        <span className={s.title}>{title}</span>
+        {shown && <span className={s.place}>{shown}</span>}
+      </span>
+    </div>
+  );
 }
 
 export default function Calendar() {
@@ -67,8 +105,6 @@ export default function Calendar() {
         ? space.partnerName
         : null;
 
-  const faceCtx = { me: space?.me ?? config.me, myId: space?.myId };
-  const ownerIndex = (ownerId: string): 0 | 1 => faceIndexFor(ownerId, faceCtx);
 
   /* Plans land on every day they cover, so a trip reads as one run of
      days rather than a mark on the day you leave. */
@@ -274,142 +310,40 @@ export default function Calendar() {
                   <span className={s.upNextDate}>{upNext.dateFormatted}</span>
                 </div>
                 <div className={s.plansList}>
-                  {upNext.plans.map((a) => {
-                    const time = dtTime(a.date_time);
-                    const timing = time ? prettyLower(time) : 'All day';
-                    return (
-                      <div
-                        key={a.id}
-                        role="button"
-                        tabIndex={0}
-                        className={s.entry}
-                        onClick={() => openDetail(a.id)}
-                      >
-                        <CoverArt
-                          url={a.image_url}
-                          washId={a.id}
-                          washTitle={a.title}
-                          size="thumb"
-                          className={s.thumb}
-                        />
-                        <span className={s.entryText}>
-                          <span className={s.title}>{a.title}</span>
-                          <div className={s.range}>{timing}</div>
-                          {a.location && (
-                            <div className={s.loc}>
-                              <span className={s.locIcon}>📍</span> <span className={s.locText}>{a.location}</span>
-                            </div>
-                          )}
-                          {a.description && <div className={s.note}><Linkify text={a.description} /></div>}
-                          <div className={s.meta}>
-                            <span
-                              className={s.avatar}
-                              style={{
-                                background: faceColor(),
-                              }}
-                            >
-                              {(partnerName(config, a.created_by)[0] ?? '?').toUpperCase()}
-                            </span>
-                            {partnerName(config, a.created_by)}
-                          </div>
-                        </span>
-                      </div>
-                    );
-                  })}
+                  {upNext.plans.map((a) => (
+                    <AgendaRow
+                      key={a.id}
+                      time={planTime(a.date_time)}
+                      title={a.title}
+                      place={a.location}
+                      onOpen={() => openDetail(a.id)}
+                    />
+                  ))}
                 </div>
               </div>
             )}
           </>
         ) : (
           <div className={s.plansList}>
-            {dayItems.map((item) => {
-              if (item.kind === 'plan') {
-                const a = item.plan;
-                const when = relativeDay(dtDate(a.date_time) ?? picked);
-                const time = dtTime(a.date_time);
-                const timing = time ? `${when} · ${prettyLower(time)}` : `${when} · All day`;
-                return (
-                  <div
-                    key={a.id}
-                    role="button"
-                    tabIndex={0}
-                    className={s.entry}
-                    onClick={() => openDetail(a.id)}
-                  >
-                    <CoverArt
-                      url={a.image_url}
-                      washId={a.id}
-                      washTitle={a.title}
-                      size="thumb"
-                      className={s.thumb}
-                    />
-                    <span className={s.entryText}>
-                      <span className={s.title}>{a.title}</span>
-                      <div className={s.range}>{timing}</div>
-                      {a.location && (
-                        <div className={s.loc}>
-                          <span className={s.locIcon}>📍</span> <span className={s.locText}>{a.location}</span>
-                        </div>
-                      )}
-                      {a.description && <div className={s.note}><Linkify text={a.description} /></div>}
-                      <div className={s.meta}>
-                        <span
-                          className={s.avatar}
-                          style={{
-                            background: faceColor(),
-                          }}
-                        >
-                          {(partnerName(config, a.created_by)[0] ?? '?').toUpperCase()}
-                        </span>
-                        {partnerName(config, a.created_by)}
-                      </div>
-                    </span>
-                  </div>
-                );
-              }
-
-              const e = item.event;
-              const owner = ownerIndex(e.ownerId);
-              const myId = space?.myId ?? String(space?.me ?? config.me);
-              const isMine = e.ownerId === myId || e.ownerId === String(space?.me ?? config.me);
-              const ownerName = isMine
-                ? (space?.myName ?? config.names[owner] ?? 'You')
-                : (config.names[owner] ?? 'Them');
-              const when = relativeDay(dtDate(e.startsAt) ?? picked);
-              const timing = `${when} · ${pillWhen(e, picked)}`;
-              return (
-                <div
-                  key={e.id}
-                  role="button"
-                  tabIndex={0}
-                  className={s.entry}
-                  onClick={() => openExternal(e.id)}
-                >
-                  <CoverArt
-                    washId={e.id}
-                    washTitle={e.title}
-                    size="thumb"
-                    className={s.thumb}
-                  />
-                  <span className={s.entryText}>
-                    <span className={s.title}>{e.title || Copy.availability.busy}</span>
-                    <div className={s.range}>{timing}</div>
-                    {e.location && (
-                      <div className={s.loc}>
-                        <span className={s.locIcon}>📍</span> <span className={s.locText}>{e.location}</span>
-                      </div>
-                    )}
-                    <div className={s.meta}>
-                      <span className={s.avatar} style={{ background: faceColor() }}>
-                        {(ownerName[0] ?? '?').toUpperCase()}
-                      </span>
-                      {ownerName}
-                      <span className={s.sourceTag}>{sourceTag(e.source)}</span>
-                    </div>
-                  </span>
-                </div>
-              );
-            })}
+            {dayItems.map((item) =>
+              item.kind === 'plan' ? (
+                <AgendaRow
+                  key={item.plan.id}
+                  time={planTime(item.plan.date_time)}
+                  title={item.plan.title}
+                  place={item.plan.location}
+                  onOpen={() => openDetail(item.plan.id)}
+                />
+              ) : (
+                <AgendaRow
+                  key={item.event.id}
+                  time={pillWhen(item.event, picked)}
+                  title={item.event.title || Copy.availability.busy}
+                  place={item.event.location}
+                  onOpen={() => openExternal(item.event.id)}
+                />
+              ),
+            )}
           </div>
         )}
       </div>

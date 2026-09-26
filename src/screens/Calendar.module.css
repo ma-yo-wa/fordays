@@ -159,160 +159,50 @@
 .plansList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2-5);
 }
 
-.calThumb {
-  width: var(--space-10-5);
-  height: var(--space-10-5);
-  border-radius: var(--r-control);
+
+/* Plain rows like iOS: time on the left, title and place on the right. */
+.row {
   display: grid;
-  place-items: center;
-  font-size: var(--fs-title3);
-  background: var(--paper-sunk);
-}
-
-.sourceTag,
-.privateTag {
-  font: var(--t-caption2);
-  letter-spacing: var(--tr-caption2);
-  font-weight: 500;
-  padding: var(--space-px) var(--space-1-5);
-  border-radius: var(--r-capsule);
-  line-height: var(--lh-caption);
-}
-
-.sourceTag {
-  color: var(--ink-soft);
-  background: var(--paper-sunk);
-}
-
-.privateTag {
-  color: var(--ink-soft);
-  background: transparent;
-  border: var(--hairline-w) solid var(--hairline);
-}
-
-.entryCal .title {
-  font-weight: 500;
-}
-
-/* Warm, rounded tactile cards matching iOS */
-.entry {
-  display: grid;
-  grid-template-columns: var(--space-10-5) 1fr;
+  grid-template-columns: var(--space-18) 1fr;
   gap: var(--space-3);
-  align-items: start;
-  padding: var(--space-3-5);
-  border: none;
-  background: var(--paper-warm);
-  border-radius: var(--r-md);
-  box-shadow: var(--space-0) var(--space-px) var(--space-0-75) var(--fill-quaternary);
-  width: 100%;
-  text-align: left;
+  align-items: baseline;
+  padding: var(--space-3) var(--space-0);
+  border-bottom: var(--hairline-w) solid var(--hairline);
   cursor: pointer;
   color: inherit;
-  transition:
-    transform var(--duration-press) var(--ease-ios),
-    opacity var(--duration-press) var(--ease-ios);
+  transition: opacity var(--duration-press) var(--ease-ios);
 }
-
-.entry:active {
-  transform: scale(var(--scale-press-hair));
+.row:active {
   opacity: var(--op-80);
 }
-
-.entry + .entry {
-  border-top: none;
+.time {
+  font: var(--t-subhead);
+  letter-spacing: var(--tr-subhead);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  text-align: right;
+  white-space: nowrap;
 }
-
-.thumb {
-  width: var(--space-10-5);
-  height: var(--space-10-5);
-  border-radius: var(--r-control);
-  overflow: hidden;
-}
-
-.entryText {
+.rowText {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  gap: var(--space-0-5);
 }
-
 .title {
-  font: var(--t-headline);
-  letter-spacing: var(--tr-headline);
-  display: block;
+  font: var(--t-body);
+  letter-spacing: var(--tr-body);
   overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
 }
-
-.range {
-  margin-top: var(--space-px);
-  font: var(--t-subhead);
-  letter-spacing: var(--tr-subhead);
-  color: var(--ink-soft);
-}
-
-.loc {
-  margin-top: var(--space-0-5);
+.place {
   font: var(--t-footnote);
   letter-spacing: var(--tr-footnote);
   color: var(--ink-soft);
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-1);
-}
-
-.locIcon {
-  flex-shrink: 0;
-}
-
-.locText {
-  min-width: 0;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
-}
-
-.note {
-  margin-top: var(--space-0-5);
-  font: var(--t-footnote);
-  letter-spacing: var(--tr-footnote);
-  color: var(--ink-soft);
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
-}
-
-.meta {
-  margin-top: var(--space-1-25);
-  display: flex;
-  align-items: center;
-  gap: var(--space-1-25);
-  font: var(--t-caption);
-  letter-spacing: var(--tr-caption);
-  color: var(--ink-soft);
-}
-
-.meta svg {
-  width: var(--space-3);
-  height: var(--space-3);
-}
-
-.avatar {
-  width: var(--space-4-25);
-  height: var(--space-4-25);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--fs-micro);
-  font-weight: 700;
-  line-height: var(--lh-solid);
-  color: var(--paper-warm);
-  padding-bottom: var(--space-px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .blank {
