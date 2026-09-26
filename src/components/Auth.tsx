@@ -112,6 +112,7 @@ export default function Auth({
         <div className={f.row}>
           <Button
             variant="secondary"
+            fullWidth
             onClick={() => {
               setMode('signin');
               setError(null);
@@ -145,6 +146,7 @@ export default function Auth({
         <div className={f.row}>
           <Button
             variant="primary"
+          fullWidth
             loading={busy}
             disabled={busy}
             onClick={() => void submit()}
@@ -182,6 +184,7 @@ export default function Auth({
         <div className={f.row}>
           <Button
             variant="primary"
+          fullWidth
             loading={busy}
             disabled={busy}
             onClick={() => void submit()}
@@ -266,6 +269,7 @@ export default function Auth({
       <div className={f.row}>
         <Button
           variant="primary"
+          fullWidth
           loading={busy}
           disabled={busy}
           onClick={() => void submit()}

@@ -12,11 +12,11 @@ struct AuthView: View {
 
   var body: some View {
     ZStack {
-      Theme.paper.ignoresSafeArea()
+      OrbBackground().ignoresSafeArea()
       ScrollView {
         VStack(alignment: .leading, spacing: Theme.Spacing.none) {
           Text(Theme.brandName)
-            .font(.fdBrand)
+            .font(.fdLargeTitle)
             .foregroundStyle(Theme.ink)
             .padding(.top, Theme.Spacing.s48)
             .padding(.bottom, Theme.Spacing.sm)
@@ -128,7 +128,7 @@ struct AuthView: View {
 
   private func lead(_ text: String) -> some View {
     Text(text)
-      .font(.title3.weight(.medium))
+      .font(.fdBody)
       .foregroundStyle(Theme.inkSoft)
       .padding(.bottom, Theme.Spacing.lg)
   }

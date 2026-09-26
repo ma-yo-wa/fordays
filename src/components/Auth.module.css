@@ -47,7 +47,7 @@
   margin-top: var(--space-4-5);
   border: none;
   background: none;
-  color: var(--rose-ink);
+  color: var(--ink-soft);
   font: var(--t-subhead);
   letter-spacing: var(--tr-subhead);
   font-weight: 600;
@@ -60,7 +60,7 @@
   margin: var(--space-2-5) var(--space-0) var(--space-0);
   border: none;
   background: none;
-  color: var(--rose-ink);
+  color: var(--ink-soft);
   font: var(--t-footnote);
   letter-spacing: var(--tr-footnote);
   font-weight: 600;
