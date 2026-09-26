@@ -12,7 +12,7 @@ An Orb is **the notebook for a specific we** (including a we of one). Plans belo
 
 Someday / Plans / Memories **are** that notebook. Everyone has at least one **live** Orb.
 
-**Notebook isolation**: Plans stay strictly in the notebook where they were created. No cross-Orb bleeding. Plans from your Personal Orb or another Orb never appear as phantom availability lines or ghost dots in your other Orbs. To see your personal plans, switch to Personal. External calendar events (Google / Apple / Outlook) live only in Personal and never appear in shared Orbs.
+**Notebook isolation**: Plans stay strictly in the notebook where they were created. No cross-Orb bleeding. Plans from your Personal Orb or another Orb never appear as phantom availability lines or ghost dots in your other Orbs. To see your personal plans, switch to Personal. Your own calendar events (Google / Apple / Outlook) show only in Personal and never appear in shared Orbs — see Calendars.
 
 **Enforced Personal Orb**: Every user always has a Personal Orb as their permanent anchor. You can rename it, but you cannot delete your Personal Orb. It is your home base.
 
@@ -28,7 +28,7 @@ Someday / Plans / Memories **are** that notebook. Everyone has at least one **li
 - Type parity: Someday moves directly to Someday; Plans move directly to Plans (retaining their date, time, location, notes, and cover).
 - When moved, the item leaves Personal and appears in the target Orb with a clean confirmation toast (`Moved to Aline’s Someday` / `Moved to Aline’s Plans`).
 
-**Orb** = the notebook. **Faces** = people in *this* space. Every face is the same warm stone (`ink-soft`) with a white initial — one color, like a group thread. The letter tells people apart. A photo can replace the initial later. Not a hue per person, and not rose / sage.
+**Orb** = the notebook. **Faces** = people in *this* space. Each face is one of five soft orb pastels with a dark initial, picked from the person’s id, so someone is the same color in every Orb and on both clients (`faceColor` in `tint.ts` = `Theme.faceColor`, same hash). The letter still tells people apart. A photo can replace the initial later. Orb tiles cluster faces inside the circle: one centred, two side by side, three as two over one, four as a square, five or more as three and `+N`.
 
 The solo notebook’s default title is **their name** — the first word of their display name (`Mayowa`, not Personal, not Mayowa’s Orb). They can rename it. A shared Orb is still not titled with one person’s name; that notebook belongs to the we. Placeholder in the field is their name for Just you, and an example (`Aline’s Crew`) for With someone — the shared example is never saved. Unnamed legacy Orbs (Fordays / Someday / blank) stay untitled until named. A solo Orb still titled `Personal` is renamed to their name the next time the app loads. When they name it, that word sits **under the circle** and **beside This Orb**.
 
@@ -49,15 +49,18 @@ Do **not** type Orbs as Work / Personal / Travel. Names are free. Categories are
 
 ### Settings
 
-One sheet. At the top, **Your Orbs**; below it, a short list of rows that each open a page inside the same sheet (`← Back`, never a second sheet).
+**The Orb name** at the top of Plans opens the **switcher**: your Orbs as tiles (tap to switch; hold the name to jump back to the last Orb), then **[Orb] settings**, **Start a new one** and **Join with a code**. The switcher only switches; it isn’t Settings.
 
-- **Your Orbs** — all live notebooks as a grid, with + first (Start a new one / Join with a code). Tap a tile to switch.
-- **This Orb** — the open notebook. The page reads **This Orb** with its name beside it in a lighter weight. The field is the name (placeholder still the example). People / invite / remove, Leave or Delete. No “Orb actions” heading.
-- **Account** — your name, Past Orbs, Sign out.
-- **External calendars** — PWA: Google and Outlook. iOS: Apple Calendar, which already carries any Google or Outlook account on the phone, so there is no separate Outlook switch.
+**Your face** in the tab bar, beside Memories, opens **Settings** as a full screen (not a sheet), with a search field at the top. Rows open pages in place with `← Back`:
+
+- **You** — your name and email.
+- **Your Orbs** — every live notebook; each opens its Orb page (name, people / invite / remove, Leave or Delete). Orb pages work for any Orb, not just the open one. Opened from the switcher, an Orb page stands alone and Back returns to the tab.
+- **Past Orbs** — frozen copies to restore or delete.
+- **Calendars** — your own calendars (see Calendars).
 - **Notifications** — PWA only for now. iOS shows no row until native push ships; never a switch that can’t turn on.
+- **Sign out** — at the bottom, with a confirm.
 
-Account / calendars / notifications are you, not a notebook.
+You, calendars and notifications are you, not a notebook.
 
 Invite is its own sheet, so Settings closes before it opens.
 
@@ -125,13 +128,13 @@ Empty: the line only. Plus adds. No empty CTA.
   - A dot simply means something is happening on that day.
   - Capped at 3 dots total per day cell (`...` heat map shorthand) without numbers cluttering the cell.
 - **External Events are Plans (No Extra Setup)**:
-  - In a shared Orb (with a partner or group), external calendar events never appear. Shared Orbs are pure notebooks of what you plan together.
-  - External events (Google / Apple / Outlook) live in your Personal Orb alongside personal plans, tagged simply with their source (`Google`, `Apple`, or `Outlook`).
+  - In a shared Orb (with a partner or group), your calendar events never appear. Shared Orbs are pure notebooks of what you plan together.
+  - Your calendar events (Google / Apple / Outlook) show in your Personal Orb alongside personal plans, tagged simply with their calendar.
   - **First-class plans, no difference**: A massage appointment, hotel booking, or workout is a plan. There is no second-class setup or modal barrier.
   - **Cover Art**: Displayed with the signature Fordays gradient orb wash (matching native plans without photos), completely replacing emoji glyphs.
   - **Agenda Cards**: Rendered as identical floating tactile cards with cover art wash, title, time range, location link (📍), owner face, and a quiet source capsule (`Google`, `Apple`, `Outlook`).
   - **Detail Sheet**: Features the signature gradient cover header, title, time range, tappable location to Apple Maps, and source badge.
-  - **No "Share with the Orb" / Lock Chrome**: Zero "Share with the Orb" buttons, zero privacy locks, and zero "Make private" toggles. External events whisper ambiently as `Busy ([time])` to partners in shared Orbs for conflict awareness without exposing details.
+  - **No "Share with the Orb" / Lock Chrome**: Zero "Share with the Orb" buttons, zero privacy locks, and zero "Make private" toggles. Nobody else ever sees your calendar events, not even as `Busy`.
   - **Do with [Partner / Space]**: Just like any personal plan, an external plan in Personal can be brought into a shared Orb via `Do with [Partner]` with a single tap, creating a live shared plan in that notebook.
 - **Frosted Shelf Header (Approach A)**:
   - The sticky top header provides a spacious frosted shelf (~56pt min-height) with a generous 14pt cushion directly below the Orb selector pill (`Alowa ∨`).
@@ -216,29 +219,25 @@ An optional place on a plan or idea.
 
 ## Calendars
 
-**External calendars** lists the overlays: **Google** and **Outlook** on the web; **Apple Calendar** (and Outlook under it) on iPhone. Outlook is always in that list — not hidden until a key exists.
+**Your calendar is yours.** An imported event belongs to the person who imported it, not to an Orb. It is stored once (`my_events`), only its owner can read it, and nobody else ever sees it — no `Busy`, no sharing switch. A calendar can’t know whether someone is really busy, and a false `Busy` kills invites; availability in a group comes from answers to a suggested day, never from calendars.
+
+- **Where it shows**: only in your home Orb (Personal, your solo notebook), never in any other Orb.
+- **It’s a plan to you**: it reminds you with your default alerts and is in your morning summary, counted once however many calendars carry it. One you made a plan from (`Do with…`) stops showing and is left to the plan.
+- **Sources**: the web connects **Google** and **Outlook**; iPhone reads **Apple Calendar**, which already carries any Google or Outlook account on the phone. Tick as many calendars as you like; the main one is ticked to start.
+- **Sync**: read only, never notifies. A month back to six months ahead. Declined and cancelled events are left out. Each calendar is replaced whole on every sync, so something deleted at the source is gone here too. It refreshes when you open the app or come back to it.
+- **The Calendars page** opens with *Your events show in [home Orb] and remind you. Nobody else ever sees them.* Each source has a switch, the ticked calendars, **Refresh**, and a count with *Updated 5 min ago*. Turning a source off clears every event from it.
 
 Google / Microsoft / Unsplash / Giphy / VAPID keys are deploy env. Never a key field in Settings.
 
 ---
 
-## The Whisper (Availability Context)
+## What you already have (Composer)
 
-When composing a plan, ambient availability context appears quietly below the date and time fields.
+Under the date in the Composer, a private line says what you already have then: *You have Gym – Lower Body, 8:00 am – 9:00 am*, with *and 2 more* when there are several. It reads only your own data — your calendar events and your home Orb’s plans — in any Orb, and nobody else sees it.
 
-- **Calm ambient context, never a gatekeeper**: The Whisper never blocks saving. The action button is always active and one tap ("Make it a plan"). There are zero warning dialogs, confirmation prompts, or "Proceed anyway?" modals. Overlaps are informative, not blockers (e.g. joining a Netflix party while traveling in France, skipping a workout for drinks, or joining dinner 30 minutes late).
-- **Universal Ambient Availability (Personal Plans)**:
-  - Personal timed plans automatically whisper as `[Name] · Busy ([time])` into all your shared Orbs.
-  - Strict privacy: titles, locations, and descriptions remain 100% private in Personal; shared Orbs only see `Busy` and the time window.
-  - Ambient availability requires zero toggles or manual sharing for native plans.
-- **Imported External Calendars (Apple, Google, Outlook)**:
-  - Your own imported calendar events whisper to you for self-awareness without needing to be shared.
-  - Partner external calendar events whisper only when explicitly shared with the Orb. If shared with title, the title is shown (`Aline · Dinner (6:00 – 8:30 pm)`). If shared as busy only (null title), it displays as `Busy` (`Aline · Busy (6:00 – 8:30 pm)`). If unshared, it remains completely private and silent.
-- **Transparent time ranges**: Show concrete ranges (`6:00 – 8:30 pm` or `All day`) rather than ambiguous statements like "busy until 8:30 pm".
-- **Intelligent time-aware filtering**:
-  - *Date-only plan (no From/Until)*: Whispers events scheduled across that day so members see open pockets before picking a time.
-  - *Plan with From time*: Filters out events that ended before the plan starts. Never assume an artificial meeting duration: when `Until` is blank, active and later events from `From` onward are surfaced directly so people can process the information and judge for themselves. If `Until` is explicitly specified, events beyond that window are excluded.
-  - *Multiple overlaps*: If up to 2 events overlap, both are shown concisely (`Aline · 6:00 – 8:30 pm · Remi · All day`). If 3 or more overlap, it provides a quiet summary count (`3 overlapping events at this time` or `3 shared events on this day`).
+- **Day only**: anything on that day. **With a time**: anything that overlaps it (an hour when there’s no Until).
+- **Never a gatekeeper**: it never blocks saving. No warnings, no “Proceed anyway?”. Overlaps are information (a Netflix party while travelling, drinks instead of the gym).
+- **Nothing is broadcast**: other people’s plans and calendars never appear here, and your Personal plans never whisper `Busy` into shared Orbs.
 
 ---
 
@@ -275,7 +274,7 @@ Sign in first. Sign up is a link. Name placeholder **Aline**. No Mayowa in app c
 ## Sheets & Confirmations
 
 - **Never stack sheets.** A Sheet (`<Sheet>` in PWA, `.sheet` in SwiftUI) is a draggable drawer with a grabber bar for primary destinations (Settings, Composer, Detail, Add). Stacking a sheet on top of another sheet creates double grabber bars, conflicting gestures, and visual clutter.
-- **In-sheet sub-views**: Multi-step flows within a sheet (e.g. Settings → Another Orb → Your Orb; Settings → Past Orbs; Settings → Import calendars) navigate in-place inside that single sheet with a `← Back` button. The sheet retains its single top grabber bar.
+- **In-sheet sub-views**: Multi-step flows within a sheet (e.g. Detail → Alerts; Composer → Cover) navigate in-place inside that single sheet with a `← Back` button. The sheet retains its single top grabber bar. Settings is a full screen, not a sheet, and its pages push in place the same way.
 - **Confirmations & destructive choices**: Never use a Sheet for confirmation (Leave Orb, Delete Orb, Remove member, Purge, Discard). Always use an **Action Sheet** (`<ActionSheet>` in PWA, `.confirmationDialog` in SwiftUI).
   - Anchored to the bottom of the screen above the safe area / home indicator.
   - Zero grabber bars, completely non-draggable.
