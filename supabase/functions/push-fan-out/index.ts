@@ -5,17 +5,28 @@
    Zero dependencies. VAPID signing (RFC 8292) and payload encryption
    (RFC 8291 / aes128gcm per RFC 8188) are done directly against Web
    Crypto — no notification SDK, no vendor sitting between our database
-   and the user's push service.
+   and the user's push service. iOS goes straight to APNs with a token
+   signed by our own .p8 key, same idea.
 
-   Invoked by the push triggers in push.sql with:
-     { recipient_id, space_id, activity_id?, kind, title, body }
+   Invoked by private.enqueue_push_event (migration 020) with:
+     { recipient_id, space_id, activity_id?, kind, facts }
+   facts = { actor, title?, note?, at?, all_day?, orb?, orb_name? }
 
-   kind is one of: idea | scheduled | notes | joined | suggested | suggestion_accepted
+   The words are written here, per device, so a time reads in that
+   device's time zone. Older callers that still send { title, body }
+   are passed through as they are.
+
+   kind is one of: idea | scheduled | rescheduled | notes | joined |
+                   suggested | suggestion_accepted
 
    Secrets required (supabase secrets set ...):
      VAPID_PUBLIC_KEY    base64url, uncompressed P-256 point (65 bytes)
      VAPID_PRIVATE_KEY   base64url, raw d scalar (32 bytes)
      VAPID_SUBJECT       mailto:you@example.com  (or an https:// URL)
+     APNS_KEY_ID         10 characters, from the Apple Developer key
+     APNS_TEAM_ID        10 characters
+     APNS_BUNDLE_ID      app.fordays.ios
+     APNS_PRIVATE_KEY    the .p8 file's contents (PEM)
      SUPABASE_URL                (injected automatically)
      SUPABASE_SERVICE_ROLE_KEY   (injected automatically)
    ===================================================================== */
@@ -25,6 +36,10 @@ const VAPID_PRIVATE = Deno.env.get("VAPID_PRIVATE_KEY")!;
 const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") ?? "mailto:hello@example.com";
 const SB_URL        = Deno.env.get("SUPABASE_URL")!;
 const SB_KEY        = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const APNS_KEY_ID   = Deno.env.get("APNS_KEY_ID") ?? "";
+const APNS_TEAM_ID  = Deno.env.get("APNS_TEAM_ID") ?? "";
+const APNS_TOPIC    = Deno.env.get("APNS_BUNDLE_ID") ?? "app.fordays.ios";
+const APNS_PEM      = Deno.env.get("APNS_PRIVATE_KEY") ?? "";
 
 /* The trigger's bearer has to satisfy two checks with one value: the
    platform gateway, which only accepts a JWT, and the caller check below.
@@ -158,12 +173,122 @@ async function encryptPayload(
 }
 
 /* ------------------------------------------------------------------ */
-/* One device                                                          */
+/* Words                                                               */
 /* ------------------------------------------------------------------ */
-type Sub = { endpoint: string; p256dh: string; auth: string };
+type Facts = {
+  actor?: string;
+  title?: string | null;
+  note?: string | null;
+  at?: string | null;
+  all_day?: boolean;
+  orb?: string | null;       // set only when they're in more than one shared Orb
+  orb_name?: string | null;  // "joined" always names the Orb if it has a name
+};
 
-async function sendTo(sub: Sub, payload: unknown): Promise<"ok" | "gone" | "failed"> {
-  const body = await encryptPayload(JSON.stringify(payload), sub.p256dh, sub.auth);
+type Words = { title: string; body: string };
+
+const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** Calendar parts of an instant as seen in a time zone. */
+function partsIn(d: Date, tz: string): { y: number; m: number; day: number; wd: number; h: number; min: number } {
+  const f = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, year: "numeric", month: "numeric", day: "numeric",
+    weekday: "short", hour: "numeric", minute: "numeric", hourCycle: "h23",
+  });
+  const p: Record<string, string> = {};
+  for (const x of f.formatToParts(d)) p[x.type] = x.value;
+  return {
+    y: +p.year, m: +p.month, day: +p.day,
+    wd: WEEKDAY.indexOf(p.weekday), h: +p.hour % 24, min: +p.minute,
+  };
+}
+
+/** "today at 6:30 pm", "tomorrow", "Sat, Oct 3 at 6:30 pm". Lowercase
+ *  times, as everywhere else in the app. All-day plans are stored at
+ *  noon UTC, so their date is read in UTC; timed plans in the device's
+ *  own zone. No zone known yet → the day only, never a UTC clock time. */
+function when(iso: string | null | undefined, allDay: boolean, tz: string | null): string {
+  if (!iso) return "";
+  const at = new Date(iso);
+  if (isNaN(at.getTime())) return "";
+  const zone = allDay || !tz ? "UTC" : tz;
+  const a = partsIn(at, zone);
+  const today = partsIn(new Date(), tz ?? "UTC");
+
+  const dayNo = (x: { y: number; m: number; day: number }) => Date.UTC(x.y, x.m - 1, x.day) / 86400000;
+  const diff = dayNo(a) - dayNo(today);
+  const day = diff === 0 ? "today"
+    : diff === 1 ? "tomorrow"
+    : `${WEEKDAY[a.wd]}, ${MONTH[a.m - 1]} ${a.day}`;
+
+  if (allDay || !tz) return day;
+  const h12 = a.h % 12 === 0 ? 12 : a.h % 12;
+  const mm = String(a.min).padStart(2, "0");
+  return `${day} at ${h12}:${mm} ${a.h >= 12 ? "pm" : "am"}`;
+}
+
+function clip(s: string, n: number): string {
+  const t = s.replace(/\s+/g, " ").trim();
+  return t.length > n ? t.slice(0, n - 1).trimEnd() + "…" : t;
+}
+
+/** Plan name first so the banner says what it's about; the Orb's name
+ *  follows only for people juggling more than one shared Orb. */
+function words(kind: string, f: Facts, tz: string | null): Words {
+  const who = f.actor || "Someone";
+  const plan = clip(f.title || "A plan", 60);
+  const titled = f.orb ? `${plan} · ${f.orb}` : plan;
+  const note = f.note ? clip(f.note, 120) : "";
+  const at = when(f.at, Boolean(f.all_day), tz);
+  const withNote = (line: string) => (note ? `${line}\n${note}` : line);
+
+  switch (kind) {
+    case "idea":
+      return { title: titled, body: withNote(`${who} added this to Someday`) };
+    case "scheduled":
+      return { title: titled, body: at ? `${who} made this a plan for ${at}` : `${who} made this a plan` };
+    case "rescheduled":
+      return { title: titled, body: at ? `${who} moved this to ${at}` : `${who} changed the day` };
+    case "suggested":
+      return { title: titled, body: withNote(at ? `${who} suggested ${at}` : `${who} suggested a new day`) };
+    case "suggestion_accepted":
+      return { title: titled, body: at ? `${who} said yes to ${at}` : `${who} said yes to your day` };
+    case "notes":
+      return { title: titled, body: withNote(`${who} updated the note`) };
+    case "joined":
+      return {
+        title: f.orb_name ? `${who} joined ${f.orb_name}` : `${who} joined your Orb`,
+        body: "You can plan together now",
+      };
+    default:
+      return { title: titled, body: "" };
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* One web device                                                      */
+/* ------------------------------------------------------------------ */
+type Sub = {
+  endpoint: string;
+  platform: "web" | "ios";
+  p256dh: string | null;
+  auth: string | null;
+  apns_env: string | null;
+  time_zone: string | null;
+};
+
+type Message = Words & {
+  tag: string;
+  kind: string;
+  activityId: string | null;
+  spaceId: string;
+  url: string;
+};
+
+async function sendWeb(sub: Sub, msg: Message): Promise<"ok" | "gone" | "failed"> {
+  if (!sub.p256dh || !sub.auth) return "gone";
+  const body = await encryptPayload(JSON.stringify(msg), sub.p256dh, sub.auth);
   const auth = await vapidHeader(sub.endpoint);
 
   const res = await fetch(sub.endpoint, {
@@ -187,6 +312,89 @@ async function sendTo(sub: Sub, payload: unknown): Promise<"ok" | "gone" | "fail
 }
 
 /* ------------------------------------------------------------------ */
+/* One iOS device — APNs over HTTP/2 with a provider token             */
+/* ------------------------------------------------------------------ */
+let apnsKey: CryptoKey | null = null;
+let apnsJwt: { token: string; at: number } | null = null;
+
+async function apnsToken(): Promise<string> {
+  // Apple wants the same token reused for 20–60 minutes; minting one per
+  // request gets TooManyProviderTokenUpdates.
+  const now = Math.floor(Date.now() / 1000);
+  if (apnsJwt && now - apnsJwt.at < 40 * 60) return apnsJwt.token;
+
+  if (!apnsKey) {
+    const b64 = APNS_PEM
+      .replace(/-----(BEGIN|END) PRIVATE KEY-----/g, "")
+      .replace(/\s+/g, "");
+    const der = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    apnsKey = await crypto.subtle.importKey(
+      "pkcs8", der, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"],
+    );
+  }
+
+  const header = { alg: "ES256", kid: APNS_KEY_ID };
+  const claims = { iss: APNS_TEAM_ID, iat: now };
+  const input =
+    bytesToB64u(utf8(JSON.stringify(header))) + "." +
+    bytesToB64u(utf8(JSON.stringify(claims)));
+  const sig = new Uint8Array(
+    await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, apnsKey, utf8(input)),
+  );
+  apnsJwt = { token: `${input}.${bytesToB64u(sig)}`, at: now };
+  return apnsJwt.token;
+}
+
+async function sendIos(sub: Sub, msg: Message): Promise<"ok" | "gone" | "failed"> {
+  if (!APNS_PEM || !APNS_KEY_ID || !APNS_TEAM_ID) {
+    console.error("APNs secrets missing");
+    return "failed";
+  }
+  const token = sub.endpoint.replace(/^apns:/, "");
+  const host = sub.apns_env === "sandbox"
+    ? "https://api.sandbox.push.apple.com"
+    : "https://api.push.apple.com";
+
+  const payload = {
+    aps: {
+      alert: { title: msg.title, body: msg.body },
+      sound: "default",
+      "thread-id": msg.spaceId,
+    },
+    kind: msg.kind,
+    activityId: msg.activityId,
+    spaceId: msg.spaceId,
+    url: msg.url,
+  };
+
+  const res = await fetch(`${host}/3/device/${token}`, {
+    method: "POST",
+    headers: {
+      "authorization": `bearer ${await apnsToken()}`,
+      "apns-topic": APNS_TOPIC,
+      "apns-push-type": "alert",
+      "apns-priority": "10",
+      "apns-expiration": String(Math.floor(Date.now() / 1000) + 86400),
+      // Same collapse as the web tag: a second update about one plan
+      // replaces the first banner.
+      "apns-collapse-id": msg.tag.slice(0, 64),
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (res.ok) return "ok";
+  const text = await res.text().catch(() => "");
+  let reason = "";
+  try { reason = JSON.parse(text).reason ?? ""; } catch { /* */ }
+  if (res.status === 410 || reason === "BadDeviceToken" || reason === "Unregistered") {
+    return "gone";
+  }
+  console.error("apns failed", res.status, reason || text);
+  return "failed";
+}
+
+/* ------------------------------------------------------------------ */
 /* PostgREST helpers (service role — bypasses RLS by design)           */
 /* ------------------------------------------------------------------ */
 const sbHeaders = {
@@ -195,9 +403,10 @@ const sbHeaders = {
   "Content-Type": "application/json",
 };
 
-async function loadSubs(userId: string, spaceId: string): Promise<Sub[]> {
+/** Every device the person has. A device hears from all their Orbs. */
+async function loadSubs(userId: string): Promise<Sub[]> {
   const url = `${SB_URL}/rest/v1/push_subscriptions` +
-    `?select=endpoint,p256dh,auth&user_id=eq.${userId}&space_id=eq.${spaceId}`;
+    `?select=endpoint,platform,p256dh,auth,apns_env,time_zone&user_id=eq.${userId}`;
   const r = await fetch(url, { headers: sbHeaders });
   if (!r.ok) { console.error("loadSubs", await r.text()); return []; }
   return await r.json();
@@ -230,8 +439,9 @@ Deno.serve(async (req) => {
     space_id: string;
     activity_id?: string | null;
     kind: string;
-    title: string;
-    body: string;
+    facts?: Facts;
+    title?: string;
+    body?: string;
   };
   try {
     job = await req.json();
@@ -239,22 +449,20 @@ Deno.serve(async (req) => {
     return new Response("Bad JSON", { status: 400 });
   }
 
-  if (!job.recipient_id || !job.space_id || !job.title) {
+  if (!job.recipient_id || !job.space_id || (!job.facts && !job.title)) {
     return new Response("Missing fields", { status: 400 });
   }
 
-  const subs = await loadSubs(job.recipient_id, job.space_id);
+  const subs = await loadSubs(job.recipient_id);
   if (!subs.length) {
     return Response.json({ sent: 0, reason: "no registered devices" });
   }
 
   const activityId = job.activity_id ?? null;
   const spaceId = job.space_id;
-  const payload = {
-    title: job.title,
-    body: job.body,
+  const base = {
     // Collapse repeats: one activity, or one "joined" per space.
-    tag: activityId ? `activity-${activityId}` : `space-${job.kind}-${job.space_id}`,
+    tag: activityId ? `activity-${activityId}` : `space-${job.kind}-${spaceId}`,
     kind: job.kind,
     activityId,
     spaceId,
@@ -265,7 +473,11 @@ Deno.serve(async (req) => {
 
   const results = await Promise.all(subs.map(async (s) => {
     try {
-      const outcome = await sendTo(s, payload);
+      const w = job.facts
+        ? words(job.kind, job.facts, s.time_zone)
+        : { title: job.title ?? "Fordays", body: job.body ?? "" };
+      const msg: Message = { ...base, ...w };
+      const outcome = s.platform === "ios" ? await sendIos(s, msg) : await sendWeb(s, msg);
       if (outcome === "gone") await pruneSub(s.endpoint);
       return outcome;
     } catch (err) {

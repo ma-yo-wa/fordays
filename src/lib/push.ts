@@ -62,32 +62,55 @@ export function pushState(): PushState {
   return 'default';
 }
 
-async function persist(subscription: PushSubscription): Promise<void> {
-  const conf = loadConfig();
-  const sb = await getClient(conf);
-  if (!sb || !conf.spaceId) return;
+/* A device belongs to whoever is signed in, and hears from every Orb
+   they're in. The RPC moves the row over if this browser was last
+   signed in as someone else, which RLS alone can't do. */
+async function persist(j: PushSubscriptionJSON): Promise<void> {
+  const sb = await getClient();
+  if (!sb) return;
   const { data: sess } = await sb.auth.getSession();
-  const uid = sess.session?.user?.id;
-  if (!uid) return;
-  const j = subscription.toJSON();
-  await sb.from('push_subscriptions').upsert(
-    {
-      user_id: uid,
-      space_id: conf.spaceId,
-      endpoint: j.endpoint,
-      p256dh: j.keys?.p256dh,
-      auth: j.keys?.auth,
-      user_agent: navigator.userAgent.slice(0, 180),
-      last_seen: new Date().toISOString(),
-    },
-    { onConflict: 'endpoint' },
-  );
+  if (!sess.session?.user?.id || !j.endpoint) return;
+  await sb.rpc('register_push_device', {
+    device_endpoint: j.endpoint,
+    device_platform: 'web',
+    device_p256dh: j.keys?.p256dh ?? null,
+    device_auth: j.keys?.auth ?? null,
+    device_tz: Intl.DateTimeFormat().resolvedOptions().timeZone ?? null,
+    device_agent: navigator.userAgent,
+  });
 }
 
 async function forget(endpoint: string): Promise<void> {
   const sb = await getClient();
   if (!sb) return;
   await sb.from('push_subscriptions').delete().eq('endpoint', endpoint);
+}
+
+/** The worker got a fresh endpoint from the push service (they rotate
+ *  without asking). Swap it in, or this device quietly goes deaf. */
+export async function adoptRotatedSubscription(
+  oldEndpoint: string | null,
+  fresh: PushSubscriptionJSON,
+): Promise<void> {
+  try {
+    if (oldEndpoint && oldEndpoint !== fresh.endpoint) await forget(oldEndpoint);
+    await persist(fresh);
+  } catch {
+    /* */
+  }
+}
+
+/** Signing out stops this browser hearing about that account's Orbs. The
+ *  browser keeps its subscription; the next sign-in claims it. */
+export async function forgetThisDevice(): Promise<void> {
+  try {
+    if (!pushSupported()) return;
+    if (!reg) await registerPush();
+    const current = sub ?? (reg ? await reg.pushManager.getSubscription() : null);
+    if (current) await forget(current.endpoint);
+  } catch {
+    /* */
+  }
 }
 
 export async function enablePush(): Promise<string> {
@@ -120,7 +143,7 @@ export async function enablePush(): Promise<string> {
       userVisibleOnly: true,
       applicationServerKey: urlB64ToUint8Array(key) as BufferSource,
     });
-    await persist(sub);
+    await persist(sub.toJSON());
     return 'Notifications on';
   } catch (err) {
     const detail = err instanceof Error ? err.message : '';
@@ -160,7 +183,7 @@ export async function syncPush(): Promise<void> {
         applicationServerKey: urlB64ToUint8Array(key) as BufferSource,
       });
     }
-    await persist(sub);
+    await persist(sub.toJSON());
   } catch {
     /* */
   }

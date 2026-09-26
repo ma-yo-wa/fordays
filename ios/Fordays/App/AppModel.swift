@@ -4,7 +4,15 @@ import Supabase
 
 @MainActor
 final class AppModel: ObservableObject {
-  @Published var authPhase: AuthPhase = .loading
+  @Published var authPhase: AuthPhase = .loading {
+    didSet {
+      // Signed in (launch or fresh sign-in): claim this phone's push
+      // token for whoever it is now.
+      if authPhase == .signedIn && oldValue != .signedIn {
+        Task { await Push.shared.syncIfAllowed() }
+      }
+    }
+  }
   @Published var space: SpaceInfo?
   @Published var spaces: [SpaceInfo] = []
   @Published var activities: [Activity] = []
@@ -376,6 +384,7 @@ final class AppModel: ObservableObject {
   }
 
   func signOut() async {
+    await Push.shared.forgetThisDevice()
     try? await sb.auth.signOut()
     space = nil
     spaces = []

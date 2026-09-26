@@ -43,21 +43,20 @@ import ui from './Settings.module.css';
 import auth from './Auth.module.css';
 import OrbKindForm from './OrbKindForm';
 
-function pushCopy(state: PushState, partnerName: string | null | undefined): string {
-  const who = partnerName?.trim() || 'your person';
+function pushCopy(state: PushState): string {
   switch (state) {
     case 'unsupported':
-      return "This browser can't do web push";
+      return 'This browser can’t show notifications';
     case 'ios-install':
       return 'Open Fordays from the Home Screen icon to turn notifications on';
     case 'denied':
-      return 'Blocked — iPhone Settings → Fordays → Notifications';
+      return 'Blocked. Turn them on in iPhone Settings → Fordays → Notifications';
     case 'granted-idle':
-      return 'Allowed — turn the switch on to finish subscribing';
+      return 'Allowed. Turn the switch on to finish';
     case 'on':
-      return `On — when ${who} adds to Someday, suggests a time, locks in a date, or updates notes`;
+      return 'On. You’ll hear when someone adds to Someday, makes a plan, changes the day, or joins';
     default:
-      return `Hear when ${who} adds to Someday, suggests a time, locks in a date, or updates notes`;
+      return 'Hear when someone adds to Someday, makes a plan, changes the day, or joins';
   }
 }
 
@@ -1008,7 +1007,7 @@ export default function Settings() {
         <div style={{ marginTop: 'var(--space-2)' }}>
           <FormGroup
             header="Notifications"
-            footer={bellBusy ? 'Working…' : pushCopy(bell, space?.partnerName)}
+            footer={bellBusy ? 'Working…' : pushCopy(bell)}
           >
             <FormRow label="Push notifications" icon={<BellIcon />}>
               <Switch

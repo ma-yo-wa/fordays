@@ -576,6 +576,8 @@ export const useApp = create<AppState>()((set, get) => {
     },
 
     async signOutUser() {
+      // While the session still exists, so RLS lets the row go.
+      await import('./push').then((m) => m.forgetThisDevice());
       await signOut();
       clearSnaps();
       set({ space: null, spaces: [], authPhase: 'signedOut', activities: [], logs: [] });

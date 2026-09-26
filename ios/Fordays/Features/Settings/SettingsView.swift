@@ -58,6 +58,7 @@ private enum SettingsDestination: Hashable {
   case orbSetup(withPeople: Bool)
   case pastOrbs
   case applePicker
+  case notifications
 }
 
 struct SettingsView: View {
@@ -74,6 +75,8 @@ struct SettingsView: View {
   @State private var appleOn = CalendarSync.isConnected
   @State private var appleName = CalendarSync.selectedName
   @State private var appleBusy = false
+  @StateObject private var push = Push.shared
+  @State private var pushBusy = false
   @State private var appleCals: [DeviceCalendar] = []
   @State private var pendingAppleId: String?
 
@@ -135,6 +138,16 @@ struct SettingsView: View {
                 }
               }
               .buttonStyle(.plain)
+
+              Divider().overlay(Theme.separator)
+              NavigationLink(value: SettingsDestination.notifications) {
+                FDFormRow(label: "Notifications", glyph: .bell, action: nil) {
+                  Text("›")
+                    .font(.fdSubhead)
+                    .foregroundStyle(Theme.inkFaint)
+                }
+              }
+              .buttonStyle(.plain)
             }
           }
         }
@@ -164,6 +177,8 @@ struct SettingsView: View {
           pastOrbsView
         case .applePicker:
           applePickerView
+        case .notifications:
+          notificationsView
         }
       }
       .toolbar {
@@ -744,6 +759,57 @@ struct SettingsView: View {
     .background(Theme.paper.ignoresSafeArea())
     .navigationTitle("External calendars")
     .navigationBarTitleDisplayMode(.inline)
+  }
+
+  private var notificationsView: some View {
+    ScrollView {
+      VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+        FDFormGroup {
+          FDFormRow(label: "Push notifications", glyph: .bell) {
+            Toggle("Notifications", isOn: pushToggle)
+              .labelsHidden()
+              .tint(Theme.roseInk)
+              .disabled(pushBusy)
+          }
+        }
+
+        Text(pushNote)
+          .font(.fdFootnote)
+          .foregroundStyle(Theme.inkSoft)
+      }
+      .padding(.horizontal, Theme.Spacing.lg)
+      .padding(.vertical, Theme.Spacing.base)
+    }
+    .background(Theme.paper.ignoresSafeArea())
+    .navigationTitle("Notifications")
+    .navigationBarTitleDisplayMode(.inline)
+    .task { await push.refresh() }
+  }
+
+  private var pushNote: String {
+    if pushBusy { return "Working…" }
+    switch push.state {
+    case .denied:
+      return "Blocked. Turn them on in iPhone Settings → Fordays → Notifications"
+    case .on:
+      return "On. You’ll hear when someone adds to Someday, makes a plan, changes the day, or joins"
+    case .off:
+      return "Hear when someone adds to Someday, makes a plan, changes the day, or joins"
+    }
+  }
+
+  private var pushToggle: Binding<Bool> {
+    Binding(
+      get: { push.state == .on },
+      set: { on in
+        guard !pushBusy else { return }
+        Task {
+          pushBusy = true
+          app.toast = on ? await push.enable() : await push.disable()
+          pushBusy = false
+        }
+      }
+    )
   }
 
   private var appleToggle: Binding<Bool> {

@@ -115,9 +115,16 @@ function AppShell() {
         type?: string;
         activityId?: string | null;
         spaceId?: string | null;
+        oldEndpoint?: string | null;
+        subscription?: PushSubscriptionJSON;
       } | null;
       if (data?.type === 'notification-click' && data.activityId) {
         void useApp.getState().navigateToActivity(data.activityId, data.spaceId);
+      }
+      if (data?.type === 'subscription-change' && data.subscription) {
+        void import('./lib/push').then((m) =>
+          m.adoptRotatedSubscription(data.oldEndpoint ?? null, data.subscription!),
+        );
       }
     };
     navigator.serviceWorker.addEventListener('message', handler);

@@ -27,6 +27,22 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     return true
   }
 
+  func application(
+    _ application: UIApplication,
+    didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+  ) {
+    Task { @MainActor in
+      await Push.shared.didRegister(deviceToken: deviceToken)
+    }
+  }
+
+  func application(
+    _ application: UIApplication,
+    didFailToRegisterForRemoteNotificationsWithError error: Error
+  ) {
+    print("APNs registration failed:", error)
+  }
+
   func userNotificationCenter(
     _ center: UNUserNotificationCenter,
     willPresent notification: UNNotification,
