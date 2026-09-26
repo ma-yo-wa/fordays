@@ -162,8 +162,9 @@ struct PlansView: View {
                 planRow(a)
               case .external(let e):
                 let title = (e.title ?? "").isEmpty ? Copy.Availability.busy : (e.title ?? "")
-                agendaRow(time: externalTiming(e), title: title, place: e.location)
-                  .onTapGesture { onSelectExternal?(e) }
+                agendaRow(time: externalTiming(e), title: title, place: e.location) {
+                  onSelectExternal?(e)
+                }
               }
             }
           }
@@ -201,43 +202,57 @@ struct PlansView: View {
   /// In a shared Orb, a small face says who put the plan here.
   private func planRow(_ a: Activity) -> some View {
     let who = app.space?.isMatched == true ? app.space?.displayName(for: a.createdBy) : nil
-    return agendaRow(time: rowTime(a), title: a.title, place: a.location, who: who)
-      .onTapGesture { onSelect(a) }
+    return agendaRow(time: rowTime(a), title: a.title, place: a.location, who: who) {
+      onSelect(a)
+    }
   }
 
-  private func agendaRow(time: String, title: String, place: String?, who: String? = nil) -> some View {
-    HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.md) {
-      Text(time)
-        .font(.subheadline.monospacedDigit())
-        .foregroundStyle(Theme.inkSoft)
-        .lineLimit(1)
-        .minimumScaleFactor(0.85)
-        .frame(width: Theme.TouchTarget.agendaTime, alignment: .leading)
-      VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
-        Text(title)
-          .font(.body)
-          .foregroundStyle(Theme.ink)
-        if let place = shortPlace(place, title: title) {
-          Text(place)
-            .font(.footnote)
-            .foregroundStyle(Theme.inkSoft)
-            .lineLimit(1)
+  /// A chevron and a press highlight say the row opens something.
+  private func agendaRow(
+    time: String,
+    title: String,
+    place: String?,
+    who: String? = nil,
+    action: @escaping () -> Void
+  ) -> some View {
+    Button(action: action) {
+      HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.md) {
+        Text(time)
+          .font(.subheadline.monospacedDigit())
+          .foregroundStyle(Theme.inkSoft)
+          .lineLimit(1)
+          .minimumScaleFactor(0.85)
+          .frame(width: Theme.TouchTarget.agendaTime, alignment: .leading)
+        VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
+          Text(title)
+            .font(.body)
+            .foregroundStyle(Theme.ink)
+          if let place = shortPlace(place, title: title) {
+            Text(place)
+              .font(.footnote)
+              .foregroundStyle(Theme.inkSoft)
+              .lineLimit(1)
+          }
         }
+        Spacer(minLength: 0)
+        if let who {
+          face(who)
+        }
+        Image(systemName: "chevron.right")
+          .font(.footnote.weight(.semibold))
+          .foregroundStyle(Theme.inkFaint)
+          .accessibilityHidden(true)
       }
-      Spacer(minLength: 0)
-      if let who {
-        face(who)
-      }
+      .padding(.vertical, Theme.Spacing.md)
+      .contentShape(Rectangle())
     }
-    .padding(.vertical, Theme.Spacing.md)
+    .buttonStyle(RowPressStyle())
     .overlay(alignment: .bottom) {
       Rectangle()
         .fill(Theme.hairline)
         .frame(height: Theme.TouchTarget.hairlineWidth)
     }
-    .contentShape(Rectangle())
     .accessibilityElement(children: .combine)
-    .accessibilityAddTraits(.isButton)
   }
 
   private func face(_ name: String) -> some View {
@@ -513,3 +528,14 @@ struct SpanningTrackShape: Shape {
   }
 }
 
+/// A quiet grey wash behind a list row while it's held down.
+private struct RowPressStyle: ButtonStyle {
+  func makeBody(configuration: Configuration) -> some View {
+    configuration.label
+      .background(
+        RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous)
+          .fill(configuration.isPressed ? Theme.fillQuaternary : Color.clear)
+          .padding(.horizontal, -Theme.Spacing.sm)
+      )
+  }
+}

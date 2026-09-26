@@ -172,10 +172,22 @@
   border-bottom: var(--hairline-w) solid var(--hairline);
   cursor: pointer;
   color: inherit;
-  transition: opacity var(--duration-press) var(--ease-ios);
+  position: relative;
 }
-.row:active {
-  opacity: var(--op-80);
+/* The press wash reaches a little past the text, like iOS. */
+.row::before {
+  content: '';
+  position: absolute;
+  inset: var(--space-0) calc(-1 * var(--space-2));
+  border-radius: var(--r-control);
+  transition: background var(--duration-press) var(--ease-ios);
+  pointer-events: none;
+}
+.row > * {
+  position: relative;
+}
+.row:active::before {
+  background: var(--fill-quaternary);
 }
 .time {
   font: var(--t-subhead);
@@ -195,8 +207,18 @@
   letter-spacing: var(--tr-body);
   overflow-wrap: break-word;
 }
-.face {
+.trail {
   align-self: center;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.chevron {
+  width: var(--space-2);
+  height: var(--space-3-5);
+  color: var(--ink-faint);
+}
+.face {
   width: var(--space-4-25);
   height: var(--space-4-25);
   border-radius: 50%;

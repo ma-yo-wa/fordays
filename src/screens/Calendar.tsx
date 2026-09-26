@@ -44,7 +44,7 @@ function shortPlace(place: string | null | undefined, title: string): string | n
 }
 
 /* A plan on the agenda: time on the left, title and place on the right.
-   Cover, note and who made it live in Detail. */
+   A chevron and a press highlight say it opens. Cover and note live in Detail. */
 function AgendaRow({
   time,
   title,
@@ -78,11 +78,16 @@ function AgendaRow({
         <span className={s.title}>{title}</span>
         {shown && <span className={s.place}>{shown}</span>}
       </span>
-      {who && (
-        <span className={s.face} style={{ background: faceColor() }} aria-label={`Added by ${who}`}>
-          {(who[0] ?? '?').toUpperCase()}
-        </span>
-      )}
+      <span className={s.trail}>
+        {who && (
+          <span className={s.face} style={{ background: faceColor() }} aria-label={`Added by ${who}`}>
+            {(who[0] ?? '?').toUpperCase()}
+          </span>
+        )}
+        <svg className={s.chevron} viewBox="0 0 8 14" aria-hidden="true">
+          <path d="M1 1l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
     </div>
   );
 }
