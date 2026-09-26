@@ -149,16 +149,18 @@ struct FDButton: View {
 
   var body: some View {
     Button(action: action) {
-      HStack(spacing: Theme.Spacing.sm) {
-        if loading {
-          ProgressView()
-            .tint(foregroundColor)
-            .scaleEffect(Theme.Motion.spinner)
-        } else {
-          Text(title)
-            .font(size.font)
+      // The title keeps its space while loading, so the button never
+      // shrinks; the spinner sits where the words were.
+      Text(title)
+        .font(size.font)
+        .opacity(loading ? 0 : 1)
+        .overlay {
+          if loading {
+            ProgressView()
+              .tint(foregroundColor)
+              .scaleEffect(Theme.Motion.spinner)
+          }
         }
-      }
       .foregroundStyle(foregroundColor)
       .frame(maxWidth: fullWidth ? .infinity : nil)
       .frame(minHeight: size.minHeight)
@@ -167,6 +169,7 @@ struct FDButton: View {
     }
     .buttonStyle(FDScaleButtonStyle())
     .disabled(disabled || loading)
-    .opacity((disabled || loading) ? Theme.Motion.disabledOpacity : 1.0)
+    // Busy, not broken: a loading button stays solid; only disabled fades.
+    .opacity(disabled && !loading ? Theme.Motion.disabledOpacity : 1.0)
   }
 }

@@ -124,7 +124,7 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
     >
       <p className={f.rowNote} style={{ marginTop: 'var(--space-2)' }}>
         {peek
-          ? `You’ll share this Orb with ${peek.inviterName}.`
+          ? `You’ll join ${peek.inviterName} in this Orb.`
           : Copy.invite.joinSubtitle}
       </p>
 

@@ -29,7 +29,7 @@ struct JoinOrbView: View {
           .foregroundStyle(Theme.ink)
           .padding(.bottom, Theme.Spacing.sm)
 
-        Text(peek != nil ? "You’ll share this Orb with \(peek!.inviterName)." : Copy.Invite.joinSubtitle)
+        Text(peek != nil ? "You’ll join \(peek!.inviterName) in this Orb." : Copy.Invite.joinSubtitle)
           .font(.footnote)
           .foregroundStyle(Theme.inkFaint)
           .padding(.bottom, Theme.Spacing.base)

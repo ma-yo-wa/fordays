@@ -16,6 +16,7 @@ enum Copy {
     static let thisOrb = "This Orb"
     static let people = "People"
     static let setupTitle = "Your first Orb"
+    static let createTitle = "A new Orb"
     static let setupLead = "Just you, or with someone."
     static let justYou = "Just you"
     static let withPeople = "With someone"
@@ -100,10 +101,10 @@ enum Copy {
     static let ideaLabel = "One thing you want to do"
     static let ideaHint = "— optional, but nicer than an empty Orb"
     static func shareSolo(link: String) -> String {
-      "Join my Orb on Fordays: \(link)"
+      "Plan with me on Fordays: \(link)"
     }
     static func shareWithIdea(idea: String, link: String) -> String {
-      "I added “\(idea)” to an Orb for us — join here: \(link)"
+      "I added “\(idea)” for us on Fordays — join here: \(link)"
     }
     static let joinTitle = "Join an Orb"
     static let joinSubtitle = "Enter an invite code or paste an invite link to join someone’s Orb."

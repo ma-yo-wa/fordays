@@ -61,7 +61,7 @@ struct OrbSetupView: View {
 
   private var createBody: some View {
     VStack(alignment: .leading, spacing: Theme.Spacing.none) {
-      Text(Copy.Orbs.setupTitle)
+      Text(Copy.Orbs.createTitle)
         .font(.title2.weight(.semibold))
         .foregroundStyle(Theme.ink)
         .padding(.bottom, Theme.Spacing.sm)
