@@ -42,6 +42,8 @@ struct MainShellView: View {
       .safeAreaInset(edge: .top, spacing: Theme.Spacing.none) {
         topBar
       }
+      // Settings covers the whole screen, so VoiceOver shouldn't reach behind it.
+      .accessibilityHidden(showSettings)
 
       VStack(spacing: Theme.Spacing.md) {
         Button {
@@ -86,6 +88,7 @@ struct MainShellView: View {
         TabDock(tab: $app.tab) { openSettings(orbId: nil) }
           .padding(.bottom, Theme.Spacing.sm)
       }
+      .accessibilityHidden(showSettings)
 
       if let toast = app.toast {
         Text(toast)
