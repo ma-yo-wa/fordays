@@ -25,23 +25,24 @@ struct InviteShareView: View {
       ScrollView {
       VStack(alignment: .leading, spacing: Theme.Spacing.none) {
         Text(Copy.Invite.title)
-          .font(.title2.weight(.semibold))
+          .font(.fdTitle2)
           .foregroundStyle(Theme.ink)
-          .padding(.bottom, Theme.Spacing.sm)
+          .padding(.bottom, Theme.Spacing.s10)
 
         Text(Copy.Invite.subtitle)
-          .font(.footnote)
+          .font(.fdFootnote)
           .foregroundStyle(Theme.inkFaint)
-          .padding(.bottom, Theme.Spacing.base)
+          .padding(.bottom, code.isEmpty ? Theme.Spacing.base : Theme.Spacing.s10)
 
         if !code.isEmpty {
           HStack {
             VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
-              Text(Copy.Invite.orbCodeLabel)
-                .font(.fdCaption2.weight(.medium))
+              Text(Copy.Invite.orbCodeLabel.uppercased())
+                .font(.fdCaption2)
                 .foregroundStyle(Theme.inkFaint)
               Text(code)
                 .font(.system(.body, design: .monospaced).weight(.bold))
+                .tracking(Theme.Spacing.xxs)
                 .foregroundStyle(Theme.ink)
             }
             Spacer()
@@ -50,11 +51,12 @@ struct InviteShareView: View {
               app.toast = Copy.Invite.codeCopied
             }
           }
-          .padding(Theme.Spacing.md)
-          .background(Theme.fillQuaternary)
-          .clipShape(RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous))
+          .padding(.horizontal, Theme.Spacing.row)
+          .padding(.vertical, Theme.Spacing.md)
+          .background(Theme.paperWarm)
+          .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
           .overlay(
-            RoundedRectangle(cornerRadius: Theme.radiusMd, style: .continuous)
+            RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous)
               .stroke(Theme.separator, lineWidth: Theme.TouchTarget.borderWidth)
           )
           .padding(.bottom, Theme.Spacing.base)
@@ -78,7 +80,7 @@ struct InviteShareView: View {
             await share()
           }
         }
-        .padding(.top, Theme.Spacing.lg)
+        .padding(.top, Theme.Spacing.s26)
       }
       .padding(Theme.Spacing.lg)
     }

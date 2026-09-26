@@ -179,6 +179,7 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
       <div className={f.row} style={{ marginTop: 'var(--space-5)' }}>
         <Button
           variant="secondary"
+          fullWidth
           onClick={() => {
             clearInviteFromUrl();
             onDismiss();
@@ -188,6 +189,7 @@ export default function InviteAccept({ code = '', open, onJoined, onDismiss }: P
         </Button>
         <Button
           variant="primary"
+          fullWidth
           loading={busy}
           disabled={!canJoin}
           onClick={() => void accept()}

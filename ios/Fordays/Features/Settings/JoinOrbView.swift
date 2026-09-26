@@ -25,12 +25,12 @@ struct JoinOrbView: View {
     ScrollView {
       VStack(alignment: .leading, spacing: Theme.Spacing.none) {
         Text(peek?.isOpen == true ? "\(peek!.inviterName) invited you" : Copy.Invite.joinTitle)
-          .font(.title2.weight(.semibold))
+          .font(.fdTitle2)
           .foregroundStyle(Theme.ink)
-          .padding(.bottom, Theme.Spacing.sm)
+          .padding(.bottom, Theme.Spacing.s10)
 
         Text(peek?.isOpen == true ? "You’ll join \(peek!.inviterName) in this Orb." : Copy.Invite.joinSubtitle)
-          .font(.footnote)
+          .font(.fdFootnote)
           .foregroundStyle(Theme.inkFaint)
           .padding(.bottom, Theme.Spacing.base)
 
@@ -47,7 +47,7 @@ struct JoinOrbView: View {
         }
 
         if input.isEmpty {
-          FDButton(Copy.Invite.paste, variant: .ghost, size: .sm) {
+          FDButton(Copy.Invite.paste, variant: .ghost, size: .sm, fullWidth: false) {
             if let paste = UIPasteboard.general.string, !paste.isEmpty {
               input = paste
             }
@@ -57,21 +57,21 @@ struct JoinOrbView: View {
 
         if isLookingUp {
           Text(Copy.Invite.lookingUp)
-            .font(.footnote)
-            .foregroundStyle(Theme.inkSoft)
-            .padding(.top, Theme.Spacing.s10)
+            .font(.fdFootnote)
+            .foregroundStyle(Theme.inkFaint)
+            .padding(.top, Theme.Spacing.sm)
         }
 
         if let peek, peek.isOpen {
           FDCard(variant: .sageWash, padding: .sm) {
             VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
               Text("\(peek.inviterName) invited you to \(peek.spaceName.map { "“\($0)”" } ?? "their Orb")")
-                .font(.headline)
+                .font(.fdHeadline)
                 .foregroundStyle(Theme.ink)
 
               Text("You’ll be added to this Orb and keep your existing Orbs.")
-                .font(.footnote)
-                .foregroundStyle(Theme.inkSoft)
+                .font(.fdFootnote)
+                .foregroundStyle(Theme.ink2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
           }
@@ -80,7 +80,7 @@ struct JoinOrbView: View {
 
         if let errorText {
           Text(errorText)
-            .font(.footnote)
+            .font(.fdFootnote)
             .foregroundStyle(Theme.roseInk)
             .padding(.top, Theme.Spacing.s10)
         }
@@ -97,7 +97,7 @@ struct JoinOrbView: View {
             await join()
           }
         }
-        .padding(.top, Theme.Spacing.xl)
+        .padding(.top, Theme.Spacing.lg)
       }
       .padding(Theme.Spacing.lg)
     }

@@ -107,11 +107,12 @@ export default function InviteShare({ open, code, onClose }: Props) {
       </div>
 
       <div className={f.row}>
-        <Button variant="secondary" onClick={onClose}>
+        <Button variant="secondary" fullWidth onClick={onClose}>
           {Copy.invite.notNow}
         </Button>
         <Button
           variant="primary"
+          fullWidth
           loading={busy}
           disabled={busy}
           onClick={() => void share()}
