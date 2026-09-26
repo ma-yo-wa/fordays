@@ -198,12 +198,14 @@ struct PlansView: View {
 
   /// A plan on the agenda: time on the left, title and place on the right.
   /// Cover, note and who made it live in Detail.
+  /// In a shared Orb, a small face says who put the plan here.
   private func planRow(_ a: Activity) -> some View {
-    agendaRow(time: rowTime(a), title: a.title, place: a.location)
+    let who = app.space?.isMatched == true ? app.space?.displayName(for: a.createdBy) : nil
+    return agendaRow(time: rowTime(a), title: a.title, place: a.location, who: who)
       .onTapGesture { onSelect(a) }
   }
 
-  private func agendaRow(time: String, title: String, place: String?) -> some View {
+  private func agendaRow(time: String, title: String, place: String?, who: String? = nil) -> some View {
     HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.md) {
       Text(time)
         .font(.subheadline.monospacedDigit())
@@ -223,6 +225,9 @@ struct PlansView: View {
         }
       }
       Spacer(minLength: 0)
+      if let who {
+        face(who)
+      }
     }
     .padding(.vertical, Theme.Spacing.md)
     .overlay(alignment: .bottom) {
@@ -233,6 +238,15 @@ struct PlansView: View {
     .contentShape(Rectangle())
     .accessibilityElement(children: .combine)
     .accessibilityAddTraits(.isButton)
+  }
+
+  private func face(_ name: String) -> some View {
+    Text(String(name.prefix(1)).uppercased())
+      .font(.caption2.weight(.bold))
+      .foregroundStyle(.white)
+      .frame(width: Theme.TouchTarget.avatarXs, height: Theme.TouchTarget.avatarXs)
+      .background(Theme.inkSoft, in: Circle())
+      .accessibilityLabel("Added by \(name)")
   }
 
   /// The place name without the street address, or nil when the title already says it.

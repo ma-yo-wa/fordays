@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react';
-import { useApp, isMatched } from '../lib/store';
+import { useApp, isMatched, partnerName } from '../lib/store';
+import { faceColor } from '../lib/tint';
 import { isPlan, type ExternalEvent } from '../lib/types';
 import {
   MONTHS,
@@ -48,11 +49,14 @@ function AgendaRow({
   time,
   title,
   place,
+  who,
   onOpen,
 }: {
   time: string;
   title: string;
   place?: string | null;
+  /** In a shared Orb, who put the plan here. */
+  who?: string;
   onOpen: () => void;
 }) {
   const shown = shortPlace(place, title);
@@ -74,6 +78,11 @@ function AgendaRow({
         <span className={s.title}>{title}</span>
         {shown && <span className={s.place}>{shown}</span>}
       </span>
+      {who && (
+        <span className={s.face} style={{ background: faceColor() }} aria-label={`Added by ${who}`}>
+          {(who[0] ?? '?').toUpperCase()}
+        </span>
+      )}
     </div>
   );
 }
@@ -316,6 +325,7 @@ export default function Calendar() {
                       time={planTime(a.date_time)}
                       title={a.title}
                       place={a.location}
+                      who={matched ? partnerName(config, a.created_by) : undefined}
                       onOpen={() => openDetail(a.id)}
                     />
                   ))}
@@ -332,6 +342,7 @@ export default function Calendar() {
                   time={planTime(item.plan.date_time)}
                   title={item.plan.title}
                   place={item.plan.location}
+                  who={matched ? partnerName(config, item.plan.created_by) : undefined}
                   onOpen={() => openDetail(item.plan.id)}
                 />
               ) : (

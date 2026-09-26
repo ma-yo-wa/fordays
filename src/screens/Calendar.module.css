@@ -165,7 +165,7 @@
 /* Plain rows like iOS: time on the left, title and place on the right. */
 .row {
   display: grid;
-  grid-template-columns: var(--space-18) 1fr;
+  grid-template-columns: var(--space-18) 1fr auto;
   gap: var(--space-3);
   align-items: baseline;
   padding: var(--space-3) var(--space-0);
@@ -194,6 +194,19 @@
   font: var(--t-body);
   letter-spacing: var(--tr-body);
   overflow-wrap: break-word;
+}
+.face {
+  align-self: center;
+  width: var(--space-4-25);
+  height: var(--space-4-25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  line-height: var(--lh-solid);
+  color: var(--paper-warm);
 }
 .place {
   font: var(--t-footnote);
