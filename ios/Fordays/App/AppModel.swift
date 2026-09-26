@@ -17,7 +17,10 @@ final class AppModel: ObservableObject {
   @Published var spaces: [SpaceInfo] = []
   @Published var activities: [Activity] = []
   @Published var logs: [AuditLog] = []
+  /// Your own calendar events (my_events), once each. Not per Orb.
   @Published var externalEvents: [ExternalEvent] = []
+  /// Your home Orb's plans, for the private clash line in other Orbs.
+  @Published var homePlans: [BusyItem] = []
   @Published var tab: HomeTab = .plans {
     didSet {
       isScrolled = false
@@ -124,6 +127,7 @@ final class AppModel: ObservableObject {
   }
 
   private var lastAppleSync: Date?
+  private var mineLoaded = false
   private var calendarObserver: NSObjectProtocol?
   private var sb: SupabaseClient { SupabaseService.shared.client }
 
@@ -141,124 +145,101 @@ final class AppModel: ObservableObject {
   }
 
   func syncAppleIfNeeded(force: Bool = false) async {
-    guard space?.frozen != true else { return }
-    guard CalendarSync.isConnected, CalendarSync.selectedId != nil else { return }
+    guard CalendarSync.isConnected, !CalendarSync.chosen.isEmpty else { return }
     if !force, let last = lastAppleSync, Date().timeIntervalSince(last) < 20 { return }
     lastAppleSync = Date()
     do {
-      try await replaceExternal(CalendarSync.fetchEvents(), source: "apple")
+      _ = try await syncApple()
     } catch {
-      toast = userFriendlyCalendarError(error)
+      toast = error.localizedDescription
     }
   }
 
-  func userFriendlyCalendarError(_ error: Error) -> String {
-    let msg = error.localizedDescription
-    if msg.localizedCaseInsensitiveContains("location") && (msg.localizedCaseInsensitiveContains("schema cache") || msg.localizedCaseInsensitiveContains("does not exist") || msg.localizedCaseInsensitiveContains("could not find")) {
-      return "Location column missing — run migrations/005_external_event_details.sql in Supabase"
-    }
-    if msg.localizedCaseInsensitiveContains("calendar_source") || msg.localizedCaseInsensitiveContains("external_events_source_uniq") {
-      return "Calendar sources not set up — run migrations/014_calendar_source.sql in Supabase"
-    }
-    if msg.localizedCaseInsensitiveContains("external_events") || msg.localizedCaseInsensitiveContains("schema cache") || msg.localizedCaseInsensitiveContains("does not exist") {
-      return "Calendar sharing not set up — run migrations/003_external_events.sql in Supabase"
-    }
-    if msg.localizedCaseInsensitiveContains("permission denied") || msg.localizedCaseInsensitiveContains("42501") {
-      return "No permission to save calendar overlays — re-run migrations/003_external_events.sql (includes grants)"
-    }
-    return msg
+  private struct MyEventWrite: Encodable {
+    let source_id: String
+    let title: String?
+    let location: String?
+    let starts_at: String?
+    let ends_at: String?
+    let start_date: String?
+    let end_date: String?
   }
 
-  func replaceExternal(_ events: [ImportedEventDraft], source: String) async throws {
-    guard let space else { return }
-    guard space.canCompose else { return }
-    let session = try await sb.auth.session
-    let uid = session.user.id.uuidString.lowercased()
-    let now = ISO8601DateFormatter().string(from: Date())
+  private struct ReplaceCalendarParams: Encodable {
+    let p_source: String
+    let p_calendar_id: String
+    let p_calendar_name: String
+    let p_events: [MyEventWrite]
+  }
 
-    var seen = Set<String>()
-    var uniqueEvents: [ImportedEventDraft] = []
-    // Keep the last occurrence of any duplicate sourceId
-    for ev in events.reversed() {
-      if seen.insert(ev.sourceId).inserted {
-        uniqueEvents.append(ev)
-      }
-    }
-    uniqueEvents.reverse()
+  private struct ForgetCalendarsParams: Encodable {
+    let p_source: String
+    let p_keep: [String]
+  }
 
-    struct ExistingExt: Decodable {
-      let id: String
-      let source_id: String
-    }
-
-    let existing: [ExistingExt] = try await sb.from("external_events")
-      .select("id, source_id")
-      .eq("space_id", value: space.id)
-      .eq("owner_id", value: uid)
-      .eq("calendar_source", value: source)
-      .execute()
-      .value
-
-    let keep = Set(uniqueEvents.map(\.sourceId))
-    let stale = existing.filter { !keep.contains($0.source_id) }.map(\.id)
-    if !stale.isEmpty {
-      for chunk in stale.chunked(into: 80) {
-        try await sb.from("external_events")
-          .delete()
-          .in("id", values: chunk)
-          .execute()
-      }
-    }
-
-    if !uniqueEvents.isEmpty {
-      struct ExternalEventWrite: Encodable {
-        let space_id: String
-        let owner_id: String
-        let source_id: String
-        let calendar_source: String
-        let title: String?
-        let location: String?
-        let starts_at: String
-        let ends_at: String
-        let all_day: Bool
-        let calendar_name: String
-        let updated_at: String
-      }
-
-      let rows = uniqueEvents.map { e in
-        ExternalEventWrite(
-          space_id: space.id,
-          owner_id: uid,
+  /// Sync every ticked Apple calendar whole, so an event deleted or declined
+  /// on the phone is gone here too; forget calendars no longer ticked.
+  /// Returns how many events came in.
+  @discardableResult
+  func syncApple() async throws -> Int {
+    let calendars = CalendarSync.chosen
+    var counts: [String: Int] = [:]
+    var firstError: Error?
+    for cal in calendars {
+      let events = CalendarSync.fetchEvents(calendarId: cal.id)
+      let rows = events.map { e in
+        MyEventWrite(
           source_id: e.sourceId,
-          calendar_source: source,
           title: e.title,
           location: e.location,
-          starts_at: DateLocal.toTimestamptz(e.startsAt),
-          ends_at: DateLocal.toTimestamptz(e.endsAt),
-          all_day: e.allDay,
-          calendar_name: e.calendar,
-          updated_at: now
+          starts_at: e.allDay ? nil : DateLocal.toTimestamptz(e.startsAt),
+          ends_at: e.allDay ? nil : DateLocal.toTimestamptz(e.endsAt.isEmpty ? e.startsAt : e.endsAt),
+          start_date: e.allDay ? String(e.startsAt.prefix(10)) : nil,
+          end_date: e.allDay ? String((e.endsAt.isEmpty ? e.startsAt : e.endsAt).prefix(10)) : nil
         )
       }
-      for chunk in rows.chunked(into: 80) {
-        try await sb.from("external_events")
-          .upsert(chunk, onConflict: "space_id,owner_id,calendar_source,source_id")
-          .execute()
+      do {
+        try await sb.rpc("replace_my_calendar", params: ReplaceCalendarParams(
+          p_source: "apple",
+          p_calendar_id: cal.id,
+          p_calendar_name: cal.summary,
+          p_events: rows
+        )).execute()
+        counts[cal.id] = rows.count
+      } catch {
+        if firstError == nil { firstError = error }
       }
     }
-
-    await refreshExternal()
+    do {
+      try await sb.rpc("forget_my_calendars", params: ForgetCalendarsParams(
+        p_source: "apple",
+        p_keep: calendars.map(\.id)
+      )).execute()
+    } catch {
+      if firstError == nil { firstError = error }
+    }
+    if let firstError, counts.isEmpty, !calendars.isEmpty { throw firstError }
+    CalendarSync.markSynced(counts)
+    await loadMine()
+    return counts.values.reduce(0, +)
   }
 
+  /// Off: nothing ticked, and every Apple event gone.
   func disconnectApple() async {
     CalendarSync.setConnected(false)
     do {
-      try await replaceExternal([], source: "apple")
+      try await sb.rpc("forget_my_calendars", params: ForgetCalendarsParams(
+        p_source: "apple",
+        p_keep: []
+      )).execute()
+      await loadMine()
       toast = "Apple Calendar disconnected"
     } catch {
       toast = error.localizedDescription
     }
   }
+
+
 
   func boot() async {
     // init hydrated the snapshot: keep that notebook on screen while the
@@ -391,6 +372,9 @@ final class AppModel: ObservableObject {
     storedSpaceId = nil
     activities = []
     logs = []
+    externalEvents = []
+    homePlans = []
+    mineLoaded = false
     authPhase = .signedOut
   }
 
@@ -430,7 +414,6 @@ final class AppModel: ObservableObject {
       toast = error.localizedDescription
     }
     Task { await refreshLogs() }
-    Task { await refreshExternal() }
   }
 
   func refreshLogs() async {
@@ -452,51 +435,94 @@ final class AppModel: ObservableObject {
     }
   }
 
-  func refreshExternal() async {
-    guard let space else {
-      externalEvents = []
-      return
-    }
+  private struct MyEventRow: Decodable {
+    let id: String
+    let owner_id: String
+    let source: String
+    let calendar_id: String
+    let calendar_name: String
+    let title: String?
+    let location: String?
+    let starts_at: String?
+    let ends_at: String?
+    let start_date: String?
+    let end_date: String?
+  }
+
+  private struct PlanTimeRow: Decodable {
+    let space_id: String
+    let title: String
+    let date_time: String
+    let ends_at: String?
+    let all_day: Bool?
+  }
+
+  private static func matchKey(_ title: String?, _ startsAt: String) -> String {
+    "\((title ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased())|\(startsAt)"
+  }
+
+  /// Your events, once each (the same event from two calendars counts once),
+  /// leaving out any you made a plan from; and your home Orb's plans.
+  func loadMine() async {
     do {
-      let rows: [ExternalEvent] = try await sb.from("external_events")
+      let since = Calendar.current.date(byAdding: .month, value: -2, to: Date()) ?? Date()
+      async let eventsReq: [MyEventRow] = sb.from("my_events")
         .select()
-        .eq("space_id", value: space.id)
-        .order("starts_at", ascending: true)
         .execute()
         .value
-      // The server stores UTC; show local times like the PWA does.
-      externalEvents = rows.map { row in
-        var e = row
-        e.startsAt = DateLocal.fromTimestamptz(row.startsAt, allDay: row.allDay) ?? row.startsAt
-        e.endsAt = DateLocal.fromTimestamptz(row.endsAt, allDay: row.allDay) ?? row.endsAt
-        return e
+      async let plansReq: [PlanTimeRow] = sb.from("activities")
+        .select("space_id, title, date_time, ends_at, all_day")
+        .not("date_time", operator: .is, value: "null")
+        .gte("date_time", value: ISO8601DateFormatter().string(from: since))
+        .execute()
+        .value
+      let (rows, plans) = try await (eventsReq, plansReq)
+
+      let home = spaces.first(where: { $0.isHomeOrb(in: spaces) })?.id
+      func stamp(_ v: String, _ allDay: Bool) -> String {
+        DateLocal.fromTimestamptz(v, allDay: allDay) ?? String(v.prefix(10))
       }
+      let planned = Set(plans.map { Self.matchKey($0.title, stamp($0.date_time, $0.all_day ?? false)) })
+      homePlans = plans.filter { $0.space_id == home }.map { p in
+        let allDay = p.all_day ?? false
+        return BusyItem(
+          title: p.title,
+          startsAt: stamp(p.date_time, allDay),
+          endsAt: stamp(p.ends_at ?? p.date_time, allDay),
+          allDay: allDay
+        )
+      }
+
+      var seen = Set<String>()
+      var out: [ExternalEvent] = []
+      for r in rows {
+        let allDay = r.start_date != nil
+        let startsAt = allDay ? (r.start_date ?? "") : stamp(r.starts_at ?? "", false)
+        let endsAt = allDay
+          ? (r.end_date ?? startsAt)
+          : stamp(r.ends_at ?? r.starts_at ?? "", false)
+        let key = Self.matchKey(r.title, startsAt)
+        if planned.contains(key) || !seen.insert(key).inserted { continue }
+        out.append(ExternalEvent(
+          id: r.id,
+          userId: r.owner_id,
+          title: r.title,
+          location: r.location,
+          startsAt: startsAt,
+          endsAt: endsAt,
+          allDay: allDay,
+          calendar: r.calendar_name,
+          calendarId: r.calendar_id,
+          source: r.source
+        ))
+      }
+      externalEvents = out.sorted { $0.startsAt < $1.startsAt }
     } catch {
-      externalEvents = []
+      // Keep what's showing; the next open tries again.
     }
   }
 
-  func toggleExternalShare(event: ExternalEvent, shared: Bool) async {
-    struct UpdateShare: Encodable {
-      let shared_with_space: Bool
-      let updated_at: String
-    }
-    do {
-      try await sb.from("external_events")
-        .update(UpdateShare(
-          shared_with_space: shared,
-          updated_at: ISO8601DateFormatter().string(from: Date())
-        ))
-        .eq("id", value: event.id)
-        .execute()
-      if let idx = externalEvents.firstIndex(where: { $0.id == event.id }) {
-        externalEvents[idx].sharedWithSpace = shared
-      }
-      toast = shared ? Copy.Availability.sharedTitle : Copy.Availability.privateTitle
-    } catch {
-      toast = error.localizedDescription
-    }
-  }
+
 
   @discardableResult
   func createActivity(
@@ -1064,7 +1090,6 @@ final class AppModel: ObservableObject {
       if let target = spaces.first(where: { $0.id == id }) { space = target }
       activities = []
       logs = []
-      externalEvents = []
     }
     do {
       try await refreshSpaceAndData()
@@ -1323,6 +1348,11 @@ final class AppModel: ObservableObject {
     if let space { storedSpaceId = space.id }
     if space != nil {
       await refreshActivities()
+      // Your own events are yours, not the Orb's: once per sign-in.
+      if !mineLoaded {
+        mineLoaded = true
+        Task { await loadMine() }
+      }
       watchDeviceCalendars()
       Task { await syncAppleIfNeeded() }
     } else {

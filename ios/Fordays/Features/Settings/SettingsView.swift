@@ -88,14 +88,14 @@ struct SettingsView: View {
   @State private var profileNameDraft = ""
   @State private var spaceBusy = false
   @State private var appleOn = CalendarSync.isConnected
-  @State private var appleName = CalendarSync.selectedName
+  @State private var appleChosen = CalendarSync.chosen
   @State private var appleBusy = false
   @StateObject private var push = Push.shared
   @State private var pushBusy = false
   @State private var prefs = Alerts.Prefs()
   @State private var orbMuted = false
   @State private var appleCals: [DeviceCalendar] = []
-  @State private var pendingAppleId: String?
+  @State private var pendingAppleIds: Set<String> = []
 
   /// Open straight on this Orb's page, from the switcher.
   var startOrbId: String? = nil
@@ -148,7 +148,7 @@ struct SettingsView: View {
     }
     .onAppear {
       appleOn = CalendarSync.isConnected
-      appleName = CalendarSync.selectedName
+      appleChosen = CalendarSync.chosen
     }
   }
 
@@ -749,9 +749,16 @@ struct SettingsView: View {
   }
 
   private var calendarsView: some View {
-    ScrollView {
-      VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-        FDFormGroup {
+    let home = app.spaces.first(where: { $0.isHomeOrb(in: app.spaces) })
+    let appleCount = app.externalEvents.filter { $0.source == "apple" }.count
+    return ScrollView {
+      VStack(alignment: .leading, spacing: Theme.Spacing.base) {
+        Text(Copy.Availability.yoursOnly(home.map(orbName) ?? "your own Orb"))
+          .font(.fdSubhead)
+          .foregroundStyle(Theme.inkSoft)
+          .padding(.horizontal, Theme.Spacing.xs)
+
+        FDFormGroup(footer: appleOn && !appleChosen.isEmpty ? appleFooter(count: appleCount) : nil) {
           FDFormRow(label: Copy.Availability.appleCalendar, glyph: .calendar) {
             Toggle("Connect Apple Calendar", isOn: appleToggle)
               .labelsHidden()
@@ -762,21 +769,19 @@ struct SettingsView: View {
           if appleOn {
             Divider().overlay(Theme.separator)
             FDFormRow(
-              label: appleName ?? "Choose calendar",
-              note: appleBusy ? "…" : nil,
+              label: appleChosen.isEmpty ? "Choose calendars" : appleChosen.map(\.summary).joined(separator: ", "),
               action: { Task { await openApplePicker() } }
             ) {
-              Text(appleName == nil ? "›" : "Change ›")
+              Text(appleChosen.isEmpty ? "›" : "Change ›")
                 .font(.fdSubhead)
                 .foregroundStyle(Theme.inkFaint)
             }
 
-            if appleName != nil {
+            if !appleChosen.isEmpty {
               Divider().overlay(Theme.separator)
               FDFormRow(
-                label: "Refresh overlay",
-                note: appleBusy ? "…" : nil,
-                action: { Task { await importApple() } }
+                label: "Refresh",
+                action: { Task { await refreshApple() } }
               ) {
                 Text(appleBusy ? "…" : "›")
                   .font(.fdSubhead)
@@ -788,7 +793,8 @@ struct SettingsView: View {
 
         Text(Copy.Availability.settingsNoteIos)
           .font(.fdFootnote)
-          .foregroundStyle(Theme.inkSoft)
+          .foregroundStyle(Theme.inkFaint)
+          .padding(.horizontal, Theme.Spacing.xs)
       }
       .padding(.horizontal, Theme.Spacing.lg)
       .padding(.vertical, Theme.Spacing.base)
@@ -797,6 +803,20 @@ struct SettingsView: View {
     .navigationTitle("Calendars")
     .navigationBarTitleDisplayMode(.large)
   }
+
+  /// "12 events · Updated 5 min ago", like the PWA.
+  private func appleFooter(count: Int) -> String {
+    let events = count == 1 ? "1 event" : "\(count) events"
+    guard let at = CalendarSync.lastSynced?.at else { return events }
+    let mins = Int(Date().timeIntervalSince(at) / 60)
+    let ago: String
+    if mins < 1 { ago = "Updated just now" }
+    else if mins < 60 { ago = "Updated \(mins) min ago" }
+    else if mins < 60 * 24 { ago = "Updated \(mins / 60) h ago" }
+    else { ago = "Updated \(DateLocal.shortDate(DateLocal.todayISO(at)))" }
+    return "\(events) · \(ago)"
+  }
+
 
   private var notificationsView: some View {
     ScrollView {
@@ -964,28 +984,26 @@ struct SettingsView: View {
   private func setAppleConnected(_ on: Bool) async {
     if !on {
       appleOn = false
-      appleName = nil
+      appleChosen = []
       appleCals = []
       await app.disconnectApple()
       return
     }
+    await openApplePicker(connecting: true)
+  }
+
+  private func openApplePicker(connecting: Bool = false) async {
     appleBusy = true
-    let ok: Bool
-    if CalendarSync.hasFullAccess {
-      ok = true
-    } else {
-      ok = await CalendarSync.requestAccess()
-    }
-    if !ok {
-      appleBusy = false
-      appleOn = false
+    let ok = CalendarSync.hasFullAccess ? true : await CalendarSync.requestAccess()
+    appleBusy = false
+    guard ok else {
+      if connecting { appleOn = false }
       app.toast = "Allow calendars in iPhone Settings → Fordays"
       return
     }
     let list = CalendarSync.listCalendars()
-    appleBusy = false
     if list.isEmpty {
-      appleOn = false
+      if connecting { appleOn = false }
       app.toast = "No calendars found on this iPhone"
       return
     }
@@ -994,119 +1012,133 @@ struct SettingsView: View {
     navPath.append(SettingsDestination.applePicker)
   }
 
-  private func openApplePicker() async {
+  /// Tick boxes saved: sync the ticked ones, forget the rest.
+  private func saveApple(_ list: [DeviceCalendar]) async {
+    guard !list.isEmpty else {
+      appleOn = false
+      appleChosen = []
+      await app.disconnectApple()
+      return
+    }
+    CalendarSync.choose(list)
+    appleChosen = list
+    appleOn = true
     appleBusy = true
-    let ok: Bool
-    if CalendarSync.hasFullAccess {
-      ok = true
-    } else {
-      ok = await CalendarSync.requestAccess()
+    do {
+      let n = try await app.syncApple()
+      app.watchDeviceCalendars()
+      app.toast = n == 0 ? "Nothing in the next few months" : "\(n) events from Apple Calendar"
+    } catch {
+      app.toast = error.localizedDescription
     }
     appleBusy = false
-    guard ok else {
-      app.toast = "Allow calendars in iPhone Settings → Fordays"
-      return
-    }
-    appleCals = CalendarSync.listCalendars()
-    navPath.append(SettingsDestination.applePicker)
   }
 
-  private func importApple(_ cal: DeviceCalendar? = nil) async {
-    let chosen = cal ?? appleCals.first(where: { $0.id == CalendarSync.selectedId })
-    guard let chosen else {
-      app.toast = "Choose a calendar first"
-      return
-    }
+  private func refreshApple() async {
     appleBusy = true
-    CalendarSync.saveCalendar(chosen)
-    appleName = chosen.summary
-    appleOn = true
     do {
-      try await app.replaceExternal(CalendarSync.fetchEvents(), source: "apple")
-      app.watchDeviceCalendars()
-      let n = CalendarSync.fetchEvents().count
-      app.toast = n == 0
-        ? "\(chosen.summary) — nothing in the next few months"
-        : "\(chosen.summary) — \(n) events"
+      try await app.syncApple()
+      app.toast = "Up to date"
     } catch {
-      app.toast = app.userFriendlyCalendarError(error)
+      app.toast = error.localizedDescription
     }
     appleBusy = false
   }
 
   private var applePickerView: some View {
-    ScrollView {
-        VStack(alignment: .leading, spacing: Theme.Spacing.base) {
-          Text(Copy.Availability.pickerLead)
-            .font(.subheadline)
-            .foregroundStyle(Theme.inkSoft)
-          let mine = appleCals.filter(\.primary)
-          let other = appleCals.filter { !$0.primary }
-          if !mine.isEmpty {
-            applePickerSection(title: "My calendars", items: mine)
-          }
-          if !other.isEmpty {
-            applePickerSection(title: "Other", items: other)
-          }
+    let counts = CalendarSync.lastSynced?.counts ?? [:]
+    return ScrollView {
+      VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
+        Text(Copy.Availability.pickerLead)
+          .font(.fdSubhead)
+          .foregroundStyle(Theme.inkFaint)
+        let mine = appleCals.filter(\.primary)
+        let other = appleCals.filter { !$0.primary }
+        if !mine.isEmpty {
+          applePickerSection(title: "My calendars", items: mine, counts: counts)
         }
-        .padding(Theme.Spacing.lg)
+        if !other.isEmpty {
+          applePickerSection(title: "Other", items: other, counts: counts)
+        }
+      }
+      .padding(Theme.Spacing.lg)
     }
     .background(Theme.paper.ignoresSafeArea())
-    .navigationTitle("Choose a calendar")
+    .navigationTitle("Choose calendars")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItem(placement: .confirmationAction) {
-        Button("Import") {
-          let chosen = appleCals.first(where: { $0.id == pendingAppleId })
-            ?? appleCals.first(where: \.primary)
-            ?? appleCals.first
-          Task {
-            await importApple(chosen)
-            if !navPath.isEmpty { navPath.removeLast() }
-          }
+        Button(appleChosen.isEmpty ? "Import" : "Save") {
+          let picked = appleCals.filter { pendingAppleIds.contains($0.id) }
+          if !navPath.isEmpty { navPath.removeLast() }
+          Task { await saveApple(picked) }
         }
         .fontWeight(.semibold)
-        .disabled(appleBusy || appleCals.isEmpty)
+        .disabled(appleBusy || (pendingAppleIds.isEmpty && appleChosen.isEmpty))
       }
     }
     .onDisappear {
-      // Backing out without choosing leaves Apple Calendar off, like the PWA picker.
-      if CalendarSync.selectedId == nil {
+      // Backed out of a first connect with nothing ticked: Apple Calendar stays off.
+      if CalendarSync.chosen.isEmpty {
         appleOn = false
         CalendarSync.setConnected(false)
       }
     }
     .onAppear {
-      pendingAppleId = CalendarSync.selectedId
-        ?? appleCals.first(where: \.primary)?.id
-        ?? appleCals.first?.id
+      let saved = Set(CalendarSync.chosen.map(\.id))
+      let main = appleCals.first(where: \.primary)?.id ?? appleCals.first?.id
+      pendingAppleIds = saved.isEmpty ? Set([main].compactMap { $0 }) : saved
     }
   }
 
-  private func applePickerSection(title: String, items: [DeviceCalendar]) -> some View {
+  private func applePickerSection(title: String, items: [DeviceCalendar], counts: [String: Int]) -> some View {
     VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
       Text(title)
-        .font(.footnote.weight(.semibold))
+        .font(.fdFootnote.weight(.semibold))
         .foregroundStyle(Theme.inkFaint)
+        .padding(.horizontal, Theme.Spacing.xs)
       VStack(spacing: Theme.Spacing.none) {
-        ForEach(items) { cal in
+        ForEach(Array(items.enumerated()), id: \.element.id) { index, cal in
+          if index > 0 { Divider().overlay(Theme.separator) }
+          let on = pendingAppleIds.contains(cal.id)
           Button {
-            pendingAppleId = cal.id
+            if on { pendingAppleIds.remove(cal.id) } else { pendingAppleIds.insert(cal.id) }
           } label: {
             HStack(spacing: Theme.Spacing.md) {
               FormGlyphIcon(glyph: .calendar)
               Text(cal.primary ? "\(cal.summary) · Primary" : cal.summary)
-                .font(.body)
+                .font(.fdBody)
                 .foregroundStyle(Theme.ink)
               Spacer()
-              Image(systemName: pendingAppleId == cal.id ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(pendingAppleId == cal.id ? Theme.roseInk : Theme.inkFaint)
+              if let n = counts[cal.id] {
+                Text("\(n)")
+                  .font(.fdSubhead)
+                  .monospacedDigit()
+                  .foregroundStyle(Theme.inkFaint)
+              }
+              ZStack {
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                  .fill(on ? Theme.ink : Color.clear)
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                  .strokeBorder(on ? Theme.ink : Theme.inkFaint, lineWidth: 1.5)
+                if on {
+                  Image(systemName: "checkmark")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Theme.paperWarm)
+                }
+              }
+              .frame(width: 22, height: 22)
             }
-            .padding(.vertical, Theme.Spacing.s10)
+            .padding(.vertical, Theme.Spacing.md)
+            .padding(.horizontal, Theme.Spacing.row)
+            .contentShape(Rectangle())
           }
           .buttonStyle(.plain)
+          .disabled(appleBusy)
+          .accessibilityAddTraits(on ? .isSelected : [])
         }
       }
+      .background(Theme.fillQuaternary, in: RoundedRectangle(cornerRadius: Theme.controlRadius, style: .continuous))
     }
   }
 

@@ -127,6 +127,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 struct FordaysApp: App {
   @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
   @StateObject private var app = AppModel()
+  @Environment(\.scenePhase) private var scenePhase
 
   var body: some Scene {
     WindowGroup {
@@ -142,6 +143,12 @@ struct FordaysApp: App {
         }
         .onOpenURL { url in
           Task { await app.handleOpenURL(url) }
+        }
+        // Coming back: pick up calendar changes made while away.
+        .onChange(of: scenePhase) { _, phase in
+          if phase == .active, app.authPhase == .signedIn {
+            Task { await app.syncAppleIfNeeded() }
+          }
         }
     }
   }

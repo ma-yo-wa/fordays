@@ -172,6 +172,20 @@ struct ComposerView: View {
             .font(.footnote)
             .foregroundStyle(Theme.inkFaint)
             .padding(.top, Theme.Spacing.md)
+
+          if let clash {
+            Text(clash)
+              .font(.fdFootnote)
+              .foregroundStyle(Theme.ink2)
+              .lineLimit(1)
+              .truncationMode(.tail)
+              .frame(maxWidth: .infinity, alignment: .leading)
+              .padding(.vertical, Theme.Spacing.sm)
+              .padding(.horizontal, Theme.Spacing.md)
+              .background(Theme.paperWarm, in: RoundedRectangle(cornerRadius: Theme.radiusSm, style: .continuous))
+              .padding(.top, Theme.Spacing.s10)
+              .accessibilityLabel("Only you see this. \(clash)")
+          }
         }
 
         if cover.isEmpty {
@@ -465,6 +479,20 @@ struct ComposerView: View {
       }
     }
     .padding(.top, Theme.Spacing.sm)
+  }
+
+  /// Yours only: your calendar and your home Orb's plans on that day or at
+  /// that time. It never stops a save.
+  private var clash: String? {
+    Clash.line(
+      date: date,
+      from: from,
+      until: until,
+      endDate: multiDay ? end : nil,
+      items: app.externalEvents.map {
+        BusyItem(title: $0.title, startsAt: $0.startsAt, endsAt: $0.endsAt, allDay: $0.allDay)
+      } + app.homePlans
+    )
   }
 
   private var previewWhen: String {

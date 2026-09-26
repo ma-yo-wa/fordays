@@ -490,3 +490,69 @@ extension AttributedString {
     return out
   }
 }
+
+/// The private line under a plan's date: "You have Gym, 8:00 am – 9:00 am".
+/// A day with no time matches anything on that day; a time matches what
+/// overlaps it. Yours only, and it never stops a save. Same as the PWA's clashLine.
+enum Clash {
+  /// An hour on, same day; a start at 11 pm runs to midnight.
+  private static func addHour(_ stamp: String) -> String {
+    let day = String(stamp.prefix(10))
+    let time = stamp.count > 11 ? String(stamp.dropFirst(11).prefix(5)) : "00:00"
+    let h = (Int(time.prefix(2)) ?? 0) + 1
+    return h > 23 ? "\(day)T23:59" : String(format: "%@T%02d%@", day, h, String(time.dropFirst(2)))
+  }
+
+  private static func days(_ from: String, _ to: String) -> Set<String> {
+    var out = Set<String>()
+    var cur = from
+    var i = 0
+    while cur <= to && i < 400 {
+      out.insert(cur)
+      cur = DateLocal.addDays(1, from: cur)
+      i += 1
+    }
+    return out.isEmpty ? [from] : out
+  }
+
+  private static func range(_ e: BusyItem) -> String {
+    let sDate = String(e.startsAt.prefix(10))
+    let eDate = String((e.endsAt.isEmpty ? e.startsAt : e.endsAt).prefix(10))
+    if e.allDay {
+      return sDate == eDate ? "all day" : "\(DateLocal.shortDate(sDate)) – \(DateLocal.shortDate(eDate))"
+    }
+    let sTime = DateLocal.dtTime(e.startsAt).map(DateLocal.prettyTime) ?? ""
+    let eTime = DateLocal.dtTime(e.endsAt).map(DateLocal.prettyTime)
+    if sDate == eDate { return eTime.map { "\(sTime) – \($0)" } ?? sTime }
+    return "\(DateLocal.shortDate(sDate)) at \(sTime) – \(DateLocal.shortDate(eDate))\(eTime.map { " at \($0)" } ?? "")"
+  }
+
+  static func line(date: String, from: String, until: String, endDate: String?, items: [BusyItem]) -> String? {
+    let lastDay = (endDate ?? "") > date ? endDate! : date
+    var hits: [BusyItem]
+    if from.isEmpty {
+      let want = days(date, lastDay)
+      hits = items.filter { e in
+        let s = String(e.startsAt.prefix(10))
+        let t = String((e.endsAt.isEmpty ? e.startsAt : e.endsAt).prefix(10))
+        return !days(s, t).isDisjoint(with: want)
+      }
+    } else {
+      let start = "\(date)T\(from)"
+      let end = !until.isEmpty ? "\(lastDay)T\(until)" : (lastDay != date ? "\(lastDay)T23:59" : addHour(start))
+      hits = items.filter { e in
+        guard !e.allDay else { return false }
+        let eEnd = e.endsAt > e.startsAt ? e.endsAt : addHour(e.startsAt)
+        return e.startsAt < end && eEnd > start
+      }
+    }
+    guard !hits.isEmpty else { return nil }
+    hits.sort { a, b in
+      a.allDay != b.allDay ? !a.allDay : a.startsAt < b.startsAt
+    }
+    let first = hits[0]
+    let title = first.title?.trimmingCharacters(in: .whitespacesAndNewlines)
+    let line = Copy.Availability.clash(title?.isEmpty == false ? title! : Copy.Availability.busy, range(first))
+    return hits.count > 1 ? "\(line) and \(hits.count - 1) more" : line
+  }
+}

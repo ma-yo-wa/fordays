@@ -21,38 +21,63 @@ enum CalendarSync {
   static let store = EKEventStore()
 
   private static let connectedKey = "fordays.appleConnected"
-  private static let calendarIdKey = "fordays.appleCalendarId"
-  private static let calendarNameKey = "fordays.appleCalendarName"
+  private static let calendarsKey = "fordays.appleCalendars"
+  private static let syncedKey = "fordays.appleSynced"
+  // The first version kept one calendar; it becomes a list of one.
+  private static let legacyIdKey = "fordays.appleCalendarId"
+  private static let legacyNameKey = "fordays.appleCalendarName"
 
   static var isConnected: Bool {
     UserDefaults.standard.bool(forKey: connectedKey)
   }
 
-  static var selectedId: String? {
-    UserDefaults.standard.string(forKey: calendarIdKey)
+  /// The ticked calendars, as [id: name].
+  static var chosen: [DeviceCalendar] {
+    let d = UserDefaults.standard
+    if let saved = d.array(forKey: calendarsKey) as? [[String: String]] {
+      return saved.compactMap { row in
+        guard let id = row["id"], let name = row["name"] else { return nil }
+        return DeviceCalendar(id: id, summary: name, primary: false)
+      }
+    }
+    if let id = d.string(forKey: legacyIdKey) {
+      let one = DeviceCalendar(id: id, summary: d.string(forKey: legacyNameKey) ?? "Apple", primary: false)
+      choose([one])
+      return [one]
+    }
+    return []
   }
 
-  static var selectedName: String? {
-    UserDefaults.standard.string(forKey: calendarNameKey)
+  static func choose(_ list: [DeviceCalendar]) {
+    let d = UserDefaults.standard
+    d.removeObject(forKey: legacyIdKey)
+    d.removeObject(forKey: legacyNameKey)
+    if list.isEmpty {
+      d.removeObject(forKey: calendarsKey)
+      d.removeObject(forKey: syncedKey)
+      return
+    }
+    d.set(list.map { ["id": $0.id, "name": $0.summary] }, forKey: calendarsKey)
+    d.set(true, forKey: connectedKey)
   }
 
   static func setConnected(_ on: Bool) {
     UserDefaults.standard.set(on, forKey: connectedKey)
-    if !on {
-      UserDefaults.standard.removeObject(forKey: calendarIdKey)
-      UserDefaults.standard.removeObject(forKey: calendarNameKey)
-    }
+    if !on { choose([]) }
   }
 
-  static func saveCalendar(_ cal: DeviceCalendar?) {
-    if let cal {
-      UserDefaults.standard.set(cal.id, forKey: calendarIdKey)
-      UserDefaults.standard.set(cal.summary, forKey: calendarNameKey)
-      UserDefaults.standard.set(true, forKey: connectedKey)
-    } else {
-      UserDefaults.standard.removeObject(forKey: calendarIdKey)
-      UserDefaults.standard.removeObject(forKey: calendarNameKey)
-    }
+  /// When Apple last synced, and how many events each calendar brought.
+  static var lastSynced: (at: Date, counts: [String: Int])? {
+    guard let row = UserDefaults.standard.dictionary(forKey: syncedKey),
+          let at = row["at"] as? Double else { return nil }
+    return (Date(timeIntervalSince1970: at), row["counts"] as? [String: Int] ?? [:])
+  }
+
+  static func markSynced(_ counts: [String: Int]) {
+    UserDefaults.standard.set(
+      ["at": Date().timeIntervalSince1970, "counts": counts],
+      forKey: syncedKey
+    )
   }
 
   static var hasFullAccess: Bool {
@@ -83,19 +108,24 @@ enum CalendarSync {
     return list
   }
 
-  static func fetchEvents() -> [ImportedEventDraft] {
-    guard let selectedId else { return [] }
-    let calendars = store.calendars(for: .event).filter { $0.calendarIdentifier == selectedId }
+  /// One calendar's events, a month back to six months ahead. Cancelled
+  /// ones, and invites you said no to, aren't in your day.
+  static func fetchEvents(calendarId: String) -> [ImportedEventDraft] {
+    let calendars = store.calendars(for: .event).filter { $0.calendarIdentifier == calendarId }
     guard !calendars.isEmpty else { return [] }
 
     let cal = Calendar.current
     let start = cal.date(byAdding: .month, value: -1, to: Date()) ?? Date()
-    let end = cal.date(byAdding: .month, value: 3, to: Date()) ?? Date()
+    let end = cal.date(byAdding: .month, value: 6, to: Date()) ?? Date()
     let predicate = store.predicateForEvents(withStart: start, end: end, calendars: calendars)
     let events = store.events(matching: predicate)
-    let label = selectedName ?? calendars.first?.title ?? "Apple"
+    let label = calendars.first?.title ?? "Apple"
 
     let drafts: [ImportedEventDraft] = events.compactMap { ev in
+      if ev.status == .canceled { return nil }
+      if ev.attendees?.contains(where: { $0.isCurrentUser && $0.participantStatus == .declined }) == true {
+        return nil
+      }
       let baseId = ev.eventIdentifier ?? ev.calendarItemIdentifier
       guard !baseId.isEmpty else { return nil }
       let allDay = ev.isAllDay
@@ -106,8 +136,7 @@ enum CalendarSync {
           endsAt = localStamp(pulled, allDay: true)
         }
       }
-      // Recurring events share the same base event identifier in EventKit.
-      // We append startsAt to ensure all occurrences get a unique ID, but we should make sure we always include it.
+      // Occurrences of a repeating event share an identifier; the start tells them apart.
       let sourceId = "\(baseId)_\(startsAt)"
       let place = ev.location?.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
         .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -120,18 +149,14 @@ enum CalendarSync {
         startsAt: startsAt,
         endsAt: endsAt,
         allDay: allDay,
-        calendar: ev.calendar?.title ?? label
+        calendar: label
       )
     }
 
     var seen = Set<String>()
     var unique: [ImportedEventDraft] = []
-    // Reverse the drafts so that if there are duplicates with the exact same ID + StartsAt,
-    // we keep the later/more recently updated one, though they should be identical.
-    for draft in drafts.reversed() {
-      if seen.insert(draft.sourceId).inserted {
-        unique.append(draft)
-      }
+    for draft in drafts.reversed() where seen.insert(draft.sourceId).inserted {
+      unique.append(draft)
     }
     return Array(unique.reversed())
   }

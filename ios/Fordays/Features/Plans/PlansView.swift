@@ -29,13 +29,15 @@ struct PlansView: View {
     "\(DateLocal.dtDate(dateTime) ?? "9999-99-99") \(DateLocal.dtTime(dateTime) ?? "99")"
   }
 
+  /// Your own calendar shows in your home Orb and nowhere else.
+  private var showsMyCalendar: Bool {
+    app.space?.isHomeOrb(in: app.spaces) == true
+  }
+
   private var dayExternal: [ExternalEvent] {
-    guard app.space?.isMatched != true else { return [] }
+    guard showsMyCalendar else { return [] }
     let day = app.pickedDay
-    let myId = app.space?.myId
     return app.externalEvents.filter { e in
-      let isMine = myId == e.userId || e.userId == "0"
-      if !isMine { return false }
       let start = String(e.startsAt.prefix(10))
       let end = e.endsAt.isEmpty ? start : String(e.endsAt.prefix(10))
       return day >= start && day <= end
@@ -437,11 +439,8 @@ struct PlansView: View {
   }
 
   private func visibleExternalCount(on day: String) -> Int {
-    guard app.space?.isMatched != true else { return 0 }
-    let myId = app.space?.myId
+    guard showsMyCalendar else { return 0 }
     return app.externalEvents.filter { e in
-      let isMine = myId == e.userId || e.userId == "0"
-      if !isMine { return false }
       let start = String(e.startsAt.prefix(10))
       let end = e.endsAt.isEmpty ? start : String(e.endsAt.prefix(10))
       return day >= start && day <= end

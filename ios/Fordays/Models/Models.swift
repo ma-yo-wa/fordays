@@ -119,6 +119,23 @@ struct SpaceInfo: Hashable, Codable {
     let title = Self.soloTitle(from: myName).lowercased()
     return !title.isEmpty && raw == title
   }
+
+  /// Your home solo Orb: where your own calendar shows. A lone solo Orb is
+  /// home whatever it's called. Same rule as the PWA's isHomeOrb.
+  func isHomeOrb(in all: [SpaceInfo]) -> Bool {
+    guard !frozen, members.count <= 1 else { return false }
+    let soloOrbs = all.filter { !$0.frozen && $0.members.count <= 1 }
+    return isHomeSoloName() || soloOrbs.count <= 1
+  }
+}
+
+/// Something already in your day, for the private clash line: one of your
+/// calendar events or a plan in your home Orb. Local times, like ExternalEvent.
+struct BusyItem: Hashable {
+  var title: String?
+  var startsAt: String
+  var endsAt: String
+  var allDay: Bool
 }
 
 enum AuthPhase: Equatable {
@@ -204,9 +221,11 @@ struct RemoveMemberParams: Encodable {
   let uid: String
 }
 
-struct ExternalEvent: Identifiable, Hashable, Codable {
+/// One of your own Google / Apple / Outlook events. Yours alone: it shows
+/// in your home Orb, reminds you, and nobody else ever sees it.
+/// Times are local: "YYYY-MM-DD" when all-day, else "YYYY-MM-DDTHH:MM".
+struct ExternalEvent: Identifiable, Hashable {
   var id: String
-  var spaceId: String?
   var userId: String
   var title: String?
   var location: String?
@@ -214,84 +233,8 @@ struct ExternalEvent: Identifiable, Hashable, Codable {
   var endsAt: String
   var allDay: Bool
   var calendar: String
+  var calendarId: String
   var source: String
-  var sharedWithSpace: Bool
-
-  enum CodingKeys: String, CodingKey {
-    case id
-    case spaceId = "space_id"
-    case ownerId = "owner_id"
-    case userId = "user_id"
-    case title
-    case location
-    case startsAt = "starts_at"
-    case endsAt = "ends_at"
-    case allDay = "all_day"
-    case calendarName = "calendar_name"
-    case calendar
-    case calendarSource = "calendar_source"
-    case sharedWithSpace = "shared_with_space"
-  }
-
-  init(
-    id: String,
-    spaceId: String? = nil,
-    userId: String,
-    title: String? = nil,
-    location: String? = nil,
-    startsAt: String,
-    endsAt: String,
-    allDay: Bool,
-    calendar: String,
-    source: String = "google",
-    sharedWithSpace: Bool = false
-  ) {
-    self.id = id
-    self.spaceId = spaceId
-    self.userId = userId
-    self.title = title
-    self.location = location
-    self.startsAt = startsAt
-    self.endsAt = endsAt
-    self.allDay = allDay
-    self.calendar = calendar
-    self.source = source
-    self.sharedWithSpace = sharedWithSpace
-  }
-
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    id = try container.decode(String.self, forKey: .id)
-    spaceId = try container.decodeIfPresent(String.self, forKey: .spaceId)
-    userId = try container.decodeIfPresent(String.self, forKey: .ownerId)
-      ?? container.decodeIfPresent(String.self, forKey: .userId)
-      ?? ""
-    title = try container.decodeIfPresent(String.self, forKey: .title)
-    location = try container.decodeIfPresent(String.self, forKey: .location)
-    startsAt = try container.decode(String.self, forKey: .startsAt)
-    endsAt = try container.decode(String.self, forKey: .endsAt)
-    allDay = try container.decodeIfPresent(Bool.self, forKey: .allDay) ?? false
-    calendar = try container.decodeIfPresent(String.self, forKey: .calendarName)
-      ?? container.decodeIfPresent(String.self, forKey: .calendar)
-      ?? "Google"
-    source = try container.decodeIfPresent(String.self, forKey: .calendarSource) ?? "google"
-    sharedWithSpace = try container.decodeIfPresent(Bool.self, forKey: .sharedWithSpace) ?? false
-  }
-
-  func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encode(id, forKey: .id)
-    try container.encodeIfPresent(spaceId, forKey: .spaceId)
-    try container.encode(userId, forKey: .ownerId)
-    try container.encodeIfPresent(title, forKey: .title)
-    try container.encodeIfPresent(location, forKey: .location)
-    try container.encode(startsAt, forKey: .startsAt)
-    try container.encode(endsAt, forKey: .endsAt)
-    try container.encode(allDay, forKey: .allDay)
-    try container.encode(calendar, forKey: .calendarName)
-    try container.encode(source, forKey: .calendarSource)
-    try container.encode(sharedWithSpace, forKey: .sharedWithSpace)
-  }
 
   func isFutureOrToday(today: String) -> Bool {
     let last = endsAt.isEmpty ? String(startsAt.prefix(10)) : String(endsAt.prefix(10))

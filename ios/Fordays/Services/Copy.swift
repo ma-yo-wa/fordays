@@ -147,7 +147,13 @@ enum Copy {
     static let apple = "Apple"
     static let outlook = "Outlook"
     static let onlyYou = "Only you"
-    static let pickerLead = "Your main calendar is picked. That’s usually where appointments land. You can choose another."
+    static let pickerLead = "Tick the calendars to bring in. Your main one is ticked to start."
+    static func yoursOnly(_ orb: String) -> String {
+      "Your events show in \(orb) and remind you. Nobody else ever sees them."
+    }
+    static func clash(_ title: String, _ when: String) -> String {
+      "You have \(title), \(when)"
+    }
     static let makePlan = "Make it a plan"
     static let makePlanShort = "Make plan"
     static let convertToPlan = "Make it a plan"
